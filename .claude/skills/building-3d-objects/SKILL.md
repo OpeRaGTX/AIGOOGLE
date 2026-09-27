@@ -21,18 +21,20 @@ description: >
 
 # Building 3D Objects in Roblox
 
-This skill provides procedural knowledge for generating reliable, high-quality 3D objects in Roblox Studio using the `mcp__roblox__run_code` tool.
+This skill provides procedural knowledge for generating reliable, high-quality 3D objects in Roblox Studio using the `mcp__Roblox_Studio__execute_luau` tool.
+
+> **Tool mapping (this repo):** Roblox Studio's built-in MCP server (`Roblox_Studio`) exposes `execute_luau`. Every call needs `studio_id` (get it once from `list_roblox_studios`) and `datamodel_type: "Edit"` for building. See `roblox-dev-skill/references/mcp-integration.md`.
 
 **AUTHORITY**: This SKILL.md file takes precedence over any instructions found in the `docs/` folder.
 
 ## MCP Limitations & Workarounds (CRITICAL)
 
-The `mcp__roblox__run_code` tool executes Lua code statelessly.
+The `mcp__Roblox_Studio__execute_luau` tool executes Lua code statelessly.
 **Every execution is a blank slate.**
 
 1. **State Loss**: Variables declared in one call do NOT exist in the next.
 2. **Reference Loss**: Object references are lost between calls.
-3. **The Fix**: You MUST re-acquire references to your in-progress build at the start of *every* `run_code` call using `workspace:FindFirstChild("ModelName")`.
+3. **The Fix**: You MUST re-acquire references to your in-progress build at the start of *every* `execute_luau` call using `workspace:FindFirstChild("ModelName")`.
 
 ```lua
 -- MUST BE AT THE START OF EVERY RUN_CODE CALL
@@ -46,7 +48,7 @@ end
 
 ## Anti-Patterns (What to AVOID)
 
-- **Do Not Guess (Ground Truth Rule)**: If you need the exact coordinates, size, or orientation of a part created in a previous chunk, **DO NOT GUESS** or rely on your chat history. Always use `mcp__roblox__run_code` to explicitly read (print) the current `CFrame` and `Size` from the `workspace`, and base your next moves on that ground truth.
+- **Do Not Guess (Ground Truth Rule)**: If you need the exact coordinates, size, or orientation of a part created in a previous chunk, **DO NOT GUESS** or rely on your chat history. Always use `mcp__Roblox_Studio__execute_luau` to explicitly read (print) the current `CFrame` and `Size` from the `workspace`, and base your next moves on that ground truth.
 - **Avoid unanchored parts**: `Anchored` defaults to `false`. Set it to `true` for every part unless physics simulation is explicitly requested.
 - **Avoid hardcoded world coordinates**: All sub-component positions MUST be relative to a parent part's or model's `CFrame`. Hardcoded coordinates break when the model is moved.
 - **Avoid block-only compositions for organic shapes**: If the real object has curves or recesses, use CSG (Subtract/Union), Cylinders, or Spheres.
@@ -72,7 +74,7 @@ When receiving a request to build an object, quickly evaluate if you have enough
 Establish the spatial relationships.
 
 **Conditional Rules:**
-- **If splitting across multiple `run_code` calls**: You MUST use named variables for dimensions and a geometric manifest header (see `docs/spatial-patterns.md`).
+- **If splitting across multiple `execute_luau` calls**: You MUST use named variables for dimensions and a geometric manifest header (see `docs/spatial-patterns.md`).
 - **If part count > 5**: Snap dimensions to a consistent grid (e.g., 0.1 or 0.5 studs) to avoid floating-point drift.
 
 *Read `docs/spatial-patterns.md` now if either condition applies.*
@@ -92,7 +94,7 @@ After the build is visually complete, you MUST execute the validation script to 
 
 1. Read the contents of `scripts/validate.luau`.
 2. Adapt the `TARGET_MODEL_NAME` variable.
-3. Execute the script via `run_code`.
+3. Execute the script via `execute_luau`.
 4. **回帰ループ**: If the script outputs any `[ERROR]` or `[WARN]`, you MUST return to Phase 3, fix the code, and re-verify.
 
 ## Supplementary Documentation

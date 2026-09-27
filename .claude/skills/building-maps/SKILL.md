@@ -13,18 +13,20 @@ description: >
 
 # Building Maps in Roblox
 
-This skill provides procedural knowledge for generating reliable, coherent large-scale environments in Roblox Studio using the `mcp__roblox__run_code` tool.
+This skill provides procedural knowledge for generating reliable, coherent large-scale environments in Roblox Studio using the `mcp__Roblox_Studio__execute_luau` tool.
+
+> **Tool mapping (this repo):** Roblox Studio's built-in MCP server (`Roblox_Studio`) exposes `execute_luau`. Every call needs `studio_id` (get it once from `list_roblox_studios`) and `datamodel_type: "Edit"` for building. See `roblox-dev-skill/references/mcp-integration.md`.
 
 **AUTHORITY**: This SKILL.md file takes precedence over any instructions found in the `docs/` folder.
 
 ## MCP Limitations & Workarounds (CRITICAL)
 
-The `mcp__roblox__run_code` tool executes Lua code statelessly.
+The `mcp__Roblox_Studio__execute_luau` tool executes Lua code statelessly.
 **Every execution is a blank slate.**
 
 1. **State Loss**: Variables declared in one call do NOT exist in the next.
 2. **Reference Loss**: Object references are lost between calls.
-3. **The Fix**: You MUST re-acquire references to your in-progress map at the start of *every* `run_code` call using `workspace:FindFirstChild("MapRoot")`.
+3. **The Fix**: You MUST re-acquire references to your in-progress map at the start of *every* `execute_luau` call using `workspace:FindFirstChild("MapRoot")`.
 
 ```lua
 -- MUST BE AT THE START OF EVERY RUN_CODE CALL
@@ -38,7 +40,7 @@ end
 
 ## Anti-Patterns (What to AVOID)
 
-- **Do Not Guess (Ground Truth Rule)**: Map building spans many chunks. If you lose track of where a zone or landmark is, **DO NOT GUESS**. Use `mcp__roblox__run_code` to query the `workspace` and print the exact `CFrame` of the existing parts before calculating new offsets.
+- **Do Not Guess (Ground Truth Rule)**: Map building spans many chunks. If you lose track of where a zone or landmark is, **DO NOT GUESS**. Use `mcp__Roblox_Studio__execute_luau` to query the `workspace` and print the exact `CFrame` of the existing parts before calculating new offsets.
 - **Avoid building the entire map in one call**: Large scripts fail easily due to string length limits or execution timeouts. Split the build by phase and zone.
 - **Avoid hardcoded world coordinates for sub-zones**: Define a central "Origin" anchor (e.g., a 1x1 invisible part at 0,0,0). All zone offsets MUST be relative to this `Origin.CFrame`.
 - **Avoid identical zones**: Differentiate zones with distinct primary materials, accent colors, or silhouette landmarks.
@@ -53,7 +55,7 @@ Do not attempt to build a complex map in a single run. Follow these phases seque
 When receiving a request to build a map, you MUST strictly follow this evaluation process before writing any code. Words like "spacious(広い)", "western(洋風)", or "cool(かっこいい)" are VAGUE MODIFIERS, not structural requirements.
 
 **Step 1: Force Thinking and Checklist Evaluation**
-Before calling `mcp__roblox__run_code`, you MUST output a `<thinking>` block to evaluate the user's prompt against this Mandatory Checklist:
+Before calling `mcp__Roblox_Studio__execute_luau`, you MUST output a `<thinking>` block to evaluate the user's prompt against this Mandatory Checklist:
 1. **[Scale/Scope]** Is the total size defined? (e.g., a 100x100 small arena vs a 2000x2000 city).
 2. **[Gameplay Type]** Is the structural topology defined? (e.g., a flat social lobby vs a vertical parkour obby).
 3. **[Zone Breakdown]** Are the specific areas/zones listed? (e.g., "a town" is invalid. "a town with a spawn plaza, 3 houses, and a shop" is valid).
@@ -112,7 +114,7 @@ workspace/
 
 ## Post-Build Verification
 
-After the build is visually complete, run a validation script via `mcp__roblox__run_code`. Adapt the `MAP_ROOT_NAME` variable to your map's folder name.
+After the build is visually complete, run a validation script via `mcp__Roblox_Studio__execute_luau`. Adapt the `MAP_ROOT_NAME` variable to your map's folder name.
 
 ```lua
 local MAP_ROOT_NAME = "YourMapName" -- AI: Update this

@@ -1,5 +1,5 @@
 -- Roblox Object Validation Script
--- Usage: Execute this script via mcp__roblox__run_code after completing a build.
+-- Usage: Execute this script via mcp__Roblox_Studio__execute_luau after completing a build.
 
 local TARGET_MODEL_NAME = "YourModelNameHere" -- AI: Update this before running
 
