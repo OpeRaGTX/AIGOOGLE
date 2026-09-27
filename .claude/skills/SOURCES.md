@@ -8,3 +8,6 @@ Vendored copies of third-party Agent Skills. Update by re-copying from upstream.
 | roblox-ui, luau-expert | afrxo/roblox-agent-skills (`skills/`) | ff50be7 | MIT |
 | building-3d-objects, building-maps, roblox-design-consultant, roblox-ui-mastery | ohzw/roblox-dev-skills (`.claude/skills/`) | 8eb7488 | none declared upstream |
 | roblox-ui-implementation, roblox-game-ux, roblox-world-level-design, roblox-asset-pipeline, roblox-animation-audio-feedback, roblox-luau-architecture, roblox-game-development-lifecycle | AshExplained/roblox-skills | a3a7b94 | MIT |
+| survival-crafting, game-ai, ai-behavior-trees-utility-ai, audio-design, procedural-gen, roblox-characters, roblox-physics | gamedev-skills/awesome-gamedev-agent-skills (`skills/`) | d4b0e35 | Apache-2.0 (LICENSE + NOTICE in each folder) |
+| roblox-genre-patterns, roblox-combat-systems, roblox-quest-progression-systems, roblox-economy-balancing, roblox-performance-optimization, roblox-playtest-qa, roblox-mobile-playtest, roblox-security-economy, roblox-social-systems, roblox-debugging-bugfix, roblox-policy-compliance | AshExplained/roblox-skills | a3a7b94 | MIT |
+| plan-first | written for this repo | — | — |
