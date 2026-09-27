@@ -47,6 +47,7 @@ try {
         Write-Host 'Claude Code уже установлен.'
     } else {
         Invoke-RestMethod https://claude.ai/install.ps1 | Invoke-Expression
+        $ErrorActionPreference = 'Continue'   # установщик Claude переключает на 'Stop'
         Refresh-Path
         if (-not (Get-Command claude -ErrorAction SilentlyContinue)) { throw 'Claude Code не найден после установки. Перезапустите PowerShell и вставьте скрипт снова.' }
     }
@@ -69,7 +70,8 @@ try {
         Write-Warning "Не найден $bat. Установите/обновите Roblox Studio и запустите скрипт ещё раз."
     } else {
         Push-Location $Repo
-        claude mcp get Roblox_Studio *> $null
+        # через cmd, чтобы сообщение "No MCP server" в stderr не считалось ошибкой PowerShell
+        cmd.exe /c "claude mcp get Roblox_Studio >nul 2>&1"
         if ($LASTEXITCODE -eq 0) {
             Write-Host 'Сервер Roblox_Studio уже добавлен.'
         } else {
