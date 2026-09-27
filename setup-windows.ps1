@@ -24,7 +24,20 @@ try {
     if (Get-Command git -ErrorAction SilentlyContinue) {
         Write-Host 'Git уже установлен.'
     } else {
-        winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
+        if (Get-Command winget -ErrorAction SilentlyContinue) {
+            winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
+        } else {
+            # Нет winget — качаем официальный установщик Git for Windows с GitHub
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            $rel = Invoke-RestMethod 'https://api.github.com/repos/git-for-windows/git/releases/latest'
+            $asset = $rel.assets | Where-Object { $_.name -match '^Git-[\d.]+-64-bit\.exe$' } | Select-Object -First 1
+            if (-not $asset) { throw 'Не нашёл установщик Git. Поставьте вручную: https://git-scm.com/download/win' }
+            $exe = Join-Path $env:TEMP $asset.name
+            Write-Host "Скачиваю $($asset.name)..."
+            Invoke-WebRequest $asset.browser_download_url -OutFile $exe -UseBasicParsing
+            Write-Host 'Устанавливаю Git (Windows может спросить разрешение — нажмите "Да")...'
+            Start-Process $exe -ArgumentList '/VERYSILENT', '/NORESTART' -Wait
+        }
         Refresh-Path
         if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw 'Git не установился. Поставьте вручную: https://git-scm.com/download/win' }
     }
