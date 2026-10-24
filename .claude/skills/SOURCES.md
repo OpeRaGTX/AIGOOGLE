@@ -22,3 +22,11 @@ Vendored copies of third-party Agent Skills. Update by re-copying from upstream.
 | short-form-video, caption-animation, lower-thirds, countdown-video | iart-ai/tiktok-video-skills | 2a77533 | MIT |
 | kinetic-typography | iart-ai/kinetic-typography-skills | fccc94b | MIT |
 | youtube-intro-outro, audiogram | iart-ai/youtube-video-skills | f3df381 | MIT |
+
+## Writing / humanizer skills
+
+| Skill | Upstream | Commit | License |
+|---|---|---|---|
+| humanizer | blader/humanizer | 8c307f3 | MIT |
+| humanizer-ru | smixs/humanizer-ru | ff990df | MIT |
+| sepia, sepia-write, sepia-review, sepia-refactor, sepia-recreate, sepia-hemingway | Nanako0129/sepia (`skills/`) | fb06be7 | MIT |
