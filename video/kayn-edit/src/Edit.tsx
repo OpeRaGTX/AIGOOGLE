@@ -88,12 +88,12 @@ const KillLabel: React.FC<{t: number; n: string; name: string}> = ({t, n, name})
 	if (o <= 0) return null;
 	const ease = 1 - Math.pow(1 - inP, 3);
 	return (
-		<div style={{position: 'absolute', left: 110, bottom: 120, fontFamily: FONT, color: '#fff', opacity: o, transform: `translateX(${(1 - ease) * -30}px)`, textShadow: '0 2px 18px rgba(0,0,0,.85), 0 0 4px rgba(0,0,0,.6)'}}>
+		<div style={{position: 'absolute', left: 80, bottom: 470, fontFamily: FONT, color: '#fff', opacity: o, transform: `translateX(${(1 - ease) * -30}px)`, textShadow: '0 2px 18px rgba(0,0,0,.85), 0 0 4px rgba(0,0,0,.6)'}}>
 			<div style={{display: 'flex', alignItems: 'baseline', gap: 22}}>
-				<span style={{fontSize: 84, fontWeight: 300, color: '#ff3030', letterSpacing: 2}}>{n}</span>
-				<span style={{fontSize: 40, fontWeight: 500, letterSpacing: 18}}>{name}</span>
+				<span style={{fontSize: 96, fontWeight: 300, color: '#ff3030', letterSpacing: 2}}>{n}</span>
+				<span style={{fontSize: 42, fontWeight: 500, letterSpacing: 14}}>{name}</span>
 			</div>
-			<div style={{height: 2, width: 460 * ease, background: 'linear-gradient(90deg,#ff2a2a,rgba(255,42,42,0))', marginTop: 6}} />
+			<div style={{height: 2, width: 520 * ease, background: 'linear-gradient(90deg,#ff2a2a,rgba(255,42,42,0))', marginTop: 6}} />
 		</div>
 	);
 };
@@ -103,12 +103,12 @@ const Title: React.FC = () => {
 	const sec = frame / FPS;
 	const a = interpolate(sec, [28.0, 28.45], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 	if (a <= 0) return null;
-	const track = interpolate(sec, [28.0, 29.388], [70, 46]);
+	const track = interpolate(sec, [28.0, 29.388], [44, 28]);
 	return (
 		<AbsoluteFill style={{alignItems: 'center', justifyContent: 'center', fontFamily: FONT, color: '#fff'}}>
-			<div style={{opacity: a, textAlign: 'center', transform: 'translateY(160px)'}}>
-				<div style={{fontSize: 150, fontWeight: 200, letterSpacing: track, marginRight: -track, textShadow: '0 0 40px rgba(255,20,20,.6)'}}>KAYN</div>
-				<div style={{fontSize: 26, fontWeight: 400, letterSpacing: 14, marginRight: -14, color: '#ff4a4a', marginTop: 6}}>THE SHADOW REAPER</div>
+			<div style={{opacity: a, textAlign: 'center', transform: 'translateY(330px)'}}>
+				<div style={{fontSize: 170, fontWeight: 200, letterSpacing: track, marginRight: -track, textShadow: '0 0 40px rgba(255,20,20,.6)'}}>KAYN</div>
+				<div style={{fontSize: 28, fontWeight: 400, letterSpacing: 12, marginRight: -12, color: '#ff4a4a', marginTop: 6}}>THE SHADOW REAPER</div>
 			</div>
 		</AbsoluteFill>
 	);
@@ -138,8 +138,8 @@ export const KaynEdit: React.FC = () => {
 			<AbsoluteFill style={{transform: `translate(${sx}px,${sy}px) scale(${zoom + whip * 0.06})`, filter: whip > 0.05 ? `blur(${whip * 6}px)` : undefined, opacity: fadeOut}}>
 				<Clips />
 			</AbsoluteFill>
-			<AbsoluteFill style={{background: 'radial-gradient(ellipse at center, rgba(0,0,0,0) 52%, rgba(0,0,0,.62) 100%)'}} />
-			<AbsoluteFill style={{background: 'linear-gradient(20deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 38%)'}} />
+			<AbsoluteFill style={{background: 'radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,.6) 100%)'}} />
+			<AbsoluteFill style={{background: 'linear-gradient(0deg, rgba(0,0,0,.6) 0%, rgba(0,0,0,0) 42%)'}} />
 			<Grain seed={frame % 6} />
 			{KILLS.map((k) => (
 				<KillLabel key={k.n} {...k} />
