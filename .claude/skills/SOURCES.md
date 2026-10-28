@@ -22,3 +22,9 @@ Vendored copies of third-party Agent Skills. Update by re-copying from upstream.
 | short-form-video, caption-animation, lower-thirds, countdown-video | iart-ai/tiktok-video-skills | 2a77533 | MIT |
 | kinetic-typography | iart-ai/kinetic-typography-skills | fccc94b | MIT |
 | youtube-intro-outro, audiogram | iart-ai/youtube-video-skills | f3df381 | MIT |
+| ffmpeg-skill | kajisho5/ffmpeg-skill (SKILL.md, scripts, references, templates) | 1ae1bdf | MIT |
+| threejs-animation, shader-glsl, particle-system | iart-ai/webgl-animation-skills | 50697d6 | MIT |
+| creative-brief, video-delivery-specs | iart-ai/freelance-motion-skills | d85c2b4 | MIT |
+| blender-director, camera-cinematography, animation, lighting, rendering, compositing, vfx-fx | arjun988/blender-skills (`.cursor/skills/`; shared `references/` moved to `blender-director/shared/`) | 8f778d2 | MIT |
+
+Blender skills assume a Blender MCP; here Blender runs headless as the `bpy` module instead: `video/setup-blender.sh`.
