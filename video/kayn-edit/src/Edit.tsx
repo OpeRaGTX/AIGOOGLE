@@ -29,10 +29,10 @@ const EDL: Clip[] = [
 
 // Kill impacts: label + strong punch. Big = section accents without a label.
 const KILLS = [
-	{t: 7.349, n: '01', name: 'PANTHEON'},
-	{t: 12.25, n: '02', name: 'AHRI'},
-	{t: 16.742, n: '03', name: 'VOLIBEAR'},
-	{t: 23.15, n: '04', name: 'SERAPHINE'},
+	{t: 7.349, until: 8.266, n: '01', name: 'PANTHEON'},
+	{t: 10.757, until: 12.62, n: '02', name: 'AHRI'},
+	{t: 16.742, until: 18.123, n: '03', name: 'VOLIBEAR'},
+	{t: 23.15, until: 24.532, n: '04', name: 'SERAPHINE'},
 ];
 const IMPACTS = [7.349, 10.757, 14.443, 16.742, 20.863, 23.15, 27.57];
 const FLASH = [{t: 7.349, a: 0.75}, {t: 10.757, a: 0.4}, {t: 14.443, a: 0.95}, {t: 16.742, a: 0.75}, {t: 20.863, a: 0.6}, {t: 23.15, a: 0.75}, {t: 27.736, a: 0.35}];
@@ -79,11 +79,12 @@ const Grain: React.FC<{seed: number}> = ({seed}) => (
 	</svg>
 );
 
-const KillLabel: React.FC<{t: number; n: string; name: string}> = ({t, n, name}) => {
+const KillLabel: React.FC<{t: number; until: number; n: string; name: string}> = ({t, until, n, name}) => {
 	const frame = useCurrentFrame();
 	const sec = frame / FPS;
 	const inP = interpolate(sec, [t, t + 0.18], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-	const outP = interpolate(sec, [t + 1.25, t + 1.5], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+	const end = Math.min(t + 1.5, until);
+	const outP = interpolate(sec, [end - 0.2, end - 1 / FPS], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 	const o = Math.min(inP, outP);
 	if (o <= 0) return null;
 	const ease = 1 - Math.pow(1 - inP, 3);
