@@ -13,16 +13,16 @@ type Clip = {kind: 'shot'; id: string; from: number; to: number} | {kind: 'game'
 // Edit decision list, in track seconds (beat-aligned, 132 BPM).
 const EDL: Clip[] = [
 	{kind: 'shot', id: 'S1_intro', from: 0, to: 3.228},
-	{kind: 'shot', id: 'S2_pantheon', from: 3.228, to: 5.074},
-	{kind: 'game', from: 5.074, to: 8.266, segs: [{at: 5.074, src: 4.574, rate: 1}, {at: 7.25, src: 6.75, rate: 0.5}, {at: 7.55, src: 6.9, rate: 1}]},
-	{kind: 'shot', id: 'S3_ahri', from: 8.266, to: 9.857},
-	{kind: 'game', from: 9.857, to: 12.156, segs: [{at: 9.857, src: 10.0, rate: 1}, {at: 10.7, src: 10.843, rate: 0.5}, {at: 11.0, src: 10.993, rate: 1}]},
+	{kind: 'shot', id: 'K1_pantheon', from: 3.228, to: 5.979},
+	{kind: 'game', from: 5.979, to: 8.266, segs: [{at: 5.979, src: 5.479, rate: 1}, {at: 7.25, src: 6.75, rate: 0.5}, {at: 7.55, src: 6.9, rate: 1}]},
+	{kind: 'shot', id: 'K2_ahri', from: 8.266, to: 10.333},
+	{kind: 'game', from: 10.333, to: 12.156, segs: [{at: 10.333, src: 10.476, rate: 1}, {at: 10.7, src: 10.843, rate: 0.5}, {at: 11.0, src: 10.993, rate: 1}]},
 	{kind: 'game', from: 12.156, to: 12.62, segs: [{at: 12.156, src: 15.48, rate: 1}]},
-	{kind: 'shot', id: 'S4_volibear', from: 12.62, to: 14.443},
-	{kind: 'game', from: 14.443, to: 18.123, segs: [{at: 14.443, src: 16.993, rate: 1}, {at: 16.65, src: 19.2, rate: 0.5}, {at: 17.0, src: 19.375, rate: 1}]},
-	{kind: 'shot', id: 'S5_seraphine', from: 18.123, to: 20.863},
+	{kind: 'shot', id: 'K3_volibear', from: 12.62, to: 15.372},
+	{kind: 'game', from: 15.372, to: 18.123, segs: [{at: 15.372, src: 17.922, rate: 1}, {at: 16.65, src: 19.2, rate: 0.5}, {at: 17.0, src: 19.375, rate: 1}]},
+	{kind: 'shot', id: 'K4_seraphine', from: 18.123, to: 20.863},
 	{kind: 'game', from: 20.863, to: 24.532, segs: [{at: 20.863, src: 20.613, rate: 1}, {at: 23.05, src: 22.8, rate: 0.5}, {at: 23.4, src: 22.975, rate: 1}]},
-	{kind: 'shot', id: 'S6_finale', from: 24.532, to: 26.366},
+	{kind: 'shot', id: 'K5_finale', from: 24.532, to: 26.366},
 	{kind: 'game', from: 26.366, to: 27.736, segs: [{at: 26.366, src: 26.3, rate: 1}]},
 	{kind: 'shot', id: 'S7_hero', from: 27.736, to: 29.388},
 ];
@@ -34,8 +34,8 @@ const KILLS = [
 	{t: 16.742, until: 18.123, n: '03', name: 'VOLIBEAR'},
 	{t: 23.15, until: 24.532, n: '04', name: 'SERAPHINE'},
 ];
-const IMPACTS = [7.349, 10.757, 14.443, 16.742, 20.863, 23.15, 27.57];
-const FLASH = [{t: 7.349, a: 0.75}, {t: 10.757, a: 0.4}, {t: 14.443, a: 0.95}, {t: 16.742, a: 0.75}, {t: 20.863, a: 0.6}, {t: 23.15, a: 0.75}, {t: 27.736, a: 0.35}];
+const IMPACTS = [4.609, 7.349, 9.648, 10.757, 14.443, 16.742, 19.958, 20.863, 23.15, 27.57];
+const FLASH = [{t: 4.609, a: 0.6}, {t: 9.648, a: 0.55}, {t: 19.958, a: 0.5}, {t: 7.349, a: 0.75}, {t: 10.757, a: 0.4}, {t: 14.443, a: 0.95}, {t: 16.742, a: 0.75}, {t: 20.863, a: 0.6}, {t: 23.15, a: 0.75}, {t: 27.736, a: 0.35}];
 const KICKS = (hits.kicks as [number, number][]).filter(([t, s]) => s >= 0.45 && t > 3.5 && t < 28.1);
 
 const decay = (t: number, at: number, tau: number) => (t < at ? 0 : Math.exp(-(t - at) / tau));
