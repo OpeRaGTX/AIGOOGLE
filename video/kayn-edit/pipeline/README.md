@@ -1,5 +1,21 @@
 # Kayn edit — pipeline
 
+## Quick start (Windows PC)
+
+Needs: Blender ≥ 4.2, Node.js, ffmpeg on PATH, Git for Windows. Once: `npm install` in `video/kayn-edit/`.
+Drop the sources into `pipeline/work/in/` (original names are fine: `*каин*.glb`, `*пантеон*.glb`, `ари*.glb`,
+`*волиб*.glb`, `*сераф*.glb`, any `.mp3`, the gameplay `.mp4`). Then, from `video/kayn-edit/` in any terminal:
+
+- `npm run build` — renders whatever is missing and the final video → `out/kayn_edit_tiktok.mp4`
+- `npm run build -- K1_pantheon K3_volibear` — re-render only these 3D shots, then the edit
+- `npm run build -- --force` — everything from scratch; `--no-edit` skips the Remotion step
+- `npm run render` — only the edit (after changing `src/`); `npm run studio` — preview in the browser
+
+Blender is looked up on PATH, in `D:\git\tools\Blender`, and in `Program Files`; otherwise set `BLENDER`.
+Git Bash is found automatically (`GIT_BASH` to override). The manual steps below are what `build.sh` runs.
+
+## Manual steps
+
 Inputs (not in git): put them in `pipeline/work/in/`: `kayn.glb pantheon.glb ahri.glb volibear.glb seraphine.glb`, `track.mp3`, `game.mp4`.
 
 1. 3D shots (Blender ≥ 4.2, run from `pipeline/`):

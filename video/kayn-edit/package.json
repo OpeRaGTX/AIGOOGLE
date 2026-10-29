@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "node pipeline/bash.mjs pipeline/build.sh",
+    "render": "remotion render src/index.ts KaynEdit out/kayn_edit_tiktok.mp4",
+    "studio": "remotion studio src/index.ts"
   },
   "keywords": [],
   "author": "",

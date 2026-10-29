@@ -10,5 +10,7 @@ if (existsSync(SANDBOX_SHELL)) {
 if (process.platform === 'win32') {
 	Config.setChromiumOpenGlRenderer('angle'); // GPU compositing instead of software
 }
-Config.setConcurrency(Math.max(1, cpus().length - 2));
+// more threads than ~8 starve the video frame extractor ("No frame found", delayRender timeouts)
+Config.setConcurrency(Math.max(1, Math.min(8, cpus().length - 2)));
+Config.setDelayRenderTimeoutInMilliseconds(120000);
 Config.setX264Preset('veryfast');
