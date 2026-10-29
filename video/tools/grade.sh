@@ -1,4 +1,4 @@
-# grade.sh — sourced by the *2mp4.sh scripts. grade <contrast> <saturate> <brightness> prints ffmpeg filters equal to
+# grade.sh — sourced via tools/env.sh. grade <contrast> <saturate> <brightness> prints ffmpeg filters equal to
 # the CSS filter "contrast() saturate() brightness()" (sRGB, in that order), so Remotion doesn't filter every frame.
 grade() {
   awk -v c="$1" -v s="$2" -v b="$3" 'BEGIN {
@@ -12,5 +12,3 @@ grade() {
     printf "lutrgb=r=%s:g=%s:b=%s", k, k, k
   }'
 }
-GRADE_SHOT="$(grade 1.12 1.06 1.18)"
-GRADE_GAME="$(grade 1.16 1.06 0.9)"

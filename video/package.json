@@ -1,10 +1,13 @@
 {
-  "name": "stylit-tiktok",
+  "name": "tiktok-studio",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "TikTok video studio: one shared Remotion engine, one folder per video (projects/<name>)",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "new": "node tools/new.mjs",
+    "list": "node tools/list.mjs",
+    "studio": "node tools/studio.mjs",
+    "render": "node tools/render.mjs",
+    "build": "node tools/build.mjs"
   },
   "keywords": [],
   "author": "",

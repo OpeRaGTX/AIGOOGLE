@@ -1,0 +1,3 @@
+# bash scripts must keep LF even with core.autocrlf=true; cmd scripts need CRLF
+*.sh text eol=lf
+*.bat text eol=crlf

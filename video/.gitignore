@@ -1,0 +1,7 @@
+# Studio: only briefs, notes and code go to git. Materials, intermediates and renders stay on this PC.
+node_modules/
+projects/*/inbox/
+projects/*/work/
+projects/*/public/
+projects/*/out/
+__pycache__/

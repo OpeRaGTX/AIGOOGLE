@@ -2,7 +2,7 @@
 import bpy, math, random
 from mathutils import Vector
 
-IN = __import__('os').environ.get('KAYN_IN', __import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), '..', 'work', 'in'))
+IN = __import__('os').environ.get('KAYN_IN', __import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), '..', '..', 'inbox'))
 FPS = 30
 
 
