@@ -21,7 +21,7 @@ const EDL: Clip[] = [
 	{kind: 'shot', id: 'V3_orbit', from: 12.69, to: 14.431},
 	{kind: 'game', from: 14.431, to: 17.705, segs: [{at: 14.431, src: 14.146, rate: 1}, {at: 15.85, src: 15.565, rate: 0.5}, {at: 16.25, src: 15.765, rate: 1}]},
 	{kind: 'shot', id: 'V4_dive', from: 17.705, to: 19.365},
-	{kind: 'game', from: 19.365, to: 24.05, segs: [{at: 19.365, src: 18.978, rate: 1}, {at: 20.55, src: 20.163, rate: 0.4}, {at: 21.15, src: 20.403, rate: 1}]},
+	{kind: 'game', from: 19.365, to: 24.05, segs: [{at: 19.365, src: 18.978, rate: 1}, {at: 20.55, src: 20.163, rate: 0.4}, {at: 21.22, src: 20.431, rate: 1}]},
 	{kind: 'shot', id: 'V5_track', from: 24.05, to: 25.53},
 	{kind: 'game', from: 25.53, to: 26.912, segs: [{at: 25.53, src: 19.95, rate: 0.45}]},
 	{kind: 'shot', id: 'V6_crane', from: 26.912, to: 28.97},
