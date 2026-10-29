@@ -185,6 +185,7 @@ def k_finale(N):
         a = math.radians(ang); p = (3.0 * math.sin(a), 3.0 * math.cos(a), 0)
         c = S.champion(n, loc=p, rot_deg=ang + 180, anim_offset=7 * i)
         c.parent.rotation_euler[0] = math.radians(-86)
+        A.key_pose(c, 1, **A.FALLEN)
         S.area(f'cold{i}', (p[0] * 1.3, p[1] * 1.3, 2.4), p, (0.35, 0.5, 1.0), 90, size=0.8)
     k.aura_pulse([(1, 300), (18, 1800), (24, 400), (32, 1800), (38, 400), (49, 2200), (N, 600)])
     S.haze('hz', (0, 6.0, 2.5), (12, 7), (0.55, 0.05, 0.05), strength=0.3)

@@ -1,6 +1,6 @@
 """Action toolkit for the kill shots: dash + ghosts, spin slash with energy trail, impacts, knockdowns."""
 import bpy, math, random
-from mathutils import Vector
+from mathutils import Vector, Quaternion
 import stage as S
 
 TAU = math.tau
@@ -203,3 +203,70 @@ def knockdown(root, f_hit, f_land, away_dir, dist=2.2, lift=0.6, fall_deg=-86, f
     hit.parent = root; hit.location = (0, 0, 1.3)
     for ff, e in ((f_hit - 1, 0), (f_hit, 1500), (f_hit + 8, 0)):
         S.key(hit, ff, energy=e)
+    arm = next((c for c in root.children if c.type == 'ARMATURE'), None)
+    if arm:
+        body_reaction(arm, f_hit, f_land)
+
+
+# ---------------------------------------------------------------- bone reaction (hit whiplash + fall)
+# Pose deltas are layered over the idle (action blend COMBINE). Each joint bends its segment toward a
+# direction in the champion's own frame: faces -Y, left = +X, up = +Z. Values in degrees:
+# arch/head = lean back, arms = fling out sideways, elbows = flex, hips = thigh forward, knees = buckle.
+
+REST = dict(arch=0, head=0, arms=0, elbows=0, hips=0, knees=0)
+FALLEN = dict(arch=4, head=12, arms=85, elbows=20, hips=38, knees=60)
+
+
+def _bend(B, bone, seg, toward, deg):
+    ax = Vector(seg).cross(Vector(toward))
+    ax = B[bone].matrix_local.to_3x3().inverted() @ ax   # armature space -> bone local
+    return Quaternion(ax.normalized(), math.radians(deg))
+
+
+def body_pose(arm, arch=0, head=0, arms=0, elbows=0, hips=0, knees=0):
+    B = arm.data.bones
+    up, back, fwd = (0, 0, 1), (0, 1, 0), (0, -1, 0)
+    seg = lambda a, b: B[b].head_local - B[a].head_local
+    # Volibear's torso is skinned to the *_SKN chain, not Spine1/2: bend only Chest there
+    spine = ['Chest'] if 'Spine1_SKN' in B else [n for n in ('Spine1', 'Spine2', 'Chest') if n in B]
+    q = {n: _bend(B, n, up, back, arch / len(spine)) for n in spine}
+    for n, w in (('Neck', 0.4), ('Head', 0.6)):
+        if n in B:
+            q[n] = _bend(B, n, up, back, head * w)
+    for sd, sg, amt in (('L', 1, 1.0), ('R', -1, 0.88)):   # slight asymmetry reads less robotic
+        sh, el, ha = f'{sd}_Shoulder', f'{sd}_Elbow', f'{sd}_Hand'
+        if sh in B and el in B:
+            out = Vector((sg, 0, 0.35))   # cap so rigs whose rest arms are already raised don't flip overhead
+            q[sh] = _bend(B, sh, seg(sh, el), out, min(arms, math.degrees(seg(sh, el).angle(out)) + 12) * amt)
+        if el in B and ha in B:
+            q[el] = _bend(B, el, seg(el, ha), fwd, elbows * amt)
+        hip, ku, kl, ft = f'{sd}_Hip', f'{sd}_KneeUpper', f'{sd}_KneeLower', f'{sd}_Foot'
+        if hip in B and ku in B:
+            q[hip] = _bend(B, hip, seg(hip, ku), fwd, hips * (2 - amt))
+        for k in (ku, kl):
+            if k in B and ft in B:
+                q[k] = _bend(B, k, seg(k, ft), back, knees * (2 - amt) / 2)
+    return q
+
+
+def key_pose(arm, frame, **pose):
+    arm.animation_data.action_blend_type = 'COMBINE'
+    for n, qq in body_pose(arm, **{**REST, **pose}).items():
+        pb = arm.pose.bones[n]; pb.rotation_mode = 'QUATERNION'
+        pb.rotation_quaternion = qq; pb.keyframe_insert('rotation_quaternion', frame=max(1, frame), group=n)
+
+
+def body_reaction(arm, f_hit, f_land):
+    """Whiplash on the hit (back arches, head snaps back, arms fling out, knees buckle), then the landing slam."""
+    s = max(1.0, (f_land - f_hit) / 26)   # slow-mo shots stretch the whiplash too
+    keys = [
+        (f_hit - 1, REST),
+        (f_hit + round(2 * s), dict(arch=38, head=45, arms=55, elbows=15, hips=15, knees=25)),
+        (f_hit + round(6 * s), dict(arch=30, head=35, arms=85, elbows=30, hips=35, knees=55)),
+        (int(f_hit + (f_land - f_hit) * 0.6), dict(arch=22, head=25, arms=72, elbows=25, hips=45, knees=70)),
+        (f_land, dict(arch=0, head=30, arms=95, elbows=15, hips=40, knees=65)),
+        (f_land + 3, dict(arch=8, head=-10, arms=80, elbows=25, hips=50, knees=75)),
+        (f_land + 10, FALLEN),
+    ]
+    for f, pose in keys:
+        key_pose(arm, f, **pose)

@@ -40,6 +40,7 @@ const KICKS = (hits.kicks as [number, number][]).filter(([t, s]) => s >= 0.45 &&
 
 const decay = (t: number, at: number, tau: number) => (t < at ? 0 : Math.exp(-(t - at) / tau));
 
+// Shot/gameplay grading is baked into the mp4s by pipeline/grade.sh (was a per-frame CSS filter here).
 const Clips: React.FC = () => (
 	<>
 		{EDL.map((c, i) => {
@@ -47,7 +48,7 @@ const Clips: React.FC = () => (
 			if (c.kind === 'shot') {
 				return (
 					<Sequence key={i} from={f(c.from)} durationInFrames={dur}>
-						<OffthreadVideo src={staticFile(`shots/${c.id}.mp4`)} muted style={{width: '100%', height: '100%', filter: 'contrast(1.12) saturate(1.06) brightness(1.18)'}} />
+						<OffthreadVideo src={staticFile(`shots/${c.id}.mp4`)} muted style={{width: '100%', height: '100%'}} />
 					</Sequence>
 				);
 			}
@@ -60,7 +61,7 @@ const Clips: React.FC = () => (
 							muted
 							startFrom={Math.round(s.src * FPS)}
 							playbackRate={s.rate}
-							style={{width: '100%', height: '100%', filter: 'contrast(1.16) saturate(1.06) brightness(0.9)'}}
+							style={{width: '100%', height: '100%'}}
 						/>
 					</Sequence>
 				);

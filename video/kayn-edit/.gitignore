@@ -2,3 +2,4 @@ node_modules
 out/*.png
 out/*.jpg
 public/
+pipeline/b3d/__pycache__/

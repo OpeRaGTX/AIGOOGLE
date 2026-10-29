@@ -12,12 +12,13 @@ def reset(frames, res=(720, 1280), samples=16, fog=0.0, fog_color=(0.55, 0.6, 0.
     s.render.fps = FPS
     s.frame_start, s.frame_end = 1, frames
     s.render.engine = 'CYCLES'
-    s.cycles.device = 'CPU'
+    s.cycles.device = gpu()
     s.cycles.samples = samples
     s.cycles.use_adaptive_sampling = True
     s.cycles.adaptive_threshold = 0.05
     s.cycles.use_denoising = True
     s.cycles.denoiser = 'OPENIMAGEDENOISE'
+    s.cycles.denoising_use_gpu = s.cycles.device == 'GPU'
     s.cycles.max_bounces = 4
     s.cycles.volume_bounces = 0
     s.cycles.volume_step_rate = 4
@@ -46,6 +47,27 @@ def reset(frames, res=(720, 1280), samples=16, fog=0.0, fog_color=(0.55, 0.6, 0.
         nt.links.new(vol.outputs[0], out.inputs['Volume'])
     floor()
     return s
+
+
+def gpu():
+    """Enable OptiX (NVIDIA RTX) -> CUDA -> CPU. Prefs are reset by read_factory_settings, so call after it."""
+    if __import__('os').environ.get('KAYN_CPU'):
+        return 'CPU'
+    p = bpy.context.preferences.addons['cycles'].preferences
+    for kind in ('OPTIX', 'CUDA'):
+        try:
+            p.compute_device_type = kind
+        except TypeError:
+            continue
+        p.get_devices()
+        devs = [d for d in p.devices if d.type == kind]
+        if devs:
+            for d in p.devices:
+                d.use = d.type == kind
+            print(f'[stage] Cycles on {kind}: {", ".join(d.name for d in devs)}')
+            return 'GPU'
+    print('[stage] no GPU found, Cycles on CPU')
+    return 'CPU'
 
 
 def floor():
