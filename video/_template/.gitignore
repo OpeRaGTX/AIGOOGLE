@@ -1,0 +1,8 @@
+# heavy inputs and renders stay on the local disk, not in git
+input/**/*
+!input/**/.gitkeep
+work/
+public/
+node_modules/
+out/*.png
+out/*.jpg
