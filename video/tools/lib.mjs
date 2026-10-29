@@ -13,6 +13,10 @@ export const die = (msg) => {
 	process.exit(1);
 };
 
+if (!existsSync(join(STUDIO, 'node_modules')))
+	die(`Нет ${join(STUDIO, 'node_modules')}: выполни "npm install" в video/. Если это git worktree — материалы и рендеры
+лежат в основной папке D:\\git\\aigoogle\\video, открой сессию там (без worktree).`);
+
 export const listProjects = () =>
 	existsSync(PROJECTS) ? readdirSync(PROJECTS, {withFileTypes: true}).filter((d) => d.isDirectory()).map((d) => d.name) : [];
 
