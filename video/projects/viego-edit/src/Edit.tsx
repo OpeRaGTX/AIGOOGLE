@@ -11,6 +11,7 @@ const EMERALD = '#36ffb4';
 type Seg = {at: number; src: number; rate: number};
 type Clip = {kind: 'shot'; id: string; from: number; to: number} | {kind: 'game'; from: number; to: number; segs: Seg[]};
 
+// Grading is baked into the mp4s (tools/grade.sh): shots 1.1/1.05/1.12, gameplay 1.14/1.04/0.92.
 // Edit decision list in track seconds (139.7 BPM). Gameplay src = seconds in the 60 fps gameplay file.
 const EDL: Clip[] = [
 	{kind: 'shot', id: 'V1_intro', from: 0, to: 4.969},
@@ -44,7 +45,7 @@ const Clips: React.FC = () => (
 			if (c.kind === 'shot') {
 				return (
 					<Sequence key={i} from={f(c.from)} durationInFrames={dur}>
-						<OffthreadVideo src={staticFile(`shots/${c.id}.mp4`)} muted style={{width: '100%', height: '100%', filter: 'contrast(1.1) saturate(1.05) brightness(1.12)'}} />
+						<OffthreadVideo src={staticFile(`shots/${c.id}.mp4`)} muted style={{width: '100%', height: '100%'}} />
 					</Sequence>
 				);
 			}
@@ -57,7 +58,7 @@ const Clips: React.FC = () => (
 							muted
 							startFrom={Math.round(s.src * FPS)}
 							playbackRate={s.rate}
-							style={{width: '100%', height: '100%', filter: 'contrast(1.14) saturate(1.04) brightness(0.92) hue-rotate(-4deg)'}}
+							style={{width: '100%', height: '100%'}}
 						/>
 					</Sequence>
 				);
