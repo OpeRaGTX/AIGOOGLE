@@ -74,20 +74,24 @@ FEET = [(1, SL, SR), (27, SL, SR), (30, (0.20, -0.20, 0.32), (-0.22, 0.12, 0.30)
         (37, (0.22, -0.46, 0.10), (-0.25, -0.09, 0.16)), (38, (0.22, -0.46, 0.10), (-0.26, -0.09, 0.10)),
         (90, (0.22, -0.46, 0.10), (-0.26, -0.09, 0.10))]
 # right hand path (an arc, not a straight line) + weapon angle; the weapon trails the hand by a frame
-HAND = [(1, (-0.40, -0.06, 0.98), -12), (12, (-0.40, -0.05, 0.99), -14), (18, (-0.36, 0.10, 1.02), -60),
-        (22, (-0.30, 0.30, 0.98), -135), (26, (-0.26, 0.34, 0.92), -152), (29, (-0.22, 0.28, 1.35), -95),
-        (31, (-0.16, 0.12, 1.80), -35), (33, (-0.12, -0.05, 2.02), -5), (35, (-0.12, -0.32, 1.86), 35),
-        (37, (-0.12, -0.52, 1.40), 80), (39, (-0.12, -0.64, 0.94), 'floor'),        # impact: blade meets the floor
-        (41, (-0.12, -0.66, 0.84), 'floor-'), (44, (-0.12, -0.63, 0.90), 'floor+'),  # overshoot (bites in), recoil
-        (49, (-0.12, -0.64, 0.87), 'floor'), (58, (-0.12, -0.63, 0.89), 'floor'), (90, (-0.12, -0.61, 0.92), 'floor')]
+HAND = [(1, (-0.40, -0.06, 0.98), -12), (12, (-0.40, -0.05, 0.99), -14), (18, (-0.42, 0.04, 1.05), -60),
+        (22, (-0.46, 0.14, 1.02), -135), (26, (-0.44, 0.18, 0.96), -152), (29, (-0.40, -0.06, 1.48), -82),
+        # overhead: hands centred and in front of the head, blade laid back so the butt end points away from the face
+        (31, (-0.20, -0.20, 1.88), -45), (33, (-0.04, -0.22, 2.02), -15), (35, (-0.06, -0.55, 1.78), 30),
+        (37, (-0.08, -0.80, 1.30), 80),   # arms reach out: the butt end must clear the chest (39, (-0.10, -0.86, 0.80), 'floor'),        # impact: arms drive the blade
+        (41, (-0.10, -0.89, 0.72), 'floor-'), (44, (-0.10, -0.85, 0.78), 'floor+'),  # into the floor in front of the
+        (49, (-0.10, -0.87, 0.75), 'floor'), (58, (-0.10, -0.86, 0.76), 'floor'), (90, (-0.10, -0.84, 0.78), 'floor')]  # chest, overshoot, recoil
 IMPACT = {37, 38, 39}
 CONTACT = {'floor': 0.02, 'floor-': -0.03, 'floor+': 0.07}   # lowest weapon point above the floor
+# grip along the shaft (0 = butt end, 1 = top): relaxed one-hand hold mid-shaft, then the hand slides to the end for
+# the two-handed swing so the shaft extends away from the body instead of poking back into it
+U_R = {1: 0.45, 12: 0.45}; U_SWING, U_L = 0.16, 0.04
 
 
-def contact_theta(grip, z):
+def contact_theta(grip, z, u=U_SWING):
     """Swing angle at which the weapon's lowest point is at height z for this grip (contact, no clipping)."""
     return min((90 + a * 0.5 for a in range(0, 160)),
-               key=lambda th: abs(rig.weapon_lowest(rig.weapon_pose(grip, *shaft(th), u=0.42)) - z))
+               key=lambda th: abs(rig.weapon_lowest(rig.weapon_pose(grip, *shaft(th), u=u)) - z))
 
 for f, dx, dy, dz, p, y in HIPS:
     rest = REST['CTRL_hips']
@@ -118,11 +122,11 @@ for f, pos, th in HAND:
     bpy.context.scene.frame_set(f)
     grip = rig.world('R_Hand').translation
     s, b = shaft(contact_theta(grip, CONTACT[th]) if isinstance(th, str) else th)
-    rig.key_weapon(min(N, f + (1 if 1 < f < 29 else 0)), rig.weapon_pose(grip, s, b, u=0.42))  # trails the hand, except in the strike
+    rig.key_weapon(min(N, f + (1 if 1 < f < 29 else 0)), rig.weapon_pose(grip, s, b, u=U_R.get(f, U_SWING)))  # trails the hand, except in the strike
 # left hand own pose on the weapon: lower on the shaft, computed once in weapon space
 bpy.context.scene.frame_set(22)
 Wd = rig.world('CTRL_weapon') @ W_REST.inverted()
-want = Matrix.Translation(rig.shaft_point(0.16)) @ Wd.to_3x3().to_4x4() @ REST['CTRL_hand_L'].to_3x3().to_4x4()
+want = Matrix.Translation(rig.shaft_point(U_L)) @ Wd.to_3x3().to_4x4() @ REST['CTRL_hand_L'].to_3x3().to_4x4()
 own = W_REST @ rig.world('CTRL_weapon').inverted() @ want
 for f in (20, 90):
     rig.key('CTRL_hand_L', f, matrix=own)
@@ -145,6 +149,7 @@ SB.bake_springs(arm, 1, N, chains=long, preset='cloth', stiffness=6.0, damping=3
 skirts = SB.find_chains(arm, ('skirt',))
 SB.bake_springs(arm, 1, N, chains=skirts, preset='cloth')
 print('springs:', chains, skirts)
-if ARGS.get('out'):
-    bpy.ops.wm.save_as_mainfile(filepath=ARGS['out'], copy=True)
-    print('saved', ARGS['out'])
+
+# ---------------------------------------------------------------- self-check: forearms must stay outside the torso
+hits = CR.limb_penetration(arm, 1, N)
+print('forearm-in-torso:', hits or 'none')

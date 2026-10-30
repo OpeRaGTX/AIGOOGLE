@@ -57,6 +57,10 @@ Related skills: `animation-principles` (timing/easing theory), `animation` (Blen
   clamp keeps them above z = rest height); weight shifts happen in the hips, not by sliding feet.
 - **Contact, not clipping**: weapons and feet touch surfaces — solve the angle so the lowest point sits at the floor
   (the example's `contact_theta`), never through it.
+- **Two-handed weapons**: the hand nearer the butt end is the one that ends up inside the body. Regrip for the
+  swing (slide the hands toward the end, close together), keep the hands centred and in front of the head overhead,
+  tilt the blade back so the butt points away from the face, and reach the arms out in the strike — the butt end and
+  forearms must clear the chest when the torso folds over them.
 - **Silhouette & line of action**: one clear curve through the body at each golden pose; avoid twins (both arms
   or legs doing the same thing).
 
@@ -64,7 +68,10 @@ Related skills: `animation-principles` (timing/easing theory), `animation` (Blen
 Do this every pass — numbers lie less than you, the viewport lies less than numbers:
 1. Screenshots of every key/golden frame from at least two views (side + three-quarter), mesh visible, overlays off
    (`bmcp.py frames <dir> 1,24,33,39 side 5`), cropped and tiled into one strip; look at it.
-2. A spacing check (speeds per frame) for the fast parts.
+2. A spacing check (speeds per frame) for the fast parts, and an intersection check —
+   `CR.limb_penetration(arm, s, e, torso=[...,'Head'])` lists frames where a forearm goes inside the torso/head mesh
+   (contacts under ~2 cm are skin touching; game meshes have open shells, so it only trusts the first 12 cm).
+   Look at flagged frames from the top view: that is where "the arm is in the body" is obvious.
 3. A quick lit playblast (`blender -b x.blend -P video/tools/anim/preview.py -- out.mp4`) and look at its contact sheet.
 Write down what is wrong (pose, timing, clipping, pops, stiff hair), fix, and repeat until nothing is. Only then
 render the real shot. Tell the user what you fixed between passes.

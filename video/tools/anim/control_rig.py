@@ -387,6 +387,35 @@ def bake(rig, start, end, strip=False):
     return act
 
 
+def limb_penetration(arm, start, end, limbs=None, torso=None, margin=0.01, max_depth=0.12):
+    """Frames where forearm/shin sample points are inside the deformed torso surface (real mesh, not a capsule).
+    Returns [(frame, bone, depth_m)]. Torso = mesh faces whose vertices are weighted mostly to pelvis/spine bones."""
+    from mathutils.bvhtree import BVHTree
+    m = detect(arm)
+    torso = set(torso or [m['root'], m['hips'], *m['spine'], m['neck']])
+    limbs = limbs or [(c[2], c[3]) for c in m['arm'].values()]          # (elbow, hand) pairs
+    me = next(o for o in bpy.data.objects if o.type == 'MESH' and any(md.type == 'ARMATURE' and md.object == arm for md in o.modifiers))
+    names = {g.index: g.name for g in me.vertex_groups}
+    main = [names.get(max(v.groups, key=lambda g: g.weight).group) if len(v.groups) else None for v in me.data.vertices]
+    polys = [list(p.vertices) for p in me.data.polygons if sum(main[i] in torso for i in p.vertices) * 2 > len(p.vertices)]
+    out, P = [], arm.pose.bones
+    for f in range(start, end + 1):
+        bpy.context.scene.frame_set(f)
+        dg = bpy.context.evaluated_depsgraph_get(); ev = me.evaluated_get(dg); mesh = ev.to_mesh()
+        tree = BVHTree.FromPolygons([me.matrix_world @ v.co for v in mesh.vertices], polys)
+        ev.to_mesh_clear()
+        for a, b in limbs:
+            worst = 0.0
+            for k in range(1, 5):
+                p = arm.matrix_world @ P[a].head.lerp(P[b].head, k / 4)
+                loc, nrm, _, dist = tree.find_nearest(p)
+                if loc is not None and (p - loc).dot(nrm) < 0 and margin < dist < max_depth:  # deeper = open-shell noise
+                    worst = max(worst, dist)
+            if worst:
+                out.append((f, a, round(worst, 3)))
+    return out
+
+
 def fcurves(obj):
     """All F-curves of the object's action (Blender 4.4+ layered actions and the legacy API)."""
     act = obj.animation_data.action if obj.animation_data else None

@@ -15,6 +15,7 @@ rig.weapon_lowest(matrix)            # lowest weapon point for contact solving
 rig.shaft_point(u)                   # current shaft point (second-hand grips)
 CR.fcurves(arm)                      # all F-curves (layered actions in Blender 4.4+/5.x)
 CR.bake(rig, 1, N)                   # plain keys on model bones, constraints removed (strip=True deletes controls)
+CR.limb_penetration(arm, 1, N, torso=None)  # [(frame, bone, depth)] forearms inside the torso mesh (add "Head")
 ```
 Controls: `CTRL_root, CTRL_hips, CTRL_torso, CTRL_head, CTRL_hand_L/R, CTRL_foot_L/R, CTRL_pole_arm_L/R,
 CTRL_pole_leg_L/R, CTRL_weapon, FK_*`. Key parents before children for any given frame range.
