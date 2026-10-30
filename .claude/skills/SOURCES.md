@@ -26,5 +26,18 @@ Vendored copies of third-party Agent Skills. Update by re-copying from upstream.
 | threejs-animation, shader-glsl, particle-system | iart-ai/webgl-animation-skills | 50697d6 | MIT |
 | creative-brief, video-delivery-specs | iart-ai/freelance-motion-skills | d85c2b4 | MIT |
 | blender-director, camera-cinematography, animation, lighting, rendering, compositing, vfx-fx | arjun988/blender-skills (`.cursor/skills/`; shared `references/` moved to `blender-director/shared/`) | 8f778d2 | MIT |
+| blender-toolkit | Dev-GOM/claude-code-marketplace (`plugins/blender-toolkit/skills/`; plugin hooks not used, local-install note added on top of SKILL.md; CLI built in `scripts/dist`) | eed6aa2 | Apache-2.0 |
+| character-animator | own (this repo): studio animation method over `video/tools/anim/` | — | — |
 
-Blender skills assume a Blender MCP; here Blender runs headless as the `bpy` module instead: `video/setup-blender.sh`.
+Blender skills assume a Blender MCP. Locally the `blender` MCP server is configured in `.mcp.json` (ahujasid/mcp-for-blender,
+MIT, telemetry off); its addon and the other Blender add-ons are gathered by `video/tools/addons/fetch_addons.sh`.
+In cloud sessions Blender runs headless as the `bpy` module instead: `video/tools/setup-blender.sh`.
+
+Animation tools used by `character-animator` (installed into git-ignored `video/tools/anim/vendor/`):
+
+| Tool | Upstream | Commit / version | License |
+|---|---|---|---|
+| MCP for Blender (server via `uvx mcp-for-blender`, addon) | ahujasid/mcp-for-blender (formerly blender-mcp) | PyPI latest | MIT |
+| MoMask text-to-motion (`vendor/install_momask.sh`) | EricGuo5513/momask-codes + HumanML3D weights (Google Drive) | 94a6636 | code MIT; weights trained on HumanML3D/AMASS — research / non-commercial |
+| Wiggle 2 (optional live spring bones; loads in Blender 5.2) | shteeve3d/blender-wiggle-2 | v2.2.3 | GPL-3.0 |
+| Not installed: mixamo-llm-mocap (+ GVHMR) | squall01337/mixamo-llm-mocap, zju3dv/GVHMR | — | MIT; GVHMR non-commercial; needs ~8 GB VRAM and SMPL-X (registration) |

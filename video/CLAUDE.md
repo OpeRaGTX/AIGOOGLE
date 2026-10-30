@@ -37,6 +37,19 @@ Music analysis: `python tools/beats.py track.mp3` (tempo, beats, loudness), `pyt
 - 3D in Blender: `blender-director` (entry), `animation`, `camera-cinematography`, `lighting`, `rendering`, `compositing`, `vfx-fx`.
 - Other formats: `testimonial-video`, `youtube-intro-outro`, `after-effects`.
 
+## Анимация персонажей
+Load the `character-animator` skill for any character motion. Source priority:
+1. **Own animation on the control rig** (`tools/anim/control_rig.py`): optional text-to-motion draft
+   (`tools/anim/text2motion.sh "<prompt>" <sec> <out.bvh> <model.glb> <out.blend>`, MoMask on the GPU) → reworked with
+   keys: blocking on beat subdivisions → breakdowns → spline → polish → `bake` → springs (`tools/anim/spring_bones.py`).
+2. Mocap from the user's video — files go to `inbox/mocap/`; the GVHMR pipeline is not installed (needs ~8 GB VRAM).
+3. Mixamo FBX (also `inbox/mocap/`) retargeted with the `blender-toolkit` skill.
+4. Game clips inside the .glb — reference only.
+Materials: references (edits, clips, screenshots of poses) → `inbox/refs/`; mocap videos and FBX → `inbox/mocap/`.
+Eyes: Blender open with the MCP addon (`blender` MCP server in `/.mcp.json`; addon files from
+`tools/addons/fetch_addons.sh`). No key frame goes to a real render before it was looked at (screenshots + playblast:
+`tools/anim/bmcp.py frames`, `tools/anim/preview.py`). Worked example: `tools/anim/examples/kayn_overhead_slam.py`.
+
 ## Defaults and lessons
 - 1080×1920, 9:16, 60 fps (30 for talking/UI videos), H.264 yuv420p + AAC. Keep text out of TikTok UI zones:
   top ~150 px, bottom ~420 px, right ~140 px.

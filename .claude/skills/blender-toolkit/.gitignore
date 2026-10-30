@@ -1,0 +1,4 @@
+# blender-toolkit CLI build output and deps
+scripts/node_modules/
+scripts/dist/
+scripts/.blender-toolkit/

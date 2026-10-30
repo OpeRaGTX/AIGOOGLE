@@ -5,3 +5,8 @@ projects/*/work/
 projects/*/public/
 projects/*/out/
 __pycache__/
+# third-party tools fetched locally (see tools/anim/vendor/install_momask.sh, tools/addons/fetch_addons.sh)
+tools/anim/vendor/*
+!tools/anim/vendor/install_momask.sh
+tools/addons/*
+!tools/addons/fetch_addons.sh
