@@ -154,7 +154,12 @@ if __name__ == '__main__':
     S.ease_all()
     print('pruned blocks', FX.prune_blocks(N))
     if mode == 'full':
-        S.render(f'{out}/{name}')
+        import os
+        for fr in range(1, N + 1):   # resumable: skip frames already on disk
+            fp = f'{out}/{name}/{fr:04d}.png'
+            if os.path.exists(fp):
+                continue
+            s.frame_set(fr); s.render.filepath = fp; bpy.ops.render.render(write_still=True)
     else:
         for f in [int(x) for x in mode.split(':')[1].split(',')]:
             s.frame_set(f); s.render.filepath = f'{out}/{name}_{f:03d}.png'; bpy.ops.render.render(write_still=True)
