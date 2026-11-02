@@ -29,6 +29,7 @@ Music analysis: `python tools/beats.py track.mp3` (tempo, beats, loudness), `pyt
 4. Commit only when asked; never add inbox/work/public/out files.
 
 ## Skills to load by task
+- Content plan, ideas, hooks analysis, retention, viral forecast, post-mortems: `tiktok-content-team` (entry; data in `content/`).
 - Format, hooks, pacing, TikTok specifics: `short-form-video`, `video-delivery-specs`, `ad-creative-video`, `launch-video`.
 - Editing & music: `beat-sync-editing`, `audio-design`, `audiogram`; direction: `motion-art-direction`, `shot-composition`, `animation-principles`.
 - Text: `caption-animation`, `remotion-captions`, `kinetic-typography`, `lower-thirds`, `countdown-video`, `logo-animation`.

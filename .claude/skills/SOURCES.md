@@ -41,3 +41,14 @@ Animation tools used by `character-animator` (installed into git-ignored `video/
 | MoMask text-to-motion (`vendor/install_momask.sh`) | EricGuo5513/momask-codes + HumanML3D weights (Google Drive) | 94a6636 | code MIT; weights trained on HumanML3D/AMASS — research / non-commercial |
 | Wiggle 2 (optional live spring bones; loads in Blender 5.2) | shteeve3d/blender-wiggle-2 | v2.2.3 | GPL-3.0 |
 | Not installed: mixamo-llm-mocap (+ GVHMR) | squall01337/mixamo-llm-mocap, zju3dv/GVHMR | — | MIT; GVHMR non-commercial; needs ~8 GB VRAM and SMPL-X (registration) |
+
+## TikTok content-planning skills
+
+| Skill | Upstream | Commit | License |
+|---|---|---|---|
+| content-strategy, social, video, marketing-psychology, marketing-council, marketing-ideas, copywriting, analytics | coreyhaines31/marketingskills (`skills/`, evals dropped) — ~58k★ | 88c79f6 | MIT |
+| last30days | mvanhorn/last30days-skill (`skills/last30days`, demo `assets/` dropped) — ~66k★ | 6894d44 | MIT |
+| yt-shorts, yt-retention, yt-viral, yt-script, yt-plan, yt-audit | Jakeschincariol/youtube-agent-skill — ~4k★ | a2feb21 | MIT |
+| ig-reel, ig-viral, ig-plan | Jakeschincariol/instagram-agent-skill — ~4k★ | d03c56b | MIT |
+| scrapecreators-api, trend-discovery, outlier-post-finder, comment-mining, creator-profile-teardown, competitor-social-research, audience-research, transcript-intelligence | ScrapeCreators/social-media-research-skills (need `SCRAPECREATORS_API_KEY`) — ~5k★ | 64ba7b4 | MIT |
+| tiktok-content-team | own (this repo): orchestrator for the Wild Rift channel, data in `video/content/` | — | — |
