@@ -18,6 +18,11 @@ if [ ! -f public/fonts/montserrat-cyrillic-900-normal.woff2 ]; then
   cp work/package/files/montserrat-{cyrillic,latin}-{800,900}-normal.woff2 public/fonts/
 fi
 
+# 2b. v2 living pictures: depth (Depth Anything V2 Small, ONNX) + mist/glow masks -> public/depth, maps, glow
+M=work/models/depth-anything-v2-small.onnx
+[ -f "$M" ] || { mkdir -p work/models && curl -sSfL -o "$M" https://huggingface.co/onnx-community/depth-anything-v2-small/resolve/main/onnx/model.onnx; }
+[ -f public/maps/14.png ] || python3 pipeline/depth.py
+
 # 3. Piper voice (needs huggingface.co + its CDN in the network allowlist) -> work/vo/voice_raw.wav + src/timeline.json
 V=$(python3 -c "import json; print(json.load(open('pipeline/scenes.json'))['voice'])")
 HF=https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/$(echo "$V" | cut -d- -f2)/medium

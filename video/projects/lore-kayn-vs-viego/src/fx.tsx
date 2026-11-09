@@ -25,11 +25,12 @@ export const camAt = (keys: Key[], t: number): Cam => {
 	return keys[keys.length - 1][1];
 };
 
-// image placement in the 1080x1920 frame for a camera (edges never visible)
+// image placement in the 1080x1920 frame for a camera; keeps a 4 % margin so shader parallax/flow never hits the edge
+const M = 0.04;
 export const place = (c: Cam) => {
 	const W = IW * c.z;
 	const H = IH * c.z;
-	return {W, H, x: clamp(540 - c.cx * W, 1080 - W, 0), y: clamp(960 - c.cy * H, 1920 - H, 0)};
+	return {W, H, x: clamp(540 - c.cx * W, 1080 - W * (1 - M), -W * M), y: clamp(960 - c.cy * H, 1920 - H * (1 - M), -H * M)};
 };
 export const toScreen = (c: Cam, px: number, py: number) => {
 	const p = place(c);

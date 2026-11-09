@@ -1,12 +1,15 @@
 import React from 'react';
-import {AbsoluteFill, Easing, Img, Sequence, continueRender, delayRender, interpolate, staticFile, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Easing, Sequence, continueRender, delayRender, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import tl from './timeline.json';
 import {Captions} from './Captions';
-import {Cam, Converge, FPS, Flash, Fog, Glow, IH, IW, Key, Rising, Sparks, camAt, place, shakeAt, toScreen} from './fx';
+import {Living} from './Living';
+import {Cam, Converge, FPS, Flash, Fog, Glow, Key, Rising, Sparks, camAt, place, shakeAt, toScreen} from './fx';
 
-// «Битва по лору: Каин против Виего» — 15 stills, voice-driven EDL from timeline.json (pipeline/vo.py).
+// «Битва по лору: Каин против Виего» v2 — «living pictures»: each still runs through the WebGL depth shader
+// (Living.tsx). Voice-driven EDL from timeline.json (pipeline/vo.py); captions untouched.
 export {FPS};
 export const DURATION = tl.frames;
+const WIPE = 9; // fog-wipe frames, played over the start of the next scene
 
 const fontHandle = delayRender('fonts');
 Promise.all(
@@ -21,8 +24,15 @@ Promise.all(
 type Ctx = {t: number; f: number; D: number; w: (re: RegExp, n?: number) => number; we: (re: RegExp, n?: number) => number};
 type Def = {
 	cam: (c: Ctx) => Key[];
+	par: [[number, number], [number, number]]; // depth-parallax camera offset: start -> end of scene
+	red?: number; // red haze flows + embers flicker
+	flow?: number;
+	glow?: number;
 	shake?: (c: Ctx) => [number, number][];
+	hits?: (c: Ctx) => number[]; // RGB split 3 px for 3 frames
+	cuts?: (c: Ctx) => number[]; // diagonal cut, halves slide for 6 frames
 	blur?: (c: Ctx) => number;
+	wipeOut?: boolean; // fog wipe into the next scene
 	fx?: (c: Ctx, cam: Cam) => React.ReactNode;
 };
 const OUT = Easing.out(Easing.cubic);
@@ -34,11 +44,13 @@ const fr = (s: number) => Math.round(s * FPS);
 
 const DEFS: Def[] = [
 	{ // 1 hook: fast push-in, flash on «убить»
-		cam: ({D}) => [[0, C(1, 0.5, 0.47)], [0.6, C(1.12, 0.5, 0.45), OUT], [D, C(1.18, 0.5, 0.44), LIN]],
+		cam: ({D}) => [[0, C(1, 0.47, 0.47)], [0.5, C(1.12, 0.49, 0.45), OUT], [D, C(1.2, 0.52, 0.44), LIN]],
+		par: [[-1.2, -0.2], [1.2, 0.2]], red: 0.6,
 		fx: ({f, w}) => <Flash frame={f} at={[fr(w(/^убить/))]} />,
 	},
-	{ // 2 Rhaast: slow push, embers, red pulse
-		cam: ({D}) => [[0, C(1, 0.45, 0.3)], [D, C(1.1, 0.45, 0.24), LIN]],
+	{ // 2 Rhaast: push, embers, red pulse
+		cam: ({D}) => [[0, C(1, 0.43, 0.3)], [D, C(1.2, 0.47, 0.25), LIN]],
+		par: [[1.2, 0.3], [-1.2, -0.2]], red: 1,
 		fx: ({t}) => (
 			<>
 				<AbsoluteFill style={{background: '#ff3a24', mixBlendMode: 'screen', opacity: 0.05 + 0.05 * Math.sin(t * Math.PI * 2 * 1.1)}} />
@@ -46,30 +58,38 @@ const DEFS: Def[] = [
 			</>
 		),
 	},
-	{ // 3 still alive: almost static, slight pull-back
-		cam: ({D}) => [[0, C(1.06, 0.55, 0.3)], [D, C(1, 0.55, 0.3), LIN]],
+	{ // 3 still alive: pull-back
+		cam: ({D}) => [[0, C(1.18, 0.56, 0.3)], [D, C(1, 0.52, 0.3), LIN]],
+		par: [[-1, 0], [1.2, 0.3]], red: 1, wipeOut: true,
 	},
-	{ // 4 Viego: tilt bottom→top + pull-back, green fog layers
-		cam: ({D}) => [[0, C(1.16, 0.5, 0.78)], [D, C(1.03, 0.47, 0.3)]],
+	{ // 4 Viego: tilt bottom→top + pull-back
+		cam: ({D}) => [[0, C(1.24, 0.5, 0.78)], [D, C(1.04, 0.46, 0.3)]],
+		par: [[-1, -0.8], [1, 0.8]], flow: 1.2, wipeOut: true,
 		fx: ({t}) => (
 			<>
-				<Fog t={t} seed="f4a" alpha={0.14} band={[0.45, 1.0]} />
-				<Fog t={t} seed="f4b" n={5} alpha={0.1} band={[0.75, 1.1]} />
+				<Fog t={t} seed="f4a" alpha={0.12} band={[0.45, 1.0]} />
+				<Fog t={t} seed="f4b" n={5} alpha={0.08} band={[0.75, 1.1]} />
 			</>
 		),
 	},
 	{ // 5 Black Mist: drift right, fog creeps in
-		cam: ({D}) => [[0, C(1.12, 0.36, 0.5)], [D, C(1.12, 0.64, 0.5), LIN]],
-		fx: ({t, D}) => <Fog t={t} seed="f5" n={10} alpha={0.2} creep={Math.min(1, t / D)} band={[0.25, 1.05]} />,
+		cam: ({D}) => [[0, C(1.08, 0.36, 0.5)], [D, C(1.22, 0.62, 0.48), LIN]],
+		par: [[-1.4, 0], [1.4, 0.2]], flow: 1.4,
+		fx: ({t, D}) => <Fog t={t} seed="f5" n={10} alpha={0.16} creep={Math.min(1, t / D)} band={[0.25, 1.05]} />,
 	},
-	{ // 6 Kayn is faster: smear entry, shake on «быстрее»
-		cam: ({D}) => [[0, C(1.14, 0.32, 0.5)], [4 / FPS, C(1.08, 0.42, 0.5), OUT], [D, C(1.13, 0.42, 0.47), LIN]],
+	{ // 6 Kayn is faster: smear entry + fast push, shake + RGB on «быстрее»
+		cam: ({D}) => [[0, C(1, 0.36, 0.5)], [0.4, C(1.16, 0.42, 0.5), OUT], [D, C(1.22, 0.45, 0.47), LIN]],
+		par: [[-1.4, 0], [1.2, 0.2]], red: 1,
 		blur: ({f}) => (f < 4 ? (4 - f) * 4 : 0),
-		shake: ({w}) => [[fr(w(/^быстрее/)), 6]],
+		shake: ({w}) => [[0, 6], [fr(w(/^быстрее/)), 8]],
+		hits: ({w}) => [0, fr(w(/^быстрее/))],
 		fx: ({t}) => <Rising t={t} seed="e6" n={22} colors={EMBER} minY={800} />,
 	},
-	{ // 7 from the walls: fast push to the impact point, sparks on each place
-		cam: ({D}) => [[0, C(1, 0.5, 0.5)], [0.8, C(1.3, 0.57, 0.5), OUT], [D, C(1.36, 0.57, 0.5), LIN]],
+	{ // 7 from the walls: fast push to the impact point, sparks + shake + RGB on each place
+		cam: ({D}) => [[0, C(1, 0.5, 0.5)], [0.4, C(1.22, 0.57, 0.5), OUT], [D, C(1.32, 0.58, 0.5), LIN]],
+		par: [[1.2, 0.3], [-1.2, -0.2]], red: 1,
+		shake: ({w}) => [w(/^стен/), w(/^пола/), w(/^потолка/)].map((s): [number, number] => [fr(s), 7]),
+		hits: ({w}) => [w(/^стен/), w(/^пола/), w(/^потолка/)].map(fr),
 		fx: ({t, w}, cam) => {
 			const p = toScreen(cam, 0.57, 0.5);
 			return (
@@ -80,33 +100,39 @@ const DEFS: Def[] = [
 			);
 		},
 	},
-	{ // 8 cut in half: impact frames + shake + punch-ins
+	{ // 8 cut in half: inversion frame, diagonal cut, RGB split, shake, punch-ins
 		cam: ({D, w}) => {
 			const h = [w(/^пополам/), w(/^снова/i, 0), w(/^снова/i, 1)];
-			return [[0, C(1.04, 0.55, 0.5)], ...h.flatMap((s, i): Key[] => [[s, C(1.04 + 0.05 * i, 0.55, 0.5)], [s + 0.12, C(1.09 + 0.05 * i, 0.55, 0.5), OUT]]), [D, C(1.2, 0.55, 0.5), LIN]];
+			return [[0, C(1, 0.55, 0.5)], [0.4, C(1.06, 0.55, 0.5), OUT],
+				...h.flatMap((s, i): Key[] => [[s, C(1.06 + 0.06 * i, 0.55, 0.5)], [s + 0.12, C(1.12 + 0.06 * i, 0.55, 0.5), OUT]]), [D, C(1.26, 0.55, 0.5), LIN]];
 		},
+		par: [[-1.2, 0.2], [1.2, -0.2]], red: 1, wipeOut: true,
 		shake: ({w}) => [[fr(w(/^пополам/)), 10], [fr(w(/^снова/i, 0)), 10], [fr(w(/^снова/i, 1)), 12]],
+		hits: ({w}) => [fr(w(/^пополам/)), fr(w(/^снова/i, 0)), fr(w(/^снова/i, 1))],
+		cuts: ({w}) => [fr(w(/^пополам/)), fr(w(/^снова/i, 0)), fr(w(/^снова/i, 1))],
 		fx: ({t, f, w}) => (
 			<>
 				<Rising t={t} seed="e8" n={18} colors={EMBER} minY={900} />
-				<Flash frame={f} at={[fr(w(/^пополам/)), fr(w(/^снова/i, 0)), fr(w(/^снова/i, 1))]} invertFirst />
+				<Flash frame={f} at={[fr(w(/^пополам/)), fr(w(/^снова/i, 0)), fr(w(/^снова/i, 1))]} invertFirst len={1} />
 			</>
 		),
 	},
-	{ // 9 the mist reassembles the king: particles pulled in, slight pull-back
-		cam: ({D}) => [[0, C(1.12, 0.5, 0.38)], [D, C(1.02, 0.5, 0.38), LIN]],
+	{ // 9 the mist reassembles the king: particles pulled in, pull-back
+		cam: ({D}) => [[0, C(1.22, 0.5, 0.38)], [D, C(1.02, 0.48, 0.38), LIN]],
+		par: [[1.2, 0.3], [-1.2, -0.3]], flow: 1.5,
 		fx: ({t, D}, cam) => {
 			const p = toScreen(cam, 0.5, 0.33);
 			return (
 				<>
-					<Fog t={t} seed="f9" n={5} alpha={0.1} />
+					<Fog t={t} seed="f9" n={5} alpha={0.08} />
 					<Converge t={t} seed="c9" n={70} tx={p.x} ty={p.y} dur={D} />
 				</>
 			);
 		},
 	},
 	{ // 10 only light works: vignette closes in on Kayn, darkening to the end of the phrase
-		cam: ({D}) => [[0, C(1, 0.3, 0.6)], [D, C(1.08, 0.3, 0.6), LIN]],
+		cam: ({D}) => [[0, C(1, 0.3, 0.6)], [D, C(1.18, 0.28, 0.6), LIN]],
+		par: [[-1.2, 0], [1.2, 0.2]], red: 1,
 		fx: ({t, we}, cam) => {
 			const end = we(/^нет/);
 			const p = toScreen(cam, 0.28, 0.6);
@@ -122,25 +148,27 @@ const DEFS: Def[] = [
 	},
 	{ // 11 the twist: slow push onto the red eye, tremble on «жутко»
 		cam: ({D}) => [[0, C(1, 0.56, 0.38)], [D, C(1.32, 0.63, 0.27)]],
+		par: [[1.2, 0.2], [-1.2, -0.2]], flow: 1.3, glow: 1, wipeOut: true,
 		shake: ({w}) => [[fr(w(/^жутко/)), 5], [fr(w(/^жутко/)) + 4, 4]],
 		fx: ({t}, cam) => {
 			const p = toScreen(cam, 0.63, 0.26);
 			return (
 				<>
-					<Fog t={t} seed="f11" n={6} alpha={0.12} band={[0.6, 1.05]} />
-					<Glow x={p.x} y={p.y} r={120 * cam.z} color="rgba(255,40,40,0.8)" opacity={0.35 + 0.15 * Math.sin(t * 4)} />
+					<Fog t={t} seed="f11" n={6} alpha={0.1} band={[0.6, 1.05]} />
+					<Glow x={p.x} y={p.y} r={120 * cam.z} color="rgba(255,40,40,0.8)" opacity={0.3 + 0.15 * Math.sin(t * 4)} />
 				</>
 			);
 		},
 	},
 	{ // 12 the mist may take Rhaast: push in, red glow dies, green takes over
-		cam: ({D}) => [[0, C(1.08, 0.6, 0.36)], [D, C(1.28, 0.61, 0.32)]],
+		cam: ({D}) => [[0, C(1.04, 0.6, 0.36)], [D, C(1.26, 0.61, 0.32)]],
+		par: [[-1.2, -0.2], [1.2, 0.2]], flow: 1.4,
 		fx: ({t, D}, cam) => {
 			const p = toScreen(cam, 0.61, 0.32);
 			const k = interpolate(t, [D * 0.25, D], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 			return (
 				<>
-					<Fog t={t} seed="f12" n={7} alpha={0.12 + 0.08 * k} band={[0.3, 1.05]} />
+					<Fog t={t} seed="f12" n={7} alpha={0.1 + 0.08 * k} band={[0.3, 1.05]} />
 					<Glow x={p.x} y={p.y} r={110 * cam.z} color="rgba(0,0,0,0.9)" opacity={0.75 * k} blend="normal" />
 					<Glow x={p.x} y={p.y} r={150 * cam.z} color="rgba(255,40,40,0.8)" opacity={0.6 * (1 - k)} />
 					<Glow x={p.x} y={p.y} r={170 * cam.z} color="rgba(46,242,160,0.7)" opacity={0.45 * k} />
@@ -148,25 +176,30 @@ const DEFS: Def[] = [
 			);
 		},
 	},
-	{ // 13 time is on his side: slow pull-back
-		cam: ({D}) => [[0, C(1.16, 0.45, 0.55)], [D, C(1, 0.45, 0.5), LIN]],
-		fx: ({t}) => <Fog t={t} seed="f13" n={7} alpha={0.13} band={[0.35, 1.05]} />,
+	{ // 13 time is on his side: pull-back
+		cam: ({D}) => [[0, C(1.22, 0.45, 0.55)], [D, C(1, 0.43, 0.5), LIN]],
+		par: [[1.2, 0.2], [-1.2, -0.3]], flow: 1.3, wipeOut: true,
+		fx: ({t}) => <Fog t={t} seed="f13" n={7} alpha={0.11} band={[0.35, 1.05]} />,
 	},
-	{ // 14 climax: green flash on «смыкается», slow pull-back, particles
-		cam: ({D}) => [[0, C(1.16, 0.45, 0.4)], [D, C(1.02, 0.45, 0.4), LIN]],
+	{ // 14 climax: fast push, green flash + RGB + shake on «смыкается», slow pull-back
+		cam: ({D}) => [[0, C(1, 0.45, 0.42)], [0.4, C(1.2, 0.45, 0.4), OUT], [D, C(1.04, 0.45, 0.4), LIN]],
+		par: [[-1.2, 0], [1.2, 0.3]], flow: 1.4,
+		shake: ({w}) => [[0, 6], [fr(w(/^смыкается/)), 9]],
+		hits: ({w}) => [fr(w(/^смыкается/))],
 		fx: ({t, f, w}) => (
 			<>
-				<Fog t={t} seed="f14" n={7} alpha={0.13} />
+				<Fog t={t} seed="f14" n={7} alpha={0.11} />
 				<Rising t={t} seed="g14" n={26} colors={JADE} minY={600} speed={[60, 140]} opacity={0.7} />
 				<Flash frame={f} at={[fr(w(/^смыкается/))]} color="#2EF2A0" len={4} peak={0.75} />
 			</>
 		),
 	},
 	{ // 15 verdict + CTA plate
-		cam: ({D}) => [[0, C(1, 0.5, 0.3)], [D, C(1.14, 0.52, 0.22), LIN]],
+		cam: ({D}) => [[0, C(1, 0.5, 0.3)], [D, C(1.2, 0.52, 0.22), LIN]],
+		par: [[-1.2, 0.2], [1.2, -0.2]], flow: 1.2, glow: 1,
 		fx: ({t, D}) => (
 			<>
-				<Fog t={t} seed="f15" n={6} alpha={0.12} />
+				<Fog t={t} seed="f15" n={6} alpha={0.1} />
 				<Rising t={t} seed="g15" n={22} colors={JADE} minY={700} speed={[50, 120]} opacity={0.65} />
 				<Plate t={t - (D - 2)} />
 			</>
@@ -199,21 +232,30 @@ const SceneView: React.FC<{i: number}> = ({i}) => {
 		if (!m) throw new Error(`scene ${i + 1}: no word ${re} #${n}`);
 		return m;
 	};
-	const ctx: Ctx = {t: f / FPS, f, D: sc.dur / FPS, w: (re, n) => find(re, n).s - t0, we: (re, n) => find(re, n).e - t0};
+	const D = sc.dur / FPS;
+	const ctx: Ctx = {t: f / FPS, f, D, w: (re, n) => find(re, n).s - t0, we: (re, n) => find(re, n).e - t0};
 	const def = DEFS[i];
 	const cam = camAt(def.cam(ctx), ctx.t);
 	const p = place(cam);
+	const k = Easing.inOut(Easing.sin)(Math.min(1, ctx.t / D));
+	const par: [number, number] = [def.par[0][0] + (def.par[1][0] - def.par[0][0]) * k, def.par[0][1] + (def.par[1][1] - def.par[0][1]) * k];
 	const sh = shakeAt(f, def.shake?.(ctx) ?? [], 9);
 	const shaking = sh.x !== 0 || sh.y !== 0;
+	const rgb = (def.hits?.(ctx) ?? []).some((h) => f >= h && f < h + 3) ? 3 : 0;
+	const cut = (def.cuts?.(ctx) ?? []).map((h) => f - h).find((d) => d >= 0 && d < 6);
+	const wipe = f >= sc.dur ? ((f - sc.dur + 1) / WIPE) * 1.12 : 0;
 	const blur = def.blur?.(ctx) ?? 0;
 	return (
-		<AbsoluteFill style={{background: '#000', overflow: 'hidden'}}>
+		<AbsoluteFill style={{overflow: 'hidden'}}>
 			<AbsoluteFill style={{transform: `translate(${sh.x}px, ${sh.y}px) scale(${shaking ? 1.02 : 1})`}}>
-				<Img src={staticFile(`${sc.img}.png`)} style={{
-					position: 'absolute', left: 0, top: 0, width: IW, height: IH, transformOrigin: '0 0',
-					transform: `translate(${p.x}px, ${p.y}px) scale(${cam.z})`, filter: blur ? `blur(${blur}px)` : undefined,
-				}} />
-				{def.fx?.(ctx, cam)}
+				<Living
+					img={sc.img} t={ctx.t} par={par} focus={[cam.cx, cam.cy]}
+					uvOff={[-p.x / p.W, -p.y / p.H]} uvScale={[1080 / p.W, 1920 / p.H]}
+					red={def.red} flow={def.flow} glow={def.glow} rgb={rgb} seed={i * 7.3} wipe={wipe}
+					split={cut === undefined ? 0 : 56 * (1 - cut / 6) ** 2} splitLine={cut !== undefined && cut < 3 ? 1 - cut / 3 : 0}
+					style={blur ? {filter: `blur(${blur}px)`} : undefined}
+				/>
+				<AbsoluteFill style={{opacity: 1 - Math.min(1, wipe)}}>{def.fx?.(ctx, cam)}</AbsoluteFill>
 			</AbsoluteFill>
 		</AbsoluteFill>
 	);
@@ -222,11 +264,13 @@ const SceneView: React.FC<{i: number}> = ({i}) => {
 export const Lore: React.FC = () => (
 	<AbsoluteFill style={{background: '#000'}}>
 		{tl.scenes.map((s, i) => (
-			<Sequence key={i} from={s.from} durationInFrames={s.dur} name={`${i + 1} · ${s.img}`}>
+			<Sequence key={i} from={s.from} durationInFrames={s.dur + (DEFS[i].wipeOut ? WIPE : 0)} name={`${i + 1} · ${s.img}`} style={{zIndex: 100 - i}}>
 				<SceneView i={i} />
 			</Sequence>
 		))}
-		<AbsoluteFill style={{background: 'radial-gradient(ellipse 75% 60% at 50% 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.5) 100%)'}} />
-		<Captions />
+		<AbsoluteFill style={{zIndex: 200, background: 'radial-gradient(ellipse 75% 60% at 50% 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.5) 100%)'}} />
+		<AbsoluteFill style={{zIndex: 201}}>
+			<Captions />
+		</AbsoluteFill>
 	</AbsoluteFill>
 );
