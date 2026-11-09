@@ -1,7 +1,7 @@
 import React from 'react';
 import {Composition} from 'remotion';
-import {DURATION, FPS, Video} from './Video';
+import {DURATION, FPS, Lore} from './Lore';
 
 export const RemotionRoot: React.FC = () => (
-	<Composition id="lore-kayn-vs-viego" component={Video} durationInFrames={DURATION} fps={FPS} width={1080} height={1920} />
+	<Composition id="lore-kayn-vs-viego" component={Lore} durationInFrames={DURATION} fps={FPS} width={1080} height={1920} />
 );

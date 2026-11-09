@@ -1,10 +1,17 @@
 import {Config} from '@remotion/cli/config';
-import {existsSync} from 'fs';
+import {existsSync, readdirSync} from 'fs';
 import {cpus} from 'os';
 
-// cloud sandbox ships its own headless shell; elsewhere Remotion downloads one on first render
-const SANDBOX_SHELL = '/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell';
-if (existsSync(SANDBOX_SHELL)) {
+// cloud sandbox ships its own headless shell (version and folder layout change between images);
+// elsewhere Remotion downloads one on first render
+const PW = '/opt/pw-browsers';
+const SANDBOX_SHELL = existsSync(PW)
+	? readdirSync(PW)
+			.filter((d) => d.startsWith('chromium_headless_shell-'))
+			.flatMap((d) => [`${PW}/${d}/chrome-headless-shell-linux64/chrome-headless-shell`, `${PW}/${d}/chrome-linux/headless_shell`])
+			.find((f) => existsSync(f))
+	: undefined;
+if (SANDBOX_SHELL) {
 	Config.setBrowserExecutable(SANDBOX_SHELL);
 }
 if (process.platform === 'win32') {
