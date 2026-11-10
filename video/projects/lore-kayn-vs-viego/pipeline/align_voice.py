@@ -108,7 +108,7 @@ for s, sc in enumerate(cfg['scenes']):
 print(f'total {total / FPS:.2f}s ({total} frames), audio {dur_audio:.2f}s')
 
 # 5. voice track: gentle highpass + two-pass loudnorm -16 LUFS / -1.5 dBTP, padded to the video length
-FX = 'aresample=48000:resampler=soxr,highpass=f=60'
+FX = 'aresample=48000:resampler=soxr,highpass=f=70'
 meas = subprocess.run(['ffmpeg', '-hide_banner', '-nostats', '-i', str(SRC), '-af', f'{FX},loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json',
                        '-f', 'null', '-'], capture_output=True, text=True).stderr
 m = json.loads(meas[meas.rindex('{'):meas.rindex('}') + 1])
