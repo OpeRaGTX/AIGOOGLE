@@ -30,7 +30,7 @@ For several profiles, repeat the block. Russian goes FIRST, English second, same
 - Casual slang, sparingly: lol, lowkey, kinda, gonna, tbh, ngl, vibe, "slide into my messages". Two or three per bio, not every sentence.
 - Each hobby gets ONE concrete, slightly self-ironic detail ("pretending I'm flexible on a yoga mat", "baking way too many cinnamon rolls"). No bare list of hobbies.
 - The job appears through a small funny or warm detail, not a CV line.
-- End with an easy open question to the reader (what / where / how), so he wants to write first.
+- END with what she is looking for: always the word "partner" (never "man"/"guy"), what kind (strong, honest, caring, can support her physically and emotionally...), plus a soft invite to chat. Every bio in a batch has a different ending, both the partner wish and the invite line.
 - 0-2 emojis. No hashtags.
 - Clean: no sexual content, no body descriptions. Light double meaning is fine.
 - No insults, no money talk, no requests for help, no sad-story pressure.
