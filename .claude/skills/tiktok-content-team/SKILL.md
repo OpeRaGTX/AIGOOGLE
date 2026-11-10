@@ -78,6 +78,12 @@ Tiers: 80+ — high chance to break past the core audience (ставим в пр
 likely; 50–64 — niche, fix the weakest factor; <50 — rework or drop. State it as a probability band, never a
 promise; after 48 h compare with real views/retention/completion and note the calibration in channel.md.
 
+## TikTok links
+For a TikTok URL use `yt-dlp` (cloud: `pip install --break-system-packages yt-dlp`; works through the proxy):
+`yt-dlp -j <url>` → public stats (views, likes, comments, reposts, description); `yt-dlp -o <dir>/%(id)s.%(ext)s <url>`
+→ download to watch frames (contact sheet via ffmpeg). Private analytics (avg watch time, retention, traffic sources,
+new followers) exist only in TikTok Studio → ask for screenshots.
+
 ## Post-mortem (when the user sends stats or a retention screenshot)
 Views, avg watch time, completion %, 3-s hold, shares/comments per 1k views → where it dropped (yt-retention
 method) → why (hook / pacing / topic / timing) → 3 concrete changes for the next video → update channel.md
