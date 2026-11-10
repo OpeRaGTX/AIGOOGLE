@@ -1,4 +1,5 @@
 {
+  "voiceFile": "inbox/voice/elevenlabs_viktoriya.mp3",
   "voice": "ru_RU-ruslan-medium",
   "lengthScale": 1.0,
   "sentenceGap": 0.25,

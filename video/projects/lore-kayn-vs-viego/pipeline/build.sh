@@ -23,13 +23,20 @@ M=work/models/depth-anything-v2-small.onnx
 [ -f "$M" ] || { mkdir -p work/models && curl -sSfL -o "$M" https://huggingface.co/onnx-community/depth-anything-v2-small/resolve/main/onnx/model.onnx; }
 [ -f public/maps/14.png ] || python3 pipeline/depth.py
 
-# 3. Piper voice (needs huggingface.co + its CDN in the network allowlist) -> work/vo/voice_raw.wav + src/timeline.json
-V=$(python3 -c "import json; print(json.load(open('pipeline/scenes.json'))['voice'])")
-HF=https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/$(echo "$V" | cut -d- -f2)/medium
-for e in onnx onnx.json; do [ -f "work/voices/$V.$e" ] || curl -sSfL -o "work/voices/$V.$e" "$HF/$V.$e"; done
-python3 -c "import piper, onnx" 2>/dev/null || pip install --break-system-packages piper-tts onnx
-python3 pipeline/vo.py
-./pipeline/voice_fx.sh   # -> out/voice.wav
+# 3. voice + word timings -> src/timeline.json + out/voice.wav
+if python3 -c "import json,sys; sys.exit(0 if json.load(open('pipeline/scenes.json')).get('voiceFile') else 1)"; then
+  # external voice (ElevenLabs etc.): Whisper word timestamps aligned to the script
+  python3 -c "import faster_whisper" 2>/dev/null || pip install --break-system-packages faster-whisper
+  HF_HUB_DISABLE_XET=1 python3 pipeline/align_voice.py
+else
+  # Piper TTS (needs huggingface.co + its CDN in the network allowlist)
+  V=$(python3 -c "import json; print(json.load(open('pipeline/scenes.json'))['voice'])")
+  HF=https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/$(echo "$V" | cut -d- -f2)/medium
+  for e in onnx onnx.json; do [ -f "work/voices/$V.$e" ] || curl -sSfL -o "work/voices/$V.$e" "$HF/$V.$e"; done
+  python3 -c "import piper, onnx" 2>/dev/null || pip install --break-system-packages piper-tts onnx
+  python3 pipeline/vo.py
+  ./pipeline/voice_fx.sh
+fi
 
 # 4. picture (silent) + mux voice
 (cd ../.. && node tools/render.mjs lore-kayn-vs-viego --out work/silent.mp4 --muted "$@")
