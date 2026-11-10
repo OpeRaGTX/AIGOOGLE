@@ -34,6 +34,7 @@ For several profiles, repeat the block. Russian goes FIRST, English second, same
 - 0-2 emojis. No hashtags.
 - Clean: no sexual content, no body descriptions. Light double meaning is fine.
 - No insults, no money talk, no requests for help, no sad-story pressure.
+- NO mention of meeting in any form: no "if we meet", dates, "together", "take me / you'd bring me", "feed you", "see you", offline plans. Even the work word "meetings" is out (use "calls"). The closing question is about him, his tastes or stories, never about a shared plan.
 
 ## Humanizer bans (from `humanizer` / `humanizer-ru`)
 
