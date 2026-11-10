@@ -22,16 +22,21 @@ for i, s in enumerate(edl['segments']):
     f0, f1 = round(s['start'] * FPS), round((s['start'] + s['dur']) * FPS)
     n_hold = round(s['hold'] * FPS)
     n = f1 - f0
-    play_src = (n - n_hold) / FPS * s['speed']  # seconds of source consumed
+    play_src = (n - n_hold) / FPS * (s.get('speed') or 1)  # seconds of source consumed
     seg = work / f'{i:02d}.mp4'
-    vf = (f"setpts=(PTS-STARTPTS)/{s['speed']},fps={FPS},scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,"
-          f"crop=1080:1920,setsar=1,tpad=stop_mode=clone:stop={n_hold + FPS}")
-    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f"{s['src_in']:.3f}", '-t', f'{play_src + 0.2:.3f}',
-                    '-i', str(ROOT / f"inbox/{PART}/{s['clip']}.mp4"), '-an', '-vf', vf, '-frames:v', str(n),
-                    '-c:v', 'libx264', '-preset', 'fast', '-crf', '12', '-pix_fmt', 'yuv420p', '-r', str(FPS), str(seg)], check=True)
+    src = ROOT / 'inbox' / s['file'] if 'file' in s else ROOT / f"inbox/{PART}/{s['clip']}.mp4"
+    cover = 'scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,crop=1080:1920,setsar=1'
+    if s.get('type') == 'image':  # placeholder still; Remotion draws the living picture over it
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-loop', '1', '-i', str(src), '-vf', f'{cover},fps={FPS}', '-frames:v', str(n),
+                        '-c:v', 'libx264', '-preset', 'fast', '-crf', '12', '-pix_fmt', 'yuv420p', '-r', str(FPS), str(seg)], check=True)
+    else:
+        vf = f"setpts=(PTS-STARTPTS)/{s['speed']},fps={FPS},{cover},tpad=stop_mode=clone:stop={n_hold + FPS}"
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f"{s['src_in']:.3f}", '-t', f'{play_src + 0.2:.3f}',
+                        '-i', str(src), '-an', '-vf', vf, '-frames:v', str(n),
+                        '-c:v', 'libx264', '-preset', 'fast', '-crf', '12', '-pix_fmt', 'yuv420p', '-r', str(FPS), str(seg)], check=True)
     got = int(subprocess.run(['ffprobe', '-v', 'error', '-count_frames', '-select_streams', 'v', '-show_entries',
                               'stream=nb_read_frames', '-of', 'csv=p=0', str(seg)], capture_output=True, text=True).stdout)
-    print(f"{i:2d} {s['clip']} {s['cue']:<15} frames {f0}-{f1} ({n}, hold {n_hold}) src {s['src_in']}+{play_src:.2f}s x{s['speed']}"
+    print(f"{i:2d} {s.get('file', s.get('clip'))} {s['cue']:<15} frames {f0}-{f1} ({n}, hold {n_hold}) src {s['src_in']}+{play_src:.2f}s x{s.get('speed')}"
           + ('' if got == n else f'  !! got {got}'))
     lst.append(f"file '{seg}'")
 (work / 'list.txt').write_text('\n'.join(lst))

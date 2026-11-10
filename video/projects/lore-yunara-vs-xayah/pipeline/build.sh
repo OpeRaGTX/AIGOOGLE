@@ -11,6 +11,11 @@ mkdir -p public/fonts out "work/$PART"
 python3 -c "import faster_whisper" 2>/dev/null || pip install --break-system-packages faster-whisper
 HF_HUB_DISABLE_XET=1 python3 pipeline/align_voice.py "$PART"   # -> src/words.json, out/voice-$PART.wav
 python3 pipeline/prep_clips.py "$PART"                          # -> public/$PART/bg.mp4
+if ls "inbox/$PART"/*.png >/dev/null 2>&1; then                  # stills -> living-picture maps
+  M=work/models/depth-anything-v2-small.onnx
+  [ -e "$M" ] || { mkdir -p work/models && curl -sSfL -o "$M" https://huggingface.co/onnx-community/depth-anything-v2-small/resolve/main/onnx/model.onnx; }
+  python3 pipeline/living_maps.py "$PART"                       # -> public/$PART/img|depth|maps|glow
+fi
 (cd ../.. && node tools/render.mjs lore-yunara-vs-xayah --comp "yunara-vs-xayah-$PART" --out "work/$PART/silent.mp4" --muted "$@")
 ffmpeg -v error -y -i "work/$PART/silent.mp4" -i "out/voice-$PART.wav" -map 0:v -map 1:a \
   -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 22 -profile:v high -level 4.2 \

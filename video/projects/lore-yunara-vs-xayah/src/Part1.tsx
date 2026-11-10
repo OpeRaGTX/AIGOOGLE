@@ -1,23 +1,14 @@
 import React from 'react';
-import {AbsoluteFill, Easing, OffthreadVideo, continueRender, delayRender, interpolate, staticFile, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Easing, OffthreadVideo, interpolate, staticFile, useCurrentFrame} from 'remotion';
+import './fonts';
 import edl from '../inbox/p1/edl.json';
-import data from './words.json';
+import data from './words-p1.json';
 import {Captions, Word, buildChunks} from './Captions';
 
 // Part 1: background = Veo clips cut exactly by inbox/p1/edl.json (pipeline/prep_clips.py -> public/p1/bg.mp4),
 // slow 1.00->1.04 push on held frames, 2-frame flashes on 1-13 «Залп» and 1-14, word captions, end card (last 2 s).
 export const FPS = 30;
 export const P1_FRAMES = data.frames;
-
-const fontHandle = delayRender('fonts');
-Promise.all(
-	(['cyrillic', 'latin'] as const).flatMap((sub) =>
-		[800, 900].map((w) => new FontFace('Montserrat', `url(${staticFile(`fonts/montserrat-${sub}-${w}-normal.woff2`)}) format('woff2')`, {
-			weight: String(w),
-			unicodeRange: sub === 'cyrillic' ? 'U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116' : 'U+0000-00FF, U+2000-206F, U+20AC, U+2122',
-		}).load().then((f) => document.fonts.add(f))),
-	),
-).then(() => continueRender(fontHandle));
 
 const SEGS = edl.segments.map((s) => {
 	const f0 = Math.round(s.start * FPS);

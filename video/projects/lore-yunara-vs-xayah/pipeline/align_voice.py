@@ -3,7 +3,7 @@
   python3 pipeline/align_voice.py p1
 Reads inbox/<part>/voice.mp3, inbox/<part>/edl.json (video length) and pipeline/script.json (part 1) /
 pipeline/script_<part>.json; Whisper words cached in work/asr/words.json (faster-whisper large-v3-turbo, word timestamps;
-set HF_HUB_DISABLE_XET=1 in the cloud). Writes src/words.json and out/voice-<part>.wav (highpass 70 Hz + two-pass
+set HF_HUB_DISABLE_XET=1 in the cloud). Writes src/words-<part>.json and out/voice-<part>.wav (highpass 70 Hz + two-pass
 loudnorm -16 LUFS / -1.5 dBTP, NOT sped up, padded to the EDL end).
 """
 import difflib, json, re, subprocess, sys
@@ -92,7 +92,7 @@ total = round(EDL['segments'][-1]['start'] * EDL['fps'] + EDL['segments'][-1]['d
 words = [{'w': tw['w'], 'p': tw['p'], 's': round(t[0], 3), 'e': round(t[1], 3), 'ph': pi,
           'q': bool(cfg['phrases'][pi].get('quote'))} for (pi, tw), t in zip(script, times)]
 (ROOT / 'src').mkdir(exist_ok=True)
-(ROOT / 'src/words.json').write_text(json.dumps({'fps': EDL['fps'], 'frames': total, 'words': words}, ensure_ascii=False, indent=0),
+(ROOT / f'src/words-{PART}.json').write_text(json.dumps({'fps': EDL['fps'], 'frames': total, 'words': words}, ensure_ascii=False, indent=0),
                                     encoding='utf-8')
 print(f'{len(words)} words, video {total} frames ({total / EDL["fps"]:.2f}s)')
 
