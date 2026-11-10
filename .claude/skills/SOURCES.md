@@ -30,3 +30,4 @@ Vendored copies of third-party Agent Skills. Update by re-copying from upstream.
 | humanizer | blader/humanizer | 8c307f3 | MIT |
 | humanizer-ru | smixs/humanizer-ru | ff990df | MIT |
 | sepia, sepia-write, sepia-review, sepia-refactor, sepia-recreate, sepia-hemingway | Nanako0129/sepia (`skills/`) | fb06be7 | MIT |
+| profile-bio | written for this repo | — | — |
