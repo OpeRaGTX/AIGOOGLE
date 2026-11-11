@@ -17,8 +17,12 @@ if ls "inbox/$PART"/*.png >/dev/null 2>&1; then                  # stills -> liv
   python3 pipeline/living_maps.py "$PART"                       # -> public/$PART/img|depth|maps|glow
 fi
 (cd ../.. && node tools/render.mjs lore-lulu-vs-nautilus --comp "lulu-vs-nautilus-$PART" --out "work/$PART/silent.mp4" --muted "$@")
+# Remotion renders full-range BT.601 (yuvj420p); TikTok wants limited-range BT.709. zscale converts exactly, plain swscale
+# shifts the colours by a few levels, so it is only the fallback for an ffmpeg built without zimg.
+CONV="scale=in_range=pc:out_range=tv"
+ffmpeg -hide_banner -filters 2>/dev/null | grep -q ' zscale ' && CONV="zscale=rangein=full:range=limited:matrixin=470bg:matrix=709"
 ffmpeg -v error -y -i "work/$PART/silent.mp4" -i "out/voice-$PART.wav" -map 0:v -map 1:a \
-  -vf "scale=in_range=pc:out_range=tv,format=yuv420p" -c:v libx264 -preset slow -crf 22 -profile:v high -level 4.2 \
+  -vf "$CONV,format=yuv420p" -c:v libx264 -preset slow -crf 22 -profile:v high -level 4.2 \
   -color_range tv -colorspace bt709 -color_primaries bt709 -color_trc bt709 -c:a aac -b:a 192k -movflags +faststart \
   "out/lulu-vs-nautilus-$PART.mp4"
 echo "done: out/lulu-vs-nautilus-$PART.mp4"
