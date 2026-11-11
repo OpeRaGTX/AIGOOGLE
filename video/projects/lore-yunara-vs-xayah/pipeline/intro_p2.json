@@ -1,0 +1,7 @@
+{
+  "note": "Cold open (NOTES «Урок ч.1 → правка ч.2»): 1.5 s without voice on the strongest moment, 2-04 aura burst (source 2.25 s), flash on the burst; the whole EDL, voice and captions shift by +1.5 s.",
+  "offset": 1.5,
+  "segments": [
+    {"start": 0, "file": "p2/2-04.mp4", "type": "video", "src_in": 1.75, "dur": 1.5, "speed": 1.0, "hold": 0, "cue": "холодный старт", "flash_at": 0.5}
+  ]
+}

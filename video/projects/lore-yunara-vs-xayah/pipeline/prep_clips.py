@@ -1,16 +1,18 @@
-"""EDL -> one frame-exact 30 fps background video (public/<part>/bg.mp4) + public/<part>/edl.json for Remotion.
+"""EDL -> one frame-exact 30 fps background video (public/<part>/bg.mp4) + src/edl-<part>.json (merged list) for Remotion.
 
   python3 pipeline/prep_clips.py p1
 Each segment: clip from src_in, speed (setpts, no frame interpolation: fps filter picks nearest frames 24->30),
 cover 1080x1920, then the last frame is held for `hold` s (the slow 1.00->1.04 push on holds is done in Remotion).
 Segment i covers frames [round(start*30), round((start+dur)*30)) so the cuts land exactly on the EDL times.
 """
-import json, shutil, subprocess, sys
+import json, subprocess, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PART = sys.argv[1] if len(sys.argv) > 1 else 'p1'
-edl = json.loads((ROOT / f'inbox/{PART}/edl.json').read_text(encoding='utf-8'))
+sys.path.insert(0, str(ROOT / 'pipeline'))
+from edl import load_edl  # noqa: E402
+edl = load_edl(ROOT, PART)  # inbox EDL + optional cold open (pipeline/intro_<part>.json)
 FPS = edl['fps']
 work = ROOT / f'work/{PART}/seg'
 work.mkdir(parents=True, exist_ok=True)
@@ -42,5 +44,5 @@ for i, s in enumerate(edl['segments']):
 (work / 'list.txt').write_text('\n'.join(lst))
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', str(work / 'list.txt'), '-c', 'copy',
                 str(out / 'bg.mp4')], check=True)
-shutil.copy(ROOT / f'inbox/{PART}/edl.json', out / 'edl.json')
+(ROOT / f'src/edl-{PART}.json').write_text(json.dumps(edl, ensure_ascii=False, indent=1), encoding='utf-8')
 print('->', out / 'bg.mp4')

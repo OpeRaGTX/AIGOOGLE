@@ -1,27 +1,31 @@
 import React from 'react';
 import {AbsoluteFill, Easing, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import './fonts';
-import edl from '../inbox/p2/edl.json';
+import edl from './edl-p2.json'; // inbox/p2/edl.json + cold open (pipeline/intro_p2.json), see pipeline/edl.py
 import data from './words-p2.json';
 import {Captions, Word, buildChunks} from './Captions';
 import {Living} from './Living';
 import {Cam, Key, camAt, place, shakeAt} from './camera';
 
-// Part 2: Veo clips cut by inbox/p2/edl.json (pipeline/prep_clips.py -> public/p2/bg.mp4) + the six stills as
-// «living pictures» (WebGL depth shader, maps from pipeline/living_maps.py), push on held frames, flashes on
-// 2-04 / 2-12 / 2-13 (+ shake), «ЧАСТЬ 2» badge (first 3 s), end card (last 2.5 s), word captions as in part 1.
+// Part 2: cold open 1.5 s without voice (2-04 aura burst + flash + «ЧАСТЬ 2 · ФИНАЛ»), then Veo clips cut by the EDL
+// shifted +1.5 s (pipeline/prep_clips.py -> public/p2/bg.mp4) + the six stills as «living pictures» (WebGL depth
+// shader, maps from pipeline/living_maps.py), push on held frames, flashes on 2-04 / 2-12 / 2-13 (+ shake),
+// corner badge for 3 s after the cold open, end card (last 2.5 s), word captions as in part 1.
 export const FPS = 30;
 export const P2_FRAMES = data.frames;
 
 const SEGS = edl.segments.map((s) => {
 	const f0 = Math.round(s.start * FPS);
 	const f1 = Math.round((s.start + s.dur) * FPS);
-	return {...s, f0, f1, nHold: Math.round(s.hold * FPS), name: s.file.split('/').pop()!.replace(/\.\w+$/, '')};
+	return {...s, f0, f1, nHold: Math.round(s.hold * FPS), name: s.file.split('/').pop()!.replace(/\.\w+$/, ''), intro: 'intro' in s};
 });
-const at = (name: string) => SEGS.find((s) => s.name === name)!.f0;
+const at = (name: string) => SEGS.find((s) => s.name === name && !s.intro)!.f0; // story segment, not the cold open
+const COLD = SEGS.filter((s) => s.intro);
+const COLD_END = COLD.length ? Math.max(...COLD.map((s) => s.f1)) : 0;
+const COLD_HIT = COLD.flatMap((s) => ('flash_at' in s ? [Math.round((s.start + (s.flash_at as number)) * FPS)] : []));
 const HOLDS = SEGS.filter((s) => s.type === 'video' && s.nHold >= 3);
-const FLASHES = [at('2-04'), at('2-12'), at('2-13')];
-const SHAKES: [number, number][] = [[at('2-13'), 12]];
+const FLASHES = [...COLD_HIT, at('2-04'), at('2-12'), at('2-13')];
+const SHAKES: [number, number][] = [...COLD_HIT.map((f): [number, number] => [f, 8]), [at('2-13'), 12]];
 const CHUNKS = buildChunks(data.words as Word[], FPS);
 const BADGE = 3 * FPS;
 const CARD = Math.round(2.5 * FPS);
@@ -58,8 +62,28 @@ const StillScene: React.FC<{name: string; dur: number; seed: number}> = ({name, 
 	);
 };
 
+// cold open: big plate in the caption zone (no voice yet), punches on the burst, hands over to the corner badge
+const ColdPlate: React.FC<{f: number}> = ({f}) => {
+	if (f >= COLD_END) return null;
+	const hit = COLD_HIT[0] ?? -99;
+	const s = interpolate(f, [0, 5], [0.85, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.back(2))})
+		* (f >= hit && f < hit + 6 ? interpolate(f, [hit, hit + 6], [1.08, 1], {easing: Easing.out(Easing.cubic)}) : 1);
+	const op = interpolate(f, [COLD_END - 5, COLD_END], [1, 0], {extrapolateLeft: 'clamp'});
+	return (
+		<div style={{position: 'absolute', left: 0, width: 1080, top: 1150, display: 'flex', justifyContent: 'center'}}>
+			<div style={{
+				transform: `translateY(-50%) scale(${s})`, opacity: op, padding: '22px 44px', borderRadius: 30, whiteSpace: 'nowrap',
+				background: 'rgba(10,6,20,0.82)', border: '6px solid #FF5FA2', boxShadow: '0 0 0 6px #5CE1E6, 0 0 70px rgba(199,125,255,0.65)',
+				color: '#fff', fontFamily: 'Montserrat', fontWeight: 900, fontSize: 92, letterSpacing: -1.5,
+			}}>
+				ЧАСТЬ 2 <span style={{color: '#5CE1E6'}}>·</span> <span style={{color: '#FF5FA2'}}>ФИНАЛ</span>
+			</div>
+		</div>
+	);
+};
+
 const Badge: React.FC<{f: number}> = ({f}) => {
-	if (f >= BADGE) return null;
+	if (f < 0 || f >= BADGE) return null;
 	const op = interpolate(f, [0, 6, BADGE - 8, BADGE], [0, 1, 1, 0], {extrapolateRight: 'clamp'});
 	const s = interpolate(f, [0, 7], [0.7, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.back(2))});
 	return (
@@ -69,7 +93,7 @@ const Badge: React.FC<{f: number}> = ({f}) => {
 			boxShadow: '0 0 0 4px #5CE1E6, 0 0 30px rgba(199,125,255,0.5)', color: '#fff', fontFamily: 'Montserrat',
 			fontWeight: 900, fontSize: 48, letterSpacing: -0.5,
 		}}>
-			ЧАСТЬ 2
+			ЧАСТЬ 2 · ФИНАЛ
 		</div>
 	);
 };
@@ -113,7 +137,8 @@ export const Part2: React.FC = () => {
 			</AbsoluteFill>
 			{flash !== undefined && <AbsoluteFill style={{background: '#fff', opacity: flash === 0 ? 0.85 : 0.4}} />}
 			<Captions chunks={CHUNKS} />
-			<Badge f={f} />
+			<ColdPlate f={f} />
+			<Badge f={f - COLD_END} />
 			<EndCard f={f - (P2_FRAMES - CARD)} />
 		</AbsoluteFill>
 	);

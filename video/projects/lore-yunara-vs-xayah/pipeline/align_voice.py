@@ -14,7 +14,10 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 PART = sys.argv[1] if len(sys.argv) > 1 else 'p1'
 SRC = ROOT / f'inbox/{PART}/voice.mp3'
-EDL = json.loads((ROOT / f'inbox/{PART}/edl.json').read_text(encoding='utf-8'))
+sys.path.insert(0, str(ROOT / 'pipeline'))
+from edl import load_edl  # noqa: E402
+EDL = load_edl(ROOT, PART)  # inbox EDL + optional cold open: voice and words shift by EDL['offset']
+OFF = EDL['offset']
 SCRIPT = ROOT / ('pipeline/script.json' if PART == 'p1' else f'pipeline/script_{PART}.json')
 cfg = json.loads(SCRIPT.read_text(encoding='utf-8'))
 ASR = ROOT / f'work/asr/words{"" if PART == "p1" else "_" + PART}.json'
@@ -89,7 +92,7 @@ for i, t in enumerate(times):
         times[i] = (prev, max(prev + 0.05, (prev + nxt) / 2))
 
 total = round(EDL['segments'][-1]['start'] * EDL['fps'] + EDL['segments'][-1]['dur'] * EDL['fps'])
-words = [{'w': tw['w'], 'p': tw['p'], 's': round(t[0], 3), 'e': round(t[1], 3), 'ph': pi,
+words = [{'w': tw['w'], 'p': tw['p'], 's': round(t[0] + OFF, 3), 'e': round(t[1] + OFF, 3), 'ph': pi,
           'q': bool(cfg['phrases'][pi].get('quote'))} for (pi, tw), t in zip(script, times)]
 (ROOT / 'src').mkdir(exist_ok=True)
 (ROOT / f'src/words-{PART}.json').write_text(json.dumps({'fps': EDL['fps'], 'frames': total, 'words': words}, ensure_ascii=False, indent=0),
@@ -103,6 +106,6 @@ m = json.loads(meas[meas.rindex('{'):meas.rindex('}') + 1])
 ln = (f"loudnorm=I=-16:TP=-1.5:LRA=11:measured_I={m['input_i']}:measured_TP={m['input_tp']}:measured_LRA={m['input_lra']}"
       f":measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true")
 (ROOT / 'out').mkdir(exist_ok=True)
-subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(SRC), '-af', f'{FX},{ln},aresample=48000,apad', '-t', f'{total / EDL["fps"]:.3f}',
+subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(SRC), '-af', f'{FX},{ln},aresample=48000,adelay={round(OFF * 1000)}:all=1,apad', '-t', f'{total / EDL["fps"]:.3f}',
                 '-ac', '2', '-c:a', 'pcm_s16le', str(ROOT / f'out/voice-{PART}.wav')], check=True)
 print(f'voice -> out/voice-{PART}.wav')

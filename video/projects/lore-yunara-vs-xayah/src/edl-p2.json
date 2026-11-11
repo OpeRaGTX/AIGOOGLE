@@ -1,0 +1,230 @@
+{
+ "fps": 30,
+ "voice": "p2/voice.mp3",
+ "voice_end": 72.5,
+ "segments": [
+  {
+   "start": 0,
+   "file": "p2/2-04.mp4",
+   "type": "video",
+   "src_in": 1.75,
+   "dur": 1.5,
+   "speed": 1.0,
+   "hold": 0,
+   "cue": "холодный старт",
+   "flash_at": 0.5,
+   "intro": true
+  },
+  {
+   "start": 1.5,
+   "file": "p1/1-17.mp4",
+   "src_in": 0,
+   "cue": "в прошлой",
+   "dur": 4.38,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 5.88,
+   "file": "p1/1-18.mp4",
+   "src_in": 0,
+   "cue": "ворон почти",
+   "dur": 1.8,
+   "type": "video",
+   "speed": 1.3,
+   "hold": 0
+  },
+  {
+   "start": 7.68,
+   "file": "p2/2-02.mp4",
+   "src_in": 0,
+   "cue": "лезвия",
+   "dur": 3.3,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 10.98,
+   "file": "p2/2-03.mp4",
+   "src_in": 0,
+   "cue": "и тогда в",
+   "dur": 3.46,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 14.44,
+   "file": "p2/2-04.mp4",
+   "src_in": 0,
+   "cue": "трансценденция",
+   "dur": 1.34,
+   "type": "video",
+   "speed": 1.3,
+   "hold": 0
+  },
+  {
+   "start": 15.78,
+   "file": "p2/2-05.mp4",
+   "src_in": 0,
+   "cue": "перья которые",
+   "dur": 2.72,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 18.5,
+   "file": "p2/2-06.mp4",
+   "src_in": 0,
+   "cue": "больше не",
+   "dur": 4.72,
+   "type": "video",
+   "speed": 0.85,
+   "hold": 0
+  },
+  {
+   "start": 23.22,
+   "file": "p2/2-07.png",
+   "src_in": 0,
+   "cue": "первый луч",
+   "dur": 2.5,
+   "type": "image",
+   "speed": null,
+   "hold": 0
+  },
+  {
+   "start": 25.72,
+   "file": "p2/2-08.mp4",
+   "src_in": 0,
+   "cue": "шая уходит",
+   "dur": 3.9,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 29.62,
+   "file": "p2/2-09.mp4",
+   "src_in": 0,
+   "cue": "юнара бросается",
+   "dur": 2.42,
+   "type": "video",
+   "speed": 1.3,
+   "hold": 0
+  },
+  {
+   "start": 32.04,
+   "file": "p2/2-10.png",
+   "src_in": 0,
+   "cue": "впервые за",
+   "dur": 3.28,
+   "type": "image",
+   "speed": null,
+   "hold": 0
+  },
+  {
+   "start": 35.32,
+   "file": "p2/2-09.mp4",
+   "src_in": 1.5,
+   "cue": "для засадницы",
+   "dur": 2.86,
+   "type": "video",
+   "speed": 0.89,
+   "hold": 0.02
+  },
+  {
+   "start": 38.18,
+   "file": "p2/2-11.png",
+   "src_in": 0,
+   "cue": "шая дерётся",
+   "dur": 5.12,
+   "type": "image",
+   "speed": null,
+   "hold": 0
+  },
+  {
+   "start": 43.3,
+   "file": "p1/1-09.mp4",
+   "src_in": 0,
+   "cue": "но против",
+   "dur": 3.28,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 46.58,
+   "file": "p2/2-12.mp4",
+   "src_in": 0,
+   "cue": "первый удар",
+   "dur": 2.14,
+   "type": "video",
+   "speed": 1.3,
+   "hold": 0
+  },
+  {
+   "start": 48.72,
+   "file": "p2/2-13.png",
+   "src_in": 0,
+   "cue": "второй",
+   "dur": 2.02,
+   "type": "image",
+   "speed": null,
+   "hold": 0
+  },
+  {
+   "start": 50.74,
+   "file": "p2/2-14.mp4",
+   "src_in": 0,
+   "cue": "шая лежит",
+   "dur": 4.52,
+   "type": "video",
+   "speed": 0.89,
+   "hold": 0
+  },
+  {
+   "start": 55.26,
+   "file": "p2/2-15.png",
+   "src_in": 0,
+   "cue": "я сражалась",
+   "dur": 3.82,
+   "type": "image",
+   "speed": null,
+   "hold": 0
+  },
+  {
+   "start": 59.08,
+   "file": "p2/2-14.mp4",
+   "src_in": 0.5,
+   "cue": "мы на",
+   "dur": 4.64,
+   "type": "video",
+   "speed": 0.76,
+   "hold": 0
+  },
+  {
+   "start": 63.72,
+   "file": "p2/2-16.png",
+   "src_in": 0,
+   "cue": "шая шипит",
+   "dur": 4.02,
+   "type": "image",
+   "speed": null,
+   "hold": 0
+  },
+  {
+   "start": 67.74,
+   "file": "p2/2-17.mp4",
+   "src_in": 0,
+   "cue": "юнара выиграла",
+   "dur": 6.26,
+   "type": "video",
+   "speed": 0.75,
+   "hold": 0.88
+  }
+ ],
+ "offset": 1.5
+}
