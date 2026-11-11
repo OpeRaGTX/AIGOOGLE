@@ -4,7 +4,7 @@
 
 ## Решения
 - 2 части по ~95 с. Часть 1 обрывается на «Лулу впервые перестаёт смеяться», часть 2 открывается тем, что она растёт.
-- **15 кадров на часть**, средняя длина кадра ~6 с (как просил автор: не больше 15 картинок).
+- **Ч.1 — 16 кадров** (15 + заставка «Лулу против Наутилуса»), **ч.2 — 15**, средняя длина кадра ~6 с (как просил автор: не больше 15 картинок).
 - Озвучка пересказана своими словами (без дословных кусков официальных биографий) и прогнана через humanizer-ru:
   нет «не X, а Y», троек, вступлений-объявлений. Линтер: 0 ошибок.
 - Правило первых 3 секунд (урок #2): кадр 1 — действие (якорь тащит корабль), первая фраза — конфликт.
@@ -15,7 +15,7 @@
 - **6 с** — обычный кадр (большинство). Под фразу 4,5–8 с монтаж подгонит скоростью 0,75–1,3×.
 - **8 с** — длинная фраза или «дыхание» (флешбек, открытие портала, финал).
 - **4 с** — быстрый удар.
-Длины указаны в таблицах. Сумма: ч.1 ≈ 98 с, ч.2 ≈ 92 с — совпадает с озвучкой.
+Длины указаны в таблицах. Сумма: ч.1 ≈ 102 с (16 кадров), ч.2 ≈ 92 с — совпадает с озвучкой.
 
 ## Стиль
 Пиксель-арт, как в «Каин vs Виего» (#1). В Юнаре ChatGPT ушёл в аниме — поэтому в промптах прямо запрещено
@@ -29,9 +29,9 @@
 
 ---
 
-## ЧАСТЬ 1 — озвучка (~223 слова ≈ 95 с)
+## ЧАСТЬ 1 — озвучка (~226 слов ≈ 97 с)
 ```
-Наутилус топит корабли целиком. Его соперница ростом ему по колено и красит море в сиреневый.
+Лулу против Наутилуса. Он топит корабли целиком. А она ростом ему по колено и красит море в сиреневый.
 У Наутилуса уже есть враг среди йордлов, Физз. У Синих Огненных островов поселился второй. Она превращает медуз в бабочек, и волны у неё звенят, как колокольчики. Для Наутилуса море священно. И он поднимается со дна.
 Когда-то он был водолазом в Билджвотере и просил у капитанов одно: бросить монету морю. Один капитан пожалел монету. На дне его схватило что-то из ила, цепь лопнула, и он остался внизу. Он очнулся гигантом в стальном скафандре и с тех пор топит жадных.
 Лулу даже среди йордлов считали чудачкой. Фея Пикс увёл её в Поляну, мир, где цвет и размер меняются по прихоти. Она играла там совсем недолго. А снаружи прошли века.
@@ -46,8 +46,9 @@
 ### Часть 1 — кадры
 | # | Фраза | Veo |
 |---|---|---|
-| 1-01 | «Наутилус топит корабли целиком» | 6 с |
-| 1-02 | «Его соперница… красит море в сиреневый» | 6 с |
+| 1-00 | «Лулу против Наутилуса» (заставка, лицом к лицу) | 4 с |
+| 1-01 | «Он топит корабли целиком» | 6 с |
+| 1-02 | «А она ростом ему по колено… сиреневый» | 6 с |
 | 1-03 | «враг… Физз… медуз в бабочек… колокольчики» | 8 с |
 | 1-04 | «море священно. И он поднимается со дна» | 6 с |
 | 1-05 | «был водолазом… бросить монету… пожалел монету» | 8 с |
@@ -63,6 +64,10 @@
 | 1-15 | «Трос… тянет на глубину. Лулу перестаёт смеяться» | 6 с |
 
 ### Часть 1 — промпты ChatGPT (копируй целиком)
+**1-00**
+```
+Detailed 16-bit pixel art, clearly visible square pixels, retro game sprite style with dithering, cinematic lighting, dark fantasy, rich colors, vertical 9:16, no text, no watermark, no smooth anime or painterly rendering, keep character designs from my reference images but redraw them in pixel art. Scene: split face-off poster, left half [LULU] small but glowing with pink and gold magic, [PIX] beside her, lilac sea and sparkles behind her; right half [NAUTILUS] towering in cold teal water with his giant anchor raised, rust and barnacles; a bright diagonal line of light splits the two halves, both looking at each other, epic versus composition.
+```
 **1-01**
 ```
 Detailed 16-bit pixel art, clearly visible square pixels, retro game sprite style with dithering, cinematic lighting, dark fantasy, rich colors, vertical 9:16, no text, no watermark, no smooth anime or painterly rendering, keep character designs from my reference images but redraw them in pixel art. Scene: [NAUTILUS] underwater, huge and silhouetted, dragging a wooden pirate ship down into the abyss by its anchor chain, the ship cracking, sailors' lanterns sinking, cold teal and deep blue light from above, bubbles and debris everywhere, epic scale.
@@ -129,6 +134,7 @@ Detailed 16-bit pixel art, clearly visible square pixels, retro game sprite styl
 
 | # | Длина | Промпт |
 |---|---|---|
+| 1-00 | 4 с | `Animate this pixel-art image. Keep the exact 16-bit pixel-art look with crisp visible pixels, no smoothing, no realistic or anime re-rendering; keep characters, faces and composition, no morphing, no new characters, no text, smooth cinematic motion, vertical 9:16. Motion: fast push-in toward the dividing line, the light line flares, the girl's magic sparkles burst, the giant's anchor swings slightly and water drips from it, both halves pulse with their colors.` |
 | 1-01 | 6 с | `Animate this pixel-art image. Keep the exact 16-bit pixel-art look with crisp visible pixels, no smoothing, no realistic or anime re-rendering; keep characters, faces and composition, no morphing, no new characters, no text, smooth cinematic motion, vertical 9:16. Motion: the anchor chain pulls the ship down, the hull cracks and splinters, lanterns tumble and sink, bubbles rush upward, slow camera tilt down following the ship into the dark.` |
 | 1-02 | 6 с | `Animate this pixel-art image. Keep the exact 16-bit pixel-art look with crisp visible pixels, no smoothing, no realistic or anime re-rendering; keep characters, faces and composition, no morphing, no new characters, no text, smooth cinematic motion, vertical 9:16. Motion: the small girl swings her legs and smiles, sparkles drift over the lilac water, the fairy circles her shoulder, the giant silhouette in the fog rises slightly higher, slow push-in.` |
 | 1-03 | 8 с | `Animate this pixel-art image. Keep the exact 16-bit pixel-art look with crisp visible pixels, no smoothing, no realistic or anime re-rendering; keep characters, faces and composition, no morphing, no new characters, no text, smooth cinematic motion, vertical 9:16. Motion: jellyfish lift from the water and transform into glowing butterflies that flutter upward, bell-shaped waves ripple gently, sparkles shimmer, the girl laughs and spins, slow sideways drift.` |
