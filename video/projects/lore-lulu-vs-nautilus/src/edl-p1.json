@@ -1,0 +1,198 @@
+{
+ "fps": 30,
+ "voice": "p1/voice.mp3",
+ "voice_end": 103.04,
+ "segments": [
+  {
+   "start": 0.0,
+   "file": "p1/1-00.mp4",
+   "src_in": 0,
+   "cue": "лулу против",
+   "dur": 1.92,
+   "type": "video",
+   "speed": 1.3,
+   "hold": 0
+  },
+  {
+   "start": 1.92,
+   "file": "p1/1-01.mp4",
+   "src_in": 0,
+   "cue": "он топит",
+   "dur": 1.88,
+   "type": "video",
+   "speed": 1.3,
+   "hold": 0
+  },
+  {
+   "start": 3.8,
+   "file": "p1/1-02.mp4",
+   "src_in": 0,
+   "cue": "а она",
+   "dur": 4.3,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 8.1,
+   "file": "p1/1-01.mp4",
+   "src_in": 2.0,
+   "cue": "уже есть",
+   "dur": 3.88,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 11.98,
+   "file": "p1/1-03.mp4",
+   "src_in": 0,
+   "cue": "синих",
+   "dur": 8.46,
+   "type": "video",
+   "speed": 0.95,
+   "hold": 0
+  },
+  {
+   "start": 20.44,
+   "file": "p1/1-04.png",
+   "src_in": 0,
+   "cue": "для наутилуса",
+   "dur": 4.6,
+   "type": "image",
+   "speed": null,
+   "hold": 0
+  },
+  {
+   "start": 25.04,
+   "file": "p1/1-05.mp4",
+   "src_in": 0,
+   "cue": "когда",
+   "dur": 8.46,
+   "type": "video",
+   "speed": 0.95,
+   "hold": 0
+  },
+  {
+   "start": 33.5,
+   "file": "p1/1-06.mp4",
+   "src_in": 0,
+   "cue": "его схватило",
+   "dur": 5.14,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 38.64,
+   "file": "p1/1-07.png",
+   "src_in": 0,
+   "cue": "он очнулся",
+   "dur": 4.94,
+   "type": "image",
+   "speed": null,
+   "hold": 0
+  },
+  {
+   "start": 43.58,
+   "file": "p1/1-08.mp4",
+   "src_in": 0,
+   "cue": "даже среди",
+   "dur": 8.36,
+   "type": "video",
+   "speed": 0.96,
+   "hold": 0
+  },
+  {
+   "start": 51.94,
+   "file": "p1/1-09.mp4",
+   "src_in": 0,
+   "cue": "она играла",
+   "dur": 4.6,
+   "type": "video",
+   "speed": 1.3,
+   "hold": 0
+  },
+  {
+   "start": 56.54,
+   "file": "p1/1-10.mp4",
+   "src_in": 0,
+   "cue": "отлив",
+   "dur": 8.54,
+   "type": "video",
+   "speed": 0.94,
+   "hold": 0
+  },
+  {
+   "start": 65.08,
+   "file": "p1/1-11.png",
+   "src_in": 0,
+   "cue": "тоже снизу",
+   "dur": 4.62,
+   "type": "image",
+   "speed": null,
+   "hold": 0
+  },
+  {
+   "start": 69.7,
+   "file": "p1/1-12.mp4",
+   "src_in": 0,
+   "cue": "разносит",
+   "dur": 4.98,
+   "type": "video",
+   "speed": 0.81,
+   "hold": 0.0
+  },
+  {
+   "start": 74.68,
+   "file": "p1/1-13.mp4",
+   "src_in": 0,
+   "cue": "искры",
+   "dur": 5.32,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 80.0,
+   "file": "p1/1-12.mp4",
+   "src_in": 1.0,
+   "cue": "ранить",
+   "dur": 3.78,
+   "type": "video",
+   "speed": 0.8,
+   "hold": 0
+  },
+  {
+   "start": 83.78,
+   "file": "p1/1-14.mp4",
+   "src_in": 0,
+   "cue": "тогда он",
+   "dur": 9.2,
+   "type": "video",
+   "speed": 0.87,
+   "hold": 0
+  },
+  {
+   "start": 92.98,
+   "file": "p1/1-15.png",
+   "src_in": 0,
+   "cue": "трос обвивает",
+   "dur": 6.8,
+   "type": "image",
+   "speed": null,
+   "hold": 0
+  },
+  {
+   "start": 99.78,
+   "file": "p1/1-00.mp4",
+   "src_in": 0,
+   "cue": "что было",
+   "dur": 3.26,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  }
+ ],
+ "offset": 0
+}
