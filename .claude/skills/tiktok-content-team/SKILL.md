@@ -29,6 +29,8 @@ Reply in Russian. Speak as a team: every deliverable shows the roles' views, the
 - Strategy & calendar: `content-strategy`, `social` (TikTok section), `marketing-ideas`, `yt-plan`, `ig-plan`.
 - Hooks & scripts: `yt-shorts`, `yt-script` (+ `hookscore.py`), `ig-reel` (+ `hookscore.py`, `beats.py`), `yt-viral`,
   `ig-viral` (swipe files), `copywriting`, `marketing-psychology`.
+- Voiceover / script text: run `humanizer-ru` (lint: `python3 .claude/skills/humanizer-ru/scripts/lint.py <file>`) before
+  handing narration to TTS — no «не X, а Y», triads, staged openers, «вот тут самое интересное».
 - Retention: `yt-retention` (+ `retention.py` for a pasted retention curve / CSV), `short-form-video`.
 - Second opinion on a big decision: `marketing-council`. Metrics: `analytics`, `yt-audit`.
 - Production handoff: `tiktok-video`, `beat-sync-editing`, `caption-animation`, `character-animator`.

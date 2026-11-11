@@ -52,3 +52,10 @@ Animation tools used by `character-animator` (installed into git-ignored `video/
 | ig-reel, ig-viral, ig-plan | Jakeschincariol/instagram-agent-skill — ~4k★ | d03c56b | MIT |
 | scrapecreators-api, trend-discovery, outlier-post-finder, comment-mining, creator-profile-teardown, competitor-social-research, audience-research, transcript-intelligence | ScrapeCreators/social-media-research-skills (need `SCRAPECREATORS_API_KEY`) — ~5k★ | 64ba7b4 | MIT |
 | tiktok-content-team | own (this repo): orchestrator for the Wild Rift channel, data in `video/content/` | — | — |
+
+## Writing / humanizer skills
+
+| Skill | Upstream | Commit | License |
+|---|---|---|---|
+| humanizer | blader/humanizer | 8c307f3 | MIT |
+| humanizer-ru | smixs/humanizer-ru | ff990df | MIT |
