@@ -1,0 +1,15 @@
+{
+	"_": "ШАБЛОН: ждём inbox/gameplay.mp4. Позиции — шаги 16-й сетки k (t = phase + k*step от 0:32 трека) или {\"f\": кадр}. Такты: k = 2 + 16n; дроп k = 130 (21.99 с).",
+	"fps": 60,
+	"text": "Nerfed? 💀",
+	"music": {"file": "track.m4a", "start": 32.0, "step": 0.16858, "phase": 0.072, "fade": 0.3, "lufs": -14},
+	"interp": "mci",
+	"precrop": [0, 0, 1, 1],
+	"window": {"aspect": 0.9, "h": 0.8},
+	"keys": [{"t": 0, "cx": 0.5, "cy": 0.5}],
+	"segments": [
+		{"at": {"f": 0}, "src": 0, "speed": 1}
+	],
+	"end": 162,
+	"fx": {"punch": [], "flash": [], "shake": [], "rgb": []}
+}
