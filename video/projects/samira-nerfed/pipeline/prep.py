@@ -79,24 +79,28 @@ def main():
         sys.exit(f"segment starts must begin at frame 0 and increase: {starts} end {total}")
     segs, prev_out = [], None
     for s, f0, f1 in zip(edl["segments"], starts, starts[1:] + [total]):
-        n, speed = f1 - f0, float(s.get("speed", 1))
+        n = f1 - f0
         src_in = float(s["src"]) if "src" in s else prev_out
         if src_in is None:
             sys.exit("the first segment needs \"src\"")
+        speed = (float(s["until"]) - src_in) / (n / FPS) if "until" in s else float(s.get("speed", 1))
+        if not 0.2 <= speed <= 4:
+            sys.exit(f"segment at frame {f0}: speed {speed:.2f} out of range")
         prev_out = src_in + n / FPS * speed
         if prev_out > info["duration"] + 0.05:
             sys.exit(f"segment at frame {f0} reads past the end of the source ({prev_out:.2f} > {info['duration']:.2f})")
-        segs.append({"f0": f0, "n": n, "src": round(src_in, 4), "speed": speed, "interp": s.get("interp", edl.get("interp", "mci"))})
+        segs.append({"f0": f0, "n": n, "src": round(src_in, 4), "speed": round(speed, 4), "interp": s.get("interp", edl.get("interp", "mci"))})
     fx = {k: sorted(frame(x) for x in v) for k, v in edl.get("fx", {}).items()}
 
     # rgb shift amplitude per timeline frame (rises into the mark, decays after it)
     rgb = {}
     for m in fx.get("rgb", []):
         for d in range(-RGB_PRE, RGB_POST):
-            amp = round(RGB_AMP * ((d + RGB_PRE + 1) / (RGB_PRE + 1) if d < 0 else 1 - d / RGB_POST))
+            amp = round(edl.get("rgbAmp", RGB_AMP) * ((d + RGB_PRE + 1) / (RGB_PRE + 1) if d < 0 else 1 - d / RGB_POST))
             if amp > 0 and 0 <= m + d < total:
                 rgb[m + d] = max(rgb.get(m + d, 0), amp)
 
+    up = int(edl.get("upscale", 1))
     # --- segments
     work = P / "work" / "segs"
     work.mkdir(parents=True, exist_ok=True)
@@ -108,7 +112,7 @@ def main():
     files, jobs = [], []
     for i, s in enumerate(segs):
         eff = info["fps"] * s["speed"]  # frame rate after the speed change
-        vf = [f"fps={info['fps']}"]
+        vf = []  # no cfr pre-filter: minterpolate works from real timestamps, so dropped frames of a VFR recording get filled
         if (rx, ry, rw, rh) != (0, 0, info["w"], info["h"]):
             vf.append(f"crop={rw}:{rh}:{rx}:{ry}")
         vf.append(f"setpts=(PTS-STARTPTS)/{s['speed']}")
@@ -117,6 +121,10 @@ def main():
         vf += [f"scale=in_color_matrix={mtx}:out_color_matrix={mtx}", "format=gbrp"]  # explicit matrix: untagged HD is bt709, not swscale's bt601
         if a.grade:
             vf.append(a.grade)
+        if up > 1:  # low-res source: upscale here (lanczos + light sharpening) instead of in the browser
+            vf.append(f"scale={rw * up}:{rh * up}:flags=lanczos+accurate_rnd")
+            if edl.get("sharpen"):
+                vf.append(f"unsharp=5:5:{edl['sharpen']}:5:5:0")
         amps = {}
         for f in range(s["f0"], s["f0"] + s["n"]):
             if f in rgb:

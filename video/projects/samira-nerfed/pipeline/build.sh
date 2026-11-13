@@ -8,6 +8,10 @@ for a in "$@"; do case "$a" in --no-render) RENDER= ;; *) ARGS+=("$a") ;; esac; 
 PY="$(command -v python3 || command -v python)"
 "$PY" "$D/prep.py" --grade "$(grade 1.08 1.2 1.02)" "${ARGS[@]}"
 [ -n "$RENDER" ] || exit 0
-cd "$STUDIO" && node tools/render.mjs samira-nerfed --crf 17 --color-space=bt709
-ffmpeg -hide_banner -nostats -i "$P/out/samira-nerfed.mp4" -af ebur128=peak=true -f null - 2>&1 | grep -A12 'Summary:' | grep -E 'I:|Peak:'
-ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate,nb_frames:format=duration,size -of default=nw=1 "$P/out/samira-nerfed.mp4"
+# master (near-lossless, fast preset) -> delivery file under ~30 MB: TikTok re-encodes anyway, the app shows <30 MB inline
+cd "$STUDIO" && node tools/render.mjs samira-nerfed --out work/master.mp4 --crf 15 --color-space=bt709
+OUT="$P/out/samira-nerfed.mp4"; mkdir -p "$P/out"
+ffmpeg -v error -y -i "$P/work/master.mp4" -c:v libx264 -preset slow -crf 20 -maxrate 8200k -bufsize 16400k -pix_fmt yuv420p \
+  -profile:v high -colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv -c:a aac -b:a 256k -movflags +faststart "$OUT"
+ffmpeg -hide_banner -nostats -i "$OUT" -af ebur128=peak=true -f null - 2>&1 | grep -A12 'Summary:' | grep -E 'I:|Peak:'
+ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate,nb_frames,pix_fmt:format=duration,size -of default=nw=1 "$OUT"
