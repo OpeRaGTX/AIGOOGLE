@@ -4,14 +4,16 @@
 вторые части почти не раздаются). Пиксель-арт, как в #1 и Лулу.
 
 ## Решения
-- **16 кадров**, ~92 с. Холодный старт — сам хук: театр, марионетки, светящаяся ухмылка в зале.
+- **17 кадров**, ~96 с. Кадр 00 — сплит-заставка «Шако против Джина. Кто сильнее?» (как в прошлых битвах), затем хук: театр,
+  марионетки, светящаяся ухмылка в зале.
 - Озвучка сжата с ~800 до ~200 слов, своими словами, прогнана через humanizer-ru (0 ошибок): без «не X, а Y», без тире.
 - Финал без «части 2» → ролик самодостаточный. Вердикт + «Кого столкнуть следующим?».
 - **Viral Score: 82** (хук 22 · удержание 17 · тема 16 · комменты 14 · пересмотр 6 · упаковка 7) → реалистично 70–75.
   Сильные стороны: хоррор-атмосфера, обман зрителя трижды (копии), твист «смешок у уха».
 
-## Озвучка (~200 слов ≈ 90 с; в ElevenLabs скорость 1.05–1.1, тот же голос)
+## Озвучка (~205 слов ≈ 92 с; в ElevenLabs скорость 1.05–1.1, тот же голос)
 ```
+Шако против Джина. Кто сильнее?
 В заброшенном театре Пилтовера идёт спектакль без зрителей. Режиссёр здесь убийца, а актёры его жертвы. Но этой ночью в зале кто-то смеётся.
 Кхада Джин, Золотой Демон Ионии. Он вырезал деревни и превращал тела в скульптуры. Чтобы поймать его, понадобились великий мастер Кушо, Шен и Зед.
 Его пушка Шёпот держит ровно четыре пули. Четвёртая бьёт без промаха. Каждый выстрел для Джина как мазок кисти.
@@ -24,13 +26,14 @@
 Подсказки: реплики в кавычках — с паузой между ними; «Барабан пуст.» — после паузы, тише; «Кхада» — ударение на первый слог.
 
 ## Сколько секунд генерировать в Veo
-6 с — большинство; 4 с — удары (12, 13); 8 с — кульминация (14) и финал (16). Сумма ≈ 92 с.
+6 с — большинство; 4 с — заставка (00) и удары (12, 13); 8 с — кульминация (14) и финал (16). Сумма ≈ 96 с.
 Внешность — по референсам: в начале чата ChatGPT приложи 1–2 картинки [JHIN] и [SHACO] и напиши «держи их
 внешность одинаковой во всех кадрах». Цвета: Джин — золото и тёплый свет рампы; Шако — фиолетовый и зелёный.
 
 ## Кадры
 | # | Фраза | Veo |
 |---|---|---|
+| 00 | «Шако против Джина. Кто сильнее?» (сплит-заставка) | 4 с |
 | 01 | «В заброшенном театре… кто-то смеётся» (хук) | 6 с |
 | 02 | «Режиссёр здесь убийца, а актёры его жертвы» | 6 с |
 | 03 | «Кхада Джин, Золотой Демон Ионии» | 6 с |
@@ -49,6 +52,10 @@
 | 16 | «Побеждает Шако… встретил настоящую. Согласен? Кого столкнуть следующим?» | 8 с |
 
 ## Промпты ChatGPT (копируй целиком)
+**00**
+```
+Detailed 16-bit pixel art, clearly visible square pixels, retro game sprite style with dithering, cinematic lighting, dark fantasy, rich colors, vertical 9:16, no text, no watermark, no blood or gore, no smooth anime or painterly rendering, keep character designs from my reference images but redraw them in pixel art. Scene: split face-off poster divided by a jagged diagonal line of light, left half [SHACO] grinning in purple and green light with a jack-in-the-box, right half [JHIN] in golden light with his ornate hand cannon raised, red theater curtains behind both, rose petals and confetti in the air, both looking at each other, epic versus composition.
+```
 **01**
 ```
 Detailed 16-bit pixel art, clearly visible square pixels, retro game sprite style with dithering, cinematic lighting, dark fantasy, rich colors, vertical 9:16, no text, no watermark, no blood or gore, no smooth anime or painterly rendering, keep character designs from my reference images but redraw them in pixel art. Scene: an abandoned grand theater at night, dusty red velvet seats, one cold spotlight on an empty stage, faint silhouettes of puppet figures hanging on strings above the stage, in the dark audience rows only a glowing wide grin and two eyes are visible, eerie and theatrical.
@@ -117,6 +124,7 @@ Detailed 16-bit pixel art, clearly visible square pixels, retro game sprite styl
 ## Промпты Veo (вставляй вместе с картинкой)
 | # | Длина | Промпт |
 |---|---|---|
+| 00 | 4 с | `Animate this pixel-art image. Keep the exact 16-bit pixel-art look with crisp visible pixels, no smoothing, no realistic or anime re-rendering; keep characters, faces and composition, no morphing, no new characters, no text, no gore, smooth cinematic motion, vertical 9:16. Motion: fast push-in toward the dividing line of light, the line flares, purple smoke swirls on the left, golden sparks and rose petals on the right, both figures shift slightly toward each other.` |
 | 01 | 6 с | `Animate this pixel-art image. Keep the exact 16-bit pixel-art look with crisp visible pixels, no smoothing, no realistic or anime re-rendering; keep characters, faces and composition, no morphing, no new characters, no text, no gore, smooth cinematic motion, vertical 9:16. Motion: the spotlight flickers, dust floats in the beam, the hanging silhouettes sway slightly, the glowing grin in the audience slowly widens, slow push-in toward the stage.` |
 | 02 | 6 с | `Animate this pixel-art image. Keep the exact 16-bit pixel-art look with crisp visible pixels, no smoothing, no realistic or anime re-rendering; keep characters, faces and composition, no morphing, no new characters, no text, no gore, smooth cinematic motion, vertical 9:16. Motion: his hands move slowly like conducting, the strings tremble and catch the light, footlights flicker warmly, slow low-angle push-in.` |
 | 03 | 6 с | `Animate this pixel-art image. Keep the exact 16-bit pixel-art look with crisp visible pixels, no smoothing, no realistic or anime re-rendering; keep characters, faces and composition, no morphing, no new characters, no text, no gore, smooth cinematic motion, vertical 9:16. Motion: the head tilts slightly toward the camera, rose petals drift past, a golden glint slides across the mask, slow push-in.` |
@@ -135,7 +143,7 @@ Detailed 16-bit pixel art, clearly visible square pixels, retro game sprite styl
 | 16 | 8 с | `Animate this pixel-art image. Keep the exact 16-bit pixel-art look with crisp visible pixels, no smoothing, no realistic or anime re-rendering; keep characters, faces and composition, no morphing, no new characters, no text, no gore, smooth cinematic motion, vertical 9:16. Motion: he lifts the mask to his face and tilts his head, the empty strings sway, the spotlight narrows slowly, slow pull-back.` |
 
 ## Публикация
-- Обложка: кадр 15 (ухмылка у уха Джина) + «ШАКО vs ДЖИН» / «кто сильнее по лору?».
+- Обложка: кадр 00 (сплит) или 15 (ухмылка у уха Джина) + «ШАКО vs ДЖИН» / «кто сильнее по лору?».
 - Подпись: «Шако или Джин — кто сильнее по лору? 🎭 Битва по лору #4 👇 #leagueoflegends #lol #лигалегенд #lorelol
   #shaco #jhin #шако #джин». Закреп: «🃏 Шако или 🌹 Джин? И кого столкнуть следующим?».
 - Публикация 9–10 утра.
