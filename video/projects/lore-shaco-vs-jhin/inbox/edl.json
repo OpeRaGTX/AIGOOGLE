@@ -1,0 +1,217 @@
+{
+ "fps": 30,
+ "voice": "voice.mp3",
+ "voice_end": 102.78,
+ "segments": [
+  {
+   "start": 0.0,
+   "file": "00.mp4",
+   "src_in": 0,
+   "cue": "против",
+   "dur": 3.08,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 3.08,
+   "file": "01.mp4",
+   "src_in": 0,
+   "cue": "в заброшенном",
+   "dur": 4.0,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 7.08,
+   "file": "02.mp4",
+   "src_in": 0,
+   "cue": "режиссёр",
+   "dur": 7.2,
+   "type": "video",
+   "speed": 0.84,
+   "hold": 0.01
+  },
+  {
+   "start": 14.28,
+   "file": "03.mp4",
+   "src_in": 0,
+   "cue": "хада",
+   "dur": 3.12,
+   "type": "video",
+   "speed": 1.3,
+   "hold": 0
+  },
+  {
+   "start": 17.4,
+   "file": "04.mp4",
+   "src_in": 0,
+   "cue": "он вырезал",
+   "dur": 3.42,
+   "type": "video",
+   "speed": 1.3,
+   "hold": 0
+  },
+  {
+   "start": 20.82,
+   "file": "05.mp4",
+   "src_in": 0,
+   "cue": "чтобы поймать",
+   "dur": 5.08,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 25.9,
+   "file": "06.mp4",
+   "src_in": 0,
+   "cue": "его пушка",
+   "dur": 5.64,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 31.54,
+   "file": "03.mp4",
+   "src_in": 3.0,
+   "cue": "каждый выстрел",
+   "dur": 2.8,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 34.34,
+   "file": "07.mp4",
+   "src_in": 0,
+   "cue": "на сцене",
+   "dur": 6.38,
+   "type": "video",
+   "speed": 0.95,
+   "hold": 0.02
+  },
+  {
+   "start": 40.72,
+   "file": "08.mp4",
+   "src_in": 0,
+   "cue": "и тут",
+   "dur": 5.22,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 45.94,
+   "file": "09.mp4",
+   "src_in": 0,
+   "cue": "когда",
+   "dur": 5.68,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 51.62,
+   "file": "10.mp4",
+   "src_in": 0,
+   "cue": "исчезает",
+   "dur": 3.94,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 55.56,
+   "file": "08.mp4",
+   "src_in": 2.0,
+   "cue": "какой",
+   "dur": 4.78,
+   "type": "video",
+   "speed": 0.84,
+   "hold": 0
+  },
+  {
+   "start": 60.34,
+   "file": "11.mp4",
+   "src_in": 0,
+   "cue": "ты испортил",
+   "dur": 4.2,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 64.54,
+   "file": "12.mp4",
+   "src_in": 0,
+   "cue": "первый выстрел",
+   "dur": 5.72,
+   "type": "video",
+   "speed": 0.75,
+   "hold": 0.34
+  },
+  {
+   "start": 70.26,
+   "file": "13.mp4",
+   "src_in": 0,
+   "cue": "третий",
+   "dur": 4.78,
+   "type": "video",
+   "speed": 0.84,
+   "hold": 0
+  },
+  {
+   "start": 75.04,
+   "file": "14.mp4",
+   "src_in": 0,
+   "cue": "последняя",
+   "dur": 8.54,
+   "type": "video",
+   "speed": 0.94,
+   "hold": 0
+  },
+  {
+   "start": 83.58,
+   "file": "15.mp4",
+   "src_in": 0,
+   "cue": "барабан",
+   "dur": 4.26,
+   "type": "video",
+   "speed": 1.3,
+   "hold": 0
+  },
+  {
+   "start": 87.84,
+   "file": "16.mp4",
+   "src_in": 0,
+   "cue": "побеждает",
+   "dur": 5.54,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  },
+  {
+   "start": 93.38,
+   "file": "07.mp4",
+   "src_in": 2.5,
+   "cue": "джин всю",
+   "dur": 5.56,
+   "type": "video",
+   "speed": 0.75,
+   "hold": 0.84
+  },
+  {
+   "start": 98.94,
+   "file": "00.mp4",
+   "src_in": 0,
+   "cue": "согласен",
+   "dur": 3.84,
+   "type": "video",
+   "speed": 1.0,
+   "hold": 0
+  }
+ ]
+}
