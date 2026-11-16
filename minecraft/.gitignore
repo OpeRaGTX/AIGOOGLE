@@ -1,0 +1,5 @@
+mods/*/.gradle/
+mods/*/build/
+mods/*/run/
+mods/*/.idea/
+mods/*/*.iml
