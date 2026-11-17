@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": "#minecraft:logs",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "LSL",
+    "LSL"
+  ],
+  "result": {
+    "count": 6,
+    "id": "hearthholm:palisade"
+  }
+}

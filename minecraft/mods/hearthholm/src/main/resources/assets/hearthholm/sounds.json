@@ -50,5 +50,29 @@
       }
     ],
     "subtitle": "subtitles.hearthholm.social.festival"
+  },
+  "threat.raid_horn": {
+    "sounds": [
+      "hearthholm:threat/raid_horn"
+    ],
+    "subtitle": "subtitles.hearthholm.threat.raid_horn"
+  },
+  "threat.alarm_bell": {
+    "sounds": [
+      "hearthholm:threat/alarm_bell"
+    ],
+    "subtitle": "subtitles.hearthholm.threat.alarm_bell"
+  },
+  "threat.rift_hum": {
+    "sounds": [
+      "hearthholm:threat/rift_hum"
+    ],
+    "subtitle": "subtitles.hearthholm.threat.rift_hum"
+  },
+  "threat.boss_roar": {
+    "sounds": [
+      "hearthholm:threat/boss_roar"
+    ],
+    "subtitle": "subtitles.hearthholm.threat.boss_roar"
   }
 }

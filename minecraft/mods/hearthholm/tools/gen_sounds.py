@@ -151,4 +151,67 @@ for name, fn, seeds in (("bell", bell, (1,)), ("murmur", murmur, (1, 2, 3, 4)), 
 for kind, fn in {"saw": saw, "chisel": chisel, "hammer": hammer, "sizzle": sizzle}.items():
     for v in (1, 2):
         write(f"{kind}{v}", fn(random.Random(v * 31 + len(kind))))
+
+# ---- wave C: threat sounds (raid horn, alarm bell, rift hum, boss roar) ---------------------------
+THREAT = os.path.join(BASE, "threat")
+
+def raid_horn(r):
+    out = []
+    dur = 3.4
+    for i in range(int(RATE * dur)):
+        t = i / RATE
+        f = 98 if t < 1.3 else 92 + 18 * min(1, (t - 1.3) / 0.25)    # low call, then a rising second note
+        e = min(1, t / 0.15) * min(1, (dur - t) / 0.6) * (0.85 + 0.15 * math.sin(2 * math.pi * 4.5 * t))
+        if 1.2 < t < 1.35: e *= 0.4
+        v = 0.0
+        for h in range(1, 14):
+            v += math.sin(2 * math.pi * f * h * t + h * 0.4) * (1.0 / h ** 0.9) * (1.0 if h < 6 else 0.6)
+        v += 0.05 * r.uniform(-1, 1)
+        out.append(math.tanh(1.6 * v) * e)
+    return out
+
+def alarm_bell(r):
+    out = [0.0] * int(RATE * 1.8)
+    f0 = 880.0
+    parts = [(1.0, 1.0, 0.7), (2.4, 0.5, 0.4), (3.9, 0.35, 0.25), (0.6, 0.4, 0.9)]
+    for k in range(4):                      # four quick strikes
+        s0 = int(k * 0.32 * RATE)
+        for i in range(len(out) - s0):
+            t = i / RATE
+            v = sum(a * math.exp(-t / d) * math.sin(2 * math.pi * f0 * m * t) for m, a, d in parts)
+            v += math.exp(-t / 0.008) * r.uniform(-1, 1) * 0.6
+            out[s0 + i] += v * (0.9 if k % 2 else 1.0)
+    return out
+
+def rift_hum(r):
+    out, lp = [], 0.0
+    dur = 3.0
+    for i in range(int(RATE * dur)):
+        t = i / RATE
+        e = min(1, t / 0.4) * min(1, (dur - t) / 0.6)
+        v = math.sin(2 * math.pi * 55 * t) + 0.8 * math.sin(2 * math.pi * 57.5 * t) + 0.4 * math.sin(2 * math.pi * 110.7 * t)
+        v *= 0.6 + 0.4 * math.sin(2 * math.pi * 1.7 * t)
+        lp += 0.02 * (r.uniform(-1, 1) - lp)
+        v += 3.0 * lp
+        v += 0.25 * math.sin(2 * math.pi * (660 + 40 * math.sin(2 * math.pi * 0.5 * t)) * t) * (0.5 + 0.5 * math.sin(2 * math.pi * 3 * t))
+        out.append(v * e)
+    return out
+
+def boss_roar(r):
+    out, lp, lp2 = [], 0.0, 0.0
+    dur = 2.2
+    for i in range(int(RATE * dur)):
+        t = i / RATE
+        e = min(1, t / 0.08) * min(1, (dur - t) / 0.7)
+        f = 70 + 40 * math.sin(math.pi * t / dur)
+        n = r.uniform(-1, 1)
+        lp += 0.15 * (n - lp)
+        lp2 += 0.04 * (lp - lp2)
+        growl = math.sin(2 * math.pi * f * t + 3 * lp2) * (0.6 + 0.4 * math.sin(2 * math.pi * 23 * t))
+        out.append(math.tanh(2.2 * (0.9 * growl + 1.5 * lp)) * e)
+    return out
+
+for name, fn in (("raid_horn", raid_horn), ("alarm_bell", alarm_bell), ("rift_hum", rift_hum), ("boss_roar", boss_roar)):
+    write(name, fn(random.Random(len(name) * 13)), THREAT)
+
 print("sounds written to", os.path.normpath(OUT))

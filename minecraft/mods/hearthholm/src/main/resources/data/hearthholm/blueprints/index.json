@@ -4,6 +4,8 @@
   "family_house",
   "warehouse",
   "town_hall",
-  "workshop"
+  "workshop",
+  "watchtower",
+  "palisade_segment"
  ]
 }

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "hearthholm:palisade",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "PP",
+    "PI",
+    "PP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:palisade_gate"
+  }
+}

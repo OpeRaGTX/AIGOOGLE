@@ -147,10 +147,84 @@ shaped("smith_anvil", ["III", " C ", "CCC"], {"I": "minecraft:iron_ingot", "C": 
 shapeless("cook_stove", ["minecraft:furnace", "minecraft:bowl", "minecraft:cobblestone"])
 shapeless("order_board", ["#minecraft:planks", "#minecraft:planks", "minecraft:paper", "minecraft:paper", "minecraft:stick"])
 
+
+# ---- wave C: defence and threats
+import zipfile as _zf, glob as _glob
+def simple_state(name, model=None):
+    w(f"assets/{NS}/blockstates/{name}.json", {"variants": {"": {"model": model or f"{NS}:block/{name}"}}})
+
+def gen_item(name, tex=None):
+    w(f"assets/{NS}/models/item/{name}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{tex or name}"}})
+    w(f"assets/{NS}/items/{name}.json", {"model": {"type": "minecraft:model", "model": f"{NS}:item/{name}"}})
+
+# palisade: lashed vertical logs with four sharpened tips on top
+tips = [box_el([x, 16, z], [x + 3, 19, z + 3], "#side") for x in (2, 11) for z in (2, 11)]
+tips += [box_el([x + 1, 19, z + 1], [x + 2, 21, z + 2], "#side") for x in (2, 11) for z in (2, 11)]
+w(f"assets/{NS}/models/block/palisade.json", {"parent": "block/block", "display": DISPLAY,
+    "textures": {"particle": f"{NS}:block/palisade_side", "side": f"{NS}:block/palisade_side", "top": f"{NS}:block/palisade_top"},
+    "elements": [cube([0, 0, 0], [16, 16, 16], {"north": "#side", "south": "#side", "east": "#side", "west": "#side", "up": "#top", "down": "#top"})] + tips})
+simple_state("palisade")
+item("palisade"); loot("palisade")
+
+# palisade gate: a door with our textures
+for part in ("bottom_left", "bottom_left_open", "bottom_right", "bottom_right_open", "top_left", "top_left_open", "top_right", "top_right_open"):
+    w(f"assets/{NS}/models/block/palisade_gate_{part}.json", {"parent": f"minecraft:block/door_{part}",
+        "textures": {"bottom": f"{NS}:block/palisade_gate_bottom", "top": f"{NS}:block/palisade_gate_top"}})
+_jar = _glob.glob(os.path.join(os.path.dirname(__file__), "..", ".gradle/loom-cache/minecraftMaven/net/minecraft/minecraft-clientOnly-*/26.3/*.jar"))
+_oak = json.loads(_zf.ZipFile(_jar[0]).read("assets/minecraft/blockstates/oak_door.json"))
+for v in _oak["variants"].values():
+    v["model"] = v["model"].replace("minecraft:block/oak_door_", f"{NS}:block/palisade_gate_")
+w(f"assets/{NS}/blockstates/palisade_gate.json", _oak)
+gen_item("palisade_gate")
+w(f"data/{NS}/loot_table/blocks/palisade_gate.json", {"type": "minecraft:block", "pools": [{"condition": {"type": "minecraft:survives_explosion"}, "rolls": 1,
+    "entries": [{"type": "minecraft:item", "name": f"{NS}:palisade_gate", "condition": {"type": "minecraft:match_block", "blocks": f"{NS}:palisade_gate",
+        "state": {"half": "lower"}}}]}], "random_sequence": f"{NS}:blocks/palisade_gate"})
+
+# alarm bell: two posts, a cross beam and a hanging bell
+block_model("alarm_bell", {"particle": f"{NS}:block/alarm_bell_wood", "wood": f"{NS}:block/alarm_bell_wood", "bell": f"{NS}:block/alarm_bell_bell"},
+            [box_el([2, 0, 7], [4, 16, 9], "#wood"), box_el([12, 0, 7], [14, 16, 9], "#wood"), box_el([2, 13, 6.5], [14, 15, 9.5], "#wood"),
+             box_el([5, 5, 5], [11, 12, 11], "#bell"), box_el([4, 4, 4], [12, 5, 12], "#bell"), box_el([7, 12, 7], [9, 13, 9], "#wood"),
+             box_el([0, 0, 6], [16, 1, 10], "#wood")])
+item("alarm_bell"); loot("alarm_bell")
+
+# rift core (animated, glowing)
+w(f"assets/{NS}/models/block/rift_core.json", {"parent": "minecraft:block/cube_all", "textures": {"all": f"{NS}:block/rift_core"}})
+simple_state("rift_core")
+item("rift_core")
+with open(os.path.join(R, f"assets/{NS}/textures/block/rift_core.png.mcmeta"), "w") as fh:
+    json.dump({"animation": {"frametime": 3, "interpolate": True}}, fh)
+
+# rift lantern
+w(f"assets/{NS}/models/block/rift_lantern.json", {"parent": "block/block", "display": DISPLAY, "textures": {"particle": f"{NS}:block/rift_lantern", "l": f"{NS}:block/rift_lantern"},
+    "elements": [{"from": [4, 0, 4], "to": [12, 8, 12], "faces": {d: face("#l", [0, 0, 8, 8]) for d in ("north", "south", "east", "west")} | {"up": face("#l", [0, 9, 8, 15]), "down": face("#l", [0, 9, 8, 15])}},
+                 {"from": [5, 8, 5], "to": [11, 10, 11], "faces": {d: face("#l", [8, 0, 14, 2]) for d in ("north", "south", "east", "west", "up", "down")}},
+                 {"from": [7, 10, 7], "to": [9, 12, 9], "faces": {d: face("#l", [8, 8, 10, 10]) for d in ("north", "south", "east", "west", "up", "down")}}]})
+simple_state("rift_lantern")
+item("rift_lantern"); loot("rift_lantern")
+
+# chieftain's banner: pole, cross bar, cloth
+block_model("chieftain_banner", {"particle": f"{NS}:block/chieftain_banner", "cloth": f"{NS}:block/chieftain_banner", "pole": f"{NS}:block/alarm_bell_wood"},
+            [box_el([7, 0, 7], [9, 16, 9], "#pole"), box_el([2, 15, 7], [14, 16, 9], "#pole"),
+             {"from": [3, 2, 7.5], "to": [13, 15, 8.5], "faces": {"north": face("#cloth", [2, 0, 14, 13]), "south": face("#cloth", [2, 0, 14, 13]),
+                 "east": face("#cloth", [0, 0, 1, 13]), "west": face("#cloth", [0, 0, 1, 13]), "up": face("#cloth", [0, 0, 16, 1]), "down": face("#cloth", [0, 0, 16, 1])}},
+             box_el([5, 0, 5], [11, 1, 11], "#pole")])
+item("chieftain_banner"); loot("chieftain_banner")
+
+for name in ("rift_shard", "founders_whistle"):
+    gen_item(name)
+for k in ("ash_raider", "ash_arsonist", "ash_archer", "ash_brute", "ash_chieftain", "rift_wisp"):
+    gen_item(f"{k}_spawn_egg")
+
+shaped("palisade", ["LSL", "LSL"], {"L": "#minecraft:logs", "S": "minecraft:stick"}, 6)
+shaped("palisade_gate", ["PP", "PI", "PP"], {"P": f"{NS}:palisade", "I": "minecraft:iron_ingot"})
+shaped("alarm_bell", ["SSS", "SGS", "S S"], {"S": "minecraft:stick", "G": "minecraft:gold_ingot"})
+shaped("rift_lantern", [" R ", "RLR", " R "], {"R": f"{NS}:rift_shard", "L": "minecraft:lantern"})
+
 # sounds
 w(f"assets/{NS}/sounds.json", {f"workshop.{n}": {"sounds": [f"{NS}:workshop/{n}{i}" for i in (1, 2)], "subtitle": f"subtitles.{NS}.workshop.{n}"}
                                for n in ("saw", "chisel", "hammer", "sizzle")} | {
     "social.bell": {"sounds": [f"{NS}:social/bell1"], "subtitle": f"subtitles.{NS}.social.bell"},
     "social.murmur": {"sounds": [f"{NS}:social/murmur{i}" for i in (1, 2, 3, 4)], "subtitle": f"subtitles.{NS}.social.murmur"},
-    "social.festival": {"sounds": [{"name": f"{NS}:social/festival", "stream": True}], "subtitle": f"subtitles.{NS}.social.festival"}})
+    "social.festival": {"sounds": [{"name": f"{NS}:social/festival", "stream": True}], "subtitle": f"subtitles.{NS}.social.festival"}} | {
+    f"threat.{n}": {"sounds": [f"{NS}:threat/{n}"], "subtitle": f"subtitles.{NS}.threat.{n}"} for n in ("raid_horn", "alarm_bell", "rift_hum", "boss_roar")})
 print("assets written")

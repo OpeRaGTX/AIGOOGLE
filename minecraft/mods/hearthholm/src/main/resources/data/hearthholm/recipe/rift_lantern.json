@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "R": "hearthholm:rift_shard",
+    "L": "minecraft:lantern"
+  },
+  "pattern": [
+    " R ",
+    "RLR",
+    " R "
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:rift_lantern"
+  }
+}

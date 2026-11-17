@@ -549,6 +549,272 @@ def icon():
                 im.putpixel((x, y), (240, 210, 120, 255))
     return im.resize((128, 128), Image.NEAREST)
 
+
+# ---------------------------------------------------------------- wave C: Ashborn, rift, defence
+def c3(c, k=1.0, n=0, a=255):
+    r, g, b = c >> 16 & 255, c >> 8 & 255, c & 255
+    j = rnd.randint(-n, n) if n else 0
+    return (max(0, min(255, int(r * k) + j)), max(0, min(255, int(g * k) + j)), max(0, min(255, int(b * k) + j)), a)
+
+def sk(f):
+    return 1 + SHADE[f] / 255
+
+def ashborn_skin(kind):
+    im = img()
+    P, O = parts(False), parts(False, True)
+    tone = {"ash_brute": 0x6E6862, "ash_chieftain": 0x5E5853}.get(kind, 0x7A7570)
+    # ash-grey skin with dark cracks and a few ember glints
+    for name, part in P.items():
+        def fn(f, x, y, w, h):
+            v = rnd.random()
+            if v < 0.05: return c3(0x2A2522, sk(f))
+            if v < 0.07: return c3(0xE0682A, 1.0)
+            return c3(tone, sk(f), 6)
+        fill_part(im, part, fn)
+    fx, fy = 8, 8
+    for x in range(8):
+        im.putpixel((fx + x, fy + 3), c3(0x3A3330) if x in (1, 2, 5, 6) else c3(tone, 0.9, 4))
+    for x in (1, 2, 5, 6):
+        im.putpixel((fx + x, fy + 4), (36, 22, 18, 255))
+    for x in (2, 5):
+        im.putpixel((fx + x, fy + 4), (255, 128, 40, 255))
+    im.putpixel((fx + 3, fy + 6), (40, 28, 26, 255)); im.putpixel((fx + 4, fy + 6), (40, 28, 26, 255))
+    im.putpixel((fx + 2, fy + 6), c3(tone, 0.7)); im.putpixel((fx + 5, fy + 6), c3(tone, 0.7))
+    pal = {
+        "ash_raider": dict(top=0x4A3B30, trim=0x8C2F1C, pants=0x302A26, hood=0x2B2622),
+        "ash_arsonist": dict(top=0x3A3532, trim=0xC05A1E, pants=0x2A2421, hood=None),
+        "ash_archer": dict(top=0x3E3A2A, trim=0x6B4A2A, pants=0x2E2A22, hood=0x34301F),
+        "ash_brute": dict(top=None, trim=0x9E2B25, pants=0x2C2622, hood=None),
+        "ash_chieftain": dict(top=0x2A2624, trim=0xC9A23A, pants=0x221E1C, hood=None),
+    }[kind]
+    # trousers and boots
+    for leg in ("rleg", "lleg"):
+        fill_part(im, P[leg], lambda f, x, y, w, h: None if f == "top" else c3(0x1E1A17, sk(f), 3) if y >= 9 or f == "bottom" else c3(pal["pants"], sk(f), 5))
+        fill_part(im, P[leg], lambda f, x, y, w, h: c3(pal["trim"], sk(f)) if f in ("front", "right", "left", "back") and y == 9 else None)
+    # torso
+    if pal["top"] is not None:
+        def torso(f, x, y, w, h):
+            if f == "bottom": return None
+            c = pal["top"]
+            if f in ("front", "back") and y in (7, 8): c = pal["trim"]
+            if f == "front" and x == (y % 8) and y < 7 and kind != "ash_chieftain": c = 0x5E4A3A
+            if kind == "ash_arsonist" and rnd.random() < 0.08: return c3(0xD8742A)
+            return c3(c, sk(f), 5)
+        fill_part(im, P["body"], torso)
+        for arm in ("rarm", "larm"):
+            fill_part(im, P[arm], lambda f, x, y, w, h: None if f == "bottom" or (f != "top" and y > 7) else c3(pal["top"], sk(f) * (0.85 if y == 7 else 1), 5))
+    else:  # brute: bare chest with red war paint, belt
+        fill_face(im, P["body"]["front"], lambda x, y, w, h: c3(0x9E2B25) if (x in (1, 6) and y < 6) or (y == 3 and 2 <= x <= 5) else None)
+        fill_part(im, P["body"], lambda f, x, y, w, h: c3(0x3B2A1E, sk(f)) if f not in ("top", "bottom") and y in (9, 10) else None)
+        fill_face(im, P["body"]["front"], lambda x, y, w, h: c3(0xA8A8B0) if x in (3, 4) and y in (9, 10) else None)
+    # hoods
+    if pal["hood"] is not None:
+        H = O["head"]
+        fill_face(im, H["top"], lambda x, y, w, h: c3(pal["hood"], sk("top"), 4))
+        for f in ("right", "left", "back"):
+            fill_face(im, H[f], lambda x, y, w, h, f=f: c3(pal["hood"], sk(f), 4))
+        fill_face(im, H["front"], lambda x, y, w, h: c3(pal["hood"], 1, 4) if y < 2 or x in (0, 7) else None)
+        fill_part(im, O["body"], lambda f, x, y, w, h: c3(pal["hood"], sk(f), 4) if f in ("back", "right", "left") and y < 10 else
+                  (c3(pal["hood"], sk(f), 4) if f == "front" and (x in (0, 7) or y == 0) and y < 10 else None))
+    if kind == "ash_arsonist":  # orange bandana over mouth, soot goggles strap
+        fill_face(im, O["head"]["front"], lambda x, y, w, h: c3(0xB4461C, 1, 6) if y >= 5 else (c3(0x2A2420) if y == 3 and x in (0, 3, 4, 7) else None))
+        for f in ("right", "left", "back"):
+            fill_face(im, O["head"][f], lambda x, y, w, h, f=f: c3(0xB4461C, sk(f), 6) if y >= 5 else (c3(0x2A2420) if y == 3 else None))
+    if kind == "ash_archer":  # quiver on the back
+        fill_face(im, O["body"]["back"], lambda x, y, w, h: c3(0x6B4A2A) if 4 <= x <= 6 and 1 <= y <= 10 else (c3(0xE8E0D0) if 4 <= x <= 6 and y == 0 else None))
+    if kind == "ash_brute":  # horned iron helm and fur mantle
+        H = O["head"]
+        fill_face(im, H["top"], lambda x, y, w, h: c3(0x55585E, 1.1, 5))
+        for f in ("front", "right", "left", "back"):
+            fill_face(im, H[f], lambda x, y, w, h, f=f: c3(0x55585E, sk(f), 5) if y < 3 or (f == "front" and x in (3, 4) and y < 6) else None)
+        for f in ("right", "left"):
+            fill_face(im, H[f], lambda x, y, w, h: (216, 207, 184, 255) if (x, y) in ((3, 1), (4, 1), (4, 0), (5, 0)) else None)
+        fill_part(im, O["body"], lambda f, x, y, w, h: c3(0x6B5440, sk(f), 10) if (f == "top" or y < 3) and f != "bottom" else None)
+        for arm in ("rarm", "larm"):
+            fill_part(im, O[arm], lambda f, x, y, w, h: c3(0x6B5440, sk(f), 10) if f == "top" or (f != "bottom" and y < 3) else None)
+    if kind == "ash_chieftain":  # spiked crown, red cloak with gold trim, gold torc
+        H = O["head"]
+        for f in ("front", "right", "left", "back"):
+            fill_face(im, H[f], lambda x, y, w, h: (c3(0x1E1B1A) if y == 0 and x % 2 == 0 else c3(0xC9A23A) if y == 1 else None))
+        fill_face(im, H["front"], lambda x, y, w, h: (255, 90, 30, 255) if (x, y) == (3, 1) or (x, y) == (4, 1) else None)
+        fill_part(im, O["body"], lambda f, x, y, w, h: c3(0xA0281A, sk(f), 6) if f in ("back", "right", "left") else
+                  (c3(0xC9A23A) if f == "front" and y == 0 else (c3(0xA0281A, 1, 6) if f == "front" and x in (0, 7) else None)))
+        fill_face(im, O["body"]["back"], lambda x, y, w, h: c3(0xC9A23A) if y == 11 or x in (0, 7) else None)
+        fill_face(im, P["body"]["front"], lambda x, y, w, h: c3(0x5A5F66, 1.1 - y * 0.02, 4) if 1 <= x <= 6 and 1 <= y <= 6 else None)
+        for arm in ("rarm", "larm"):
+            fill_part(im, O[arm], lambda f, x, y, w, h: c3(0x5A5F66, sk(f), 4) if f == "top" or (f != "bottom" and y < 3) else None)
+    return im
+
+def rift_wisp_tex():
+    im = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    for y in range(8):
+        for x in range(16):
+            im.putpixel((x, y), (255, 236, 255, 255) if (x + y) % 3 else (230, 170, 255, 255))
+    for y in range(8, 20):
+        for x in range(24):
+            a = 120 + rnd.randint(-20, 30)
+            im.putpixel((x, y), (150 + rnd.randint(-15, 15), 70 + rnd.randint(-15, 15), 220, a))
+    for y in range(4):
+        for x in range(16, 24):
+            im.putpixel((x, y), (120, 255, 240, 255))
+    return im
+
+def rift_core_tex():
+    frames = 6
+    im = Image.new("RGBA", (16, 16 * frames))
+    for fr in range(frames):
+        for y in range(16):
+            for x in range(16):
+                d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+                import math
+                swirl = math.sin(d * 1.3 - fr * 1.05 + math.atan2(y - 7.5, x - 7.5) * 2)
+                k = max(0.0, 1 - d / 10)
+                r = int(60 + 120 * k + 50 * swirl * k)
+                g = int(20 + 60 * k * k)
+                b = int(110 + 120 * k + 30 * swirl)
+                if x in (0, 15) or y in (0, 15): r, g, b = 40, 20, 60
+                im.putpixel((x, 16 * fr + y), (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)), 255))
+    return im
+
+def palisade_side():
+    im = Image.new("RGBA", (16, 16))
+    for x in range(16):
+        log = x // 4
+        for y in range(16):
+            k = 1 + rnd.randint(-6, 6) / 100
+            if x % 4 == 0: k *= 0.6
+            elif x % 4 == 3: k *= 0.82
+            if (y + log * 5) % 7 == 0 and x % 4 in (1, 2): k *= 0.85
+            c = (int(112 * k), int(80 * k), int(50 * k), 255)
+            if y in (4, 11) and x % 4 != 0: c = (int(70 * k), int(66 * k), int(60 * k), 255)  # rope lashing
+            im.putpixel((x, y), c)
+    return im
+
+def palisade_top():
+    im = Image.new("RGBA", (16, 16), (60, 42, 26, 255))
+    for cx in (3.5, 11.5):
+        for cy in (3.5, 11.5):
+            for y in range(16):
+                for x in range(16):
+                    d = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
+                    if d < 3.6:
+                        ring = int(d * 1.5) % 2
+                        im.putpixel((x, y), (176, 136, 86, 255) if ring else (150, 112, 68, 255))
+    return im
+
+def gate_tex(top):
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            k = 1 + rnd.randint(-6, 6) / 100
+            if x % 4 == 0: k *= 0.62
+            c = (int(118 * k), int(84 * k), int(52 * k), 255)
+            if y in ((3, 12) if not top else (4,)) : c = (64, 64, 70, 255)                 # iron bands
+            if top and y < 3 and x % 4 in (0, 3): c = (0, 0, 0, 0)                          # pointed tips
+            if top and y == 3 and x % 4 == 0: c = (0, 0, 0, 0)
+            im.putpixel((x, y), c)
+    if not top:
+        for p in ((12, 7), (13, 7), (12, 8)):
+            im.putpixel(p, (150, 150, 160, 255))
+    return im
+
+def bell_textures():
+    wood = plank_tex(0x5E3E24, rows=4, seed=71)
+    bell = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            k = 1.15 - x * 0.025 + rnd.randint(-4, 4) / 100
+            bell.putpixel((x, y), (int(200 * k), int(150 * k), int(50 * k), 255))
+    for x in range(16): bell.putpixel((x, 13), (140, 96, 30, 255))
+    return wood, bell
+
+def lantern_tex():
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            if x in (0, 7) or y in (0, 8, 15) or x in (8, 15):
+                im.putpixel((x, y), (40, 36, 44, 255))
+            elif y < 8 and x < 8:
+                im.putpixel((x, y), (220 - y * 6, 150, 255, 255))
+            elif y >= 9 and x < 8:
+                im.putpixel((x, y), (70, 60, 78, 255))
+            else:
+                im.putpixel((x, y), (60, 52, 66, 255) if (x + y) % 2 else (90, 80, 98, 255))
+    return im
+
+def banner_tex():
+    im = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            c = (150 + rnd.randint(-8, 8), 34, 24, 255)
+            if x in (0, 15) or y == 15: c = (200, 160, 58, 255)
+            im.putpixel((x, y), c)
+    draw(im, ["....X....", "...XXX...", "..XX.XX..", ".XX...XX.", "..XX.XX..", "...XXX...", "....X...."], {"X": (30, 26, 26)}, 3, 3)
+    draw(im, ["...Y...", "..YOY..", "...Y..."], {"Y": (255, 170, 60), "O": (255, 240, 180)}, 4, 5)
+    return im
+
+def shard_icon():
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw(im, ["......LL....", ".....LPPL...", "....LPWPPL..", "...LPPWPPL..", "...LPPPPDL..", "..LPPPPDL...", "..LPPPDDL...",
+              ".LPPPDDL....", ".LPPDDL.....", "..LDDL......", "...LL......."],
+         {"L": (60, 20, 90), "P": (176, 92, 240), "W": (250, 220, 255), "D": (110, 50, 170)}, 2, 2)
+    return im
+
+def whistle_icon():
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw(im, ["..........RR..", ".........R..R.", "........R...R.", "..BBBBBBBR.R..", ".BGGGGGGB.R...", "BGGHGGGGGB....",
+              "BGGGGGGGGB....", ".BGGGGGGB.....", "..BBBBBB......"],
+         {"B": (90, 60, 20), "G": (210, 160, 60), "H": (255, 235, 160), "R": (150, 40, 30)}, 1, 3)
+    return im
+
+def gate_item():
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(1, 16):
+        for x in range(3, 13):
+            if y < 3 and (x - 3) % 3 != 1: continue
+            c = (118, 84, 52, 255) if (x - 3) % 3 else (80, 56, 34, 255)
+            if y in (5, 12): c = (64, 64, 70, 255)
+            im.putpixel((x, y), c)
+    return im
+
+def egg_icon(base, spot):
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    r = random.Random(base)
+    for y in range(16):
+        for x in range(16):
+            dx, dy = (x - 7.5) / 5.2, (y - 8.5) / 6.6
+            if dy < 0: dx *= 1.0 + (-dy) * 0.25
+            if dx * dx + dy * dy <= 1:
+                c = base
+                if r.random() < 0.22: c = spot
+                k = 1.12 - (x + y) * 0.012
+                im.putpixel((x, y), c3(c, k))
+            elif dx * dx + dy * dy <= 1.22:
+                im.putpixel((x, y), c3(base, 0.45))
+    return im
+
+def wave_c():
+    rnd.seed(77)   # own random stream: earlier textures stay identical
+    for kind in ("ash_raider", "ash_arsonist", "ash_archer", "ash_brute", "ash_chieftain"):
+        save(ashborn_skin(kind), f"entity/ashborn/{kind}.png")
+    save(rift_wisp_tex(), "entity/rift_wisp.png")
+    save(rift_core_tex(), "block/rift_core.png")
+    save(palisade_side(), "block/palisade_side.png")
+    save(palisade_top(), "block/palisade_top.png")
+    save(gate_tex(False), "block/palisade_gate_bottom.png")
+    save(gate_tex(True), "block/palisade_gate_top.png")
+    wood, bell = bell_textures()
+    save(wood, "block/alarm_bell_wood.png"); save(bell, "block/alarm_bell_bell.png")
+    save(lantern_tex(), "block/rift_lantern.png")
+    save(banner_tex(), "block/chieftain_banner.png")
+    save(shard_icon(), "item/rift_shard.png")
+    save(whistle_icon(), "item/founders_whistle.png")
+    save(gate_item(), "item/palisade_gate.png")
+    eggs = {"ash_raider": (0x4A3B30, 0x8C2F1C), "ash_arsonist": (0x3A3532, 0xE0682A), "ash_archer": (0x3E3A2A, 0x8A6A3A),
+            "ash_brute": (0x55585E, 0x9E2B25), "ash_chieftain": (0xA0281A, 0xC9A23A), "rift_wisp": (0x4A1E6E, 0xC890FF)}
+    for k, (b, sp) in eggs.items():
+        save(egg_icon(b, sp), f"item/{k}_spawn_egg.png")
+
 def main():
     for slim in (False, True):
         arms = "slim" if slim else "wide"
@@ -582,6 +848,7 @@ def main():
     for name, t in workshop_textures().items():
         save(t, f"block/{name}.png")
     save(hearth_mark(), "item/hearth_mark.png")
+    wave_c()
     print("textures written to", os.path.normpath(OUT))
 
 if __name__ == "__main__":
