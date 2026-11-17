@@ -91,7 +91,7 @@ public final class TradeScreen extends HhScreen {
             ItemStack st = l.stack();
             g.item(st, left + 160, y + 1);
             line(g, Component.translatable("gui.hearthholm.trade_spare", l.spare(), l.perMark()), left + 180, y + 5, 74, TEXT);
-            if (inside(mx, my, left + 160, y, 94, 18)) g.setTooltipForNextFrame(font, st.getHoverName(), mx, my);
+            if (inside(mx, my, left + 160, y, 94, 18)) g.setTooltipForNextFrame(font, Component.translatable("gui.hearthholm.trade_rate", st.getHoverName(), l.spare(), l.perMark()), mx, my);
         }
         g.textWithWordWrap(font, Component.translatable("gui.hearthholm.trade_hint"), x, top + panelH - 26, 200, DIM);
     }

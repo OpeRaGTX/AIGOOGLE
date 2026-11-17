@@ -192,12 +192,7 @@ final class WaveETest {
             far.teleportTo(O.getX() + 4.5, O.getY(), O.getZ() + 22.5);
             Decor.tick(far);
             log("DECOR far settler near=" + Decor.near(st, far.blockPosition()) + " thought=" + far.hasThought("beautiful_street"));
-            ServerPlayer p = player(s);
-            lookAt(p, O.getX() + 14.5, O.getY(), O.getZ() - 1.5, O.getX() + 5.0, O.getY() + 1.2, O.getZ() - 3.0);
         });
-        ctx.waitTicks(20);
-        sp.getConnection().waitForChunksRender();
-        ctx.takeScreenshot("hh_e3_decor_street");
 
         // ---- 3. tavern: build the blueprint, an innkeeper, an evening gathering and a meal
         sp.getServer().runCommand("time set 11900");
@@ -241,7 +236,7 @@ final class WaveETest {
         sp.getServer().runOnServer(s -> {
             ServerPlayer p = player(s);
             // inside the door, looking at the counter and the guests
-            lookAt(p, TAV_KEG.getX() + 0.5, TAV_KEG.getY(), TAV_KEG.getZ() - 4.5, TAV_KEG.getX() + 0.5, TAV_KEG.getY() + 1.0, TAV_KEG.getZ());
+            lookAt(p, TAV_KEG.getX() + 0.5, TAV_KEG.getY(), TAV_KEG.getZ() - 3.4, TAV_KEG.getX() + 0.5, TAV_KEG.getY() + 0.6, TAV_KEG.getZ());
         });
         ctx.waitTicks(10);
         sp.getConnection().waitForChunksRender();
@@ -258,6 +253,12 @@ final class WaveETest {
             if (st.stats.getOrDefault("tavern_served", 0) < 1) throw new AssertionError("innkeeper served nobody");
         });
 
+        // the decorated street at dusk (chat from the tier checks has faded by now)
+        sp.getServer().runOnServer(s -> lookAt(player(s), O.getX() + 14.5, O.getY(), O.getZ() - 1.5, O.getX() + 5.0, O.getY() + 1.2, O.getZ() - 3.0));
+        ctx.waitTicks(20);
+        sp.getConnection().waitForChunksRender();
+        ctx.takeScreenshot("hh_e3_decor_street");
+
         // ---- 4. caravan: arrives by itself a week after the last one, trades, leaves after a day
         sp.getServer().runCommand("time set 1500");
         sp.getServer().runOnServer(s -> {
@@ -271,7 +272,7 @@ final class WaveETest {
             if (!st.civic.markets.contains(MARKET)) throw new AssertionError("market stall not registered");
             st.civic.lastCaravan = SettlementService.day(l) - 8;
             st.civic.caravanEnd = -1;
-            stockUp(s, new ItemStack(Items.COBBLESTONE, 300), new ItemStack(ModItems.HEARTH_MARK, 60), new ItemStack(Items.COAL, 2));
+            stockUp(s, new ItemStack(Items.COBBLESTONE, 300), new ItemStack(ModItems.HEARTH_MARK, 64), new ItemStack(ModItems.HEARTH_MARK, 40), new ItemStack(Items.COAL, 2));
             coal0 = stock(s, Items.COAL);
             log("CARAVAN due: tier=" + st.tier().key() + " lastCaravan=" + st.civic.lastCaravan + " day=" + SettlementService.day(l));
         });
@@ -408,7 +409,7 @@ final class WaveETest {
             if (!cl || st.renown != renown0 + 25) throw new AssertionError("kill reward failed");
             // a pest far from the site does not count
             st.civic.quests.add(new Civic.Quest(st.civic.nextQuestId++, "kill", Identifier.withDefaultNamespace("zombie"), 1, 0, MINE, 28, "marks", 3, air, false, false));
-            var zombie = EntityTypes.ZOMBIE.spawn(l, O.offset(-12, 0, 20), EntitySpawnReason.COMMAND);
+            var zombie = EntityTypes.ZOMBIE.spawn(l, O.offset(-14, 0, -10), EntitySpawnReason.COMMAND);
             zombie.kill(l);
             log("QUEST far kill progress=" + st.civic.quests.getLast().progress());
             if (st.civic.quests.getLast().progress() != 0) throw new AssertionError("far kill counted");
