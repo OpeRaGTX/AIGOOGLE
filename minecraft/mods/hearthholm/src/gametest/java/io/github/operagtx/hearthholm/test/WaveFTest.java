@@ -130,8 +130,20 @@ final class WaveFTest {
             // a real order: two benches, the carpenter should make them from planks and sticks in the warehouse
             Settlement st = town(s);
             var storage = Storage.resolve(l, st.storagePositions());
-            Storage.insert(storage, new ItemStack(Items.OAK_PLANKS, 32));
-            Storage.insert(storage, new ItemStack(Items.STICK, 16));
+            st.alarm = false;
+            // the warehouse may be full after wave E: free a few slots of cobblestone / sand first
+            for (ItemStack add : new ItemStack[]{new ItemStack(Items.OAK_PLANKS, 32), new ItemStack(Items.STICK, 16)}) {
+                ItemStack rest = Storage.insert(storage, add.copy());
+                for (var c : storage) {
+                    for (int i = 0; i < c.getContainerSize() && !rest.isEmpty(); i++) {
+                        if (c.getItem(i).is(Items.COBBLESTONE) || c.getItem(i).is(Items.SAND) || c.getItem(i).is(Items.GLASS_PANE)) {
+                            c.setItem(i, ItemStack.EMPTY);
+                            rest = Storage.insert(storage, rest);
+                        }
+                    }
+                }
+                log("DECOR stocked " + add.getHoverName().getString() + " leftover=" + rest.getCount());
+            }
             SettlementService.setOrder(st, ModBlocks.BENCH.asItem(), 2);
             log("DECOR order bench placed, benches in stock=" + stock(s, ModBlocks.BENCH.asItem()));
         });
@@ -144,7 +156,14 @@ final class WaveFTest {
             log("DECOR benches made by the carpenter: " + stock(s, ModBlocks.BENCH.asItem()));
             SettlementService.setOrder(town(s), ModBlocks.BENCH.asItem(), 0);
         });
-        if (!made[0]) throw new AssertionError("carpenter did not craft a bench from the order");
+        if (!made[0]) {
+            sp.getServer().runOnServer(s -> {
+                for (var e : settlers(s)) if (e.professionId().getPath().equals("carpenter"))
+                    log("DECOR carpenter status='" + e.status().getString() + "' act=" + e.brain().currentActivity() + " sticks=" + stock(s, Items.STICK)
+                            + " planks=" + stock(s, Items.OAK_PLANKS) + " orders=" + town(s).orders.size() + " alarm=" + town(s).alarm);
+            });
+            throw new AssertionError("carpenter did not craft a bench from the order");
+        }
 
         // ---- 3. watchtower needs a village; a tower bought from the caravan opens early
         sp.getServer().runOnServer(s -> {
