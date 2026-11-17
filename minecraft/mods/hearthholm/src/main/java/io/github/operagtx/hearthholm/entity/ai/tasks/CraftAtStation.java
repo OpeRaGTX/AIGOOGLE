@@ -67,6 +67,8 @@ public final class CraftAtStation implements Task {
                 case HERBALISM, BARRACKS, TAVERN -> ParticleTypes.HAPPY_VILLAGER;
             };
             level.sendParticles(extra, top.x, top.y + 0.1, top.z, kind == Workshop.KITCHEN ? 2 : 4, 0.2, 0.1, 0.2, 0.02);
+            if (kind == Workshop.SMITHY) io.github.operagtx.hearthholm.town.Fx.forge(level, top);
+            if (kind == Workshop.KITCHEN) io.github.operagtx.hearthholm.town.Fx.cook(level, top);
         }
         if (ticks < need) return Status.RUNNING;
         ticks = 0;

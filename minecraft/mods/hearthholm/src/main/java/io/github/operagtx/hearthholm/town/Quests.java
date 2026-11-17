@@ -114,6 +114,7 @@ public final class Quests {
                 n++;
                 if (next.done()) {
                     SettlementService.notify(level, s, Component.translatable("message.hearthholm.quest_done", describe(level, s, next)).withStyle(ChatFormatting.GREEN));
+                    Fx.quest(level, q.site());
                 }
                 SettlementService.manager(level).setDirty();
             }
@@ -204,7 +205,7 @@ public final class Quests {
         if (q.done() || !q.kind().equals("bring") || count(player, item) < q.count()) return false;
         take(player, item, q.count());
         s.civic.quests.set(i, q.asDone());
-        level.playSound(null, player.blockPosition(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.8f, 1f);
+        Fx.quest(level, player.blockPosition());
         SettlementService.manager(level).setDirty();
         return true;
     }
@@ -230,7 +231,7 @@ public final class Quests {
         s.civic.quests.set(i, q.asClaimed());
         s.count("quests_done", 1);
         player.sendSystemMessage(Component.translatable("message.hearthholm.quest_reward", rewardText(q)).withStyle(ChatFormatting.GOLD));
-        level.playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.6f, 1.3f);
+        Fx.quest(level, player.blockPosition());
         SettlementService.manager(level).setDirty();
         return true;
     }

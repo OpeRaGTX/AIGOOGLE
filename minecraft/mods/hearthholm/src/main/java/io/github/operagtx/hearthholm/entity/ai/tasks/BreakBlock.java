@@ -54,7 +54,7 @@ public final class BreakBlock implements Task {
         ticks++;
         if (ticks % 5 == 1) {
             s.swingArm(InteractionHand.MAIN_HAND);
-            level.playSound(null, pos, state.getSoundType().getHitSound(), net.minecraft.sounds.SoundSource.NEUTRAL, 0.5f, 0.8f);
+            io.github.operagtx.hearthholm.town.Fx.mine(level, pos, state, hardness >= 1.5f);
         }
         level.destroyBlockProgress(s.getId(), pos, Math.min(9, ticks * 10 / Math.max(1, needed)));
         if (ticks < needed) return Status.RUNNING;

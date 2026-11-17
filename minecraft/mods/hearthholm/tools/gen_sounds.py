@@ -236,4 +236,89 @@ def war_horn(r):
 
 write("horn", war_horn(random.Random(77)), PARTY)
 
+# ---- wave F: work feedback, level-up fanfare, caravan horn, quest chime ----------------------------
+TOWN = os.path.join(BASE, "town")
+
+def chop(r):
+    """Axe into wood: a dull thunk with a short crack."""
+    out, lp = [], 0.0
+    f = r.uniform(150, 190)
+    for i in range(int(RATE * 0.35)):
+        t = i / RATE
+        n = r.uniform(-1, 1)
+        lp += 0.25 * (n - lp)
+        v = env(t, 0.0005, 0.07) * math.sin(2 * math.pi * f * t * (1 - 0.3 * t)) * 0.9
+        v += env(t, 0.0003, 0.02) * lp * 1.2
+        v += (env(t - 0.03, 0.0003, 0.012) * (n - lp) * 0.5) if t > 0.03 else 0
+        out.append(0.8 * v)
+    return out
+
+def pick(r):
+    """Pick on rock: a bright metallic clink then a dry crumble."""
+    out = []
+    f = r.uniform(1800, 2300)
+    for i in range(int(RATE * 0.45)):
+        t = i / RATE
+        v = env(t, 0.0003, 0.05) * (0.6 * math.sin(2 * math.pi * f * t) + 0.35 * math.sin(2 * math.pi * f * 2.3 * t))
+        v += env(t, 0.0003, 0.012) * r.uniform(-1, 1) * 0.7
+        if t > 0.08: v += (r.random() < 0.02) * r.uniform(-1, 1) * 0.5 * math.exp(-(t - 0.08) / 0.1)
+        out.append(0.7 * v)
+    return out
+
+def level_up(r):
+    """A bright rising arpeggio C-E-G-C with a shimmer tail."""
+    notes = [(72, 0.0), (76, 0.11), (79, 0.22), (84, 0.33), (88, 0.50)]
+    dur = 1.7
+    buf = [0.0] * int(RATE * dur)
+    for m, st in notes:
+        f = 440 * 2 ** ((m - 69) / 12)
+        s0 = int(st * RATE)
+        for i in range(len(buf) - s0):
+            t = i / RATE
+            e = min(1, t / 0.004) * math.exp(-t / (0.9 if m == 88 else 0.35))
+            buf[s0 + i] += 0.35 * e * (math.sin(2 * math.pi * f * t) + 0.3 * math.sin(4 * math.pi * f * t) + 0.12 * math.sin(2 * math.pi * f * 3 * t))
+    return buf
+
+def caravan_horn(r):
+    """A warm, rising two-call horn with a little bell jingle: the trader announcing the market."""
+    dur = 2.4
+    out = []
+    for i in range(int(RATE * dur)):
+        t = i / RATE
+        if t < 0.8: f = 130.8
+        elif t < 1.0: f = 130.8
+        else: f = 130.8 * (1.0 + 0.5 * min(1, (t - 1.0) / 0.12))      # a fifth up for the second call
+        gate = 1.0 if (t < 0.78 or 1.0 < t < dur - 0.2) else 0.25
+        e = min(1, t / 0.08) * min(1, (dur - t) / 0.5) * gate * (0.9 + 0.1 * math.sin(2 * math.pi * 4 * t))
+        v = 0.0
+        for h in range(1, 9):
+            v += math.sin(2 * math.pi * f * h * t + h * 0.2) / h ** 1.2
+        v += 0.04 * r.uniform(-1, 1)
+        out.append(math.tanh(1.3 * v) * e)
+    for k in range(4):                        # jingle
+        s0 = int((1.5 + k * 0.1) * RATE)
+        fj = 2093 * (1.25 if k % 2 else 1.0)
+        for i in range(min(int(0.4 * RATE), len(out) - s0)):
+            t = i / RATE
+            out[s0 + i] += 0.25 * math.exp(-t / 0.08) * math.sin(2 * math.pi * fj * t)
+    return out
+
+def quest_done(r):
+    """Two soft chimes (a perfect fifth) like a ticked-off task."""
+    buf = [0.0] * int(RATE * 1.1)
+    for m, st in ((79, 0.0), (86, 0.13)):
+        f = 440 * 2 ** ((m - 69) / 12)
+        s0 = int(st * RATE)
+        for i in range(len(buf) - s0):
+            t = i / RATE
+            buf[s0 + i] += 0.4 * min(1, t / 0.003) * math.exp(-t / 0.28) * (math.sin(2 * math.pi * f * t) + 0.4 * math.sin(2 * math.pi * f * 2.76 * t))
+    return buf
+
+for kind, fn in {"chop": chop, "pick": pick}.items():
+    for v in (1, 2):
+        write(f"{kind}{v}", fn(random.Random(v * 29 + len(kind))))
+write("level_up", level_up(random.Random(5)), SOCIAL)
+write("caravan_horn", caravan_horn(random.Random(6)), TOWN)
+write("quest_done", quest_done(random.Random(7)), TOWN)
+
 print("sounds written to", os.path.normpath(OUT))

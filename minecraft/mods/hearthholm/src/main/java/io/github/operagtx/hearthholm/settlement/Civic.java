@@ -56,6 +56,9 @@ public final class Civic {
     /** Blueprints bought from a trader (file names), usable whatever the settlement tier. */
     public final List<String> unlocked = new ArrayList<>();
 
+    /** Wave F: the guide book was already handed to the founder. */
+    public boolean guideGiven;
+
     public boolean caravanHere(long gameTime) { return caravanEnd > gameTime; }
 
     public static final Codec<Civic> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -72,8 +75,9 @@ public final class Civic {
             UUIDUtil.CODEC.optionalFieldOf("llama").forGetter(c -> Optional.ofNullable(c.llama)),
             Codec.INT.optionalFieldOf("caravan_seed", 0).forGetter(c -> c.caravanSeed),
             Codec.INT.listOf().optionalFieldOf("sold_out", List.of()).forGetter(c -> c.soldOut),
-            Codec.STRING.listOf().optionalFieldOf("unlocked", List.of()).forGetter(c -> c.unlocked)
-    ).apply(i, (q, nq, qd, d, m, b, f, lc, ce, tr, ll, seed, so, un) -> {
+            Codec.STRING.listOf().optionalFieldOf("unlocked", List.of()).forGetter(c -> c.unlocked),
+            Codec.BOOL.optionalFieldOf("guide_given", false).forGetter(c -> c.guideGiven)
+    ).apply(i, (q, nq, qd, d, m, b, f, lc, ce, tr, ll, seed, so, un, gg) -> {
         Civic c = new Civic();
         c.quests.addAll(q);
         c.nextQuestId = nq;
@@ -89,6 +93,7 @@ public final class Civic {
         c.caravanSeed = seed;
         c.soldOut.addAll(so);
         c.unlocked.addAll(un);
+        c.guideGiven = gg;
         return c;
     }));
 }

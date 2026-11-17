@@ -107,6 +107,18 @@ public final class SettlementService {
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 20, 0.6, 0.4, 0.6, 0.1);
         player.sendSystemMessage(Component.translatable("message.hearthholm.founded").withStyle(ChatFormatting.GOLD));
         player.sendSystemMessage(Component.translatable("message.hearthholm.founded_hint").withStyle(ChatFormatting.GRAY));
+        giveGuide(player, s);
+    }
+
+    /** Hands the guide book to the founder, once per settlement (persisted flag). Returns whether it was given now. */
+    public static boolean giveGuide(ServerPlayer player, Settlement s) {
+        if (s.civic.guideGiven) return false;
+        s.civic.guideGiven = true;
+        ItemStack book = new ItemStack(ModItems.FOUNDERS_CHRONICLE);
+        if (!player.getInventory().add(book)) player.spawnAtLocation((ServerLevel) player.level(), book);
+        player.sendSystemMessage(Component.translatable("message.hearthholm.guide_given").withStyle(ChatFormatting.GOLD));
+        manager((ServerLevel) player.level()).setDirty();
+        return true;
     }
 
     public static void onDeskRemoved(ServerLevel level, BlockPos pos, UUID id) {

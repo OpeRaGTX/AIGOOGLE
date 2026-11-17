@@ -54,6 +54,7 @@ public final class Festival {
         s.count("festivals", 1);
         BlockPos sq = square(level, s);
         level.playSound(null, sq, ModSounds.BELL, SoundSource.RECORDS, 3f, 1f);
+        io.github.operagtx.hearthholm.town.Fx.festival(level, sq, 16);
         SettlementService.notify(level, s, Component.translatable("message.hearthholm.festival_start").withStyle(ChatFormatting.GOLD));
         SettlementService.manager(level).setDirty();
         return true;
@@ -86,6 +87,7 @@ public final class Festival {
             if ((now - s.festivalStart) % TUNE_TICKS < 20) {
                 level.playSound(null, square(level, s), ModSounds.FESTIVAL, SoundSource.RECORDS, 3f, 1f);
             }
+            if ((now - s.festivalStart) % 60 < 20) io.github.operagtx.hearthholm.town.Fx.festival(level, square(level, s), 4);
             return;
         }
         long tod = Math.floorMod(level.getOverworldClockTime(), 24000L);

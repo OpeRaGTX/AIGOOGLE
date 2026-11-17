@@ -153,7 +153,7 @@ public final class LumberjackJob extends SiteJob {
             s.getLookControl().setLookAt(Vec3.atCenterOf(base));
             if (++ticks % 6 == 1) {
                 s.swingArm(InteractionHand.MAIN_HAND);
-                level.playSound(null, base, baseState.getSoundType().getHitSound(), SoundSource.BLOCKS, 0.8f, 0.8f);
+                io.github.operagtx.hearthholm.town.Fx.chop(level, base, baseState);
             }
             level.destroyBlockProgress(s.getId(), base, Math.min(9, ticks * 10 / Math.max(1, needed)));
             if (ticks < needed) return Status.RUNNING;

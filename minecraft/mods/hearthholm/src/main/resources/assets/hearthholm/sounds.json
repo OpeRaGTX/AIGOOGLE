@@ -80,5 +80,37 @@
       "hearthholm:party/horn"
     ],
     "subtitle": "subtitles.hearthholm.party.horn"
+  },
+  "workshop.chop": {
+    "sounds": [
+      "hearthholm:workshop/chop1",
+      "hearthholm:workshop/chop2"
+    ],
+    "subtitle": "subtitles.hearthholm.workshop.chop"
+  },
+  "workshop.pick": {
+    "sounds": [
+      "hearthholm:workshop/pick1",
+      "hearthholm:workshop/pick2"
+    ],
+    "subtitle": "subtitles.hearthholm.workshop.pick"
+  },
+  "social.level_up": {
+    "sounds": [
+      "hearthholm:social/level_up"
+    ],
+    "subtitle": "subtitles.hearthholm.social.level_up"
+  },
+  "town.caravan_horn": {
+    "sounds": [
+      "hearthholm:town/caravan_horn"
+    ],
+    "subtitle": "subtitles.hearthholm.town.caravan_horn"
+  },
+  "town.quest_done": {
+    "sounds": [
+      "hearthholm:town/quest_done"
+    ],
+    "subtitle": "subtitles.hearthholm.town.quest_done"
   }
 }

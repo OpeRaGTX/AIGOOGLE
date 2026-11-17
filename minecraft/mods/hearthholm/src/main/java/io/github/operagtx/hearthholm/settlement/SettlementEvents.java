@@ -41,6 +41,15 @@ public final class SettlementEvents {
                 for (Component c : s.rescan(level)) SettlementService.notify(level, s, c);
                 m.setDirty();
             }
+            int tierNow = s.tier().index() + 1, tierSeen = s.stats.getOrDefault("tier_seen", 0);
+            if (tierSeen != tierNow) {
+                s.stats.put("tier_seen", tierNow);
+                m.setDirty();
+                if (tierSeen > 0 && tierNow > tierSeen) {
+                    io.github.operagtx.hearthholm.town.Fx.levelUp(level, s.center, true);
+                    SettlementService.notify(level, s, net.minecraft.network.chat.Component.translatable("message.hearthholm.tier_up", s.tier().label()).withStyle(net.minecraft.ChatFormatting.GOLD));
+                }
+            }
             Festival.tick(level, s);
             io.github.operagtx.hearthholm.town.Caravan.tick(level, s);
             io.github.operagtx.hearthholm.threat.Threats.tick(level, s);

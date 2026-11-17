@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundEvent;
 public final class ModSounds {
     public static SoundEvent SAW, CHISEL, HAMMER, SIZZLE, BELL, MURMUR, FESTIVAL;
     public static SoundEvent WAR_HORN;
+    public static SoundEvent CHOP, PICK, LEVEL_UP, CARAVAN_HORN, QUEST_DONE;
     public static SoundEvent RAID_HORN, ALARM_BELL, RIFT_HUM, BOSS_ROAR;
 
     private ModSounds() {}
@@ -27,6 +28,11 @@ public final class ModSounds {
         BELL = reg("social.bell");
         MURMUR = reg("social.murmur");
         FESTIVAL = reg("social.festival");
+        CHOP = reg("workshop.chop");
+        PICK = reg("workshop.pick");
+        LEVEL_UP = reg("social.level_up");
+        CARAVAN_HORN = reg("town.caravan_horn");
+        QUEST_DONE = reg("town.quest_done");
         WAR_HORN = reg("party.horn");
         RAID_HORN = reg("threat.raid_horn");
         ALARM_BELL = reg("threat.alarm_bell");

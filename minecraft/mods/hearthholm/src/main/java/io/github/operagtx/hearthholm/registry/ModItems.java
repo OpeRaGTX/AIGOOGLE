@@ -27,6 +27,8 @@ public final class ModItems {
     public static Item WAR_HORN;
     /** Wave D: brewed by healers from herbs; heals whoever drinks it. */
     public static Item HEALING_SALVE;
+    /** Wave F: the in-game guide book, given once when a settlement is founded. */
+    public static Item FOUNDERS_CHRONICLE;
     public static final List<Item> SPAWN_EGGS = new ArrayList<>();
 
     private ModItems() {}
@@ -46,6 +48,7 @@ public final class ModItems {
         FOUNDERS_WHISTLE = reg("founders_whistle", FoundersWhistleItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
         WAR_HORN = reg("war_horn", io.github.operagtx.hearthholm.item.WarHornItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
         HEALING_SALVE = reg("healing_salve", io.github.operagtx.hearthholm.item.HealingSalveItem::new, new Item.Properties().stacksTo(16));
+        FOUNDERS_CHRONICLE = reg("founders_chronicle", io.github.operagtx.hearthholm.item.ChronicleItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.RARE));
         egg("ash_raider", ModEntities.ASH_RAIDER);
         egg("ash_arsonist", ModEntities.ASH_ARSONIST);
         egg("ash_archer", ModEntities.ASH_ARCHER);

@@ -18,6 +18,7 @@ public final class ModTab {
                 .icon(() -> new ItemStack(ModBlocks.TOWN_HALL_DESK))
                 .displayItems((params, output) -> {
                     for (Block b : ModBlocks.TAB_ORDER) output.accept(b);
+                    output.accept(ModItems.FOUNDERS_CHRONICLE);
                     output.accept(ModItems.HEARTH_MARK);
                     output.accept(ModItems.RIFT_SHARD);
                     output.accept(ModItems.WAR_HORN);

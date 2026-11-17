@@ -174,7 +174,7 @@ public final class Caravan {
         c.caravanSeed = level.getRandom().nextInt();
         c.soldOut.clear();
         s.count("caravans", 1);
-        level.playSound(null, spot, SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.NEUTRAL, 1.2f, 1.4f);
+        Fx.caravan(level, spot);
         SettlementService.notify(level, s, Component.translatable("message.hearthholm.caravan_arrived").withStyle(ChatFormatting.GOLD));
         SettlementService.manager(level).setDirty();
         return trader;

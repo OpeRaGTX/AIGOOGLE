@@ -210,11 +210,12 @@ block_model("chieftain_banner", {"particle": f"{NS}:block/chieftain_banner", "cl
              box_el([5, 0, 5], [11, 1, 11], "#pole")])
 item("chieftain_banner"); loot("chieftain_banner")
 
-for name in ("rift_shard", "founders_whistle"):
+for name in ("rift_shard", "founders_whistle", "founders_chronicle"):
     gen_item(name)
 for k in ("ash_raider", "ash_arsonist", "ash_archer", "ash_brute", "ash_chieftain", "rift_wisp"):
     gen_item(f"{k}_spawn_egg")
 
+shapeless("founders_chronicle", ["minecraft:book", f"{NS}:hearth_mark"])
 shaped("palisade", ["LSL", "LSL"], {"L": "#minecraft:logs", "S": "minecraft:stick"}, 6)
 shaped("palisade_gate", ["PP", "PI", "PP"], {"P": f"{NS}:palisade", "I": "minecraft:iron_ingot"})
 shaped("alarm_bell", ["SSS", "SGS", "S S"], {"S": "minecraft:stick", "G": "minecraft:gold_ingot"})
@@ -251,6 +252,11 @@ shaped("war_horn", ["II ", "IGI", " IL"], {"I": "minecraft:iron_ingot", "G": "mi
 shapeless("healing_salve", ["minecraft:glass_bottle", "minecraft:sweet_berries", "minecraft:sweet_berries"])
 _snd = json.load(open(os.path.join(R, f"assets/{NS}/sounds.json"), encoding="utf-8"))
 _snd["party.horn"] = {"sounds": [f"{NS}:party/horn"], "subtitle": f"subtitles.{NS}.party.horn"}
+_snd["workshop.chop"] = {"sounds": [f"{NS}:workshop/chop{i}" for i in (1, 2)], "subtitle": f"subtitles.{NS}.workshop.chop"}
+_snd["workshop.pick"] = {"sounds": [f"{NS}:workshop/pick{i}" for i in (1, 2)], "subtitle": f"subtitles.{NS}.workshop.pick"}
+_snd["social.level_up"] = {"sounds": [f"{NS}:social/level_up"], "subtitle": f"subtitles.{NS}.social.level_up"}
+_snd["town.caravan_horn"] = {"sounds": [f"{NS}:town/caravan_horn"], "subtitle": f"subtitles.{NS}.town.caravan_horn"}
+_snd["town.quest_done"] = {"sounds": [f"{NS}:town/quest_done"], "subtitle": f"subtitles.{NS}.town.quest_done"}
 w(f"assets/{NS}/sounds.json", _snd)
 
 # ---- wave E: square and market

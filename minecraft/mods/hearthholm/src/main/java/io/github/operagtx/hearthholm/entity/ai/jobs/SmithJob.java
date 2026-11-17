@@ -100,6 +100,7 @@ public final class SmithJob extends CrafterJob {
                 s.swingArm(InteractionHand.MAIN_HAND);
                 level.playSound(null, target.blockPosition(), ModSounds.HAMMER, SoundSource.NEUTRAL, 0.7f, 1.1f);
                 level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY() + 1, target.getZ(), 4, 0.2, 0.2, 0.2, 0.05);
+                io.github.operagtx.hearthholm.town.Fx.forge(level, target.position().add(0, 1, 0));
             }
             if (ticks < 60) return Status.RUNNING;
             ItemStack tool = target.getMainHandItem();

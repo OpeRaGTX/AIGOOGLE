@@ -1139,6 +1139,16 @@ def trader_skin():
         fill_part(im, O[arm], lambda f, x, y, w, h: c3(cloak, sk(f), 4) if f == "top" or (f != "bottom" and y < 6) else None)
     return im
 
+def chronicle_icon():
+    """A thick leather book with a brass clasp and a gold hearth flame."""
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw(im, ["..LLLLLLLLLLL..", ".LbbbbbbbbbbbL.", ".LbBBBBBBBBBbL.", ".LbBBBBgBBBBbL.", ".LbBBBgGgBBBbL.", ".LbBBgGyGgBBbL.",
+              ".LbBBgGyGgBBbL.", ".LbBBBgGgBBBbL.", ".LbBBBBgBBBBbL.", ".LbBBBBBBBBBbL.", ".LbbbbbbbbbbbL.", ".LpppppppppppL.",
+              "..LLLLLLLLLLL.."],
+         {"L": (60, 36, 20), "b": (120, 66, 36), "B": (146, 84, 46), "g": (206, 162, 70), "G": (240, 200, 100), "y": (255, 236, 150), "p": (226, 214, 180)}, 0, 1)
+    for y in range(3, 12): im.putpixel((14, y), (206, 162, 70, 255))
+    return im
+
 def wave_e():
     rnd.seed(55)
     for name, t in keg_textures().items():
@@ -1188,6 +1198,7 @@ def main():
     wave_c()
     wave_d()
     wave_e()
+    save(chronicle_icon(), "item/founders_chronicle.png")   # wave F
     print("textures written to", os.path.normpath(OUT))
 
 if __name__ == "__main__":

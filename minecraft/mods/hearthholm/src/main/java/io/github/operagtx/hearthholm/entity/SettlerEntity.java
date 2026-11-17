@@ -512,8 +512,7 @@ public class SettlerEntity extends PathfinderMob {
         int after = level(p);
         if (after > before) refreshCombatStats();
         if (after > before && level() instanceof ServerLevel sl) {
-            sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + 2, getZ(), 12, 0.4, 0.4, 0.4, 0.1);
-            sl.playSound(null, blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.6f, 1.3f);
+            io.github.operagtx.hearthholm.town.Fx.levelUp(sl, blockPosition(), false);
             addThought("proud", io.github.operagtx.hearthholm.core.Balance.MOOD_PROUD, 24000);
             Social.say(this, "levelup", 4);
             SettlementService.notifyOwner(this, Component.translatable("message.hearthholm.level_up", getName(), profession().label(), after));
