@@ -8,6 +8,7 @@ import io.github.operagtx.hearthholm.core.Trait;
 import io.github.operagtx.hearthholm.entity.ai.SettlerBrain;
 import io.github.operagtx.hearthholm.entity.ai.goals.*;
 import io.github.operagtx.hearthholm.settlement.*;
+import io.github.operagtx.hearthholm.social.Social;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
@@ -58,6 +59,8 @@ public class SettlerEntity extends PathfinderMob {
     private static final EntityDataAccessor<String> DATA_PROFESSION = SynchedEntityData.defineId(SettlerEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Integer> DATA_NAME = SynchedEntityData.defineId(SettlerEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Component> DATA_STATUS = SynchedEntityData.defineId(SettlerEntity.class, EntityDataSerializers.COMPONENT);
+    private static final EntityDataAccessor<Component> DATA_BUBBLE = SynchedEntityData.defineId(SettlerEntity.class, EntityDataSerializers.COMPONENT);
+    private static final Codec<Map<String, Integer>> AFFINITY_CODEC = Codec.unboundedMap(Codec.STRING, Codec.INT);
     private static final Codec<Map<String, Integer>> XP_CODEC = Codec.unboundedMap(Codec.STRING, Codec.INT);
     public static final int[] LEVEL_XP = {0, 60, 180, 400, 800};
     public static final float MAX_FOOD = 20f;
@@ -73,8 +76,17 @@ public class SettlerEntity extends PathfinderMob {
     private boolean leaving;
     private boolean arrived = true;
     private long lastHurt = -100000;
-    /** Game time until which a cooked meal keeps the "Tasty meal" mood bonus (saved). */
-    private long tastyUntil = -1;
+    /** Timed mood entries ("Saw the festival +12"), saved. */
+    private final List<Thought> thoughts = new ArrayList<>();
+    private boolean moodDirty;
+    /** Affinity towards other settlers (uuid string to -100..100), saved. */
+    private final Map<String, Integer> affinity = new HashMap<>();
+    private int bubbleTicks, sayCooldown = 200;
+    private long greetedUntil, lastChatDay = -1, festivalSeen = -1;
+    private final Map<String, Integer> lastBubble = new HashMap<>();
+    private @Nullable UUID chatPartner;
+    private boolean chatInitiator;
+    private long chatDeadline;
     private final Map<String, Integer> xp = new HashMap<>();
     private List<MoodEntry> moodEntries = List.of();
     private final SettlerBrain brain;
@@ -116,6 +128,7 @@ public class SettlerEntity extends PathfinderMob {
         builder.define(DATA_NAME, 0);
         builder.define(DATA_PROFESSION, Professions.UNEMPLOYED_ID.toString());
         builder.define(DATA_STATUS, Component.empty());
+        builder.define(DATA_BUBBLE, Component.empty());
     }
 
     // ---- identity -------------------------------------------------------------------------
@@ -146,8 +159,98 @@ public class SettlerEntity extends PathfinderMob {
     public boolean hasArrived() { return arrived; }
     public void markArrived() { arrived = true; }
     public boolean sleptLastNight() { return sleptLastNight; }
-    public boolean hadTastyMeal() { return level().getGameTime() < tastyUntil; }
+    public boolean hadTastyMeal() { return hasThought("tasty_meal"); }
     public void setSleptLastNight(boolean v) { sleptLastNight = v; }
+
+    // ---- thoughts, bubbles, relationships ---------------------------------------------------
+
+    public List<Thought> thoughts() { return thoughts; }
+
+    public boolean hasThought(String id) {
+        long now = level().getGameTime();
+        for (Thought t : thoughts) if (t.id().equals(id) && t.expiry() > now) return true;
+        return false;
+    }
+
+    /** Adds or refreshes a thought; it fades after {@code duration} ticks. */
+    public void addThought(String id, int value, long duration) {
+        putThought(id, value, duration);
+        moodDirty = true;
+    }
+
+    private void putThought(String id, int value, long duration) {
+        thoughts.removeIf(t -> t.id().equals(id));
+        thoughts.add(new Thought(id, value, level().getGameTime() + duration));
+    }
+
+    public Component bubble() { return entityData.get(DATA_BUBBLE); }
+    public boolean hasBubble() { return !bubble().getString().isEmpty(); }
+
+    public void showBubble(Component line, int ticks) {
+        entityData.set(DATA_BUBBLE, line);
+        bubbleTicks = ticks;
+    }
+
+    public int sayCooldown() { return sayCooldown; }
+    public void setSayCooldown(int v) { sayCooldown = v; }
+    public long greetedUntil() { return greetedUntil; }
+    public void setGreetedUntil(long v) { greetedUntil = v; }
+    public long festivalSeen() { return festivalSeen; }
+    public void setFestivalSeen(long v) { festivalSeen = v; }
+    public int lastBubbleIndex(String situation) { return lastBubble.getOrDefault(situation, -1); }
+    public void rememberBubble(String situation, int idx) { lastBubble.put(situation, idx); }
+
+    /** Says a line right now (ignores the cooldown, not the nearby-bubble limit unless {@code cap} is 99). */
+    public boolean say(String situation) {
+        return Social.say(this, situation, 4);
+    }
+
+    public Map<String, Integer> affinityMap() { return affinity; }
+
+    public int affinity(UUID other) { return affinity.getOrDefault(other.toString(), 0); }
+
+    public void addAffinity(UUID other, int delta) {
+        affinity.merge(other.toString(), delta, (a, b) -> Mth.clamp(a + b, -100, 100));
+        affinity.computeIfPresent(other.toString(), (k, v) -> Mth.clamp(v, -100, 100));
+    }
+
+    /** Closest friend (affinity &gt; 0) or rival (affinity &lt; 0); null when there is none (or they left). */
+    public @Nullable Map.Entry<UUID, Integer> bestRelation(boolean friend) {
+        Settlement s = settlement();
+        Map.Entry<UUID, Integer> best = null;
+        for (Map.Entry<String, Integer> e : affinity.entrySet()) {
+            int v = e.getValue();
+            if (friend ? v <= 0 : v >= 0) continue;
+            UUID id;
+            try { id = UUID.fromString(e.getKey()); } catch (IllegalArgumentException ex) { continue; }
+            if (s != null && s.resident(id) == null) continue;
+            if (best == null || (friend ? v > best.getValue() : v < best.getValue())) best = Map.entry(id, v);
+        }
+        return best;
+    }
+
+    public boolean canChat(long day) {
+        return hasArrived() && !isLeaving() && !isSleeping() && chatPartner == null && lastChatDay != day
+                && getTarget() == null && !isCombatant() && brain.currentActivity().matches("WorkActivity|IdleActivity|none");
+    }
+
+    public void beginChat(UUID partner, boolean initiator, long deadline, long day) {
+        chatPartner = partner;
+        chatInitiator = initiator;
+        chatDeadline = deadline;
+        lastChatDay = day;
+        brain.pause();
+    }
+
+    public void endChat() { chatPartner = null; }
+    public @Nullable UUID chatPartnerId() { return chatPartner; }
+    public boolean isChatInitiator() { return chatInitiator; }
+    public long chatDeadline() { return chatDeadline; }
+
+    public @Nullable SettlerEntity partner() {
+        if (chatPartner == null || !(level() instanceof ServerLevel sl)) return null;
+        return sl.getEntity(chatPartner) instanceof SettlerEntity p && p.isAlive() && getUUID().equals(p.chatPartner) ? p : null;
+    }
 
     public Identifier professionId() {
         Identifier id = Identifier.tryParse(entityData.get(DATA_PROFESSION));
@@ -199,7 +302,7 @@ public class SettlerEntity extends PathfinderMob {
 
     public void refreshName() {
         Profession p = profession();
-        setCustomName(Component.empty().append(profile.name())
+        setCustomName(Component.empty().append(profile.fullName())
                 .append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
                 .append(p.label().copy().withColor(p.color())));
         setCustomNameVisible(false);
@@ -253,6 +356,8 @@ public class SettlerEntity extends PathfinderMob {
         if (after > before && level() instanceof ServerLevel sl) {
             sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + 2, getZ(), 12, 0.4, 0.4, 0.4, 0.1);
             sl.playSound(null, blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.6f, 1.3f);
+            addThought("proud", 6, 24000);
+            Social.say(this, "levelup", 4);
             SettlementService.notifyOwner(this, Component.translatable("message.hearthholm.level_up", getName(), profession().label(), after));
         }
     }
@@ -386,7 +491,10 @@ public class SettlerEntity extends PathfinderMob {
         int n = Storage.nutrition(stack);
         if (n <= 0) return;
         food = Math.min(MAX_FOOD, food + n);
-        if (io.github.operagtx.hearthholm.crafting.Workshop.MEALS.contains(stack.getItem())) tastyUntil = level().getGameTime() + 24000;
+        if (io.github.operagtx.hearthholm.crafting.Workshop.MEALS.contains(stack.getItem())) {
+            addThought("tasty_meal", 8, 24000);
+            Social.say(this, "tasty", 4);
+        }
         if (level() instanceof ServerLevel sl) {
             sl.playSound(null, blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.6f, 1f);
             sl.sendParticles(new net.minecraft.core.particles.ItemParticleOption(ParticleTypes.ITEM, stack.getItem()),
@@ -400,10 +508,17 @@ public class SettlerEntity extends PathfinderMob {
         for (Trait t : profile.traitList()) rate *= t.hungerRate();
         if (isSleeping()) rate *= 0.5f;
         food = Math.max(0f, food - rate);
-        if (tickCount % 600 == 0) updateMood();
+        if (tickCount % 600 == 0) updateMood(true);
+        else if (moodDirty && tickCount % 20 == 0) updateMood(false);
+        if (bubbleTicks > 0 && --bubbleTicks == 0) entityData.set(DATA_BUBBLE, Component.empty());
+        if (tickCount % 40 == 0) Social.ambient(this);
+        if ((tickCount + getId()) % 200 == 0) Social.relations(this);
     }
 
-    private void updateMood() {
+    private void updateMood(boolean regular) {
+        moodDirty = false;
+        long now = level().getGameTime();
+        thoughts.removeIf(t -> t.expiry() <= now);
         List<MoodEntry> entries = new ArrayList<>();
         if (food >= 14) entries.add(MoodEntry.of("fed", 10));
         else if (food <= 0) entries.add(MoodEntry.of("starving", -40));
@@ -414,6 +529,7 @@ public class SettlerEntity extends PathfinderMob {
             entries.add(MoodEntry.of("own_bed", 10));
             BuildingRecord home = s == null ? null : s.buildingWithBed(bed);
             if (home != null && home.comfort() > 0) entries.add(MoodEntry.of("cozy_home", home.comfort() * 2));
+            if (home != null && home.comfort() >= 8) putThought("pretty_home", 6, 24000);
         } else {
             entries.add(MoodEntry.of("no_bed", -25));
         }
@@ -423,7 +539,9 @@ public class SettlerEntity extends PathfinderMob {
         else if (p.aptitude(profile) >= 7) entries.add(MoodEntry.of("loves_job", 10));
         else if (p.aptitude(profile) <= 3) entries.add(MoodEntry.of("hates_job", -8));
         if (level().getGameTime() - lastHurt < 2400) entries.add(MoodEntry.of("hurt", -10));
-        if (level().getGameTime() < tastyUntil) entries.add(MoodEntry.of("tasty_meal", 8));
+        if (level().isRainingAt(blockPosition())) putThought("wet", -3, 1800);
+        if (profile.legendary()) entries.add(MoodEntry.thought("legend", 5));
+        for (Thought t : thoughts) entries.add(MoodEntry.thought(t.id(), t.value()));
         if (s != null && s.residents.stream().anyMatch(r -> Professions.get(r.profession).isCombat()))
             entries.add(MoodEntry.of("protected", 5));
         for (Trait t : profile.traitList()) if (t.mood() != 0) entries.add(new MoodEntry(t.label(), t.mood()));
@@ -432,6 +550,7 @@ public class SettlerEntity extends PathfinderMob {
         int target = 0;
         for (MoodEntry e : entries) target += e.value();
         target = Mth.clamp(target, -100, 100);
+        if (!regular) return;
         mood += Mth.clamp(target - mood, -8f, 8f);
 
         if (mood <= -40) {
@@ -559,7 +678,9 @@ public class SettlerEntity extends PathfinderMob {
         out.putBoolean("Slept", sleptLastNight);
         out.putBoolean("Leaving", leaving);
         out.putBoolean("Arrived", arrived);
-        out.putLong("TastyUntil", tastyUntil);
+        out.store("Thoughts", Thought.CODEC.listOf(), List.copyOf(thoughts));
+        out.store("Affinity", AFFINITY_CODEC, Map.copyOf(affinity));
+        out.putLong("LastChatDay", lastChatDay);
         out.store("Xp", XP_CODEC, Map.copyOf(xp));
         inventory.storeAsItemList(out.list("Inventory", ItemStack.CODEC));
     }
@@ -578,7 +699,13 @@ public class SettlerEntity extends PathfinderMob {
         sleptLastNight = in.getBooleanOr("Slept", true);
         leaving = in.getBooleanOr("Leaving", false);
         arrived = in.getBooleanOr("Arrived", true);
-        tastyUntil = in.getLongOr("TastyUntil", -1L);
+        thoughts.clear();
+        in.read("Thoughts", Thought.CODEC.listOf()).ifPresent(thoughts::addAll);
+        long legacyTasty = in.getLongOr("TastyUntil", -1L);
+        if (legacyTasty > 0 && thoughts.stream().noneMatch(t -> t.id().equals("tasty_meal"))) thoughts.add(new Thought("tasty_meal", 8, legacyTasty));
+        affinity.clear();
+        in.read("Affinity", AFFINITY_CODEC).ifPresent(affinity::putAll);
+        lastChatDay = in.getLongOr("LastChatDay", -1L);
         xp.clear();
         in.read("Xp", XP_CODEC).ifPresent(xp::putAll);
         inventory.fromItemList(in.listOrEmpty("Inventory", ItemStack.CODEC));

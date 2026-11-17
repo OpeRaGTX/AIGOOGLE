@@ -82,6 +82,10 @@ public final class TownHallScreen extends HhScreen {
                         b -> send(Payloads.TownHallAction.MINT, 0, ""));
                 mint.setTooltip(net.minecraft.client.gui.components.Tooltip.create(view.mintInfo()));
                 mint.active = view.warehouse();
+                Button fest = button(Component.translatable("gui.hearthholm.festival_start", view.festivalCost()),
+                        left + 178, top + 177, panelW - 188, 14, b -> send(Payloads.TownHallAction.FESTIVAL, 0, ""));
+                fest.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.festival_tip")));
+                fest.active = view.festivalDays() >= 0 && view.food() >= view.festivalCost() && view.residents() > 0;
             }
             case BUILDINGS -> button(Component.translatable("gui.hearthholm.rescan"), left + 8, bottom, 160, 18,
                     b -> send(Payloads.TownHallAction.RESCAN, 0, ""));
@@ -144,14 +148,22 @@ public final class TownHallScreen extends HhScreen {
             line(g, "stat." + k, view.stats().getOrDefault(k, 0), x, y += 10, TEXT);
         }
         int hx = left + 178, hy = top + 54, hw = panelW - 188;
-        inset(g, hx - 4, hy - 4, hw + 8, 146);
+        inset(g, hx - 4, hy - 4, hw + 8, 100);
         text(g, Component.translatable("gui.hearthholm.next_steps"), hx, hy, TITLE);
         hy += 14;
         if (view.hints().isEmpty()) text(g, Component.translatable("gui.hearthholm.all_good"), hx, hy, GOOD);
         for (Component hint : view.hints()) {
             g.text(font, "•", hx, hy, WARN, false);
+            if (hy > top + 128) break;
             hy += g.textWithWordWrap(font, hint, hx + 8, hy, hw - 8, TEXT) + 4;
         }
+        inset(g, hx - 4, top + 150, hw + 8, 46);
+        text(g, Component.translatable("gui.hearthholm.festival"), hx, top + 154, TITLE);
+        Component fs = view.festivalDays() < 0 ? Component.translatable("gui.hearthholm.festival_active")
+                : view.festivalDays() == 0 ? Component.translatable("gui.hearthholm.festival_due", view.festivalCost())
+                : view.festivalDays() == 1 ? Component.translatable("gui.hearthholm.festival_day1")
+                : Component.translatable("gui.hearthholm.festival_days", view.festivalDays());
+        g.text(font, fs, hx, top + 165, view.festivalDays() < 0 ? GOOD : TEXT, false);
     }
 
     private int rows() {
@@ -170,7 +182,7 @@ public final class TownHallScreen extends HhScreen {
             boolean hover = inside(mx, my, left + 8, y, panelW - 16, 20);
             g.fill(left + 8, y, left + panelW - 8, y + 20, hover ? 0xFF3A2D20 : BG2);
             face(g, r.profile().appearance(), r.profession(), left + 11, y + 2, 16);
-            text(g, r.profile().name(), left + 32, y + 2, TEXT);
+            text(g, r.profile().listName(), left + 32, y + 2, TEXT);
             Profession p = Professions.get(r.profession());
             g.text(font, p.label().copy().append(" " + "I".repeat(Math.max(1, r.level()))), left + 32, y + 11, 0xFF000000 | p.color(), false);
             g.text(font, moodFace(r.mood()) + " " + r.mood(), left + 150, y + 6, moodColor(r.mood()), false);
@@ -191,18 +203,27 @@ public final class TownHallScreen extends HhScreen {
             SettlerProfile p = cands.get(i);
             int x = left + 8 + i * 108, y = top + 50;
             inset(g, x, y, 104, 146);
+            if (p.legendary()) g.outline(x + 1, y + 1, 102, 144, 0xFFE8B84A);
             face(g, p.appearance(), Professions.UNEMPLOYED_ID, x + 40, y + 4, 24);
-            Component name = p.name();
-            g.text(font, name, x + 52 - font.width(name) / 2, y + 30, TITLE, false);
+            Component name = p.legendary() ? p.listName() : p.name();
+            g.text(font, name, x + 52 - font.width(name) / 2, y + 30, p.legendary() ? 0xFFFFD35A : TITLE, false);
+            if (p.legendary()) {
+                Component title = p.titleText().copy().withStyle(net.minecraft.ChatFormatting.GOLD);
+                g.text(font, title, x + 52 - font.width(title) / 2, y + 39, 0xFFFFD35A, false);
+                g.text(font, "★", x + 91, y + 4, 0xFFFFD35A, false);
+                if (inside(mx, my, x + 2, y + 2, 100, 12) || inside(mx, my, x + 2, y + 28, 100, 20))
+                    g.setTooltipForNextFrame(font, Component.translatable("gui.hearthholm.legendary.tip"), mx, my);
+            }
             g.text(font, p.female() ? "♀" : "♂", x + 4, y + 4, p.female() ? 0xFFE58FB4 : 0xFF7FA8E0, false);
-            int sy = y + 41;
+            int sy = y + (p.legendary() ? 50 : 41);
+            int step = p.legendary() ? 9 : 10;
             for (Stat st : Stat.values()) {
                 Component lbl = Component.translatable("stat.hearthholm." + st.name().toLowerCase() + ".short");
                 text(g, lbl, x + 4, sy, DIM);
                 bar(g, x + 32, sy + 1, 50, 6, p.stat(st) / 10f, 0xFF8BB0D8);
                 text(g, String.valueOf(p.stat(st)), x + 86, sy, TEXT);
                 if (inside(mx, my, x + 2, sy - 1, 100, 10)) g.setTooltipForNextFrame(font, st.label(), mx, my);
-                sy += 10;
+                sy += step;
             }
             int tx = x + 4;
             for (Trait t : p.traitList()) {

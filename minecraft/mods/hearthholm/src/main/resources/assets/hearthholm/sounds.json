@@ -26,5 +26,29 @@
       "hearthholm:workshop/sizzle2"
     ],
     "subtitle": "subtitles.hearthholm.workshop.sizzle"
+  },
+  "social.bell": {
+    "sounds": [
+      "hearthholm:social/bell1"
+    ],
+    "subtitle": "subtitles.hearthholm.social.bell"
+  },
+  "social.murmur": {
+    "sounds": [
+      "hearthholm:social/murmur1",
+      "hearthholm:social/murmur2",
+      "hearthholm:social/murmur3",
+      "hearthholm:social/murmur4"
+    ],
+    "subtitle": "subtitles.hearthholm.social.murmur"
+  },
+  "social.festival": {
+    "sounds": [
+      {
+        "name": "hearthholm:social/festival",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.hearthholm.social.festival"
   }
 }

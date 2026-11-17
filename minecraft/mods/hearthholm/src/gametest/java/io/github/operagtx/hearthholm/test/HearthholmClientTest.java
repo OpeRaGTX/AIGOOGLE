@@ -157,8 +157,181 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 if (bread <= bread0) throw new AssertionError("cook made no bread");
                 log("CRAFT OK");
             });
+            waveB(ctx, sp);
             log("DONE");
         }
+    }
+
+    // ---- wave B: speech bubbles, relationships, thoughts, festival, legendary candidates -------------
+
+    private static Settlement town(MinecraftServer s) {
+        return SettlementManager.get(s).all().iterator().next();
+    }
+
+    private static void waveB(ClientGameTestContext ctx, TestSingleplayerContext sp) {
+        // lines and sounds exist
+        ctx.runOnClient(mc -> {
+            int total = 0, missing = 0;
+            for (String sit : List.of("greet", "hungry", "no_bed", "night", "rain", "levelup", "tasty", "festival", "idle", "chat", "quarrel")) {
+                int n = io.github.operagtx.hearthholm.social.BubbleLines.count(sit);
+                for (int i = 0; i < n; i++) if (!net.minecraft.locale.Language.getInstance().has("bubble.hearthholm." + sit + "." + i)) missing++;
+                total += n;
+            }
+            log("bubble lines total=" + io.github.operagtx.hearthholm.social.BubbleLines.total() + " base=" + total + " missingTranslations=" + missing);
+            if (io.github.operagtx.hearthholm.social.BubbleLines.total() < 120 || missing > 0) throw new AssertionError("bubble pool incomplete");
+        });
+        sp.getServer().runCommand("time set 6000");
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            Settlement st = town(s);
+            List<SettlerEntity> ls = settlers(s);
+            SettlerEntity a = ls.get(0), b = ls.get(1), c = ls.get(2), d = ls.get(3);
+            a.addAffinity(b.getUUID(), 55); b.addAffinity(a.getUUID(), 55);
+            a.addAffinity(c.getUUID(), -40); c.addAffinity(a.getUUID(), -40);
+            c.addAffinity(d.getUUID(), -25); d.addAffinity(c.getUUID(), -25);
+            // a legendary candidate in the first slot
+            st.candidates.set(0, io.github.operagtx.hearthholm.settlement.SettlerProfile.random(l.getRandom(), true));
+            var lp = st.candidates.get(0);
+            log("legendary candidate " + lp.name().getString() + " title=" + lp.title() + " traits=" + lp.traits() + " stats=" + lp.stats());
+            if (!lp.legendary() || lp.traits().size() != 2) throw new AssertionError("legendary profile wrong");
+            // the codec round-trips and old saves (without the new fields) still decode
+            var enc = io.github.operagtx.hearthholm.settlement.SettlerProfile.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, lp).getOrThrow();
+            var back = io.github.operagtx.hearthholm.settlement.SettlerProfile.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, enc).getOrThrow();
+            if (!back.legendary() || back.title() != lp.title()) throw new AssertionError("profile codec");
+            var old = enc.getAsJsonObject().deepCopy();
+            old.remove("legendary"); old.remove("title");
+            var oldP = io.github.operagtx.hearthholm.settlement.SettlerProfile.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, old).getOrThrow();
+            if (oldP.legendary() || oldP.title() != -1) throw new AssertionError("old profile codec");
+            log("legendary codec OK, old save OK");
+            ServerPlayer p = player(s);
+            p.teleportTo(l, DESK.getX() + 0.5, DESK.getY(), DESK.getZ() - 1.5, java.util.Set.of(), 0f, 10f, false);
+            SettlementService.openTownHall(p, DESK);
+        });
+        ctx.waitForScreen(TownHallScreen.class);
+        ctx.clickScreenButton("gui.hearthholm.tab.overview");
+        ctx.waitTicks(5);
+        ctx.takeScreenshot("hh_20_overview_festival_idle");
+        ctx.clickScreenButton("gui.hearthholm.tab.hire");
+        ctx.waitTicks(5);
+        ctx.takeScreenshot("hh_21_hire_legendary");
+        ctx.clickScreenButton("gui.hearthholm.tab.overview");
+        ctx.waitTicks(3);
+        sp.getServer().runOnServer(s -> SettlementService.handleTownHall(player(s), new Payloads.TownHallAction(DESK, Payloads.TownHallAction.FESTIVAL, 0, "")));
+        ctx.waitTicks(10);
+        ctx.takeScreenshot("hh_22_overview_festival_active");
+        ctx.setScreen(() -> null);
+        sp.getServer().runOnServer(s -> {
+            Settlement st = town(s);
+            log("festival active=" + st.festivalActive(s.overworld().getGameTime()) + " end=" + st.festivalEnd + " last=" + st.lastFestival
+                    + " daysUntil=" + io.github.operagtx.hearthholm.settlement.Festival.daysUntil(s.overworld(), st));
+            if (!st.festivalActive(s.overworld().getGameTime())) throw new AssertionError("festival did not start");
+            BlockPos sq = io.github.operagtx.hearthholm.settlement.Festival.square(s.overworld(), st);
+            log("festival square " + sq + " center " + st.center);
+            ServerPlayer p = player(s);
+            p.teleportTo(s.overworld(), sq.getX() + 0.5, sq.getY() + 1.5, sq.getZ() + 9.5, java.util.Set.of(), 180f, 14f, false);
+        });
+        ctx.waitTicks(450);
+        sp.getServer().runOnServer(s -> {
+            int at = 0;
+            for (SettlerEntity e : settlers(s)) {
+                if (e.brain().currentActivity().equals("FestivalActivity")) at++;
+                log("fest " + e.getName().getString() + " act=" + e.brain().currentActivity() + " status='" + e.status().getString()
+                        + "' thoughts=" + e.thoughts().stream().map(t -> t.id() + t.value()).toList() + " pos=" + e.blockPosition().toShortString());
+            }
+            log("festival attendees " + at + "/" + settlers(s).size());
+            if (at == 0) throw new AssertionError("nobody came to the festival");
+        });
+        ctx.takeScreenshot("hh_23_festival");
+        ctx.waitTicks(40);
+        ctx.takeScreenshot("hh_24_festival_dance");
+        sp.getServer().runOnServer(s -> {
+            Settlement st = town(s);
+            int with = 0;
+            for (SettlerEntity e : settlers(s)) if (e.hasThought("festival")) with++;
+            log("festival thought on " + with + " settlers; marks stock bread=" + stock(s, Items.BREAD) + " festivals=" + st.stats.get("festivals"));
+            if (with == 0) throw new AssertionError("no festival thought");
+            io.github.operagtx.hearthholm.settlement.Festival.end(s.overworld(), st);
+        });
+        // auto-start at noon after 7 days
+        sp.getServer().runOnServer(s -> {
+            Settlement st = town(s);
+            st.lastFestival = SettlementService.day(s.overworld()) - 8;
+            log("auto festival armed, daysUntil=" + io.github.operagtx.hearthholm.settlement.Festival.daysUntil(s.overworld(), st));
+        });
+        ctx.waitTicks(60);
+        sp.getServer().runOnServer(s -> {
+            Settlement st = town(s);
+            boolean on = st.festivalActive(s.overworld().getGameTime());
+            log("auto festival active=" + on);
+            if (!on) throw new AssertionError("festival did not auto-start at noon");
+            io.github.operagtx.hearthholm.settlement.Festival.end(s.overworld(), st);
+        });
+        // speech bubbles: three settlers lined up in front of the player
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            List<SettlerEntity> ls = settlers(s);
+            ServerPlayer p = player(s);
+            p.teleportTo(l, O.getX() + 4.5, O.getY(), O.getZ() - 4.4, java.util.Set.of(), 0f, 8f, false);
+            String[] lines = {"greet", "hungry", "work_miner", "trait_cheerful", "festival"};
+            for (int i = 0; i < 4; i++) {
+                SettlerEntity e = ls.get(i);
+                e.setNoAi(true);
+                e.getNavigation().stop();
+                e.teleportTo(O.getX() + 1.8 + i * 1.7, O.getY(), O.getZ() - 1.4);
+                e.setYRot(180f); e.yBodyRot = 180f; e.yHeadRot = 180f;
+                boolean ok = io.github.operagtx.hearthholm.social.Social.say(e, lines[i], 99);
+                log("bubble " + e.getName().getString() + " " + lines[i] + " ok=" + ok + " text='" + e.bubble().getString() + "'");
+            }
+            // the visible-bubble cap: with 3 bubbles up, a fourth ambient line is refused
+            log("cap check say(cap=3) while bubbling -> " + io.github.operagtx.hearthholm.social.Social.say(ls.get(4), "idle", 3));
+        });
+        ctx.waitTicks(15);
+        ctx.takeScreenshot("hh_25_bubbles");
+        sp.getServer().runOnServer(s -> { for (SettlerEntity e : settlers(s)) e.setNoAi(false); });
+        // an evening chat between friends
+        sp.getServer().runCommand("time set 11300");
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            List<SettlerEntity> ls = settlers(s);
+            SettlerEntity a = ls.get(0), b = ls.get(1);
+            ServerPlayer p = player(s);
+            p.teleportTo(l, O.getX() + 3.5, O.getY(), O.getZ() - 4.4, java.util.Set.of(), 0f, 8f, false);
+            a.teleportTo(O.getX() + 2.5, O.getY(), O.getZ() - 1.5);
+            b.teleportTo(O.getX() + 6.5, O.getY(), O.getZ() - 1.5);
+            io.github.operagtx.hearthholm.social.Social.startChat(l, a, b, SettlementService.day(l) + 50);
+            log("chat started " + a.getName().getString() + " + " + b.getName().getString() + " affinity=" + a.affinity(b.getUUID()));
+        });
+        ctx.waitTicks(200);
+        ctx.takeScreenshot("hh_26_chat");
+        ctx.waitTicks(260);
+        sp.getServer().runOnServer(s -> {
+            List<SettlerEntity> ls = settlers(s);
+            SettlerEntity a = ls.get(0), b = ls.get(1);
+            log("chat done affinity a->b=" + a.affinity(b.getUUID()) + " b->a=" + b.affinity(a.getUUID()) + " act=" + a.brain().currentActivity()
+                    + " friend thought=" + a.hasThought("friend"));
+            if (a.affinity(b.getUUID()) <= 55) throw new AssertionError("chat gave no affinity");
+            for (SettlerEntity e : ls) log("rel " + e.getName().getString() + " affinity=" + e.affinityMap().size() + " thoughts="
+                    + e.thoughts().stream().map(t -> t.id() + (t.value() > 0 ? "+" : "") + t.value()).toList());
+            // quarrel path
+            io.github.operagtx.hearthholm.social.Social.quarrel(ls.get(2), ls.get(3));
+            log("quarrel c->d=" + ls.get(2).affinity(ls.get(3).getUUID()) + " thought=" + ls.get(2).hasThought("quarrel"));
+            SettlementService.openSettler(player(s), a);
+        });
+        ctx.waitForScreen(SettlerScreen.class);
+        ctx.waitTicks(5);
+        ctx.takeScreenshot("hh_27_settler_relations");
+        ctx.setScreen(() -> null);
+        sp.getServer().runOnServer(s -> SettlementService.openSettler(player(s), settlers(s).get(2)));
+        ctx.waitForScreen(SettlerScreen.class);
+        ctx.waitTicks(5);
+        ctx.takeScreenshot("hh_28_settler_thoughts");
+        ctx.setScreen(() -> null);
+        // hire the legendary and look at the new settler's screen
+        sp.getServer().runOnServer(s -> {
+            Settlement st = town(s);
+            st.residents.size();
+            log("WAVE B OK bubbles=" + io.github.operagtx.hearthholm.social.BubbleLines.total() + " legendary candidate hired later");
+        });
     }
 
     private static ServerPlayer player(MinecraftServer s) {

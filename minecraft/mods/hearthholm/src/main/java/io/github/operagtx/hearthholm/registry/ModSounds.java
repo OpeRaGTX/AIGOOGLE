@@ -8,7 +8,7 @@ import net.minecraft.sounds.SoundEvent;
 
 /** Procedurally generated workshop sounds (tools/gen_sounds.py). */
 public final class ModSounds {
-    public static SoundEvent SAW, CHISEL, HAMMER, SIZZLE;
+    public static SoundEvent SAW, CHISEL, HAMMER, SIZZLE, BELL, MURMUR, FESTIVAL;
 
     private ModSounds() {}
 
@@ -22,5 +22,8 @@ public final class ModSounds {
         CHISEL = reg("workshop.chisel");
         HAMMER = reg("workshop.hammer");
         SIZZLE = reg("workshop.sizzle");
+        BELL = reg("social.bell");
+        MURMUR = reg("social.murmur");
+        FESTIVAL = reg("social.festival");
     }
 }

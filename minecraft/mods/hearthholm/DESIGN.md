@@ -81,6 +81,14 @@
 
 Зомби, скелеты, пауки и иллагеры охотятся на жителей, поэтому охрана нужна на самом деле.
 
+**Голоса очага (волна B).** Пакет `social/`: `Social` (реплики, симпатии, ссоры, вечерние беседы), `BubbleLines`
+(пулы фраз: ключи `bubble.hearthholm.<ситуация>.<n>`, число вариантов — `data/hearthholm/bubbles.json`, пишет
+`tools/gen_lang.py` из `tools/bubbles.py`). Реплика = синхронизируемый `Component` в `SettlerEntity` (`DATA_BUBBLE`),
+клиент рисует его над головой в `SettlerRenderer`. Симпатии и «мысли» (`entity/Thought`) сохраняются в сущности
+(`Affinity`, `Thoughts`). Активности `ChatActivity` и `FestivalActivity` стоят в мозге между едой и работой.
+Праздник — `settlement/Festival` (поля в `Settlement.Extra`: `last_festival`, `festival_start`, `festival_end`).
+`SettlerProfile` получил `legendary` и `title` (по умолчанию `false`/`-1`, старые сохранения читаются).
+
 ## 6. Архитектура (как расширять, не ломая старое)
 
 ```

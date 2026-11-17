@@ -79,13 +79,30 @@ public final class SettlerScreen extends HhScreen {
         inset(g, x, y, 44, 44);
         face(g, view.profile().appearance(), view.profession(), x + 2, y + 2, 40);
         Profession p = Professions.get(view.profession());
-        text(g, view.profile().name(), x + 52, y + 2, TITLE);
+        text(g, view.profile().fullName(), x + 52, y + 2, view.profile().legendary() ? 0xFFFFD35A : TITLE);
         text(g, p.label().copy().append(" · ").append(Component.translatable("gui.hearthholm.level", view.level())), x + 52, y + 14, 0xFF000000 | p.color());
         if (view.nextXp() > 0) {
             bar(g, x + 52, y + 25, 90, 5, view.xp() / (float) view.nextXp(), 0xFF7FC24A);
         }
         text(g, view.settlement(), x + 52, y + 34, DIM);
         g.textWithWordWrap(font, view.status(), x + 150, y + 4, 175, WARN);
+        // closest friend and rival
+        int rx = x + 150, ry = y + 36;
+        if (view.friendValue() > 0 || view.rivalValue() < 0) {
+            if (view.friendValue() > 0) {
+                Component f = Component.literal("♥ ").append(view.friend()).append(" +" + view.friendValue());
+                g.text(font, f, rx, ry, GOOD, false);
+                if (inside(mx, my, rx, ry - 1, 80, 10)) g.setTooltipForNextFrame(font, Component.translatable("gui.hearthholm.friend"), mx, my);
+                rx += font.width(f) + 8;
+            }
+            if (view.rivalValue() < 0) {
+                Component f = Component.literal("⚔ ").append(view.rival()).append(" " + view.rivalValue());
+                g.text(font, f, rx, ry, BAD, false);
+                if (inside(mx, my, rx, ry - 1, 80, 10)) g.setTooltipForNextFrame(font, Component.translatable("gui.hearthholm.rival"), mx, my);
+            }
+        } else {
+            text(g, Component.translatable("gui.hearthholm.no_relations"), rx, ry, DIM);
+        }
 
         // stats
         int sy = top + 54;
@@ -114,15 +131,15 @@ public final class SettlerScreen extends HhScreen {
         ny += 12;
         if (!view.bed()) { text(g, Component.translatable("gui.hearthholm.no_bed"), nx, ny, BAD); ny += 11; }
         for (MoodEntry m : view.moods()) {
-            if (ny > top + panelH - 100) break;
+            if (ny > top + panelH - 98) break;
             text(g, m.label(), nx + 4, ny, TEXT);
             String v = (m.value() > 0 ? "+" : "") + m.value();
             text(g, v, nx + 150, ny, m.value() >= 0 ? GOOD : BAD);
-            ny += 10;
+            ny += 9;
         }
 
         // equipment + inventory
-        int ix = left + 8, iy = top + panelH - 89;
+        int ix = left + 8, iy = top + panelH - 77;
         int i = 0;
         for (ItemStack st : view.equipment()) drawItem(g, st, ix + (i++) * 18, iy, mx, my);
         i = 0;

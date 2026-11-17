@@ -52,11 +52,14 @@ public final class Settlement {
     }
 
     /** Fields added after the first release (kept in a second map codec: a record codec holds 16 fields). */
-    private record Extra(List<BlockPos> workshops, List<Order> orders, int marksMinted) {
+    private record Extra(List<BlockPos> workshops, List<Order> orders, int marksMinted, long lastFestival, long festivalStart, long festivalEnd) {
         static final MapCodec<Extra> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 BlockPos.CODEC.listOf().optionalFieldOf("workshops", List.of()).forGetter(Extra::workshops),
                 Order.CODEC.listOf().optionalFieldOf("orders", List.of()).forGetter(Extra::orders),
-                Codec.INT.optionalFieldOf("marks_minted", 0).forGetter(Extra::marksMinted)
+                Codec.INT.optionalFieldOf("marks_minted", 0).forGetter(Extra::marksMinted),
+                Codec.LONG.optionalFieldOf("last_festival", -1L).forGetter(Extra::lastFestival),
+                Codec.LONG.optionalFieldOf("festival_start", -1L).forGetter(Extra::festivalStart),
+                Codec.LONG.optionalFieldOf("festival_end", -1L).forGetter(Extra::festivalEnd)
         ).apply(i, Extra::new));
     }
 
@@ -100,8 +103,12 @@ public final class Settlement {
         s.workshops.addAll(p.getSecond().workshops());
         s.orders.addAll(p.getSecond().orders());
         s.marksMinted = p.getSecond().marksMinted();
+        s.lastFestival = p.getSecond().lastFestival();
+        s.festivalStart = p.getSecond().festivalStart();
+        s.festivalEnd = p.getSecond().festivalEnd();
         return s;
-    }, s -> Pair.of(s, new Extra(List.copyOf(s.workshops), List.copyOf(s.orders), s.marksMinted))).codec();
+    }, s -> Pair.of(s, new Extra(List.copyOf(s.workshops), List.copyOf(s.orders), s.marksMinted,
+            s.lastFestival, s.festivalStart, s.festivalEnd))).codec();
 
     public final UUID id;
     public final UUID owner;
@@ -122,6 +129,10 @@ public final class Settlement {
     public final List<BlockPos> workshops = new ArrayList<>();
     public final List<Order> orders = new ArrayList<>();
     public int marksMinted;
+    /** Harvest festival: day of the last one (-1 = none yet), game time it started and ends (end -1 = not running). */
+    public long lastFestival = -1, festivalStart = -1, festivalEnd = -1;
+    /** Not saved: the open spot by the town hall where the festival is held. */
+    public @Nullable BlockPos square;
     /** Not saved: which crafter is making which item right now (order board status). */
     public final Map<Item, String> crafting = new HashMap<>();
     /** Not saved: game time of the last room scan. */
@@ -169,6 +180,10 @@ public final class Settlement {
 
     public void count(String stat, int amount) {
         stats.merge(stat, amount, Integer::sum);
+    }
+
+    public boolean festivalActive(long gameTime) {
+        return festivalEnd > gameTime;
     }
 
     public int hireCost() {

@@ -142,6 +142,8 @@ T = {
  "status.hearthholm.going_to_bed": ("Going to bed", "Идёт спать"),
  "status.hearthholm.bed_taken": ("Someone took the bed", "Кровать занята"),
  "status.hearthholm.eating": ("Eating", "Ест"),
+ "status.hearthholm.festival": ("Celebrating the harvest", "Празднует урожай"),
+ "status.hearthholm.chatting": ("Chatting with a friend", "Болтает с другом"),
  "status.hearthholm.no_food": ("No food in the warehouse!", "На складе нет еды!"),
  "status.hearthholm.fetching_food": ("Getting food", "Идёт за едой"),
  "status.hearthholm.unemployed": ("No job — assign one", "Без работы — назначьте профессию"),
@@ -290,7 +292,54 @@ T = {
  "gui.hearthholm.aptitude": ("Aptitude: %s", "Склонность: %s"),
  "gui.hearthholm.worker": ("Worker", "Работник"), "gui.hearthholm.nobody": ("nobody yet", "пока никого"),
  "gui.hearthholm.materials": ("Materials (%s×%s, %s high):", "Материалы (%s×%s, высота %s):"),
+ # ---- wave B: living settlers ----
+ "thought.hearthholm.tasty_meal": ("Tasty meal", "Вкусный обед"),
+ "thought.hearthholm.festival": ("Saw the festival", "Видел праздник"),
+ "thought.hearthholm.friend": ("Has a friend", "Есть друг"),
+ "thought.hearthholm.quarrel": ("Quarrelled", "Поссорился"),
+ "thought.hearthholm.pretty_home": ("Pretty home", "Красивый дом"),
+ "thought.hearthholm.proud": ("Proud of progress", "Гордится успехами"),
+ "thought.hearthholm.wet": ("Soaked by the rain", "Промок под дождём"),
+ "thought.hearthholm.legend": ("Feels special", "Чувствует себя особенным"),
+ "gui.hearthholm.friend": ("Friend", "Друг"), "gui.hearthholm.rival": ("Rival", "Соперник"),
+ "gui.hearthholm.no_relations": ("No close ties yet", "Пока нет близких связей"),
+ "gui.hearthholm.legendary": ("Legendary", "Легендарный"),
+ "gui.hearthholm.legendary.tip": ("A rare candidate: two traits, better abilities and a famous title.", "Редкий кандидат: две черты, лучшие способности и громкое прозвище."),
+ "gui.hearthholm.festival": ("Harvest festival", "Праздник урожая"),
+ "gui.hearthholm.festival_active": ("In progress! Everyone is dancing.", "Идёт! Все пляшут."),
+ "gui.hearthholm.festival_days": ("Next festival in %s days", "Следующий праздник через %s дн."),
+ "gui.hearthholm.festival_day1": ("Next festival tomorrow", "Следующий праздник завтра"),
+ "gui.hearthholm.festival_due": ("Festival at noon (needs %s food)", "Праздник в полдень (нужно %s еды)"),
+ "gui.hearthholm.festival_start": ("Start now (%s food)", "Начать сейчас (%s еды)"),
+ "gui.hearthholm.festival_tip": ("Settlers gather at the town hall, dance and gain a big mood bonus. Costs 4 food per resident from the warehouse.", "Жители собираются у ратуши, пляшут и получают большой бонус настроения. Стоит 4 еды на жителя со склада."),
+ "message.hearthholm.festival_start": ("The harvest festival begins! The whole village gathers at the town hall.", "Начался праздник урожая! Всё поселение собирается у ратуши."),
+ "message.hearthholm.festival_end": ("The festival is over. Everybody is in high spirits (+%s renown).", "Праздник закончился. Все в приподнятом настроении (+%s славы)."),
+ "message.hearthholm.festival_no_food": ("No festival today: the warehouse needs %s food for the feast.", "Праздника сегодня не будет: на склад нужно %s еды для угощения."),
+ "message.hearthholm.festival_denied": ("The feast needs %s food in the warehouse.", "Для угощения нужно %s еды на складе."),
+ "message.hearthholm.festival_running": ("A festival is already underway.", "Праздник уже идёт."),
+ "message.hearthholm.legend_hired": ("%s, a legend, joins %s!", "%s, настоящая легенда, присоединяется к %s!"),
+ "message.hearthholm.friends_made": ("%s and %s have become friends.", "%s и %s подружились."),
+ "subtitles.hearthholm.social.bell": ("Town bell rings", "Звонит колокол"),
+ "subtitles.hearthholm.social.murmur": ("Settler murmurs", "Житель бормочет"),
+ "subtitles.hearthholm.social.festival": ("Festival music plays", "Играет праздничная музыка"),
+ "settler.hearthholm.title.0": ("the Stonebreaker", "Каменолом"),
+ "settler.hearthholm.title.1": ("the Tireless", "Неутомимый"),
+ "settler.hearthholm.title.2": ("Eagle-Eye", "Орлиный Глаз"),
+ "settler.hearthholm.title.3": ("the Hearthkeeper", "Хранитель Очага"),
+ "settler.hearthholm.title.4": ("the Swift", "Быстроногий"),
+ "settler.hearthholm.title.5": ("Ironhand", "Железная Рука"),
+ "settler.hearthholm.title.6": ("the Golden-Voiced", "Златоустый"),
+ "settler.hearthholm.title.7": ("the Wise", "Мудрый"),
 }
+
+# speech bubbles
+import sys
+sys.path.insert(0, os.path.dirname(__file__))
+import bubbles
+POOLS = bubbles.all_pools()
+for sit, lines in POOLS.items():
+    for n, (en, ru) in enumerate(lines):
+        T[f"bubble.hearthholm.{sit}.{n}"] = (en, ru)
 
 def write(lang, idx):
     data = {k: v[idx] for k, v in T.items()}
@@ -304,4 +353,6 @@ def write(lang, idx):
 
 write("en_us", 0)
 write("ru_ru", 1)
+with open(os.path.join(os.path.dirname(__file__), "..", "src", "main", "resources", "data", "hearthholm", "bubbles.json"), "w") as fh:
+    json.dump({k: len(v) for k, v in POOLS.items()}, fh, indent=1)
 print(len(T), "keys + names")

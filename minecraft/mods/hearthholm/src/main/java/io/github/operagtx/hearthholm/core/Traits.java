@@ -37,11 +37,15 @@ public final class Traits {
 
     /** Rolls 1-2 non-conflicting traits. */
     public static List<Identifier> roll(RandomSource random) {
+        return roll(random, random.nextFloat() < 0.45f ? 2 : 1);
+    }
+
+    /** Rolls exactly {@code count} non-conflicting traits (as far as the pool allows). */
+    public static List<Identifier> roll(RandomSource random, int count) {
         List<Trait> pool = new ArrayList<>(REGISTRY.values());
         List<Identifier> picked = new ArrayList<>();
         List<String> groups = new ArrayList<>();
-        int count = random.nextFloat() < 0.45f ? 2 : 1;
-        for (int i = 0; i < 20 && picked.size() < count && !pool.isEmpty(); i++) {
+        for (int i = 0; i < 80 && picked.size() < count && !pool.isEmpty(); i++) {
             Trait t = pool.get(random.nextInt(pool.size()));
             if (picked.contains(t.id()) || (!t.conflictGroup().isEmpty() && groups.contains(t.conflictGroup()))) continue;
             picked.add(t.id());

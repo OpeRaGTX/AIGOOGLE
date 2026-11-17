@@ -9,6 +9,7 @@ import io.github.operagtx.hearthholm.crafting.CraftPlanner;
 import io.github.operagtx.hearthholm.crafting.Mint;
 import io.github.operagtx.hearthholm.crafting.Workshop;
 import io.github.operagtx.hearthholm.registry.ModItems;
+import io.github.operagtx.hearthholm.registry.ModSounds;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import io.github.operagtx.hearthholm.entity.SettlerEntity;
@@ -101,7 +102,7 @@ public final class SettlementService {
         Settlement s = m.create(player.getUUID(), player.getName().getString(), level.dimension(), pos);
         desk.setSettlementId(s.id);
         s.rescan(level);
-        level.playSound(null, pos, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 1f, 1f);
+        level.playSound(null, pos, ModSounds.BELL, SoundSource.BLOCKS, 2f, 1f);
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 20, 0.6, 0.4, 0.6, 0.1);
         player.sendSystemMessage(Component.translatable("message.hearthholm.founded").withStyle(ChatFormatting.GOLD));
         player.sendSystemMessage(Component.translatable("message.hearthholm.founded_hint").withStyle(ChatFormatting.GRAY));
@@ -176,7 +177,8 @@ public final class SettlementService {
                 next == null ? "" : next.key(), s.residents.size(), s.popCap(), s.housingBeds().size(), s.freeBeds(),
                 Storage.totalNutrition(storage), s.hireCost(), s.radius(), s.hallValid(), s.warehouseValid(),
                 people, buildings, List.copyOf(s.candidates), hints(s, storage), new LinkedHashMap<>(s.stats),
-                Storage.count(storage, st -> st.is(ModItems.HEARTH_MARK)), Mint.describe());
+                Storage.count(storage, st -> st.is(ModItems.HEARTH_MARK)), Mint.describe(),
+                Festival.daysUntil(level, s), Festival.cost(s));
     }
 
     private static List<Component> hints(Settlement s, List<Container> storage) {
@@ -217,6 +219,10 @@ public final class SettlementService {
                 say(player, "rescanned", s.buildings.size());
             }
             case Payloads.TownHallAction.MINT -> mint(player, level, s);
+            case Payloads.TownHallAction.FESTIVAL -> {
+                if (Festival.active(level, s)) say(player, "festival_running");
+                else if (!Festival.start(level, s, true)) say(player, "festival_denied", Festival.cost(s));
+            }
             case Payloads.TownHallAction.RENAME -> {
                 String name = a.text().strip();
                 if (name.length() <= 32) s.name = name;
@@ -270,6 +276,8 @@ public final class SettlementService {
         s.assignBeds();
         manager(level).setDirty();
         level.playSound(null, s.center, SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 1f, 1f);
+        level.playSound(null, s.center, ModSounds.BELL, SoundSource.NEUTRAL, 1.2f, 1.3f);
+        if (profile.legendary()) player.sendSystemMessage(Component.translatable("message.hearthholm.legend_hired", profile.fullName(), s.displayName()).withStyle(ChatFormatting.GOLD));
         player.sendSystemMessage(Component.translatable("message.hearthholm.hired", profile.name()).withStyle(ChatFormatting.GREEN));
     }
 
@@ -559,6 +567,11 @@ public final class SettlementService {
         say(player, "gave", one.getHoverName(), e.getName());
     }
 
+    private static Component relationName(@Nullable Settlement s, @Nullable java.util.Map.Entry<UUID, Integer> rel) {
+        ResidentRecord r = rel == null || s == null ? null : s.resident(rel.getKey());
+        return r == null ? Component.empty() : r.profile.listName();
+    }
+
     public static void openSettler(ServerPlayer player, SettlerEntity e) {
         Settlement s = e.settlement();
         Identifier prof = e.professionId();
@@ -570,9 +583,12 @@ public final class SettlementService {
         }
         List<ItemStack> inv = new ArrayList<>();
         for (ItemStack st : e.inventory().getItems()) inv.add(st.copy());
+        var friend = e.bestRelation(true);
+        var rival = e.bestRelation(false);
         Views.Settler v = new Views.Settler(e.getId(), e.profile(), prof, Math.round(e.food()), Math.round(e.mood()),
                 e.moodEntries(), e.status(), lvl, e.xp(prof), next, inv, equipment, e.bed() != null,
-                s == null ? Component.empty() : s.displayName());
+                s == null ? Component.empty() : s.displayName(),
+                relationName(s, friend), friend == null ? 0 : friend.getValue(), relationName(s, rival), rival == null ? 0 : rival.getValue());
         ServerPlayNetworking.send(player, new Payloads.OpenSettler(v));
     }
 

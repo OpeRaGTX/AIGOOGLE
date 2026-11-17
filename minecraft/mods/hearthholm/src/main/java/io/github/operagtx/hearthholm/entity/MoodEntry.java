@@ -16,4 +16,9 @@ public record MoodEntry(Component label, int value) {
     public static MoodEntry of(String key, int value) {
         return new MoodEntry(Component.translatable("mood.hearthholm." + key), value);
     }
+
+    /** A timed thought ("Saw the festival"): label key thought.hearthholm.<id>. */
+    public static MoodEntry thought(String id, int value) {
+        return new MoodEntry(Component.translatable("thought.hearthholm." + id), value);
+    }
 }

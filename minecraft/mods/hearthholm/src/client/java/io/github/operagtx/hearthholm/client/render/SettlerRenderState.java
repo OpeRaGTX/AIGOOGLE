@@ -7,4 +7,6 @@ import net.minecraft.resources.Identifier;
 public class SettlerRenderState extends HumanoidRenderState {
     public Identifier texture;
     public boolean slim;
+    /** Speech bubble text (null when silent) and whether it is a legendary settler (gold text). */
+    public net.minecraft.network.chat.Component bubble;
 }

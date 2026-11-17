@@ -149,5 +149,8 @@ shapeless("order_board", ["#minecraft:planks", "#minecraft:planks", "minecraft:p
 
 # sounds
 w(f"assets/{NS}/sounds.json", {f"workshop.{n}": {"sounds": [f"{NS}:workshop/{n}{i}" for i in (1, 2)], "subtitle": f"subtitles.{NS}.workshop.{n}"}
-                               for n in ("saw", "chisel", "hammer", "sizzle")})
+                               for n in ("saw", "chisel", "hammer", "sizzle")} | {
+    "social.bell": {"sounds": [f"{NS}:social/bell1"], "subtitle": f"subtitles.{NS}.social.bell"},
+    "social.murmur": {"sounds": [f"{NS}:social/murmur{i}" for i in (1, 2, 3, 4)], "subtitle": f"subtitles.{NS}.social.murmur"},
+    "social.festival": {"sounds": [{"name": f"{NS}:social/festival", "stream": True}], "subtitle": f"subtitles.{NS}.social.festival"}})
 print("assets written")
