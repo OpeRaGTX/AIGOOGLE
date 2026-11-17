@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "hearthholm",
+  "version": "${version}",
+  "name": "Hearthholm",
+  "description": "Found a settlement: hire settlers with their own traits, give them homes and food, mark work zones and watch them mine, farm, chop, fish, build and guard.",
+  "authors": [
+    "OpeRaGTX"
+  ],
+  "license": "All-Rights-Reserved",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.operagtx.hearthholm.Hearthholm"
+    ],
+    "client": [
+      "io.github.operagtx.hearthholm.client.HearthholmClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  },
+  "mixins": [
+    "hearthholm.mixins.json"
+  ],
+  "icon": "assets/hearthholm/icon.png"
+}

@@ -53,6 +53,12 @@ cd minecraft/mods/<modid> && ./gradlew build --no-daemon -q     # jar -> build/l
   (`minecraft-testing`). No display here, so `runClient` is for the user's PC.
 - Never report "works" without a passing build; paste the first real error otherwise.
 
+- **Client check without a display**: `bash minecraft/tools/run-client-test.sh minecraft/mods/<modid>`
+  runs the Fabric client game test (`src/gametest/`, `fabricApi { configureTests {...} }`) with SDL's
+  offscreen driver + Mesa llvmpipe; screenshots land in `build/run/clientGameTest/screenshots/`.
+  Read them — this is how rendering and GUI bugs are found. Xvfb does NOT work for 26.x (SDL3
+  wants an sRGB GLX visual that Xvfb lacks). Dedicated-server console commands failed here too.
+
 ## 3. Package for the player
 
 ```bash
@@ -79,4 +85,10 @@ Crash on start → ask for `.minecraft/logs/latest.log` or `crash-reports/*.txt`
   must match the profile the user picks.
 - 26.1+ is unobfuscated: plugin `net.fabricmc.fabric-loom`, no `mappings` line, Mojang names
   (`Minecraft`, `GuiGraphics`, `Component`); 1.21 Yarn tutorials do not compile.
+- 26.3 API traps met in practice: blocks have no `codec()`; beds have no BlockEntity (find them via
+  `LevelChunkSection.maybeHas`); `Level.canSeeSky` is light-based (use the heightmap for roofs);
+  `mc.gui.screen()` / `mc.setScreenAndShow()`; GUI draws via `GuiGraphicsExtractor` in `extractRenderState`;
+  a mob whose render state extends `AvatarRenderState` is drawn by the PLAYER renderer (Steve skin) —
+  use `HumanoidRenderState` + `HumanoidModel` built from `ModelLayers.PLAYER`; colored blocks live in
+  `Blocks.BED.red()`-style `ColorCollection`s. Look up signatures with `javap` on the Loom jars.
 - Texture paths: `assets/<modid>/textures/item|block|entity/*.png`, lowercase names, PNG RGBA.

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/town_hall_desk",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "hearthholm:block/town_hall_desk",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "hearthholm:block/town_hall_desk"
+    },
+    "facing=west": {
+      "model": "hearthholm:block/town_hall_desk",
+      "y": 90
+    }
+  }
+}

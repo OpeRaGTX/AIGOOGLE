@@ -1,0 +1,8 @@
+{
+ "blueprints": [
+  "small_house",
+  "family_house",
+  "warehouse",
+  "town_hall"
+ ]
+}
