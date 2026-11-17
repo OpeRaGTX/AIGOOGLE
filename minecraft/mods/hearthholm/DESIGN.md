@@ -89,6 +89,16 @@
 Праздник — `settlement/Festival` (поля в `Settlement.Extra`: `last_festival`, `festival_start`, `festival_end`).
 `SettlerProfile` получил `legendary` и `title` (по умолчанию `false`/`-1`, старые сохранения читаются).
 
+**Тени у ворот (волна C).** Пакет `threat/`: `Threats` (налёты, Разлом, огонь, хуки для тестов `forceRaid`/`forceRift`/
+`spawnChieftain`/`endRaid`/`closeRift`), `Defense` (тревога, колокола, ворота, трофеи), `ThreatConfig`
+(`config/hearthholm-threats.json`). Состояние — `RaidState` и `RiftState` в `Settlement.Extra` (`raid`, `rift`, `alarm`, `bells`,
+`gates`, `trophies`; у всех полей значения по умолчанию). Всё считается раз в секунду из `SettlementEvents`. Мобы — пакет
+`entity/ashborn/`: `AshbornEntity` (база: цель-марш к ратуше `MarchGoal`, сохраняет поселение и цель налёта), поджигатель
+(`IgniteGoal`: 24 случайные пробы вокруг, а не скан области; огонь учитывается в `Threats` и тушится через 8 и 18 с в радиусе 5),
+лучник, громила (`BreakBarrierGoal` ломает только частокол и двери), `AshChieftainEntity` (ServerBossEvent, фазы по здоровью,
+огненные кольца), `RiftWispEntity` (без навигации, рулит прямо к цели). Тревога — активность `AlarmActivity` (сразу после
+прибытия в мозге). Фонарь Разлома — POI, проверка в миксине `MobSpawnMixin` на `Mob.checkSpawnRules` (только NATURAL).
+
 ## 6. Архитектура (как расширять, не ломая старое)
 
 ```
@@ -122,4 +132,4 @@ Job наследует `SiteJob`, то есть получает захват м
 ## 7. Дальше (идеи)
 
 Таверна (настроение), лучники (дальний бой), торговец (обмен излишков),
-события (набеги, ярмарки), семьи и дети, предпросмотр чертежа «призраком».
+события (ярмарки), семьи и дети, предпросмотр чертежа «призраком».

@@ -42,6 +42,10 @@ public class SettlerRenderer extends HumanoidMobRenderer<SettlerEntity, SettlerR
         state.slim = Appearance.unpack(look).female();
         state.texture = SettlerTextures.get(look, entity.professionId());
         state.bubble = entity.hasBubble() ? entity.bubble() : null;
+        // vanilla only fills the name-tag anchor for the entity under the crosshair; bubbles need it for everyone
+        if (state.bubble != null && state.nameTagAttachment == null) {
+            state.nameTagAttachment = entity.getAttachments().getNullable(net.minecraft.world.entity.EntityAttachment.NAME_TAG, 0, entity.getYRot(partialTick));
+        }
     }
 
     /** The speech bubble: the line (wrapped to at most 2 rows) above the head, over the nameplate. */

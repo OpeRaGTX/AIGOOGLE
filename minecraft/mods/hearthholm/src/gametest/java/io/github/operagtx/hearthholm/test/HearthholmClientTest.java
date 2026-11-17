@@ -158,6 +158,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 log("CRAFT OK");
             });
             waveB(ctx, sp);
+            waveC(ctx, sp);
             log("DONE");
         }
     }
@@ -272,7 +273,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             ServerLevel l = s.overworld();
             List<SettlerEntity> ls = settlers(s);
             ServerPlayer p = player(s);
-            p.teleportTo(l, O.getX() + 4.5, O.getY(), O.getZ() - 4.4, java.util.Set.of(), 0f, 8f, false);
+            p.teleportTo(l, O.getX() + 4.5, O.getY(), O.getZ() - 4.4, java.util.Set.of(), 0f, 0f, false);
             String[] lines = {"greet", "hungry", "work_miner", "trait_cheerful", "festival"};
             for (int i = 4; i < ls.size(); i++) ls.get(i).teleportTo(O.getX() - 8.5, O.getY(), O.getZ() + 5.5);
             for (int i = 0; i < 4; i++) {
@@ -338,6 +339,272 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             Settlement st = town(s);
             st.residents.size();
             log("WAVE B OK bubbles=" + io.github.operagtx.hearthholm.social.BubbleLines.total() + " legendary candidate hired later");
+        });
+    }
+
+
+    // ---- wave C: raids, alarm, rift, chieftain, palisade -----------------------------------------------
+
+    private static BlockPos BELL, GATE, BANNER;
+    private static java.util.UUID CHIEF;
+
+    private static void waveC(ClientGameTestContext ctx, TestSingleplayerContext sp) {
+        sp.getServer().runCommand("gamemode creative @a");
+        sp.getServer().runCommand("time set 6000");
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            Settlement st = town(s);
+            ServerPlayer p = player(s);
+            // two defenders with swords
+            List<SettlerEntity> ls = settlers(s);
+            for (int i = 0; i < 2; i++) {
+                SettlerEntity g = ls.get(ls.size() - 1 - i);
+                g.setProfession(i == 0 ? Professions.GUARD : Professions.WARRIOR);
+                g.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+                g.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
+                log("defender " + g.getName().getString() + " -> " + g.professionId());
+            }
+            // alarm bell west of the hall, palisade with a gate further west
+            BELL = O.offset(-3, 0, 3);
+            l.setBlock(BELL, ModBlocks.ALARM_BELL.defaultBlockState(), 3);
+            io.github.operagtx.hearthholm.threat.Defense.onBellPlaced(l, BELL, p);
+            for (int dz = -4; dz <= 4; dz++)
+                for (int dy = 0; dy <= 1; dy++)
+                    if (dz != 0) l.setBlock(O.offset(-7, dy, dz), ModBlocks.PALISADE.defaultBlockState(), 3);
+            GATE = O.offset(-7, 0, 0);
+            BlockState gate = ModBlocks.PALISADE_GATE.defaultBlockState().setValue(DoorBlock.FACING, Direction.EAST);
+            l.setBlock(GATE, gate.setValue(DoorBlock.HALF, DoubleBlockHalf.LOWER).setValue(DoorBlock.OPEN, true), 2);
+            l.setBlock(GATE.above(), gate.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER).setValue(DoorBlock.OPEN, true), 3);
+            io.github.operagtx.hearthholm.threat.Defense.onGatePlaced(l, GATE);
+            l.setBlock(O.offset(-5, 0, 5), ModBlocks.RIFT_LANTERN.defaultBlockState(), 3);
+            log("defence bells=" + st.bells.size() + " gates=" + st.gates.size() + " tier=" + st.tier().key() + " radius=" + st.radius()
+                    + " strengthEstimate=" + io.github.operagtx.hearthholm.threat.Threats.strength(l, st));
+            // Ashborn line-up for the screenshot (frozen, not part of any raid)
+            var kinds = List.of(io.github.operagtx.hearthholm.registry.ModEntities.ASH_RAIDER, io.github.operagtx.hearthholm.registry.ModEntities.ASH_ARSONIST,
+                    io.github.operagtx.hearthholm.registry.ModEntities.ASH_ARCHER, io.github.operagtx.hearthholm.registry.ModEntities.ASH_BRUTE);
+            for (int i = 0; i < kinds.size(); i++) {
+                var e = kinds.get(i).spawn(l, O.offset(-17 + i * 2, 0, -2), net.minecraft.world.entity.EntitySpawnReason.SPAWN_ITEM_USE);
+                e.setNoAi(true); e.addTag("hh_lineup");
+                e.setYRot(0f); e.yBodyRot = 0f; e.yHeadRot = 0f;
+            }
+            var w = io.github.operagtx.hearthholm.registry.ModEntities.RIFT_WISP.spawn(l, O.offset(-9, 2, -1), net.minecraft.world.entity.EntitySpawnReason.SPAWN_ITEM_USE);
+            w.setNoAi(true); w.addTag("hh_lineup");
+            p.teleportTo(l, O.getX() - 12.5, O.getY() + 1, O.getZ() + 4.5, java.util.Set.of(), 180f, 12f, false);
+            // the lantern keeps natural spawns away
+            var z = net.minecraft.world.entity.EntityTypes.ZOMBIE.create(l, net.minecraft.world.entity.EntitySpawnReason.NATURAL);
+            z.setPos(O.getX() - 5 + 0.5, O.getY(), O.getZ() + 9.5);
+            log("lantern spawn check near=" + z.checkSpawnRules(l, net.minecraft.world.entity.EntitySpawnReason.NATURAL));
+            if (z.checkSpawnRules(l, net.minecraft.world.entity.EntitySpawnReason.NATURAL)) throw new AssertionError("rift lantern did not block a spawn");
+            z.discard();
+        });
+        sp.getConnection().waitForChunksRender();
+        ctx.waitTicks(30);
+        ctx.takeScreenshot("hh_30_ashborn_lineup");
+        sp.getServer().runOnServer(s -> player(s).teleportTo(s.overworld(), O.getX() - 1.5, O.getY() + 2, O.getZ() + 6.5, java.util.Set.of(), 110f, 20f, false));
+        ctx.waitTicks(20);
+        ctx.takeScreenshot("hh_31_palisade_gate_bell");
+        sp.getServer().runOnServer(s -> {
+            for (var e : s.overworld().getEntities(net.minecraft.world.level.entity.EntityTypeTest.forClass(net.minecraft.world.entity.Mob.class), m -> m.entityTags().contains("hh_lineup")))
+                e.discard();
+            Settlement st = town(s);
+            io.github.operagtx.hearthholm.threat.Threats.forceRaid(s.overworld(), st, 4, 160);
+            log("raid forced phase=" + st.raid.phase + " dir=" + st.raid.dir + " alarm=" + st.alarm
+                    + " gateOpen=" + s.overworld().getBlockState(GATE).getValue(DoorBlock.OPEN));
+            if (!st.alarm) throw new AssertionError("raid warning did not ring the alarm");
+            player(s).teleportTo(s.overworld(), O.getX() + 4.5, O.getY() + 6, O.getZ() - 4.5, java.util.Set.of(), 0f, 25f, false);
+        });
+        ctx.waitTicks(60);
+        ctx.takeScreenshot("hh_32_raid_warning");
+        ctx.waitTicks(140);
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            Settlement st = town(s);
+            int kinds[] = new int[6];
+            for (var id : st.raid.raiders) if (l.getEntity(id) instanceof io.github.operagtx.hearthholm.entity.ashborn.AshbornEntity a)
+                log("raider " + a.getType().toShortString() + " at " + a.blockPosition().toShortString() + " hand=" + a.getMainHandItem().getItem());
+            log("raid spawned phase=" + st.raid.phase + " spawned=" + st.raid.spawned + " tracked=" + st.raid.raiders.size()
+                    + " wavesLeft=" + st.raid.wavesLeft + " strength=" + st.raid.strength);
+            if (st.raid.phase != io.github.operagtx.hearthholm.threat.RaidState.ACTIVE || st.raid.spawned == 0) throw new AssertionError("raid did not start");
+            int civ = 0, indoors = 0, atBell = 0;
+            for (SettlerEntity e : settlers(s)) {
+                boolean roof = l.getHeight(Heightmap.Types.MOTION_BLOCKING, e.getBlockX(), e.getBlockZ()) > e.getBlockY() + 1;
+                log("alarm " + e.getName().getString() + " " + e.professionId().getPath() + " act=" + e.brain().currentActivity()
+                        + " status='" + e.status().getString() + "' roof=" + roof + " pos=" + e.blockPosition().toShortString());
+                if (e.isCombatant()) { if (e.blockPosition().distSqr(BELL) < 36 || e.getTarget() != null) atBell++; }
+                else { civ++; if (roof) indoors++; }
+            }
+            log("ALARM civilians indoors " + indoors + "/" + civ + ", defenders at bell or fighting " + atBell + "/2");
+            if (indoors * 2 < civ) throw new AssertionError("civilians did not shelter");
+            // look at the raiders
+            var first = st.raid.raiders.isEmpty() ? null : l.getEntity(st.raid.raiders.getFirst());
+            if (first != null) {
+                net.minecraft.world.phys.Vec3 v = first.position();
+                net.minecraft.world.phys.Vec3 eye = v.add(net.minecraft.world.phys.Vec3.atCenterOf(O).subtract(v).normalize().scale(7)).add(0, 3, 0);
+                double dx = v.x - eye.x, dz = v.z - eye.z;
+                player(s).teleportTo(l, eye.x, eye.y, eye.z, java.util.Set.of(), (float) (Math.atan2(dz, dx) * 180 / Math.PI) - 90f, 20f, false);
+            }
+        });
+        sp.getConnection().waitForChunksRender();
+        ctx.waitTicks(10);
+        ctx.takeScreenshot("hh_33_raiders");
+        // let the fight run; then finish off stragglers so the test stays short
+        boolean[] over = {false};
+        for (int i = 0; i < 8 && !over[0]; i++) {
+            ctx.waitTicks(200);
+            sp.getServer().runOnServer(s -> {
+                Settlement st = town(s);
+                log("raid t+" + " alive=" + io.github.operagtx.hearthholm.threat.Threats.alive(s.overworld(), st) + " killed=" + st.raid.killed
+                        + " wavesLeft=" + st.raid.wavesLeft + " phase=" + st.raid.phase + " fires=" + io.github.operagtx.hearthholm.threat.Threats.activeFires());
+                over[0] = st.raid.phase == io.github.operagtx.hearthholm.threat.RaidState.NONE;
+            });
+        }
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            Settlement st = town(s);
+            if (st.raid.phase == io.github.operagtx.hearthholm.threat.RaidState.ACTIVE) {
+                st.raid.wavesLeft = 0;
+                int n = 0;
+                for (var id : List.copyOf(st.raid.raiders)) if (l.getEntity(id) instanceof net.minecraft.world.entity.LivingEntity a) { a.kill(l); n++; }
+                log("raid assisted: killed " + n + " stragglers by test code");
+            }
+        });
+        ctx.waitTicks(40);
+        sp.getServer().runOnServer(s -> {
+            Settlement st = town(s);
+            SettlerEntity e = settlers(s).getFirst();
+            log("RAID result=" + st.raid.lastResult + " won=" + st.raid.won + " lost=" + st.raid.lost + " killed=" + st.raid.killed
+                    + " deaths=" + st.raid.deaths + " nextDay=" + st.raid.nextDay + " alarm=" + st.alarm + " held_line=" + e.hasThought("held_line")
+                    + " marks=" + stock(s, io.github.operagtx.hearthholm.registry.ModItems.HEARTH_MARK));
+            if (st.raid.phase != io.github.operagtx.hearthholm.threat.RaidState.NONE || st.raid.won != 1) throw new AssertionError("raid did not end in victory");
+            if (st.alarm) throw new AssertionError("all-clear did not sound");
+            // save round trip of the threat state, and an old save without it
+            var enc = Settlement.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, st).getOrThrow();
+            var back = Settlement.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, enc).getOrThrow();
+            var old = enc.getAsJsonObject().deepCopy();
+            for (String k : List.of("raid", "rift", "alarm", "bells", "gates", "trophies")) old.remove(k);
+            var oldS = Settlement.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, old).getOrThrow();
+            log("threat codec won=" + back.raid.won + " bells=" + back.bells.size() + " old save raid.next=" + oldS.raid.nextDay + " bells=" + oldS.bells.size());
+            if (back.raid.won != 1 || back.bells.size() != 1 || oldS.raid.nextDay != -1) throw new AssertionError("threat codec");
+        });
+
+        // ---- rift night
+        sp.getServer().runCommand("time set 14500");
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            Settlement st = town(s);
+            BlockPos core = io.github.operagtx.hearthholm.threat.Threats.forceRift(l, st);
+            log("rift core=" + core + " block=" + l.getBlockState(core).getBlock());
+            if (core == null) throw new AssertionError("rift did not open");
+            player(s).teleportTo(l, core.getX() + 0.5, core.getY() + 3, core.getZ() + 7.5, java.util.Set.of(), 180f, 22f, false);
+        });
+        sp.getConnection().waitForChunksRender();
+        ctx.waitTicks(120);
+        ctx.takeScreenshot("hh_34_rift");
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            Settlement st = town(s);
+            int wisps = 0, others = 0;
+            for (var id : st.rift.mobs) {
+                var m = l.getEntity(id);
+                if (m instanceof io.github.operagtx.hearthholm.entity.ashborn.RiftWispEntity) wisps++; else if (m != null) others++;
+            }
+            log("rift mobs wisps=" + wisps + " monsters=" + others + " spawnedTotal=" + st.stats.get("rift_spawned") + " hp=" + st.rift.hp);
+            if (wisps + others == 0) throw new AssertionError("rift spawned nothing");
+            l.destroyBlock(st.rift.core, false);
+        });
+        ctx.waitTicks(40);
+        sp.getServer().runOnServer(s -> {
+            Settlement st = town(s);
+            int shards = 0;
+            for (var it : s.overworld().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new AABB(O).inflate(128)))
+                if (it.getItem().is(io.github.operagtx.hearthholm.registry.ModItems.RIFT_SHARD)) shards += it.getItem().getCount();
+            log("RIFT closed open=" + st.rift.open() + " closed=" + st.rift.closed + " shards dropped=" + shards + " next=" + st.rift.nextDay);
+            if (st.rift.open() || st.rift.closed != 1 || shards == 0) throw new AssertionError("rift did not close properly");
+            for (var m : s.overworld().getEntitiesOfClass(net.minecraft.world.entity.monster.Monster.class, new AABB(O).inflate(128))) m.discard();
+        });
+
+        // ---- the Ash Chieftain
+        sp.getServer().runCommand("time set 6000");
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            ServerPlayer p = player(s);
+            p.teleportTo(l, O.getX() - 10.5, O.getY(), O.getZ() + 14.5, java.util.Set.of(), 180f, -5f, false);
+            var c = io.github.operagtx.hearthholm.threat.Threats.spawnChieftain(l, O.offset(-11, 0, 9));
+            c.setNoAi(true);
+            c.setYRot(0f); c.yBodyRot = 0f; c.yHeadRot = 0f;
+            CHIEF = c.getUUID();
+            log("chieftain hp=" + c.getHealth() + " scale=" + c.getScale() + " phase=" + c.phase());
+        });
+        ctx.waitTicks(30);
+        ctx.takeScreenshot("hh_35_chieftain");
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            var c = (io.github.operagtx.hearthholm.entity.ashborn.AshChieftainEntity) l.getEntity(CHIEF);
+            c.setNoAi(false);
+            c.setHealth(c.getMaxHealth() * 0.5f);
+        });
+        ctx.waitTicks(10);
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            var c = (io.github.operagtx.hearthholm.entity.ashborn.AshChieftainEntity) l.getEntity(CHIEF);
+            int p2 = c.phase();
+            c.setHealth(c.getMaxHealth() * 0.25f);
+            c.castRing(c.position().add(-4.5, 0, 1));
+            player(s).teleportTo(l, O.getX() - 9.5, O.getY() + 4, O.getZ() + 19.5, java.util.Set.of(), 160f, 25f, false);
+            log("chieftain phase after 50% = " + p2);
+        });
+        ctx.waitTicks(50);
+        ctx.takeScreenshot("hh_36_chieftain_fire_ring");
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            var c = (io.github.operagtx.hearthholm.entity.ashborn.AshChieftainEntity) l.getEntity(CHIEF);
+            int minions = l.getEntitiesOfClass(io.github.operagtx.hearthholm.entity.ashborn.AshbornEntity.class, c.getBoundingBox().inflate(12), e -> e != c).size();
+            log("CHIEFTAIN phase=" + c.phase() + " rings=" + c.rings().size() + " minions=" + minions + " bossbarPlayers=" + c.bossEvent().getPlayers().size());
+            if (c.phase() != 3 || minions == 0) throw new AssertionError("chieftain phases");
+            BlockPos at = c.blockPosition();
+            c.kill(l);
+            for (var e : l.getEntitiesOfClass(io.github.operagtx.hearthholm.entity.ashborn.AshbornEntity.class, new AABB(O).inflate(64))) e.discard();
+            boolean banner = !l.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new AABB(at).inflate(4),
+                    it -> it.getItem().is(ModBlocks.CHIEFTAIN_BANNER.asItem())).isEmpty();
+            log("chieftain dead, banner dropped=" + banner);
+            if (!banner) throw new AssertionError("no chieftain banner");
+            // trophy in the hall
+            BANNER = O.offset(6, 0, 2);
+            l.setBlock(BANNER, ModBlocks.CHIEFTAIN_BANNER.defaultBlockState(), 3);
+            io.github.operagtx.hearthholm.threat.Defense.onTrophyPlaced(l, BANNER);
+            Settlement st = town(s);
+            st.rescan(l);
+            log("TROPHY in hall=" + st.trophyInHall);
+            if (!st.trophyInHall) throw new AssertionError("trophy not detected");
+        });
+        // brute vs palisade: a brute stands behind the wall and wants the town hall
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            var b = io.github.operagtx.hearthholm.registry.ModEntities.ASH_BRUTE.spawn(l, O.offset(-9, 0, 2), net.minecraft.world.entity.EntitySpawnReason.SPAWN_ITEM_USE);
+            b.joinRaid(town(s).id, O.offset(4, 0, 3));
+            b.addTag("hh_brute");
+            log("brute spawned " + b.blockPosition().toShortString());
+        });
+        ctx.waitTicks(400);
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            int left = 0;
+            for (int dz = -4; dz <= 4; dz++) for (int dy = 0; dy <= 1; dy++)
+                if (l.getBlockState(O.offset(-7, dy, dz)).getBlock() instanceof io.github.operagtx.hearthholm.block.PalisadeBlock) left++;
+            boolean gate = l.getBlockState(GATE).getBlock() instanceof io.github.operagtx.hearthholm.block.PalisadeGateBlock;
+            var brutes = l.getEntitiesOfClass(io.github.operagtx.hearthholm.entity.ashborn.AshBruteEntity.class, new AABB(O).inflate(48));
+            log("BRUTE palisade blocks left " + left + "/16 gate=" + gate + " brute=" + (brutes.isEmpty() ? "gone" : brutes.getFirst().blockPosition().toShortString()));
+            for (var b : brutes) b.discard();
+            SettlementService.openTownHall(player(s), DESK);
+        });
+        ctx.waitForScreen(TownHallScreen.class);
+        ctx.clickScreenButton("gui.hearthholm.tab.defense");
+        ctx.waitTicks(5);
+        ctx.takeScreenshot("hh_37_defense_tab");
+        ctx.setScreen(() -> null);
+        sp.getServer().runOnServer(s -> {
+            for (SettlerEntity e : settlers(s)) log("wave C moods " + e.getName().getString() + " " + e.thoughts().stream().map(t -> t.id() + t.value()).toList());
+            log("WAVE C OK");
         });
     }
 
