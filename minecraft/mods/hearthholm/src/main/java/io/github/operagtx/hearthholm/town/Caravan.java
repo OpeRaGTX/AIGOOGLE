@@ -141,7 +141,7 @@ public final class Caravan {
         }
         if (c.caravanHere(now) || s.residents.isEmpty() || s.tier().index() < 1) return;
         long day = SettlementService.day(level);
-        if (c.lastCaravan < 0) {
+        if (c.lastCaravan == -1) {
             c.lastCaravan = day;
             SettlementService.manager(level).setDirty();
             return;

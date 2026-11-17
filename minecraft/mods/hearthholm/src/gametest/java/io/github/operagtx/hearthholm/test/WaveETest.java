@@ -107,6 +107,10 @@ final class WaveETest {
             Settlement st = town(s);
             st.alarm = false;
             p.teleportTo(l, stake.getX() + 0.5, stake.getY(), stake.getZ() + 3.5, Set.of(), 0f, 10f, false);
+            if (!(l.getBlockEntity(stake) instanceof WorkSiteBlockEntity)) {   // the builder finished the house and took the stake away
+                l.setBlock(stake, ModBlocks.CONSTRUCTION_STAKE.defaultBlockState().setValue(io.github.operagtx.hearthholm.worksite.WorkSiteBlock.FACING, Direction.SOUTH), 3);
+                SettlementService.onWorkSitePlaced(l, stake, p);
+            }
             WorkSiteBlockEntity w = (WorkSiteBlockEntity) l.getBlockEntity(stake);
             w.setOption("build", 0);
             w.setOption("blueprint", 0);
@@ -335,7 +339,6 @@ final class WaveETest {
                     if (!ok || st.candidates.size() != before + 1 || !c.legendary()) throw new AssertionError("hire purchase failed");
                 }
             }
-            if (Caravan.buy(p, l, st, 0) && false) throw new AssertionError();
             log("CARAVAN stats bought=" + st.stats.get("caravan_bought") + " sold=" + st.stats.get("caravan_sold"));
             p.teleportTo(l, MARKET.getX() + 0.5, MARKET.getY(), MARKET.getZ() + 4.5, Set.of(), 180f, 10f, false);
             Caravan.openFromBlock(p, MARKET);
