@@ -19,6 +19,9 @@ public final class ModTab {
                 .displayItems((params, output) -> {
                     for (Block b : ModBlocks.TAB_ORDER) output.accept(b);
                     output.accept(ModItems.HEARTH_MARK);
+                    output.accept(ModItems.RIFT_SHARD);
+                    output.accept(ModItems.FOUNDERS_WHISTLE);
+                    for (var egg : ModItems.SPAWN_EGGS) output.accept(egg);
                 })
                 .build();
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Hearthholm.id("main"), tab);

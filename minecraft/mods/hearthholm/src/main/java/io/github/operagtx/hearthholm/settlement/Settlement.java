@@ -7,6 +7,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.operagtx.hearthholm.block.WarehouseLedgerBlock;
 import io.github.operagtx.hearthholm.block.WorkshopBlock;
 import io.github.operagtx.hearthholm.crafting.Workshop;
+import io.github.operagtx.hearthholm.threat.RaidState;
+import io.github.operagtx.hearthholm.threat.RiftState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.core.BlockPos;
@@ -52,15 +54,23 @@ public final class Settlement {
     }
 
     /** Fields added after the first release (kept in a second map codec: a record codec holds 16 fields). */
-    private record Extra(List<BlockPos> workshops, List<Order> orders, int marksMinted, long lastFestival, long festivalStart, long festivalEnd) {
+    private record Extra(List<BlockPos> workshops, List<Order> orders, int marksMinted, long lastFestival, long festivalStart, long festivalEnd,
+                         RaidState raid, RiftState rift, boolean alarm, List<BlockPos> bells, List<BlockPos> gates, List<BlockPos> trophies) {
         static final MapCodec<Extra> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 BlockPos.CODEC.listOf().optionalFieldOf("workshops", List.of()).forGetter(Extra::workshops),
                 Order.CODEC.listOf().optionalFieldOf("orders", List.of()).forGetter(Extra::orders),
                 Codec.INT.optionalFieldOf("marks_minted", 0).forGetter(Extra::marksMinted),
                 Codec.LONG.optionalFieldOf("last_festival", -1L).forGetter(Extra::lastFestival),
                 Codec.LONG.optionalFieldOf("festival_start", -1L).forGetter(Extra::festivalStart),
-                Codec.LONG.optionalFieldOf("festival_end", -1L).forGetter(Extra::festivalEnd)
-        ).apply(i, Extra::new));
+                Codec.LONG.optionalFieldOf("festival_end", -1L).forGetter(Extra::festivalEnd),
+                RaidState.CODEC.optionalFieldOf("raid").forGetter(e -> java.util.Optional.of(e.raid())),
+                RiftState.CODEC.optionalFieldOf("rift").forGetter(e -> java.util.Optional.of(e.rift())),
+                Codec.BOOL.optionalFieldOf("alarm", false).forGetter(Extra::alarm),
+                BlockPos.CODEC.listOf().optionalFieldOf("bells", List.of()).forGetter(Extra::bells),
+                BlockPos.CODEC.listOf().optionalFieldOf("gates", List.of()).forGetter(Extra::gates),
+                BlockPos.CODEC.listOf().optionalFieldOf("trophies", List.of()).forGetter(Extra::trophies)
+        ).apply(i, (w, o, m, lf, fs, fe, raid, rift, alarm, bells, gates, trophies) -> new Extra(w, o, m, lf, fs, fe,
+                raid.orElseGet(RaidState::new), rift.orElseGet(RiftState::new), alarm, bells, gates, trophies)));
     }
 
     private static final MapCodec<Settlement> BASE_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -106,9 +116,16 @@ public final class Settlement {
         s.lastFestival = p.getSecond().lastFestival();
         s.festivalStart = p.getSecond().festivalStart();
         s.festivalEnd = p.getSecond().festivalEnd();
+        s.raid = p.getSecond().raid();
+        s.rift = p.getSecond().rift();
+        s.alarm = p.getSecond().alarm();
+        s.bells.addAll(p.getSecond().bells());
+        s.gates.addAll(p.getSecond().gates());
+        s.trophies.addAll(p.getSecond().trophies());
         return s;
     }, s -> Pair.of(s, new Extra(List.copyOf(s.workshops), List.copyOf(s.orders), s.marksMinted,
-            s.lastFestival, s.festivalStart, s.festivalEnd))).codec();
+            s.lastFestival, s.festivalStart, s.festivalEnd, s.raid, s.rift, s.alarm, List.copyOf(s.bells),
+            List.copyOf(s.gates), List.copyOf(s.trophies)))).codec();
 
     public final UUID id;
     public final UUID owner;
@@ -131,6 +148,15 @@ public final class Settlement {
     public int marksMinted;
     /** Harvest festival: day of the last one (-1 = none yet), game time it started and ends (end -1 = not running). */
     public long lastFestival = -1, festivalStart = -1, festivalEnd = -1;
+    /** Wave C threats: raid and rift bookkeeping, the alarm and the defence blocks (bells, gates, trophy banners). */
+    public RaidState raid = new RaidState();
+    public RiftState rift = new RiftState();
+    public boolean alarm;
+    public final List<BlockPos> bells = new ArrayList<>();
+    public final List<BlockPos> gates = new ArrayList<>();
+    public final List<BlockPos> trophies = new ArrayList<>();
+    /** Not saved: a chieftain's banner stands inside the town hall (checked on every room scan). */
+    public boolean trophyInHall;
     /** Not saved: the open spot by the town hall where the festival is held. */
     public @Nullable BlockPos square;
     /** Not saved: which crafter is making which item right now (order board status). */
@@ -279,6 +305,10 @@ public final class Settlement {
                 }
             }
 
+        trophies.removeIf(p -> level.isLoaded(p) && !(level.getBlockState(p).getBlock() instanceof io.github.operagtx.hearthholm.block.ChieftainBannerBlock));
+        trophyInHall = deskPresent && !rooms.isEmpty() && trophies.stream().anyMatch(p -> rooms.getFirst().contains(p));
+        bells.removeIf(p -> level.isLoaded(p) && !(level.getBlockState(p).getBlock() instanceof io.github.operagtx.hearthholm.block.AlarmBellBlock));
+        gates.removeIf(p -> level.isLoaded(p) && !(level.getBlockState(p).getBlock() instanceof io.github.operagtx.hearthholm.block.PalisadeGateBlock));
         buildings.clear();
         for (int i = 0; i < rooms.size(); i++) {
             RoomScanner.Room room = rooms.get(i);

@@ -1,7 +1,7 @@
 package io.github.operagtx.hearthholm.registry;
 
 import io.github.operagtx.hearthholm.Hearthholm;
-import io.github.operagtx.hearthholm.block.TownHallDeskBlock;
+import io.github.operagtx.hearthholm.block.*;
 import io.github.operagtx.hearthholm.block.OrderBoardBlock;
 import io.github.operagtx.hearthholm.block.WarehouseLedgerBlock;
 import io.github.operagtx.hearthholm.block.WorkshopBlock;
@@ -43,6 +43,7 @@ public final class ModBlocks {
     public static WorkSiteBlock FISHING_MARKER;
     public static WorkSiteBlock PATROL_POST;
     public static WorkSiteBlock TERRITORY_BANNER;
+    public static Block ALARM_BELL, PALISADE, PALISADE_GATE, RIFT_CORE, RIFT_LANTERN, CHIEFTAIN_BANNER;
 
     private ModBlocks() {}
 
@@ -87,5 +88,18 @@ public final class ModBlocks {
         FISHING_MARKER = workSite("fishing_marker", WorkSiteTypes.FISHING_ID, MapColor.WATER);
         PATROL_POST = workSite("patrol_post", WorkSiteTypes.PATROL_ID, MapColor.COLOR_BLUE);
         TERRITORY_BANNER = workSite("territory_banner", WorkSiteTypes.TERRITORY_ID, MapColor.COLOR_RED);
+        // wave C: defence and threats
+        ALARM_BELL = register("alarm_bell", AlarmBellBlock::new, BlockBehaviour.Properties.of()
+                .mapColor(MapColor.GOLD).strength(2f).sound(SoundType.WOOD).noOcclusion());
+        PALISADE = register("palisade", PalisadeBlock::new, BlockBehaviour.Properties.of()
+                .mapColor(MapColor.WOOD).strength(3f, 12f).sound(SoundType.WOOD));
+        PALISADE_GATE = register("palisade_gate", PalisadeGateBlock::new, BlockBehaviour.Properties.of()
+                .mapColor(MapColor.WOOD).strength(3f, 12f).sound(SoundType.WOOD).noOcclusion());
+        RIFT_CORE = register("rift_core", RiftCoreBlock::new, BlockBehaviour.Properties.of()
+                .mapColor(MapColor.COLOR_PURPLE).strength(6f, 1200f).sound(SoundType.AMETHYST).lightLevel(st -> 15).noLootTable());
+        RIFT_LANTERN = register("rift_lantern", RiftLanternBlock::new, BlockBehaviour.Properties.of()
+                .mapColor(MapColor.COLOR_PURPLE).strength(1.5f).sound(SoundType.LANTERN).lightLevel(st -> 15).noOcclusion());
+        CHIEFTAIN_BANNER = register("chieftain_banner", ChieftainBannerBlock::new, BlockBehaviour.Properties.of()
+                .mapColor(MapColor.COLOR_RED).strength(1.5f).sound(SoundType.WOOD).noOcclusion());
     }
 }
