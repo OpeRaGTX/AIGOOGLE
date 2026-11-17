@@ -228,7 +228,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             BlockPos sq = io.github.operagtx.hearthholm.settlement.Festival.square(s.overworld(), st);
             log("festival square " + sq + " center " + st.center);
             ServerPlayer p = player(s);
-            p.teleportTo(s.overworld(), sq.getX() - 7.5, sq.getY(), sq.getZ() + 0.5, java.util.Set.of(), 270f, 12f, false);
+            p.teleportTo(s.overworld(), sq.getX() + 0.5, O.getY() + 5, O.getZ() - 6.5, java.util.Set.of(), 0f, 22f, false);
         });
         ctx.waitTicks(450);
         sp.getServer().runOnServer(s -> {
@@ -274,6 +274,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             ServerPlayer p = player(s);
             p.teleportTo(l, O.getX() + 4.5, O.getY(), O.getZ() - 4.4, java.util.Set.of(), 0f, 8f, false);
             String[] lines = {"greet", "hungry", "work_miner", "trait_cheerful", "festival"};
+            for (int i = 4; i < ls.size(); i++) ls.get(i).teleportTo(O.getX() - 8.5, O.getY(), O.getZ() + 5.5);
             for (int i = 0; i < 4; i++) {
                 SettlerEntity e = ls.get(i);
                 e.setNoAi(true);
@@ -287,6 +288,11 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             log("cap check say(cap=3) while bubbling -> " + io.github.operagtx.hearthholm.social.Social.say(ls.get(4), "idle", 3));
         });
         ctx.waitTicks(15);
+        ctx.runOnClient(mc -> {
+            for (var e : mc.level.entitiesForRendering())
+                if (e instanceof SettlerEntity se) log("client bubble " + se.getName().getString() + " has=" + se.hasBubble() + " '" + se.bubble().getString() + "' pos=" + se.blockPosition().toShortString());
+            log("client player " + mc.player.blockPosition().toShortString());
+        });
         ctx.takeScreenshot("hh_25_bubbles");
         sp.getServer().runOnServer(s -> { for (SettlerEntity e : settlers(s)) e.setNoAi(false); });
         // an evening chat between friends
@@ -340,7 +346,9 @@ public final class HearthholmClientTest implements FabricClientGameTest {
     }
 
     private static List<SettlerEntity> settlers(MinecraftServer s) {
-        return s.overworld().getEntitiesOfClass(SettlerEntity.class, new AABB(O).inflate(96));
+        List<SettlerEntity> l = new java.util.ArrayList<>(s.overworld().getEntitiesOfClass(SettlerEntity.class, new AABB(O).inflate(96)));
+        l.sort(java.util.Comparator.comparing(SettlerEntity::getUUID));
+        return l;
     }
 
     private static void box(ServerLevel l, int x0, int y0, int z0, int x1, int y1, int z1, BlockState wall, BlockState roof) {

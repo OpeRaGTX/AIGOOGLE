@@ -130,8 +130,8 @@ public final class SettlerScreen extends HhScreen {
         text(g, moodFace(view.mood()) + " " + view.mood(), nx + 154, ny, moodColor(view.mood()));
         ny += 12;
         if (!view.bed()) { text(g, Component.translatable("gui.hearthholm.no_bed"), nx, ny, BAD); ny += 11; }
-        for (MoodEntry m : view.moods()) {
-            if (ny > top + panelH - 98) break;
+        for (MoodEntry m : view.moods().stream().sorted(java.util.Comparator.comparingInt((MoodEntry e) -> -Math.abs(e.value()))).toList()) {
+            if (ny > top + panelH - 100) break;
             text(g, m.label(), nx + 4, ny, TEXT);
             String v = (m.value() > 0 ? "+" : "") + m.value();
             text(g, v, nx + 150, ny, m.value() >= 0 ? GOOD : BAD);
@@ -139,7 +139,7 @@ public final class SettlerScreen extends HhScreen {
         }
 
         // equipment + inventory
-        int ix = left + 8, iy = top + panelH - 77;
+        int ix = left + 8, iy = top + panelH - 89;
         int i = 0;
         for (ItemStack st : view.equipment()) drawItem(g, st, ix + (i++) * 18, iy, mx, my);
         i = 0;
