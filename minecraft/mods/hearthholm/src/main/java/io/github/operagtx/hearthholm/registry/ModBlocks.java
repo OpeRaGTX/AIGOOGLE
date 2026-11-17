@@ -2,7 +2,10 @@ package io.github.operagtx.hearthholm.registry;
 
 import io.github.operagtx.hearthholm.Hearthholm;
 import io.github.operagtx.hearthholm.block.TownHallDeskBlock;
+import io.github.operagtx.hearthholm.block.OrderBoardBlock;
 import io.github.operagtx.hearthholm.block.WarehouseLedgerBlock;
+import io.github.operagtx.hearthholm.block.WorkshopBlock;
+import io.github.operagtx.hearthholm.crafting.Workshop;
 import io.github.operagtx.hearthholm.worksite.WorkSiteBlock;
 import io.github.operagtx.hearthholm.worksite.WorkSiteTypes;
 import net.minecraft.core.Registry;
@@ -28,6 +31,11 @@ public final class ModBlocks {
 
     public static Block TOWN_HALL_DESK;
     public static Block WAREHOUSE_LEDGER;
+    public static WorkshopBlock CARPENTER_BENCH;
+    public static WorkshopBlock MASON_TABLE;
+    public static WorkshopBlock SMITH_ANVIL;
+    public static WorkshopBlock COOK_STOVE;
+    public static Block ORDER_BOARD;
     public static WorkSiteBlock CONSTRUCTION_STAKE;
     public static WorkSiteBlock MINE_MARKER;
     public static WorkSiteBlock FOREST_MARKER;
@@ -61,6 +69,16 @@ public final class ModBlocks {
         TOWN_HALL_DESK = register("town_hall_desk", TownHallDeskBlock::new, BlockBehaviour.Properties.of()
                 .mapColor(MapColor.WOOD).strength(2.5f).sound(SoundType.WOOD).noOcclusion());
         WAREHOUSE_LEDGER = register("warehouse_ledger", WarehouseLedgerBlock::new, BlockBehaviour.Properties.of()
+                .mapColor(MapColor.WOOD).strength(1.5f).sound(SoundType.WOOD).noOcclusion());
+        CARPENTER_BENCH = register("carpenter_bench", p -> new WorkshopBlock(p, Workshop.CARPENTRY, Block.box(0, 0, 0, 16, 14, 16)),
+                BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2f).sound(SoundType.WOOD).noOcclusion());
+        MASON_TABLE = register("mason_table", p -> new WorkshopBlock(p, Workshop.MASONRY, Block.box(0, 0, 0, 16, 14, 16)),
+                BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(2.5f).sound(SoundType.STONE).noOcclusion());
+        SMITH_ANVIL = register("smith_anvil", p -> new WorkshopBlock(p, Workshop.SMITHY, Block.box(1, 0, 2, 15, 12, 14)),
+                BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(3f).sound(SoundType.ANVIL).noOcclusion());
+        COOK_STOVE = register("cook_stove", p -> new WorkshopBlock(p, Workshop.KITCHEN, Block.box(0, 0, 0, 16, 16, 16)),
+                BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(2.5f).sound(SoundType.STONE).lightLevel(st -> 11));
+        ORDER_BOARD = register("order_board", OrderBoardBlock::new, BlockBehaviour.Properties.of()
                 .mapColor(MapColor.WOOD).strength(1.5f).sound(SoundType.WOOD).noOcclusion());
         CONSTRUCTION_STAKE = workSite("construction_stake", WorkSiteTypes.CONSTRUCTION_ID, MapColor.COLOR_YELLOW);
         MINE_MARKER = workSite("mine_marker", WorkSiteTypes.MINE_ID, MapColor.STONE);

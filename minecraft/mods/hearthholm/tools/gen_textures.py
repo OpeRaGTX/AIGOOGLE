@@ -288,6 +288,60 @@ def outfit(prof, slim):
             fill_part(im, O[arm], lambda f, x, y, w, h: plate(f) if f == "top" or y <= 3 else (rgb(shade(0x6B4A2A, f)) if 6 <= y <= 8 else None))
         for leg in ("rleg", "lleg"):
             fill_part(im, O[leg], lambda f, x, y, w, h: rgb(shade(0x6B4A2A, f)) if f not in ("top", "bottom") and 5 <= y <= 9 else None)
+    elif prof == "carpenter":
+        helmet(im, 0x7A5230, 1)
+        leather = 0x8A5A32
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(leather) if y >= 3 else (rgb(0x5E3C22) if x in (1, 6) else None))
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(0x5E3C22) if 2 <= x <= 5 and y in (7, 8) else None)   # pocket
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(0xE8D44A) if x == 2 and y == 6 else None)            # pencil
+        fill_face(im, O["body"]["back"], lambda x, y, w, h: rgb(0x5E3C22) if abs(x - y) < 1 or abs(7 - x - y) < 1 else None)
+        for leg in ("rleg", "lleg"):
+            fill_part(im, O[leg], lambda f, x, y, w, h: rgb(shade(leather, f)) if f == "front" and y < 5 else None)
+    elif prof == "mason":
+        helmet(im, 0x8F8A80, 1)
+        smock = 0xB8B0A0
+        fill_part(im, O["body"], lambda f, x, y, w, h: (rgb(shade(smock, f)) if (x * 7 + y * 3) % 11 else rgb(0xE6E2DA)) if f not in ("top", "bottom") and y <= 10 else None)
+        for arm in ("rarm", "larm"):
+            fill_part(im, O[arm], lambda f, x, y, w, h: rgb(shade(smock, f)) if f != "bottom" and (f == "top" or y <= 5) else None)
+        for leg in ("rleg", "lleg"):
+            fill_part(im, O[leg], lambda f, x, y, w, h: rgb(shade(0x6E6A62, f)) if f == "front" and y in (4, 5) else None)
+    elif prof == "smith":
+        O_h = parts(False, True)["head"]
+        for f in ("front", "right", "left", "back"):
+            fill_face(im, O_h[f], lambda x, y, w, h, f=f: rgb(shade(0xA0302A, f)) if y in (1, 2) else None)
+        fill_face(im, O_h["back"], lambda x, y, w, h: rgb(0x7A2420) if x in (3, 4) and y in (3, 4) else None)
+        apron = 0x3A2A20
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(apron, n=4) if y >= 1 and 1 <= x <= 6 else (rgb(0x2A1E18) if y == 0 and x in (2, 5) else None))
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(0x6E5A48) if y in (5, 9) and 2 <= x <= 5 else None)
+        fill_face(im, O["body"]["back"], lambda x, y, w, h: rgb(0x2A1E18) if y == 8 else None)
+        for arm in ("rarm", "larm"):
+            fill_part(im, O[arm], lambda f, x, y, w, h: rgb(shade(0x4A3626, f)) if f != "top" and 7 <= y <= 11 else None)
+        for leg in ("rleg", "lleg"):
+            fill_part(im, O[leg], lambda f, x, y, w, h: rgb(shade(apron, f), n=4) if f == "front" and y < 7 else None)
+    elif prof == "cook":
+        O_h = parts(False, True)["head"]
+        fill_face(im, O_h["top"], lambda x, y, w, h: rgb(shade(0xF4F2EC, "top"), n=4))
+        for f in ("front", "right", "left", "back"):
+            fill_face(im, O_h[f], lambda x, y, w, h, f=f: rgb(shade(0xF4F2EC if y else 0xFFFFFF, f), n=4) if y < 2 or (y == 2 and f != "front") else None)
+        fill_face(im, O_h["front"], lambda x, y, w, h: rgb(0xD8D4CA) if y == 1 and x % 3 == 0 else None)
+        white = 0xEEECE4
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(white, n=4) if y >= 2 else (rgb(0xC0392B) if 2 <= x <= 5 else None))
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(0xC9C4B6) if x in (3, 4) and y in (4, 7) else None)
+        fill_face(im, O["body"]["back"], lambda x, y, w, h: rgb(0xD8D4CA) if y == 9 else None)
+        for arm in ("rarm", "larm"):
+            fill_part(im, O[arm], lambda f, x, y, w, h: rgb(shade(white, f), n=4) if f != "bottom" and (f == "top" or y <= 4) else None)
+        for leg in ("rleg", "lleg"):
+            fill_part(im, O[leg], lambda f, x, y, w, h: rgb(shade(white, f), n=4) if f == "front" and y < 6 else None)
+    elif prof == "hauler":
+        helmet(im, 0x5E7A3A, 1, band=0x46602A)
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(0x6B4A2A) if x in (1, 6) and y <= 9 else None)
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(0xB89A4A) if x in (1, 6) and y == 9 else None)
+        pack = 0x8C6A3E
+        fill_face(im, O["body"]["back"], lambda x, y, w, h: rgb(pack) if 1 <= x <= 6 and 1 <= y <= 9 else None)
+        fill_face(im, O["body"]["back"], lambda x, y, w, h: rgb(0x5E4426) if (1 <= x <= 6 and y in (1, 4)) or (x in (3, 4) and y == 6) else None)
+        for side in ("right", "left"):
+            fill_face(im, O["body"][side], lambda x, y, w, h: rgb(shade(pack, "right")) if x >= 2 and 1 <= y <= 9 else None)
+        fill_face(im, O["body"]["top"], lambda x, y, w, h: rgb(pack) if y >= 2 and 1 <= x <= 6 else None)
     return im
 
 # ---------------------------------------------------------------- blocks
@@ -340,7 +394,7 @@ def ledger_textures():
     return top, side
 
 def sign_icon(kind):
-    im = plank_tex(0xB89263, rows=16, seed=hash(kind) % 100)
+    im = plank_tex(0xB89263, rows=16, seed=sum(map(ord, kind)) % 100)
     for x in range(16):
         im.putpixel((x, 0), (90, 62, 36, 255)); im.putpixel((x, 15), (90, 62, 36, 255))
     for y in range(16):
@@ -369,6 +423,109 @@ def sign_icon(kind):
         for i, ch in enumerate(row):
             if ch != ".":
                 im.putpixel((i, 3 + j), pal[ch] + (255,))
+    return im
+
+def stone_tex(base, seed, bricks=False):
+    r = random.Random(seed)
+    im = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            k = 1 + r.randint(-8, 8) / 100
+            if bricks and (y % 4 == 3 or (x + (4 if (y // 4) % 2 else 0)) % 8 == 7): k *= 0.7
+            im.putpixel((x, y), (int((base >> 16 & 255) * k), int((base >> 8 & 255) * k), int((base & 255) * k), 255))
+    return im
+
+def draw(im, rows, pal, ox=0, oy=0):
+    for j, row in enumerate(rows):
+        for i, ch in enumerate(row):
+            if ch != ".":
+                im.putpixel((ox + i, oy + j), pal[ch] + (255,))
+
+def workshop_textures():
+    out = {}
+    top = plank_tex(0xA9784A, seed=11)
+    draw(top, ["......SSSSSSSS..", ".....SsSsSsSsS..", "....hh.........."], {"S": (175, 180, 188), "s": (120, 125, 135), "h": (110, 70, 40)}, 0, 3)
+    draw(top, ["cc..c", ".c.cc", "cc..."], {"c": (230, 205, 150)}, 2, 10)
+    draw(top, ["....r", "...r.", "..r..", ".r...", "y...."], {"r": (130, 85, 45), "y": (205, 170, 70)}, 9, 9)
+    out["carpenter_bench_top"] = top
+    side = plank_tex(0x7C5233, seed=12)
+    out["carpenter_bench_side"] = side
+    front = plank_tex(0x7C5233, seed=13)
+    for x in range(3, 13):
+        front.putpixel((x, 1), (60, 40, 25, 255))
+    draw(front, ["SS", "SS"], {"S": (150, 150, 158)}, 7, 0)
+    out["carpenter_bench_front"] = front
+
+    mt = stone_tex(0xA8A49C, 21)
+    for x in range(16):
+        mt.putpixel((x, 0), (90, 88, 84, 255)); mt.putpixel((x, 15), (90, 88, 84, 255))
+    draw(mt, ["bbbbb.bbbb", "bbbbb.bbbb", "..........", "bb.bbbbb.b", "bb.bbbbb.b"], {"b": (150, 140, 128)}, 1, 2)
+    draw(mt, ["ww....", ".ww...", "..wwkk", "...kkk"], {"w": (120, 80, 45), "k": (90, 95, 105)}, 9, 9)
+    draw(mt, ["MM", "MM", ".h", ".h", ".h"], {"M": (70, 72, 78), "h": (120, 80, 45)}, 3, 9)
+    out["mason_table_top"] = mt
+    out["mason_table_side"] = stone_tex(0x8E8A84, 22, bricks=True)
+
+    at = stone_tex(0x45474D, 31)
+    for x in range(16):
+        at.putpixel((x, 4), (95, 98, 106, 255)); at.putpixel((x, 11), (30, 31, 35, 255))
+    draw(at, ["hhhhh", "hhhhh", "..w..", "..w..", "..w..", "..w.."], {"h": (110, 112, 120), "w": (120, 80, 45)}, 5, 5)
+    out["smith_anvil_top"] = at
+    asd = stone_tex(0x3E4046, 32)
+    for x in range(16):
+        asd.putpixel((x, 0), (90, 92, 100, 255))
+    out["smith_anvil_side"] = asd
+    stump = plank_tex(0x6B4A2A, rows=16, seed=33)
+    for y in range(16):
+        for x in (0, 15):
+            stump.putpixel((x, y), (80, 55, 32, 255))
+    out["smith_anvil_stump"] = stump
+
+    stove_side = stone_tex(0x9C5A3C, 41, bricks=True)
+    out["cook_stove_side"] = stove_side
+    sf = stone_tex(0x9C5A3C, 42, bricks=True)
+    for x in range(3, 13):
+        for y in range(5, 14):
+            edge = x in (3, 12) or y in (5, 13)
+            if edge: sf.putpixel((x, y), (40, 40, 44, 255))
+            else:
+                fire = (255, 200 - (13 - y) * 12, 60, 255) if (x + y) % 3 else (255, 120, 30, 255)
+                sf.putpixel((x, y), fire if y >= 9 else (30, 22, 18, 255))
+    draw(sf, ["gggggggggg"], {"g": (70, 70, 76)}, 3, 2)
+    out["cook_stove_front"] = sf
+    st = stone_tex(0x4A4A50, 43)
+    for x in range(16):
+        for y in range(16):
+            if (x % 4 == 0 or y % 4 == 0) and 1 <= x <= 14 and 1 <= y <= 14: st.putpixel((x, y), (28, 28, 32, 255))
+    out["cook_stove_top"] = st
+    pot = stone_tex(0x5A5E66, 44)
+    for x in range(16):
+        pot.putpixel((x, 0), (200, 170, 120, 255)); pot.putpixel((x, 1), (170, 120, 70, 255))
+    out["cook_stove_pot"] = pot
+
+    board = plank_tex(0x9C7444, rows=5, seed=51)
+    for x in range(16):
+        board.putpixel((x, 0), (90, 62, 36, 255)); board.putpixel((x, 10), (90, 62, 36, 255))
+    for (px0, py0, col) in ((1, 2, (236, 226, 196)), (6, 1, (225, 235, 210)), (11, 2, (240, 220, 200)), (3, 6, (230, 225, 205)), (9, 6, (236, 226, 196))):
+        for x in range(px0, px0 + 4):
+            for y in range(py0, py0 + 3):
+                board.putpixel((x, y), col + (255,))
+        board.putpixel((px0 + 1, py0 + 1), (90, 90, 110, 255)); board.putpixel((px0 + 2, py0 + 1), (90, 90, 110, 255))
+        board.putpixel((px0 + 1, py0), (200, 50, 40, 255))
+    out["order_board_front"] = board
+    out["order_board_back"] = plank_tex(0x7C5233, rows=5, seed=52)
+    return out
+
+def hearth_mark():
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+            if d <= 6.6:
+                k = 1.0 - (x + y - 15) * 0.02
+                c = (int(214 * k), int(160 * k), int(64 * k), 255) if d < 5.4 else (150, 104, 34, 255)
+                im.putpixel((x, y), c)
+    draw(im, ["...f....", "..ff.f..", "..fFff..", ".fFFFf..", ".fFYFf..", "..fFf...", "bbbbbbb."], {"f": (190, 70, 30), "F": (240, 130, 40), "Y": (255, 230, 120), "b": (120, 80, 30)}, 4, 4)
+    im.putpixel((5, 3), (255, 240, 190, 255)); im.putpixel((4, 4), (255, 240, 190, 255))
     return im
 
 def icon():
@@ -418,6 +575,13 @@ def main():
         save(sign_icon(kind), f"block/{kind}_sign.png")
     p = os.path.join(OUT, "..", "icon.png")
     icon().save(p)
+    rnd.seed(26)   # wave A outfits use their own random stream so older textures stay identical
+    for slim in (False, True):
+        for prof in ("carpenter", "mason", "smith", "cook", "hauler"):
+            save(outfit(prof, slim), f"entity/settler/profession/{prof}_{'slim' if slim else 'wide'}.png")
+    for name, t in workshop_textures().items():
+        save(t, f"block/{name}.png")
+    save(hearth_mark(), "item/hearth_mark.png")
     print("textures written to", os.path.normpath(OUT))
 
 if __name__ == "__main__":

@@ -1,8 +1,14 @@
 package io.github.operagtx.hearthholm.settlement;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.operagtx.hearthholm.block.WarehouseLedgerBlock;
+import io.github.operagtx.hearthholm.block.WorkshopBlock;
+import io.github.operagtx.hearthholm.crafting.Workshop;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
@@ -29,7 +35,32 @@ public final class Settlement {
         ).apply(i, SiteRecord::new));
     }
 
-    public static final Codec<Settlement> CODEC = RecordCodecBuilder.create(i -> i.group(
+    /** "Keep {@code amount} of {@code id} in the warehouse" (order board). Ids keep unknown items harmless. */
+    public record Order(Identifier id, int amount) {
+        public static final Codec<Order> CODEC = RecordCodecBuilder.create(i -> i.group(
+                Identifier.CODEC.fieldOf("item").forGetter(Order::id),
+                Codec.INT.fieldOf("amount").forGetter(Order::amount)
+        ).apply(i, Order::new));
+
+        public Order(Item item, int amount) {
+            this(BuiltInRegistries.ITEM.getKey(item), amount);
+        }
+
+        public Item item() {
+            return BuiltInRegistries.ITEM.getValue(id);
+        }
+    }
+
+    /** Fields added after the first release (kept in a second map codec: a record codec holds 16 fields). */
+    private record Extra(List<BlockPos> workshops, List<Order> orders, int marksMinted) {
+        static final MapCodec<Extra> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+                BlockPos.CODEC.listOf().optionalFieldOf("workshops", List.of()).forGetter(Extra::workshops),
+                Order.CODEC.listOf().optionalFieldOf("orders", List.of()).forGetter(Extra::orders),
+                Codec.INT.optionalFieldOf("marks_minted", 0).forGetter(Extra::marksMinted)
+        ).apply(i, Extra::new));
+    }
+
+    private static final MapCodec<Settlement> BASE_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             UUIDUtil.CODEC.fieldOf("id").forGetter(s -> s.id),
             Codec.STRING.optionalFieldOf("name", "").forGetter(s -> s.name),
             UUIDUtil.CODEC.fieldOf("owner").forGetter(s -> s.owner),
@@ -64,6 +95,14 @@ public final class Settlement {
         return s;
     }));
 
+    public static final Codec<Settlement> CODEC = Codec.mapPair(BASE_CODEC, Extra.CODEC).xmap(p -> {
+        Settlement s = p.getFirst();
+        s.workshops.addAll(p.getSecond().workshops());
+        s.orders.addAll(p.getSecond().orders());
+        s.marksMinted = p.getSecond().marksMinted();
+        return s;
+    }, s -> Pair.of(s, new Extra(List.copyOf(s.workshops), List.copyOf(s.orders), s.marksMinted))).codec();
+
     public final UUID id;
     public final UUID owner;
     public final ResourceKey<Level> dimension;
@@ -80,6 +119,11 @@ public final class Settlement {
     public long candidatesDay = -1;
     public final Set<Long> awarded = new HashSet<>();
     public final Map<String, Integer> stats = new HashMap<>();
+    public final List<BlockPos> workshops = new ArrayList<>();
+    public final List<Order> orders = new ArrayList<>();
+    public int marksMinted;
+    /** Not saved: which crafter is making which item right now (order board status). */
+    public final Map<Item, String> crafting = new HashMap<>();
     /** Not saved: game time of the last room scan. */
     public long lastScan = -100000;
 
@@ -188,6 +232,22 @@ public final class Settlement {
                 anchors.add(ledger);
             }
         }
+        List<List<BlockPos>> stations = new ArrayList<>();
+        for (int k = 0; k < rooms.size(); k++) stations.add(new ArrayList<>());
+        workshops.removeIf(p -> level.isLoaded(p) && !(level.getBlockState(p).getBlock() instanceof WorkshopBlock));
+        for (BlockPos ws : workshops) {
+            if (!level.isLoaded(ws) || !(level.getBlockState(ws).getBlock() instanceof WorkshopBlock wb)) continue;
+            int idx = roomIndex(rooms, ws);
+            if (idx < 0) {
+                rooms.add(RoomScanner.scan(level, ws));
+                roles.add(new int[]{0});
+                anchors.add(ws);
+                stations.add(new ArrayList<>());
+                idx = rooms.size() - 1;
+            }
+            roles.get(idx)[0] |= wb.kind().role();
+            stations.get(idx).add(ws);
+        }
         int r = radius();
         int minCx = (center.getX() - r) >> 4, maxCx = (center.getX() + r) >> 4;
         int minCz = (center.getZ() - r) >> 4, maxCz = (center.getZ() + r) >> 4;
@@ -200,6 +260,7 @@ public final class Settlement {
                     rooms.add(RoomScanner.scan(level, p));
                     roles.add(new int[]{BuildingRecord.HOUSING});
                     anchors.add(p);
+                    stations.add(List.of());
                 }
             }
 
@@ -211,15 +272,22 @@ public final class Settlement {
             String problem = room.problem();
             if (problem.isEmpty() && (role & BuildingRecord.WAREHOUSE) != 0 && room.containers().isEmpty()) problem = "no_containers";
             BuildingRecord rec = new BuildingRecord(role, anchors.get(i), room.beds(), room.containers(),
-                    room.comfort(), room.interior().size(), problem);
+                    room.comfort(), room.interior().size(), problem, List.copyOf(stations.get(i)),
+                    room.furnace() ? BuildingRecord.FURNACE : 0);
             buildings.add(rec);
             if (rec.valid()) {
-                long key = anchors.get(i).asLong() * 31 + role;
-                if (awarded.add(key)) {
+                int baseRole = role & ~BuildingRecord.WORKSHOPS;
+                long key = anchors.get(i).asLong() * 31 + baseRole;
+                if (baseRole != 0 && awarded.add(key)) {
                     int reward = (rec.is(BuildingRecord.HALL) ? 40 : 0) + (rec.is(BuildingRecord.WAREHOUSE) ? 30 : 0)
                             + (rec.is(BuildingRecord.HOUSING) ? 10 + 5 * rec.beds().size() : 0);
                     addRenown(reward);
-                    news.add(Component.translatable("message.hearthholm.building_found", rec.title(), reward));
+                    news.add(Component.translatable("message.hearthholm.building_found", BuildingRecord.title(baseRole), reward));
+                }
+                for (Workshop w : Workshop.values()) {
+                    if (!rec.is(w.role()) || !awarded.add(anchors.get(i).asLong() * 31 + 1000 + w.role())) continue;
+                    addRenown(15);
+                    news.add(Component.translatable("message.hearthholm.building_found", w.label(), 15));
                 }
             }
         }

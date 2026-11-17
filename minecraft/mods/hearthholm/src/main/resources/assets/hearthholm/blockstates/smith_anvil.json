@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/smith_anvil"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/smith_anvil",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/smith_anvil",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/smith_anvil",
+      "y": 270
+    }
+  }
+}

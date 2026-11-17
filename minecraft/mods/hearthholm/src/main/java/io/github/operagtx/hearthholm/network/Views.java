@@ -39,12 +39,13 @@ public final class Views {
         }
     }
 
-    public record Building(int roles, BlockPos anchor, int beds, int containers, int comfort, String problem) {}
+    public record Building(int roles, BlockPos anchor, int beds, int containers, int comfort, String problem, int features) {}
 
     public record Settlement(BlockPos desk, Component name, String tier, int renown, int nextRenown, String nextTier,
                              int residents, int cap, int beds, int freeBeds, int food, int hireCost, int radius,
                              boolean hall, boolean warehouse, List<Resident> people, List<Building> buildings,
-                             List<SettlerProfile> candidates, List<Component> hints, Map<String, Integer> stats) {
+                             List<SettlerProfile> candidates, List<Component> hints, Map<String, Integer> stats,
+                             int marks, Component mintInfo) {
         public static final StreamCodec<RegistryFriendlyByteBuf, Settlement> CODEC = StreamCodec.of(Settlement::write, Settlement::read);
 
         static void write(RegistryFriendlyByteBuf b, Settlement v) {
@@ -73,6 +74,7 @@ public final class Views {
                 b.writeVarInt(x.containers);
                 b.writeVarInt(x.comfort);
                 b.writeUtf(x.problem);
+                b.writeVarInt(x.features);
             }
             b.writeVarInt(v.candidates.size());
             for (SettlerProfile p : v.candidates) SettlerProfile.STREAM_CODEC.encode(b, p);
@@ -80,6 +82,8 @@ public final class Views {
             for (Component c : v.hints) COMP.encode(b, c);
             b.writeVarInt(v.stats.size());
             v.stats.forEach((k, n) -> { b.writeUtf(k); b.writeVarInt(n); });
+            b.writeVarInt(v.marks);
+            COMP.encode(b, v.mintInfo);
         }
 
         static Settlement read(RegistryFriendlyByteBuf b) {
@@ -95,15 +99,17 @@ public final class Views {
             for (int i = b.readVarInt(); i > 0; i--) people.add(Resident.read(b));
             List<Building> buildings = new ArrayList<>();
             for (int i = b.readVarInt(); i > 0; i--)
-                buildings.add(new Building(b.readVarInt(), b.readBlockPos(), b.readVarInt(), b.readVarInt(), b.readVarInt(), b.readUtf()));
+                buildings.add(new Building(b.readVarInt(), b.readBlockPos(), b.readVarInt(), b.readVarInt(), b.readVarInt(), b.readUtf(), b.readVarInt()));
             List<SettlerProfile> cands = new ArrayList<>();
             for (int i = b.readVarInt(); i > 0; i--) cands.add(SettlerProfile.STREAM_CODEC.decode(b));
             List<Component> hints = new ArrayList<>();
             for (int i = b.readVarInt(); i > 0; i--) hints.add(COMP.decode(b));
             Map<String, Integer> stats = new LinkedHashMap<>();
             for (int i = b.readVarInt(); i > 0; i--) stats.put(b.readUtf(), b.readVarInt());
+            int marks = b.readVarInt();
+            Component mint = COMP.decode(b);
             return new Settlement(desk, name, tier, renown, next, nextTier, residents, cap, beds, free, food, cost, radius,
-                    hall, wh, people, buildings, cands, hints, stats);
+                    hall, wh, people, buildings, cands, hints, stats, marks, mint);
         }
     }
 
@@ -166,6 +172,47 @@ public final class Views {
             Map<String, Integer> values = new LinkedHashMap<>();
             for (int i = b.readVarInt(); i > 0; i--) values.put(b.readUtf(), b.readVarInt());
             return new WorkSite(pos, type, values, COMP.decode(b), COMP.decode(b), b.readVarInt(), b.readVarInt());
+        }
+    }
+
+    /** One order-board line: target, stock and why it is (not) being made. */
+    public record OrderLine(Identifier item, int target, int stock, Component status, int color) {}
+
+    /** Per workshop kind: is there a valid workshop, how many crafters. */
+    public record ShopInfo(String kind, boolean workshop, boolean furnace, int crafters) {}
+
+    public record Orders(BlockPos board, Component name, List<OrderLine> lines, List<ShopInfo> shops) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, Orders> CODEC = StreamCodec.of(Orders::write, Orders::read);
+
+        static void write(RegistryFriendlyByteBuf b, Orders v) {
+            b.writeBlockPos(v.board);
+            COMP.encode(b, v.name);
+            b.writeVarInt(v.lines.size());
+            for (OrderLine l : v.lines) {
+                Identifier.STREAM_CODEC.encode(b, l.item);
+                b.writeVarInt(l.target);
+                b.writeVarInt(l.stock);
+                COMP.encode(b, l.status);
+                b.writeInt(l.color);
+            }
+            b.writeVarInt(v.shops.size());
+            for (ShopInfo s : v.shops) {
+                b.writeUtf(s.kind);
+                b.writeBoolean(s.workshop);
+                b.writeBoolean(s.furnace);
+                b.writeVarInt(s.crafters);
+            }
+        }
+
+        static Orders read(RegistryFriendlyByteBuf b) {
+            BlockPos pos = b.readBlockPos();
+            Component name = COMP.decode(b);
+            List<OrderLine> lines = new ArrayList<>();
+            for (int i = b.readVarInt(); i > 0; i--)
+                lines.add(new OrderLine(Identifier.STREAM_CODEC.decode(b), b.readVarInt(), b.readVarInt(), COMP.decode(b), b.readInt()));
+            List<ShopInfo> shops = new ArrayList<>();
+            for (int i = b.readVarInt(); i > 0; i--) shops.add(new ShopInfo(b.readUtf(), b.readBoolean(), b.readBoolean(), b.readVarInt()));
+            return new Orders(pos, name, lines, shops);
         }
     }
 }

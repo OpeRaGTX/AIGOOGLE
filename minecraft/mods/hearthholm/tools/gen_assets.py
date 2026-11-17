@@ -73,7 +73,56 @@ for name, sign in MARKERS.items():
         "textures": {"post": f"{NS}:block/marker_post", "sign": f"{NS}:block/{sign}_sign"}})
     w(f"assets/{NS}/blockstates/{name}.json", facing_states(f"{NS}:block/{name}", STD))
 
-for name in ["town_hall_desk", "warehouse_ledger", *MARKERS]:
+# ---- workshops (wave A)
+def cube(fr, to, tex, faces=("north", "south", "east", "west", "up", "down"), uvs=None):
+    f = {}
+    for d in faces:
+        t = tex[d] if isinstance(tex, dict) else tex
+        f[d] = face(t, (uvs or {}).get(d))
+    return {"from": fr, "to": to, "faces": f}
+
+def side_uv(fr, to, d):
+    x0, y0, z0 = fr; x1, y1, z1 = to
+    v0, v1 = (16 - y1, 16 - y0) if y1 <= 16 else (0, y1 - y0)
+    if d in ("north", "south"): return [x0, v0, x1, v1]
+    if d in ("east", "west"): return [z0, v0, z1, v1]
+    return [x0, z0, x1, z1]
+
+def box_el(fr, to, tex):
+    return {"from": fr, "to": to, "faces": {d: face(tex[d] if isinstance(tex, dict) else tex, side_uv(fr, to, d))
+                                            for d in ("north", "south", "east", "west", "up", "down")}}
+
+def block_model(name, textures, elements):
+    w(f"assets/{NS}/models/block/{name}.json", {"parent": "block/block", "display": DISPLAY, "textures": textures, "elements": elements})
+    w(f"assets/{NS}/blockstates/{name}.json", facing_states(f"{NS}:block/{name}", STD))
+
+legs = [box_el([x, 0, z], [x + 2, 11, z + 2], "#side") for x in (1, 13) for z in (1, 13)]
+block_model("carpenter_bench", {"particle": f"{NS}:block/carpenter_bench_side", "top": f"{NS}:block/carpenter_bench_top",
+                                "side": f"{NS}:block/carpenter_bench_side", "front": f"{NS}:block/carpenter_bench_front"},
+            [box_el([0, 11, 0], [16, 14, 16], {"up": "#top", "down": "#side", "north": "#front", "south": "#side", "east": "#side", "west": "#side"}),
+             *legs, box_el([2, 3, 2], [14, 4, 14], "#side")])
+block_model("mason_table", {"particle": f"{NS}:block/mason_table_side", "top": f"{NS}:block/mason_table_top", "side": f"{NS}:block/mason_table_side"},
+            [box_el([1, 0, 1], [15, 10, 15], "#side"), box_el([0, 10, 0], [16, 14, 16], {"up": "#top", "down": "#side", "north": "#side", "south": "#side", "east": "#side", "west": "#side"})])
+block_model("smith_anvil", {"particle": f"{NS}:block/smith_anvil_side", "top": f"{NS}:block/smith_anvil_top", "side": f"{NS}:block/smith_anvil_side",
+                            "stump": f"{NS}:block/smith_anvil_stump"},
+            [box_el([2, 0, 2], [14, 5, 14], "#stump"), box_el([4, 5, 4], [12, 7, 12], "#side"), box_el([6, 7, 5], [10, 9, 11], "#side"),
+             box_el([1, 9, 4], [15, 12, 12], {"up": "#top", "down": "#side", "north": "#side", "south": "#side", "east": "#side", "west": "#side"})])
+block_model("cook_stove", {"particle": f"{NS}:block/cook_stove_side", "top": f"{NS}:block/cook_stove_top", "side": f"{NS}:block/cook_stove_side",
+                           "front": f"{NS}:block/cook_stove_front", "pot": f"{NS}:block/cook_stove_pot"},
+            [box_el([0, 0, 0], [16, 16, 16], {"up": "#top", "down": "#side", "north": "#front", "south": "#side", "east": "#side", "west": "#side"}),
+             box_el([4, 16, 4], [11, 20, 11], "#pot"), box_el([12, 16, 11], [15, 24, 14], "#side")])
+block_model("order_board", {"particle": f"{NS}:block/marker_post", "post": f"{NS}:block/marker_post", "board": f"{NS}:block/order_board_front",
+                            "back": f"{NS}:block/order_board_back"},
+            [box_el([1, 0, 7], [3, 16, 9], "#post"), box_el([13, 0, 7], [15, 16, 9], "#post"),
+             {"from": [0, 5, 7.5], "to": [16, 16, 8.5], "faces": {"north": face("#board", [0, 0, 16, 11]), "south": face("#back", [0, 0, 16, 11]),
+                 "east": face("#post", [0, 0, 1, 11]), "west": face("#post", [0, 0, 1, 11]), "up": face("#post", [0, 0, 16, 1]), "down": face("#post", [0, 0, 16, 1])}}])
+WORKSHOPS = ["carpenter_bench", "mason_table", "smith_anvil", "cook_stove", "order_board"]
+
+# hearth mark (plain item)
+w(f"assets/{NS}/models/item/hearth_mark.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/hearth_mark"}})
+w(f"assets/{NS}/items/hearth_mark.json", {"model": {"type": "minecraft:model", "model": f"{NS}:item/hearth_mark"}})
+
+for name in ["town_hall_desk", "warehouse_ledger", *MARKERS, *WORKSHOPS]:
     item(name)
     loot(name)
 
@@ -92,4 +141,13 @@ for name, extra in {"mine_marker": "minecraft:cobblestone", "forest_marker": "#m
                     "fishing_marker": "minecraft:string", "patrol_post": "minecraft:iron_ingot", "territory_banner": "#minecraft:wool",
                     "construction_stake": "minecraft:paper"}.items():
     shapeless(name, ["minecraft:stick", "minecraft:stick", extra])
+shapeless("carpenter_bench", ["minecraft:crafting_table", "#minecraft:logs", "minecraft:stick"])
+shapeless("mason_table", ["minecraft:crafting_table", "minecraft:cobblestone", "minecraft:cobblestone", "minecraft:stone"])
+shaped("smith_anvil", ["III", " C ", "CCC"], {"I": "minecraft:iron_ingot", "C": "minecraft:cobblestone"})
+shapeless("cook_stove", ["minecraft:furnace", "minecraft:bowl", "minecraft:cobblestone"])
+shapeless("order_board", ["#minecraft:planks", "#minecraft:planks", "minecraft:paper", "minecraft:paper", "minecraft:stick"])
+
+# sounds
+w(f"assets/{NS}/sounds.json", {f"workshop.{n}": {"sounds": [f"{NS}:workshop/{n}{i}" for i in (1, 2)], "subtitle": f"subtitles.{NS}.workshop.{n}"}
+                               for n in ("saw", "chisel", "hammer", "sizzle")})
 print("assets written")

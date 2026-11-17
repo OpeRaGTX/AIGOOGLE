@@ -117,12 +117,17 @@ public final class BuilderJob extends SiteJob {
     }
 
     private Map<Item, Integer> needed(List<BuildOp> ops, int from) {
+        return upcoming(settler.level(), ops, from);
+    }
+
+    /** Materials for the next steps of a construction (also used by haulers to stock the site chest). */
+    public static Map<Item, Integer> upcoming(net.minecraft.world.level.Level level, List<BuildOp> ops, int from) {
         Map<Item, Integer> need = new LinkedHashMap<>();
         for (int i = from; i < ops.size() && i < from + LOOKAHEAD; i++) {
             BuildOp op = ops.get(i);
             if (op.clear()) continue;
             Item it = Blueprint.cost(op.state());
-            if (it != null && settler.level().getBlockState(op.pos()).getBlock() != op.state().getBlock()) need.merge(it, 1, Integer::sum);
+            if (it != null && level.getBlockState(op.pos()).getBlock() != op.state().getBlock()) need.merge(it, 1, Integer::sum);
         }
         return need;
     }
@@ -134,7 +139,7 @@ public final class BuilderJob extends SiteJob {
         need.values().removeIf(n -> n <= 0);
         if (need.isEmpty()) return null;
         for (Item first : need.keySet()) {
-            BlockPos chest = findWith(storage(), st -> st.is(first));
+            BlockPos chest = findWith(dropOffs(), st -> st.is(first));
             if (chest == null) continue;
             settler.setStatus("fetching_materials");
             return new ContainerTrip(chest, (s, c) -> takeAll(s, c, need));

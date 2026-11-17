@@ -18,6 +18,7 @@ public final class ModTab {
                 .icon(() -> new ItemStack(ModBlocks.TOWN_HALL_DESK))
                 .displayItems((params, output) -> {
                     for (Block b : ModBlocks.TAB_ORDER) output.accept(b);
+                    output.accept(ModItems.HEARTH_MARK);
                 })
                 .build();
         Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, Hearthholm.id("main"), tab);

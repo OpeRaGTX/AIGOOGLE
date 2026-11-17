@@ -75,8 +75,14 @@ public final class TownHallScreen extends HhScreen {
         });
         int bottom = top + panelH - 24;
         switch (tab) {
-            case OVERVIEW -> button(Component.translatable("gui.hearthholm.rescan"), left + 8, bottom, 160, 18,
-                    b -> send(Payloads.TownHallAction.RESCAN, 0, ""));
+            case OVERVIEW -> {
+                button(Component.translatable("gui.hearthholm.rescan"), left + 8, bottom, 160, 18,
+                        b -> send(Payloads.TownHallAction.RESCAN, 0, ""));
+                Button mint = button(Component.translatable("gui.hearthholm.mint"), left + 172, bottom, panelW - 180, 18,
+                        b -> send(Payloads.TownHallAction.MINT, 0, ""));
+                mint.setTooltip(net.minecraft.client.gui.components.Tooltip.create(view.mintInfo()));
+                mint.active = view.warehouse();
+            }
             case BUILDINGS -> button(Component.translatable("gui.hearthholm.rescan"), left + 8, bottom, 160, 18,
                     b -> send(Payloads.TownHallAction.RESCAN, 0, ""));
             case HIRE -> {
@@ -124,17 +130,18 @@ public final class TownHallScreen extends HhScreen {
     }
 
     private void overview(GuiGraphicsExtractor g) {
-        int x = left + 10, y = top + 54;
+        int x = left + 10, y = top + 52;
         line(g, "residents", view.residents() + " / " + view.cap(), x, y, TEXT);
-        line(g, "beds", view.freeBeds() + " / " + view.beds(), x, y += 12, view.freeBeds() > 0 ? GOOD : WARN);
-        line(g, "food", view.food(), x, y += 12, view.food() >= view.hireCost() ? GOOD : WARN);
-        line(g, "hall", view.hall() ? "✔" : "✖", x, y += 12, view.hall() ? GOOD : BAD);
-        line(g, "warehouse", view.warehouse() ? "✔" : "✖", x, y += 12, view.warehouse() ? GOOD : BAD);
-        line(g, "radius", view.radius(), x, y += 12, TEXT);
-        y += 14;
+        line(g, "beds", view.freeBeds() + " / " + view.beds(), x, y += 11, view.freeBeds() > 0 ? GOOD : WARN);
+        line(g, "food", view.food(), x, y += 11, view.food() >= view.hireCost() ? GOOD : WARN);
+        line(g, "marks", view.marks(), x, y += 11, WARN);
+        line(g, "hall", view.hall() ? "✔" : "✖", x, y += 11, view.hall() ? GOOD : BAD);
+        line(g, "warehouse", view.warehouse() ? "✔" : "✖", x, y += 11, view.warehouse() ? GOOD : BAD);
+        line(g, "radius", view.radius(), x, y += 11, TEXT);
+        y += 13;
         text(g, Component.translatable("gui.hearthholm.chronicle"), x, y, TITLE);
-        for (String k : new String[]{"mined", "logs", "crops", "fish", "placed"}) {
-            line(g, "stat." + k, view.stats().getOrDefault(k, 0), x, y += 12, TEXT);
+        for (String k : new String[]{"mined", "logs", "crops", "fish", "placed", "crafted"}) {
+            line(g, "stat." + k, view.stats().getOrDefault(k, 0), x, y += 10, TEXT);
         }
         int hx = left + 178, hy = top + 54, hw = panelW - 188;
         inset(g, hx - 4, hy - 4, hw + 8, 146);
@@ -226,14 +233,18 @@ public final class TownHallScreen extends HhScreen {
         for (int i = scroll; i < view.buildings().size() && i < scroll + rows() - 1; i++, y += 22) {
             Views.Building b = view.buildings().get(i);
             g.fill(left + 8, y, left + panelW - 8, y + 20, BG2);
-            String key = (b.roles() & BuildingRecord.HALL) != 0 ? "hall" : (b.roles() & BuildingRecord.WAREHOUSE) != 0 ? "warehouse" : "house";
-            Component title = Component.translatable("building.hearthholm." + key);
-            if ((b.roles() & BuildingRecord.HOUSING) != 0 && !key.equals("house")) title = title.copy().append(" + ").append(Component.translatable("building.hearthholm.house"));
-            text(g, title, left + 12, y + 2, TITLE);
+            Component title = BuildingRecord.title(b.roles());
+            text(g, font.plainSubstrByWidth(title.getString(), 124), left + 12, y + 2, TITLE);
             text(g, b.anchor().getX() + ", " + b.anchor().getY() + ", " + b.anchor().getZ(), left + 12, y + 11, DIM);
             Component info = Component.translatable("gui.hearthholm.building_info", b.beds(), b.containers(), b.comfort());
-            text(g, info, left + 140, y + 2, TEXT);
-            if (b.problem().isEmpty()) text(g, Component.translatable("gui.hearthholm.valid"), left + 140, y + 11, GOOD);
+            text(g, font.plainSubstrByWidth(info.getString(), panelW - 152), left + 140, y + 2, TEXT);
+            if (b.problem().isEmpty()) {
+                Component ok = Component.translatable("gui.hearthholm.valid");
+                if ((b.roles() & (io.github.operagtx.hearthholm.crafting.Workshop.MASONRY.role() | io.github.operagtx.hearthholm.crafting.Workshop.SMITHY.role())) != 0)
+                    ok = ok.copy().append(" · ").append(Component.translatable(
+                            (b.features() & BuildingRecord.FURNACE) != 0 ? "gui.hearthholm.furnace_yes" : "gui.hearthholm.furnace_no"));
+                text(g, ok, left + 140, y + 11, GOOD);
+            }
             else text(g, Component.translatable("problem.hearthholm." + b.problem()), left + 140, y + 11, BAD);
         }
         g.textWithWordWrap(font, Component.translatable("gui.hearthholm.room_rules"), left + 176, top + panelH - 30, panelW - 186, DIM);

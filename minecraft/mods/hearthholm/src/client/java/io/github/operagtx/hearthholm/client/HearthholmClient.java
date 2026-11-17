@@ -1,6 +1,7 @@
 package io.github.operagtx.hearthholm.client;
 
 import io.github.operagtx.hearthholm.client.render.SettlerRenderer;
+import io.github.operagtx.hearthholm.client.screen.OrdersScreen;
 import io.github.operagtx.hearthholm.client.screen.SettlerScreen;
 import io.github.operagtx.hearthholm.client.screen.TownHallScreen;
 import io.github.operagtx.hearthholm.client.screen.WorkSiteScreen;
@@ -21,6 +22,8 @@ public final class HearthholmClient implements ClientModInitializer {
                 (p, ctx) -> ctx.client().execute(() -> SettlerScreen.show(p.view())));
         ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenWorkSite.TYPE,
                 (p, ctx) -> ctx.client().execute(() -> WorkSiteScreen.show(p.view())));
+        ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenOrders.TYPE,
+                (p, ctx) -> ctx.client().execute(() -> OrdersScreen.show(p.view())));
         ClientTickEvents.END_CLIENT_TICK.register(ZonePreview::tick);
     }
 }

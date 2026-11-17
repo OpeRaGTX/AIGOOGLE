@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:crafting_table",
+    "#minecraft:logs",
+    "minecraft:stick"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:carpenter_bench"
+  }
+}

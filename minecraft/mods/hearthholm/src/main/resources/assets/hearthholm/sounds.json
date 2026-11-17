@@ -1,0 +1,30 @@
+{
+  "workshop.saw": {
+    "sounds": [
+      "hearthholm:workshop/saw1",
+      "hearthholm:workshop/saw2"
+    ],
+    "subtitle": "subtitles.hearthholm.workshop.saw"
+  },
+  "workshop.chisel": {
+    "sounds": [
+      "hearthholm:workshop/chisel1",
+      "hearthholm:workshop/chisel2"
+    ],
+    "subtitle": "subtitles.hearthholm.workshop.chisel"
+  },
+  "workshop.hammer": {
+    "sounds": [
+      "hearthholm:workshop/hammer1",
+      "hearthholm:workshop/hammer2"
+    ],
+    "subtitle": "subtitles.hearthholm.workshop.hammer"
+  },
+  "workshop.sizzle": {
+    "sounds": [
+      "hearthholm:workshop/sizzle1",
+      "hearthholm:workshop/sizzle2"
+    ],
+    "subtitle": "subtitles.hearthholm.workshop.sizzle"
+  }
+}

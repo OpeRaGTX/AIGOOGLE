@@ -34,7 +34,7 @@ public final class Payloads {
 
     /** Town hall actions; see constants. */
     public record TownHallAction(BlockPos desk, int action, int arg, String text) implements CustomPacketPayload {
-        public static final int REFRESH = 0, HIRE = 1, REROLL = 2, RESCAN = 3, RENAME = 4, OPEN_RESIDENT = 5;
+        public static final int REFRESH = 0, HIRE = 1, REROLL = 2, RESCAN = 3, RENAME = 4, OPEN_RESIDENT = 5, MINT = 6;
         public static final Type<TownHallAction> TYPE = new Type<>(Hearthholm.id("town_hall_action"));
         public static final StreamCodec<RegistryFriendlyByteBuf, TownHallAction> CODEC = StreamCodec.composite(
                 BlockPos.STREAM_CODEC, TownHallAction::desk,
@@ -64,6 +64,24 @@ public final class Payloads {
                 ByteBufCodecs.stringUtf8(64), WorkSiteAction::key,
                 ByteBufCodecs.VAR_INT, WorkSiteAction::value,
                 WorkSiteAction::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    public record OpenOrders(Views.Orders view) implements CustomPacketPayload {
+        public static final Type<OpenOrders> TYPE = new Type<>(Hearthholm.id("open_orders"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, OpenOrders> CODEC =
+                Views.Orders.CODEC.map(OpenOrders::new, OpenOrders::view);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** Sets an order ("keep {@code amount} of {@code item}"); amount 0 removes it, -1 only refreshes. */
+    public record OrderAction(BlockPos board, String item, int amount) implements CustomPacketPayload {
+        public static final Type<OrderAction> TYPE = new Type<>(Hearthholm.id("order_action"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, OrderAction> CODEC = StreamCodec.composite(
+                BlockPos.STREAM_CODEC, OrderAction::board,
+                ByteBufCodecs.stringUtf8(128), OrderAction::item,
+                ByteBufCodecs.VAR_INT, OrderAction::amount,
+                OrderAction::new);
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 }

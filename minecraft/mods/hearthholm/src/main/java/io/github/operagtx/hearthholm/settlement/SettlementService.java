@@ -5,6 +5,12 @@ import io.github.operagtx.hearthholm.block.TownHallDeskBlockEntity;
 import io.github.operagtx.hearthholm.blueprint.Blueprint;
 import io.github.operagtx.hearthholm.core.Profession;
 import io.github.operagtx.hearthholm.core.Professions;
+import io.github.operagtx.hearthholm.crafting.CraftPlanner;
+import io.github.operagtx.hearthholm.crafting.Mint;
+import io.github.operagtx.hearthholm.crafting.Workshop;
+import io.github.operagtx.hearthholm.registry.ModItems;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
 import io.github.operagtx.hearthholm.entity.SettlerEntity;
 import io.github.operagtx.hearthholm.network.Payloads;
 import io.github.operagtx.hearthholm.network.Views;
@@ -162,14 +168,15 @@ public final class SettlementService {
         }
         List<Views.Building> buildings = new ArrayList<>();
         for (BuildingRecord b : s.buildings) {
-            buildings.add(new Views.Building(b.roles(), b.anchor(), b.beds().size(), b.containers().size(), b.comfort(), b.problem()));
+            buildings.add(new Views.Building(b.roles(), b.anchor(), b.beds().size(), b.containers().size(), b.comfort(), b.problem(), b.features()));
         }
         SettlementTier tier = s.tier();
         SettlementTier next = s.nextTier();
         return new Views.Settlement(s.center, s.displayName(), tier.key(), s.renown, next == null ? -1 : next.renown(),
                 next == null ? "" : next.key(), s.residents.size(), s.popCap(), s.housingBeds().size(), s.freeBeds(),
                 Storage.totalNutrition(storage), s.hireCost(), s.radius(), s.hallValid(), s.warehouseValid(),
-                people, buildings, List.copyOf(s.candidates), hints(s, storage), new LinkedHashMap<>(s.stats));
+                people, buildings, List.copyOf(s.candidates), hints(s, storage), new LinkedHashMap<>(s.stats),
+                Storage.count(storage, st -> st.is(ModItems.HEARTH_MARK)), Mint.describe());
     }
 
     private static List<Component> hints(Settlement s, List<Container> storage) {
@@ -182,6 +189,10 @@ public final class SettlementService {
             out.add(Component.translatable("hint.hearthholm.assign_jobs"));
         if (!s.residents.isEmpty() && s.sites.isEmpty()) out.add(Component.translatable("hint.hearthholm.place_markers"));
         if (s.warehouseValid() && Storage.totalNutrition(storage) < 20) out.add(Component.translatable("hint.hearthholm.stock_food"));
+        for (Workshop w : Workshop.values()) {
+            if (CraftPlanner.hasCrafter(s, w) && CraftPlanner.workshop(s, w) == null)
+                out.add(Component.translatable("hint.hearthholm.build_workshop", w.label()));
+        }
         SettlementTier next = s.nextTier();
         if (next != null && out.size() < 4) out.add(Component.translatable("hint.hearthholm.next_tier", next.label(), next.renown()));
         return out;
@@ -205,6 +216,7 @@ public final class SettlementService {
                 for (Component c : news) notify(level, s, c);
                 say(player, "rescanned", s.buildings.size());
             }
+            case Payloads.TownHallAction.MINT -> mint(player, level, s);
             case Payloads.TownHallAction.RENAME -> {
                 String name = a.text().strip();
                 if (name.length() <= 32) s.name = name;
@@ -272,6 +284,130 @@ public final class SettlementService {
             if (level.getFluidState(p.below()).isEmpty() && Math.abs(y - s.center.getY()) < 24) return p;
         }
         return s.center.offset(2, 0, 2);
+    }
+
+    // ---- mint -----------------------------------------------------------------------------
+
+    private static void mint(ServerPlayer player, ServerLevel level, Settlement s) {
+        if (!s.warehouseValid()) { say(player, "mint_no_warehouse"); return; }
+        List<Container> storage = Storage.resolve(level, s.storagePositions());
+        List<Component> spent = new ArrayList<>();
+        int marks = Mint.mint(storage, spent);
+        if (marks <= 0) { say(player, "mint_nothing"); return; }
+        int left = marks;
+        while (left > 0) {
+            int n = Math.min(64, left);
+            ItemStack rest = Storage.insert(storage, new ItemStack(ModItems.HEARTH_MARK, n));
+            if (!rest.isEmpty() && !player.getInventory().add(rest)) player.spawnAtLocation(level, rest);
+            left -= n;
+        }
+        s.marksMinted += marks;
+        s.count("marks", marks);
+        level.playSound(null, s.center, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1f, 1.2f);
+        net.minecraft.network.chat.MutableComponent list = Component.empty();
+        for (int i = 0; i < spent.size(); i++) list.append(i == 0 ? Component.empty() : Component.literal(", ")).append(spent.get(i));
+        player.sendSystemMessage(Component.translatable("message.hearthholm.minted", marks, list).withStyle(ChatFormatting.GOLD));
+    }
+
+    // ---- workshops and orders -------------------------------------------------------------
+
+    public static void onWorkshopPlaced(ServerLevel level, BlockPos pos, @Nullable ServerPlayer player) {
+        Settlement s = manager(level).at(level.dimension(), pos);
+        if (s == null) {
+            if (player != null) say(player, "outside");
+            return;
+        }
+        if (!s.workshops.contains(pos)) s.workshops.add(pos.immutable());
+        for (Component c : s.rescan(level)) notify(level, s, c);
+        manager(level).setDirty();
+        if (player != null) describeWorkshop(player, pos);
+    }
+
+    public static void describeWorkshop(ServerPlayer player, BlockPos pos) {
+        ServerLevel level = player.level();
+        Settlement s = manager(level).at(level.dimension(), pos);
+        if (s == null || !(level.getBlockState(pos).getBlock() instanceof io.github.operagtx.hearthholm.block.WorkshopBlock wb)) {
+            say(player, "outside");
+            return;
+        }
+        if (!s.workshops.contains(pos)) {
+            s.workshops.add(pos.immutable());
+            s.rescan(level);
+            manager(level).setDirty();
+        }
+        Workshop kind = wb.kind();
+        BuildingRecord b = null;
+        for (BuildingRecord r : s.buildings) if (r.stations().contains(pos)) b = r;
+        if (b == null) { say(player, "warehouse_unknown"); return; }
+        if (!b.valid()) {
+            player.sendSystemMessage(Component.translatable("message.hearthholm.workshop_problem", kind.label(),
+                    Component.translatable("problem.hearthholm." + b.problem())).withStyle(ChatFormatting.RED));
+            return;
+        }
+        Component worker = Component.translatable("gui.hearthholm.nobody");
+        for (ResidentRecord r : s.residents) if (r.profession.equals(kind.profession())) { worker = r.profile.name(); break; }
+        boolean heat = CraftPlanner.heat(kind, b);
+        player.sendSystemMessage(Component.translatable("message.hearthholm.workshop_ok", kind.label(), worker,
+                Component.translatable(heat ? "gui.hearthholm.heat_yes" : "gui.hearthholm.heat_no")).withStyle(ChatFormatting.GREEN));
+    }
+
+    public static void openOrders(ServerPlayer player, BlockPos pos) {
+        ServerLevel level = player.level();
+        Settlement s = manager(level).at(level.dimension(), pos);
+        if (s == null) { say(player, "outside"); return; }
+        if (!canManage(player, s)) { say(player, "not_owner", s.ownerName); return; }
+        if (level.getGameTime() - s.lastScan > 100) {
+            for (Component c : s.rescan(level)) notify(level, s, c);
+            manager(level).setDirty();
+        }
+        ServerPlayNetworking.send(player, new Payloads.OpenOrders(ordersView(level, s, pos)));
+    }
+
+    public static Views.Orders ordersView(ServerLevel level, Settlement s, BlockPos board) {
+        Map<Item, Integer> stock = CraftPlanner.stock(Storage.resolve(level, s.storagePositions()));
+        List<Views.OrderLine> lines = new ArrayList<>();
+        for (Settlement.Order o : s.orders) {
+            Workshop kind = Workshop.forItem(o.item());
+            if (kind == null) continue;
+            BuildingRecord shop = CraftPlanner.workshop(s, kind);
+            CraftPlanner.Verdict v = CraftPlanner.evaluate(level, s, kind, o, stock, shop, CraftPlanner.hasCrafter(s, kind));
+            lines.add(new Views.OrderLine(o.id(), o.amount(), v.stock(), v.status(), v.color()));
+        }
+        List<Views.ShopInfo> shops = new ArrayList<>();
+        for (Workshop w : Workshop.values()) {
+            BuildingRecord shop = CraftPlanner.workshop(s, w);
+            int crafters = 0;
+            for (ResidentRecord r : s.residents) if (r.profession.equals(w.profession())) crafters++;
+            shops.add(new Views.ShopInfo(w.key(), shop != null, CraftPlanner.heat(w, shop), crafters));
+        }
+        return new Views.Orders(board, s.displayName(), lines, shops);
+    }
+
+    public static void handleOrders(ServerPlayer player, Payloads.OrderAction a) {
+        ServerLevel level = player.level();
+        if (player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(a.board())) > 100) return;
+        Settlement s = manager(level).at(level.dimension(), a.board());
+        if (s == null || !canManage(player, s)) return;
+        Identifier id = Identifier.tryParse(a.item());
+        if (a.amount() >= 0 && id != null && BuiltInRegistries.ITEM.containsKey(id)) {
+            Item item = BuiltInRegistries.ITEM.getValue(id);
+            if (Workshop.forItem(item) != null) setOrder(s, item, a.amount());
+            manager(level).setDirty();
+        }
+        ServerPlayNetworking.send(player, new Payloads.OpenOrders(ordersView(level, s, a.board())));
+    }
+
+    /** Sets (amount &gt; 0) or removes (0) the order for an item, keeping the list order. */
+    public static void setOrder(Settlement s, Item item, int amount) {
+        amount = Math.max(0, Math.min(999, amount));
+        for (int i = 0; i < s.orders.size(); i++) {
+            if (s.orders.get(i).item() == item) {
+                if (amount == 0) s.orders.remove(i);
+                else s.orders.set(i, new Settlement.Order(item, amount));
+                return;
+            }
+        }
+        if (amount > 0 && s.orders.size() < 24) s.orders.add(new Settlement.Order(item, amount));
     }
 
     // ---- warehouse ledger -----------------------------------------------------------------

@@ -1,0 +1,320 @@
+{
+  "parent": "block/block",
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.625,
+        0.625,
+        0.625
+      ]
+    },
+    "ground": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        3,
+        0
+      ],
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        2.5,
+        0
+      ],
+      "scale": [
+        0.375,
+        0.375,
+        0.375
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
+    }
+  },
+  "textures": {
+    "particle": "hearthholm:block/cook_stove_side",
+    "top": "hearthholm:block/cook_stove_top",
+    "side": "hearthholm:block/cook_stove_side",
+    "front": "hearthholm:block/cook_stove_front",
+    "pot": "hearthholm:block/cook_stove_pot"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#front",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#top",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        16,
+        4
+      ],
+      "to": [
+        11,
+        20,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pot",
+          "uv": [
+            4,
+            0,
+            11,
+            4
+          ]
+        },
+        "south": {
+          "texture": "#pot",
+          "uv": [
+            4,
+            0,
+            11,
+            4
+          ]
+        },
+        "east": {
+          "texture": "#pot",
+          "uv": [
+            4,
+            0,
+            11,
+            4
+          ]
+        },
+        "west": {
+          "texture": "#pot",
+          "uv": [
+            4,
+            0,
+            11,
+            4
+          ]
+        },
+        "up": {
+          "texture": "#pot",
+          "uv": [
+            4,
+            4,
+            11,
+            11
+          ]
+        },
+        "down": {
+          "texture": "#pot",
+          "uv": [
+            4,
+            4,
+            11,
+            11
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        12,
+        16,
+        11
+      ],
+      "to": [
+        15,
+        24,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#side",
+          "uv": [
+            12,
+            0,
+            15,
+            8
+          ]
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            12,
+            0,
+            15,
+            8
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            11,
+            0,
+            14,
+            8
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            11,
+            0,
+            14,
+            8
+          ]
+        },
+        "up": {
+          "texture": "#side",
+          "uv": [
+            12,
+            11,
+            15,
+            14
+          ]
+        },
+        "down": {
+          "texture": "#side",
+          "uv": [
+            12,
+            11,
+            15,
+            14
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -28,7 +28,7 @@ public final class RoomScanner {
     private RoomScanner() {}
 
     public record Room(boolean enclosed, String problem, Set<BlockPos> interior, Set<BlockPos> boundary,
-                       List<BlockPos> beds, List<BlockPos> containers, int doors, int comfort) {
+                       List<BlockPos> beds, List<BlockPos> containers, int doors, int comfort, boolean furnace) {
         public boolean contains(BlockPos pos) {
             return interior.contains(pos) || boundary.contains(pos);
         }
@@ -70,7 +70,7 @@ public final class RoomScanner {
         List<BlockPos> containers = new ArrayList<>();
         int doors = 0;
         Set<Block> furniture = new HashSet<>();
-        boolean light = false;
+        boolean light = false, furnace = false;
         for (BlockPos p : boundary) {
             BlockState s = level.getBlockState(p);
             Block b = s.getBlock();
@@ -79,6 +79,7 @@ public final class RoomScanner {
             if (level.getBlockEntity(p) instanceof Container && !(b instanceof BedBlock)) containers.add(p.immutable());
             if (s.getLightEmission() > 0) light = true;
             if (isFurniture(b)) furniture.add(b);
+            if (b instanceof AbstractFurnaceBlock) furnace = true;
         }
         for (BlockPos p : interior) {
             BlockState s = level.getBlockState(p);
@@ -90,14 +91,15 @@ public final class RoomScanner {
         comfort = Math.min(10, comfort);
 
         String problem = doors == 0 ? "no_door" : "";
-        return new Room(problem.isEmpty(), problem, interior, boundary, beds, containers, doors, comfort);
+        return new Room(problem.isEmpty(), problem, interior, boundary, beds, containers, doors, comfort, furnace);
     }
 
     private static boolean isFurniture(Block b) {
         return b instanceof CraftingTableBlock || b instanceof AbstractFurnaceBlock || b == Blocks.BOOKSHELF
                 || b instanceof LanternBlock || b instanceof BarrelBlock || b instanceof ChestBlock
                 || b instanceof LecternBlock || b instanceof CampfireBlock || b instanceof BannerBlock
-                || b instanceof CarpetBlock || b instanceof FlowerPotBlock || b instanceof StairBlock;
+                || b instanceof CarpetBlock || b instanceof FlowerPotBlock || b instanceof StairBlock
+                || b instanceof io.github.operagtx.hearthholm.block.WorkshopBlock;
     }
 
     /** Air-like for room purposes: no collision, or only a thin floor layer (carpet, plate). Doors are walls. */
@@ -109,6 +111,6 @@ public final class RoomScanner {
     }
 
     private static Room fail(String problem) {
-        return new Room(false, problem, Set.of(), Set.of(), List.of(), List.of(), 0, 0);
+        return new Room(false, problem, Set.of(), Set.of(), List.of(), List.of(), 0, 0, false);
     }
 }

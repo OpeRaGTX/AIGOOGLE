@@ -21,6 +21,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.*;
@@ -34,7 +35,8 @@ import java.util.List;
 
 /** End-to-end check: build a tiny settlement, hire, assign jobs, let time run, take screenshots. */
 public final class HearthholmClientTest implements FabricClientGameTest {
-    private static BlockPos O, DESK, MINE, FARM, STAKE, FOREST;
+    private static BlockPos O, DESK, MINE, FARM, STAKE, FOREST, BENCH, STOVE, BOARD;
+    private static int planks0, bread0;
 
     private static void log(String s) {
         System.out.println("HHTEST " + s);
@@ -74,6 +76,30 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 ctx.waitTicks(400);
                 sp.getServer().runOnServer(HearthholmClientTest::report);
             }
+            sp.getServer().runOnServer(s -> {
+                ServerPlayer p = player(s);
+                p.teleportTo(s.overworld(), BOARD.getX() - 1.5, BOARD.getY(), BOARD.getZ() + 2.5, java.util.Set.of(), 160f, 20f, false);
+                SettlementService.openOrders(p, BOARD);
+            });
+            ctx.waitForScreen(io.github.operagtx.hearthholm.client.screen.OrdersScreen.class);
+            ctx.waitTicks(5);
+            ctx.takeScreenshot("hh_11_order_board");
+            ctx.clickScreenButton("profession.hearthholm.cook");
+            ctx.waitTicks(5);
+            ctx.takeScreenshot("hh_11b_order_board_kitchen");
+            ctx.setScreen(() -> null);
+            sp.getServer().runOnServer(s -> {
+                ServerPlayer p = player(s);
+                p.teleportTo(s.overworld(), BENCH.getX() + 4.5, BENCH.getY(), BENCH.getZ() + 3.6, java.util.Set.of(), 127f, 22f, false);
+            });
+            ctx.waitTicks(20);
+            ctx.takeScreenshot("hh_12_workshop");
+            sp.getServer().runOnServer(s -> {
+                ServerPlayer p = player(s);
+                p.teleportTo(s.overworld(), STOVE.getX() + 2.5, STOVE.getY(), STOVE.getZ() + 2.5, java.util.Set.of(), 135f, 25f, false);
+            });
+            ctx.waitTicks(20);
+            ctx.takeScreenshot("hh_13_kitchen");
             sp.getServer().runOnServer(s -> {
                 ServerPlayer p = player(s);
                 p.teleportTo(s.overworld(), O.getX() + 6, O.getY() + 3, O.getZ() + 24, java.util.Set.of(), 200f, 12f, false);
@@ -118,6 +144,19 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             sp.getConnection().waitForChunksRender();
             ctx.waitTicks(20);
             ctx.takeScreenshot("hh_10_close_up");
+            sp.getServer().runOnServer(s -> {
+                int planks = stock(s, Items.OAK_PLANKS), bread = stock(s, Items.BREAD);
+                Settlement st = SettlementManager.get(s).all().iterator().next();
+                log("stock end planks " + planks0 + " -> " + planks + ", bread " + bread0 + " -> " + bread + " crafted=" + st.stats.get("crafted")
+                        + " hauled=" + st.stats.get("hauled"));
+                for (SettlerEntity e : settlers(s)) log("moods " + e.getName().getString() + " " + e.moodEntries().stream()
+                        .map(m -> m.label().getString() + m.value()).toList());
+                log("mine chest " + chest(s, MINE.west()) + " stake chest " + chest(s, STAKE.north()));
+                if (st.stats.getOrDefault("hauled", 0) <= 0) throw new AssertionError("hauler moved nothing");
+                if (planks <= planks0) throw new AssertionError("carpenter made no planks");
+                if (bread <= bread0) throw new AssertionError("cook made no bread");
+                log("CRAFT OK");
+            });
             log("DONE");
         }
     }
@@ -204,7 +243,28 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 new ItemStack(Items.OAK_PLANKS, 64), new ItemStack(Items.SPRUCE_PLANKS, 64), new ItemStack(Items.GLASS_PANE, 16),
                 new ItemStack(Items.OAK_DOOR, 2), new ItemStack(Items.BED.red(), 2), new ItemStack(Items.CRAFTING_TABLE, 2), new ItemStack(Items.TORCH, 16));
         fillChest(l, O.offset(15, 0, 2), new ItemStack(Items.COBBLESTONE, 64), new ItemStack(Items.COBBLESTONE, 64), new ItemStack(Items.OAK_PLANKS, 64), new ItemStack(Items.SPRUCE_PLANKS, 64));
+        fillChest(l, O.offset(15, 0, 4), new ItemStack(Items.OAK_LOG, 64), new ItemStack(Items.OAK_LOG, 64), new ItemStack(Items.WHEAT, 64),
+                new ItemStack(Items.WHEAT, 64), new ItemStack(Items.IRON_INGOT, 32), new ItemStack(Items.BOWL, 4), new ItemStack(Items.IRON_INGOT, 8));
         SettlementService.onLedgerPlaced(l, ledger, p);
+        // carpentry (with the order board and two beds) and kitchen north of the hall
+        BlockState spruce = Blocks.SPRUCE_PLANKS.defaultBlockState();
+        box(l, 0, 0, -11, 6, 3, -6, planks, spruce);
+        door(l, O.offset(3, 0, -6));
+        BENCH = O.offset(1, 0, -10);
+        l.setBlock(BENCH, ModBlocks.CARPENTER_BENCH.defaultBlockState().setValue(io.github.operagtx.hearthholm.block.HorizontalBlock.FACING, Direction.SOUTH), 3);
+        BOARD = O.offset(5, 0, -10);
+        l.setBlock(BOARD, ModBlocks.ORDER_BOARD.defaultBlockState().setValue(io.github.operagtx.hearthholm.block.HorizontalBlock.FACING, Direction.SOUTH), 3);
+        bed(l, O.offset(3, 0, -10));
+        bed(l, O.offset(5, 0, -8));
+        l.setBlock(O.offset(3, 2, -10), Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH), 3);
+        SettlementService.onWorkshopPlaced(l, BENCH, p);
+        box(l, 8, 0, -11, 14, 3, -6, planks, spruce);
+        door(l, O.offset(11, 0, -6));
+        STOVE = O.offset(9, 0, -10);
+        l.setBlock(STOVE, ModBlocks.COOK_STOVE.defaultBlockState().setValue(io.github.operagtx.hearthholm.block.HorizontalBlock.FACING, Direction.SOUTH), 3);
+        bed(l, O.offset(13, 0, -10));
+        l.setBlock(O.offset(11, 2, -10), Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH), 3);
+        SettlementService.onWorkshopPlaced(l, STOVE, p);
         // field with water
         FARM = O.offset(4, 0, 15);
         l.setBlock(FARM, marker(ModBlocks.FARM_MARKER, Direction.SOUTH), 3);
@@ -213,7 +273,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
         // mine with a chest
         MINE = O.offset(14, 0, 14);
         l.setBlock(MINE, marker(ModBlocks.MINE_MARKER, Direction.SOUTH), 3);
-        fillChest(l, MINE.west());
+        fillChest(l, MINE.west(), new ItemStack(Items.COBBLESTONE, 64), new ItemStack(Items.RAW_IRON, 12), new ItemStack(Items.TORCH, 16));
         for (int dz = 1; dz <= 34; dz++)
             for (int dx = -4; dx <= 7; dx++)
                 for (int dy = -1; dy <= 3; dy++)
@@ -229,6 +289,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
         STAKE = O.offset(20, 0, 8);
         l.setBlock(STAKE, marker(ModBlocks.CONSTRUCTION_STAKE, Direction.SOUTH), 3);
         SettlementService.onWorkSitePlaced(l, STAKE, p);
+        fillChest(l, STAKE.north(), new ItemStack(Items.DIRT, 20));
         if (l.getBlockEntity(STAKE) instanceof WorkSiteBlockEntity w) w.setOption("build", 1);
         p.teleportTo(l, DESK.getX() + 0.5, DESK.getY(), DESK.getZ() - 1.5, java.util.Set.of(), 0f, 10f, false);
     }
@@ -238,17 +299,19 @@ public final class HearthholmClientTest implements FabricClientGameTest {
         ServerPlayer p = player(s);
         Settlement st = SettlementManager.get(s).byId(((io.github.operagtx.hearthholm.block.TownHallDeskBlockEntity) l.getBlockEntity(DESK)).settlementId());
         st.rescan(l);
+        st.addRenown(400);
         log("tier=" + st.tier().key() + " renown=" + st.renown + " beds=" + st.housingBeds().size() + " hall=" + st.hallValid() + " wh=" + st.warehouseValid()
                 + " buildings=" + st.buildings.size() + " sites=" + st.sites.size());
         for (var b : st.buildings) log("building roles=" + b.roles() + " problem=" + b.problem() + " beds=" + b.beds().size() + " containers=" + b.containers().size());
         SettlementService.openTownHall(p, DESK);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 7; i++) {
             if (st.candidates.isEmpty()) SettlementService.handleTownHall(p, new Payloads.TownHallAction(DESK, Payloads.TownHallAction.REROLL, 0, ""));
             SettlementService.handleTownHall(p, new Payloads.TownHallAction(DESK, Payloads.TownHallAction.HIRE, 0, ""));
         }
         List<SettlerEntity> list = settlers(s);
         log("hired " + list.size() + " residents=" + st.residents.size());
-        var profs = List.of(Professions.MINER, Professions.FARMER, Professions.LUMBERJACK, Professions.BUILDER);
+        var profs = List.of(Professions.MINER, Professions.FARMER, Professions.LUMBERJACK, Professions.BUILDER,
+                Professions.CARPENTER, Professions.COOK, Professions.HAULER);
         for (int i = 0; i < list.size(); i++) {
             SettlerEntity e = list.get(i);
             e.markArrived();
@@ -256,6 +319,39 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             e.setProfession(profs.get(i % profs.size()));
             log("settler " + e.getName().getString() + " -> " + e.professionId() + " bed=" + e.bed());
         }
+        list.getFirst().eat(new ItemStack(Items.BREAD));
+        SettlementService.setOrder(st, Items.OAK_PLANKS, 400);
+        SettlementService.setOrder(st, Items.BREAD, 200);
+        SettlementService.setOrder(st, Items.CHEST, 4);
+        SettlementService.setOrder(st, Items.PUMPKIN_PIE, 8);
+        SettlementService.setOrder(st, Items.IRON_PICKAXE, 1);
+        SettlementService.handleTownHall(p, new Payloads.TownHallAction(DESK, Payloads.TownHallAction.MINT, 0, ""));
+        planks0 = stock(s, Items.OAK_PLANKS);
+        bread0 = stock(s, Items.BREAD);
+        log("mint marks=" + stock(s, io.github.operagtx.hearthholm.registry.ModItems.HEARTH_MARK) + " iron=" + stock(s, Items.IRON_INGOT));
+        for (Item it : List.of(Items.OAK_PLANKS, Items.STICK, Items.CHEST, Items.BREAD, Items.STONE, Items.STONE_BRICKS, Items.IRON_PICKAXE,
+                Items.IRON_INGOT, Items.COOKED_BEEF, Items.MUSHROOM_STEW, Items.PUMPKIN_PIE, Items.BED.red())) {
+            log("recipes " + it + " = " + io.github.operagtx.hearthholm.crafting.Recipes.options(l, it).size());
+        }
+        for (var w : io.github.operagtx.hearthholm.crafting.Workshop.values()) {
+            int missing = 0;
+            for (Item it : w.catalog()) if (io.github.operagtx.hearthholm.crafting.Recipes.options(l, it).isEmpty()) { missing++; log("NO RECIPE " + it); }
+            log("catalog " + w.key() + " items=" + w.catalog().size() + " without recipe=" + missing);
+        }
+        log("stock start planks=" + planks0 + " bread=" + bread0);
+    }
+
+    private static String chest(MinecraftServer s, BlockPos p) {
+        StringBuilder sb = new StringBuilder("[");
+        if (s.overworld().getBlockEntity(p) instanceof Container c)
+            for (int i = 0; i < c.getContainerSize(); i++) if (!c.getItem(i).isEmpty()) sb.append(c.getItem(i).getCount()).append("x").append(c.getItem(i).getItem()).append(" ");
+        return sb.append("]").toString();
+    }
+
+    private static int stock(MinecraftServer s, Item item) {
+        Settlement st = SettlementManager.get(s).all().iterator().next();
+        return io.github.operagtx.hearthholm.settlement.Storage.count(
+                io.github.operagtx.hearthholm.settlement.Storage.resolve(s.overworld(), st.storagePositions()), x -> x.is(item));
     }
 
     private static void report(MinecraftServer s) {
@@ -273,5 +369,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             if (l.getBlockState(q).getBlock() instanceof FarmlandBlock) farmland++;
         Settlement st = SettlementManager.get(s).all().iterator().next();
         log("farmland=" + farmland + " stats=" + st.stats + " renown=" + st.renown + " tier=" + st.tier().key());
+        log("stock planks=" + stock(s, Items.OAK_PLANKS) + " logs=" + stock(s, Items.OAK_LOG) + " bread=" + stock(s, Items.BREAD)
+                + " wheat=" + stock(s, Items.WHEAT) + " chests=" + stock(s, Items.CHEST) + " crafting=" + st.crafting);
     }
 }

@@ -20,6 +20,10 @@ public final class EatActivity implements Activity {
     private int chew;
     private long noFoodUntil;
 
+    /** Cooked meals are taken first: they lift the mood ("Tasty meal"). */
+    private static final java.util.function.Predicate<ItemStack> MEAL =
+            st -> io.github.operagtx.hearthholm.crafting.Workshop.MEALS.contains(st.getItem()) && Storage.isFood(st);
+
     public EatActivity(SettlerEntity s) { this.s = s; }
 
     @Override
@@ -56,6 +60,7 @@ public final class EatActivity implements Activity {
         if (s.food() >= 18) return false;
         ItemStack food = ItemStack.EMPTY;
         for (ItemStack st : s.inventory().getItems()) if (Storage.isFood(st)) { food = st; break; }
+        for (ItemStack st : s.inventory().getItems()) if (MEAL.test(st)) { food = st; break; }
         if (!food.isEmpty()) {
             s.setStatus("eating");
             s.getNavigation().stop();
@@ -75,7 +80,11 @@ public final class EatActivity implements Activity {
                 return false;
             }
             s.setStatus("fetching_food");
-            trip = new ContainerTrip(p, (st, c) -> st.store(Storage.take(List.of(c), Storage::isFood, 4)));
+            trip = new ContainerTrip(p, (st, c) -> {
+                ItemStack meal = Storage.take(st.settlement() == null ? List.of(c) : Storage.resolve((ServerLevel) st.level(),
+                        st.settlement().storagePositions()), MEAL, 4);
+                st.store(meal.isEmpty() ? Storage.take(List.of(c), Storage::isFood, 4) : meal);
+            });
         }
         Task.Status r = trip.tick(s);
         if (r != Task.Status.RUNNING) {

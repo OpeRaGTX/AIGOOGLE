@@ -29,6 +29,7 @@ public final class Hearthholm implements ModInitializer {
         Traits.bootstrap();
         Professions.bootstrap();
         WorkSiteTypes.bootstrap();
+        ModSounds.init();
         ModBlocks.init();
         ModBlockEntities.init();
         ModEntities.init();
@@ -36,6 +37,7 @@ public final class Hearthholm implements ModInitializer {
         ModTab.init();
         BlueprintLibrary.bootstrap();
         HhNetwork.init();
+        io.github.operagtx.hearthholm.crafting.Mint.load();
         SettlementEvents.init();
         LOG.info("Hearthholm ready: {} professions, {} work sites, {} blueprints",
                 Professions.REGISTRY.size(), WorkSiteTypes.REGISTRY.size(), BlueprintLibrary.all().size());

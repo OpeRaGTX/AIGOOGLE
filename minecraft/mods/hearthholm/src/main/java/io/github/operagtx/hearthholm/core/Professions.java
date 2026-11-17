@@ -2,6 +2,7 @@ package io.github.operagtx.hearthholm.core;
 
 import io.github.operagtx.hearthholm.Hearthholm;
 import io.github.operagtx.hearthholm.api.KeyedRegistry;
+import io.github.operagtx.hearthholm.crafting.Workshop;
 import io.github.operagtx.hearthholm.entity.ai.jobs.*;
 import io.github.operagtx.hearthholm.worksite.WorkSiteTypes;
 import net.minecraft.resources.Identifier;
@@ -21,6 +22,11 @@ public final class Professions {
     public static Profession FISHER;
     public static Profession GUARD;
     public static Profession WARRIOR;
+    public static Profession CARPENTER;
+    public static Profession MASON;
+    public static Profession SMITH;
+    public static Profession COOK;
+    public static Profession HAULER;
 
     private Professions() {}
 
@@ -71,5 +77,25 @@ public final class Professions {
                 .tool(s -> s.is(ItemTags.SWORDS) || s.is(ItemTags.AXES)).site(WorkSiteTypes.TERRITORY_ID)
                 .combat().color(0xC9483C).icon(() -> new ItemStack(Items.SHIELD))
                 .job(WarriorJob::new).build());
+        CARPENTER = reg(Profession.builder(Workshop.CARPENTRY.profession())
+                .weight(Stat.DEXTERITY, 3).weight(Stat.WITS, 2).weight(Stat.STRENGTH, 1)
+                .color(0xC98B4E).icon(() -> new ItemStack(Items.CRAFTING_TABLE))
+                .job(s -> new CrafterJob(s, Workshop.CARPENTRY)).build());
+        MASON = reg(Profession.builder(Workshop.MASONRY.profession())
+                .weight(Stat.STRENGTH, 3).weight(Stat.ENDURANCE, 2).weight(Stat.DEXTERITY, 1)
+                .color(0xA9A08F).icon(() -> new ItemStack(Items.STONE_BRICKS))
+                .job(s -> new CrafterJob(s, Workshop.MASONRY)).build());
+        SMITH = reg(Profession.builder(Workshop.SMITHY.profession())
+                .weight(Stat.STRENGTH, 3).weight(Stat.WITS, 2).weight(Stat.ENDURANCE, 1)
+                .color(0xD9663A).icon(() -> new ItemStack(Items.ANVIL))
+                .job(SmithJob::new).build());
+        COOK = reg(Profession.builder(Workshop.KITCHEN.profession())
+                .weight(Stat.WITS, 3).weight(Stat.PERCEPTION, 2).weight(Stat.DEXTERITY, 1)
+                .color(0xF0D9A8).icon(() -> new ItemStack(Items.BREAD))
+                .job(s -> new CrafterJob(s, Workshop.KITCHEN)).build());
+        HAULER = reg(Profession.builder(Hearthholm.id("hauler"))
+                .weight(Stat.ENDURANCE, 3).weight(Stat.STRENGTH, 2).weight(Stat.DEXTERITY, 1)
+                .color(0x8FA35A).icon(() -> new ItemStack(Items.CHEST))
+                .job(HaulerJob::new).build());
     }
 }

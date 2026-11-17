@@ -1,0 +1,56 @@
+{
+ "palette": {
+  "c": "minecraft:cobblestone",
+  "L": "minecraft:oak_log[axis=y]",
+  "P": "minecraft:oak_planks",
+  "R": "minecraft:spruce_planks",
+  "D": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
+  "d": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
+  "G": "minecraft:glass_pane",
+  "T": "minecraft:wall_torch[facing=south]",
+  "B": "hearthholm:carpenter_bench[facing=north]",
+  "C": "minecraft:chest[facing=north]"
+ },
+ "layers": [
+  [
+   "ccccccc",
+   "ccccccc",
+   "ccccccc",
+   "ccccccc",
+   "ccccccc",
+   "ccccccc"
+  ],
+  [
+   "LPPDPPL",
+   "P.....P",
+   "P.....P",
+   "P.....P",
+   "PCB...P",
+   "LPPPPPL"
+  ],
+  [
+   "LPPdPPL",
+   "P.....P",
+   "G.....G",
+   "P.....P",
+   "P.....P",
+   "LPGPGPL"
+  ],
+  [
+   "LPPPPPL",
+   "P..T..P",
+   "P.....P",
+   "P.....P",
+   "P.....P",
+   "LPPPPPL"
+  ],
+  [
+   "RRRRRRR",
+   "RRRRRRR",
+   "RRRRRRR",
+   "RRRRRRR",
+   "RRRRRRR",
+   "RRRRRRR"
+  ]
+ ]
+}

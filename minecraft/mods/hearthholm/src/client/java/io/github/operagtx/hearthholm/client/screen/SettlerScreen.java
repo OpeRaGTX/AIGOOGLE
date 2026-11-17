@@ -45,11 +45,12 @@ public final class SettlerScreen extends HhScreen {
     protected void init() {
         super.init();
         List<Profession> list = new ArrayList<>(Professions.REGISTRY.values());
-        int x0 = left + 8, y0 = top + panelH - 60;
+        int cols = 5, rows = (list.size() + cols - 1) / cols;
+        int x0 = left + 8, y0 = top + panelH - 24 - rows * 15;
         for (int i = 0; i < list.size(); i++) {
             Profession p = list.get(i);
             Component label = p.label();
-            Button b = button(label, x0 + (i % 4) * 81, y0 + (i / 4) * 18, 79, 16, x -> send(Payloads.SettlerAction.SET_PROFESSION, p.id().toString()));
+            Button b = button(label, x0 + (i % cols) * 65, y0 + (i / cols) * 15, 63, 14, x -> send(Payloads.SettlerAction.SET_PROFESSION, p.id().toString()));
             b.active = !p.id().equals(view.profession());
             if (p != Professions.UNEMPLOYED) b.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
                     Component.translatable("gui.hearthholm.aptitude", stars(p.aptitude(view.profile())))));
@@ -113,7 +114,7 @@ public final class SettlerScreen extends HhScreen {
         ny += 12;
         if (!view.bed()) { text(g, Component.translatable("gui.hearthholm.no_bed"), nx, ny, BAD); ny += 11; }
         for (MoodEntry m : view.moods()) {
-            if (ny > top + panelH - 98) break;
+            if (ny > top + panelH - 100) break;
             text(g, m.label(), nx + 4, ny, TEXT);
             String v = (m.value() > 0 ? "+" : "") + m.value();
             text(g, v, nx + 150, ny, m.value() >= 0 ? GOOD : BAD);
@@ -121,7 +122,7 @@ public final class SettlerScreen extends HhScreen {
         }
 
         // equipment + inventory
-        int ix = left + 8, iy = top + panelH - 84;
+        int ix = left + 8, iy = top + panelH - 89;
         int i = 0;
         for (ItemStack st : view.equipment()) drawItem(g, st, ix + (i++) * 18, iy, mx, my);
         i = 0;

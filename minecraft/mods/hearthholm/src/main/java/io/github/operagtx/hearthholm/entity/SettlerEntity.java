@@ -73,6 +73,8 @@ public class SettlerEntity extends PathfinderMob {
     private boolean leaving;
     private boolean arrived = true;
     private long lastHurt = -100000;
+    /** Game time until which a cooked meal keeps the "Tasty meal" mood bonus (saved). */
+    private long tastyUntil = -1;
     private final Map<String, Integer> xp = new HashMap<>();
     private List<MoodEntry> moodEntries = List.of();
     private final SettlerBrain brain;
@@ -144,6 +146,7 @@ public class SettlerEntity extends PathfinderMob {
     public boolean hasArrived() { return arrived; }
     public void markArrived() { arrived = true; }
     public boolean sleptLastNight() { return sleptLastNight; }
+    public boolean hadTastyMeal() { return level().getGameTime() < tastyUntil; }
     public void setSleptLastNight(boolean v) { sleptLastNight = v; }
 
     public Identifier professionId() {
@@ -383,6 +386,7 @@ public class SettlerEntity extends PathfinderMob {
         int n = Storage.nutrition(stack);
         if (n <= 0) return;
         food = Math.min(MAX_FOOD, food + n);
+        if (io.github.operagtx.hearthholm.crafting.Workshop.MEALS.contains(stack.getItem())) tastyUntil = level().getGameTime() + 24000;
         if (level() instanceof ServerLevel sl) {
             sl.playSound(null, blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.6f, 1f);
             sl.sendParticles(new net.minecraft.core.particles.ItemParticleOption(ParticleTypes.ITEM, stack.getItem()),
@@ -419,6 +423,7 @@ public class SettlerEntity extends PathfinderMob {
         else if (p.aptitude(profile) >= 7) entries.add(MoodEntry.of("loves_job", 10));
         else if (p.aptitude(profile) <= 3) entries.add(MoodEntry.of("hates_job", -8));
         if (level().getGameTime() - lastHurt < 2400) entries.add(MoodEntry.of("hurt", -10));
+        if (level().getGameTime() < tastyUntil) entries.add(MoodEntry.of("tasty_meal", 8));
         if (s != null && s.residents.stream().anyMatch(r -> Professions.get(r.profession).isCombat()))
             entries.add(MoodEntry.of("protected", 5));
         for (Trait t : profile.traitList()) if (t.mood() != 0) entries.add(new MoodEntry(t.label(), t.mood()));
@@ -554,6 +559,7 @@ public class SettlerEntity extends PathfinderMob {
         out.putBoolean("Slept", sleptLastNight);
         out.putBoolean("Leaving", leaving);
         out.putBoolean("Arrived", arrived);
+        out.putLong("TastyUntil", tastyUntil);
         out.store("Xp", XP_CODEC, Map.copyOf(xp));
         inventory.storeAsItemList(out.list("Inventory", ItemStack.CODEC));
     }
@@ -572,6 +578,7 @@ public class SettlerEntity extends PathfinderMob {
         sleptLastNight = in.getBooleanOr("Slept", true);
         leaving = in.getBooleanOr("Leaving", false);
         arrived = in.getBooleanOr("Arrived", true);
+        tastyUntil = in.getLongOr("TastyUntil", -1L);
         xp.clear();
         in.read("Xp", XP_CODEC).ifPresent(xp::putAll);
         inventory.fromItemList(in.listOrEmpty("Inventory", ItemStack.CODEC));
