@@ -236,7 +236,9 @@ final class WaveETest {
         sp.getServer().runOnServer(s -> {
             ServerPlayer p = player(s);
             // inside the door, looking at the counter and the guests
-            lookAt(p, TAV_KEG.getX() + 0.5, TAV_KEG.getY(), TAV_KEG.getZ() - 3.4, TAV_KEG.getX() + 0.5, TAV_KEG.getY() + 0.6, TAV_KEG.getZ());
+            // wave F: from the side so the innkeeper does not hide the keg; the innkeeper steps aside for the shot
+            for (SettlerEntity e : settlers(s)) if (e.professionId().equals(Professions.INNKEEPER.id())) e.teleportTo(TAV_KEG.getX() + 2.5, TAV_KEG.getY(), TAV_KEG.getZ() - 1.5);
+            lookAt(p, TAV_KEG.getX() - 1.5, TAV_KEG.getY(), TAV_KEG.getZ() - 2.6, TAV_KEG.getX() + 0.5, TAV_KEG.getY() + 0.5, TAV_KEG.getZ() + 0.5);
         });
         ctx.waitTicks(10);
         sp.getConnection().waitForChunksRender();

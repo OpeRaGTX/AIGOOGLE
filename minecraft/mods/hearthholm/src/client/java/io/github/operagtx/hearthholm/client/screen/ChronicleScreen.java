@@ -9,12 +9,12 @@ import net.minecraft.network.chat.Component;
  * book. Text lives in the language files as {@code guide.hearthholm.chN.title / p1 / p2}.
  */
 public final class ChronicleScreen extends HhScreen {
-    public static final int CHAPTERS = 9, PAGES_PER_CHAPTER = 2, LIST_W = 98;
+    public static final int CHAPTERS = 9, PAGES_PER_CHAPTER = 2, LIST_W = 112, PANEL_W = 360;
     private static int lastPage;
     private int page;
 
     public ChronicleScreen(int page) {
-        super(Component.translatable("gui.hearthholm.guide"), 340, 212);
+        super(Component.translatable("gui.hearthholm.guide"), PANEL_W, 212);
         this.page = Math.max(0, Math.min(CHAPTERS * PAGES_PER_CHAPTER - 1, page));
     }
 
@@ -46,7 +46,7 @@ public final class ChronicleScreen extends HhScreen {
             b.active = i != chapter;
         }
         int ny = top + panelH - 24;
-        var prev = button(Component.literal("<"), left + LIST_W + 40, ny, 24, 16, b -> go(page - 1));
+        var prev = button(Component.literal("<"), left + LIST_W + 44, ny, 24, 16, b -> go(page - 1));
         var next = button(Component.literal(">"), left + panelW - 32, ny, 24, 16, b -> go(page + 1));
         prev.active = page > 0;
         next.active = page < CHAPTERS * PAGES_PER_CHAPTER - 1;
