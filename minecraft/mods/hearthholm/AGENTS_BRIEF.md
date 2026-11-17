@@ -4,6 +4,15 @@ You are extending **Hearthholm**, a Fabric mod for **Minecraft Java 26.3** (unob
 in `/home/user/AIGOOGLE/minecraft/mods/hearthholm`. The owner is asleep: never ask questions, decide
 yourself, keep going until your wave is done, built, tested and committed.
 
+## Token budget (strict)
+- Gradle/test output always to a file, only errors into the chat:
+  `./gradlew build --no-daemon -q > /tmp/b.log 2>&1; grep -iE 'error|FAIL' /tmp/b.log | head -30`.
+  The client test script already prints only `HHTEST` lines; pipe it through `| tail -40`.
+- Read docs by section (`grep -n '^## ' FILE` then `sed -n`), never whole DESIGN/README/CONCEPTS.
+- Read code with offset/limit around what you change; don't re-read files you already have.
+- Screenshots: look at most at the 3–4 that show YOUR new visuals, once after the final run; skip unchanged ones.
+- Commit after each major step (crash safety), `git push` at the end.
+
 ## Read first (only what you need)
 - `DESIGN.md` (architecture), `CONCEPTS.md` (the feature waves), this file.
 - Key code: `core/Profession(s)`, `worksite/*`, `settlement/Settlement*`, `entity/SettlerEntity`,

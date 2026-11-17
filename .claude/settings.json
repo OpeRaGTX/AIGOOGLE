@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./minecraft/mods/*/.gradle/**)",
+      "Read(./minecraft/mods/*/run/**)",
+      "Read(./minecraft/mods/*/build/tmp/**)",
+      "Read(./minecraft/mods/*/build/classes/**)",
+      "Read(./minecraft/mods/*/build/resources/**)",
+      "Read(./minecraft/mods/*/build/libs/**)",
+      "Read(./minecraft/mods/*/build/run/clientGameTest/logs/**)",
+      "Read(./minecraft/mods/*/build/run/clientGameTest/saves/**)"
+    ]
+  }
+}
