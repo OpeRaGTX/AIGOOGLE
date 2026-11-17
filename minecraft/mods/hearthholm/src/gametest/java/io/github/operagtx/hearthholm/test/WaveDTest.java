@@ -447,12 +447,17 @@ final class WaveDTest {
             g.setHealth(g.getMaxHealth() * 0.25f);
             log("BARRACKS test: guard hp=" + g.getHealth() + "/" + g.getMaxHealth() + " retreatSpot=" + g.retreatSpot());
         });
-        ctx.waitTicks(300);
+        boolean[] rested = {false};
+        for (int i = 0; i < 15 && !rested[0]; i++) {   // poll: with a healer around the guard can mend and leave quickly
+            ctx.waitTicks(20);
+            sp.getServer().runOnServer(s -> rested[0] = get(s, GUARD).inBarracks());
+        }
+        ctx.waitTicks(200);   // time to mend
         sp.getServer().runOnServer(s -> {
             SettlerEntity g = get(s, GUARD);
-            log("BARRACKS rest: guard hp=" + g.getHealth() + "/" + g.getMaxHealth() + " inBarracks=" + g.inBarracks() + " status='" + g.status().getString()
+            log("BARRACKS rest: guard hp=" + g.getHealth() + "/" + g.getMaxHealth() + " reachedBarracks=" + rested[0] + " status='" + g.status().getString()
                     + "' comrades=" + g.hasThought("comrades") + " pos=" + g.blockPosition().toShortString());
-            if (!g.inBarracks()) throw new AssertionError("wounded guard did not go to the barracks");
+            if (!rested[0]) throw new AssertionError("wounded guard did not go to the barracks");
             if (g.getHealth() < g.getMaxHealth() * 0.4f) throw new AssertionError("no healing in the barracks");
         });
         ctx.waitTicks(100);
