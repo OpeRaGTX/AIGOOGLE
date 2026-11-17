@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/flower_box"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/flower_box",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/flower_box",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/flower_box",
+      "y": 270
+    }
+  }
+}

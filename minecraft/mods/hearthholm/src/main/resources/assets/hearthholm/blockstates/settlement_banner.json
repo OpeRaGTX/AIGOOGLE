@@ -1,0 +1,964 @@
+{
+  "variants": {
+    "cloth=white,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_white_0"
+    },
+    "cloth=white,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_white_0",
+      "y": 90
+    },
+    "cloth=white,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_white_0",
+      "y": 180
+    },
+    "cloth=white,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_white_0",
+      "y": 270
+    },
+    "cloth=white,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_white_1"
+    },
+    "cloth=white,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_white_1",
+      "y": 90
+    },
+    "cloth=white,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_white_1",
+      "y": 180
+    },
+    "cloth=white,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_white_1",
+      "y": 270
+    },
+    "cloth=white,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_white_2"
+    },
+    "cloth=white,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_white_2",
+      "y": 90
+    },
+    "cloth=white,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_white_2",
+      "y": 180
+    },
+    "cloth=white,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_white_2",
+      "y": 270
+    },
+    "cloth=white,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_white_3"
+    },
+    "cloth=white,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_white_3",
+      "y": 90
+    },
+    "cloth=white,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_white_3",
+      "y": 180
+    },
+    "cloth=white,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_white_3",
+      "y": 270
+    },
+    "cloth=orange,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_orange_0"
+    },
+    "cloth=orange,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_orange_0",
+      "y": 90
+    },
+    "cloth=orange,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_orange_0",
+      "y": 180
+    },
+    "cloth=orange,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_orange_0",
+      "y": 270
+    },
+    "cloth=orange,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_orange_1"
+    },
+    "cloth=orange,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_orange_1",
+      "y": 90
+    },
+    "cloth=orange,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_orange_1",
+      "y": 180
+    },
+    "cloth=orange,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_orange_1",
+      "y": 270
+    },
+    "cloth=orange,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_orange_2"
+    },
+    "cloth=orange,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_orange_2",
+      "y": 90
+    },
+    "cloth=orange,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_orange_2",
+      "y": 180
+    },
+    "cloth=orange,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_orange_2",
+      "y": 270
+    },
+    "cloth=orange,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_orange_3"
+    },
+    "cloth=orange,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_orange_3",
+      "y": 90
+    },
+    "cloth=orange,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_orange_3",
+      "y": 180
+    },
+    "cloth=orange,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_orange_3",
+      "y": 270
+    },
+    "cloth=magenta,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_magenta_0"
+    },
+    "cloth=magenta,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_magenta_0",
+      "y": 90
+    },
+    "cloth=magenta,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_magenta_0",
+      "y": 180
+    },
+    "cloth=magenta,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_magenta_0",
+      "y": 270
+    },
+    "cloth=magenta,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_magenta_1"
+    },
+    "cloth=magenta,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_magenta_1",
+      "y": 90
+    },
+    "cloth=magenta,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_magenta_1",
+      "y": 180
+    },
+    "cloth=magenta,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_magenta_1",
+      "y": 270
+    },
+    "cloth=magenta,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_magenta_2"
+    },
+    "cloth=magenta,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_magenta_2",
+      "y": 90
+    },
+    "cloth=magenta,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_magenta_2",
+      "y": 180
+    },
+    "cloth=magenta,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_magenta_2",
+      "y": 270
+    },
+    "cloth=magenta,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_magenta_3"
+    },
+    "cloth=magenta,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_magenta_3",
+      "y": 90
+    },
+    "cloth=magenta,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_magenta_3",
+      "y": 180
+    },
+    "cloth=magenta,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_magenta_3",
+      "y": 270
+    },
+    "cloth=light_blue,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_light_blue_0"
+    },
+    "cloth=light_blue,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_light_blue_0",
+      "y": 90
+    },
+    "cloth=light_blue,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_light_blue_0",
+      "y": 180
+    },
+    "cloth=light_blue,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_light_blue_0",
+      "y": 270
+    },
+    "cloth=light_blue,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_light_blue_1"
+    },
+    "cloth=light_blue,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_light_blue_1",
+      "y": 90
+    },
+    "cloth=light_blue,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_light_blue_1",
+      "y": 180
+    },
+    "cloth=light_blue,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_light_blue_1",
+      "y": 270
+    },
+    "cloth=light_blue,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_light_blue_2"
+    },
+    "cloth=light_blue,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_light_blue_2",
+      "y": 90
+    },
+    "cloth=light_blue,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_light_blue_2",
+      "y": 180
+    },
+    "cloth=light_blue,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_light_blue_2",
+      "y": 270
+    },
+    "cloth=light_blue,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_light_blue_3"
+    },
+    "cloth=light_blue,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_light_blue_3",
+      "y": 90
+    },
+    "cloth=light_blue,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_light_blue_3",
+      "y": 180
+    },
+    "cloth=light_blue,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_light_blue_3",
+      "y": 270
+    },
+    "cloth=yellow,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_yellow_0"
+    },
+    "cloth=yellow,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_yellow_0",
+      "y": 90
+    },
+    "cloth=yellow,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_yellow_0",
+      "y": 180
+    },
+    "cloth=yellow,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_yellow_0",
+      "y": 270
+    },
+    "cloth=yellow,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_yellow_1"
+    },
+    "cloth=yellow,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_yellow_1",
+      "y": 90
+    },
+    "cloth=yellow,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_yellow_1",
+      "y": 180
+    },
+    "cloth=yellow,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_yellow_1",
+      "y": 270
+    },
+    "cloth=yellow,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_yellow_2"
+    },
+    "cloth=yellow,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_yellow_2",
+      "y": 90
+    },
+    "cloth=yellow,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_yellow_2",
+      "y": 180
+    },
+    "cloth=yellow,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_yellow_2",
+      "y": 270
+    },
+    "cloth=yellow,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_yellow_3"
+    },
+    "cloth=yellow,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_yellow_3",
+      "y": 90
+    },
+    "cloth=yellow,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_yellow_3",
+      "y": 180
+    },
+    "cloth=yellow,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_yellow_3",
+      "y": 270
+    },
+    "cloth=lime,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_lime_0"
+    },
+    "cloth=lime,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_lime_0",
+      "y": 90
+    },
+    "cloth=lime,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_lime_0",
+      "y": 180
+    },
+    "cloth=lime,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_lime_0",
+      "y": 270
+    },
+    "cloth=lime,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_lime_1"
+    },
+    "cloth=lime,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_lime_1",
+      "y": 90
+    },
+    "cloth=lime,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_lime_1",
+      "y": 180
+    },
+    "cloth=lime,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_lime_1",
+      "y": 270
+    },
+    "cloth=lime,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_lime_2"
+    },
+    "cloth=lime,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_lime_2",
+      "y": 90
+    },
+    "cloth=lime,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_lime_2",
+      "y": 180
+    },
+    "cloth=lime,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_lime_2",
+      "y": 270
+    },
+    "cloth=lime,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_lime_3"
+    },
+    "cloth=lime,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_lime_3",
+      "y": 90
+    },
+    "cloth=lime,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_lime_3",
+      "y": 180
+    },
+    "cloth=lime,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_lime_3",
+      "y": 270
+    },
+    "cloth=pink,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_pink_0"
+    },
+    "cloth=pink,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_pink_0",
+      "y": 90
+    },
+    "cloth=pink,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_pink_0",
+      "y": 180
+    },
+    "cloth=pink,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_pink_0",
+      "y": 270
+    },
+    "cloth=pink,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_pink_1"
+    },
+    "cloth=pink,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_pink_1",
+      "y": 90
+    },
+    "cloth=pink,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_pink_1",
+      "y": 180
+    },
+    "cloth=pink,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_pink_1",
+      "y": 270
+    },
+    "cloth=pink,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_pink_2"
+    },
+    "cloth=pink,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_pink_2",
+      "y": 90
+    },
+    "cloth=pink,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_pink_2",
+      "y": 180
+    },
+    "cloth=pink,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_pink_2",
+      "y": 270
+    },
+    "cloth=pink,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_pink_3"
+    },
+    "cloth=pink,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_pink_3",
+      "y": 90
+    },
+    "cloth=pink,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_pink_3",
+      "y": 180
+    },
+    "cloth=pink,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_pink_3",
+      "y": 270
+    },
+    "cloth=gray,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_gray_0"
+    },
+    "cloth=gray,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_gray_0",
+      "y": 90
+    },
+    "cloth=gray,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_gray_0",
+      "y": 180
+    },
+    "cloth=gray,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_gray_0",
+      "y": 270
+    },
+    "cloth=gray,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_gray_1"
+    },
+    "cloth=gray,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_gray_1",
+      "y": 90
+    },
+    "cloth=gray,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_gray_1",
+      "y": 180
+    },
+    "cloth=gray,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_gray_1",
+      "y": 270
+    },
+    "cloth=gray,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_gray_2"
+    },
+    "cloth=gray,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_gray_2",
+      "y": 90
+    },
+    "cloth=gray,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_gray_2",
+      "y": 180
+    },
+    "cloth=gray,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_gray_2",
+      "y": 270
+    },
+    "cloth=gray,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_gray_3"
+    },
+    "cloth=gray,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_gray_3",
+      "y": 90
+    },
+    "cloth=gray,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_gray_3",
+      "y": 180
+    },
+    "cloth=gray,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_gray_3",
+      "y": 270
+    },
+    "cloth=light_gray,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_light_gray_0"
+    },
+    "cloth=light_gray,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_light_gray_0",
+      "y": 90
+    },
+    "cloth=light_gray,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_light_gray_0",
+      "y": 180
+    },
+    "cloth=light_gray,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_light_gray_0",
+      "y": 270
+    },
+    "cloth=light_gray,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_light_gray_1"
+    },
+    "cloth=light_gray,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_light_gray_1",
+      "y": 90
+    },
+    "cloth=light_gray,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_light_gray_1",
+      "y": 180
+    },
+    "cloth=light_gray,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_light_gray_1",
+      "y": 270
+    },
+    "cloth=light_gray,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_light_gray_2"
+    },
+    "cloth=light_gray,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_light_gray_2",
+      "y": 90
+    },
+    "cloth=light_gray,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_light_gray_2",
+      "y": 180
+    },
+    "cloth=light_gray,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_light_gray_2",
+      "y": 270
+    },
+    "cloth=light_gray,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_light_gray_3"
+    },
+    "cloth=light_gray,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_light_gray_3",
+      "y": 90
+    },
+    "cloth=light_gray,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_light_gray_3",
+      "y": 180
+    },
+    "cloth=light_gray,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_light_gray_3",
+      "y": 270
+    },
+    "cloth=cyan,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_cyan_0"
+    },
+    "cloth=cyan,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_cyan_0",
+      "y": 90
+    },
+    "cloth=cyan,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_cyan_0",
+      "y": 180
+    },
+    "cloth=cyan,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_cyan_0",
+      "y": 270
+    },
+    "cloth=cyan,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_cyan_1"
+    },
+    "cloth=cyan,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_cyan_1",
+      "y": 90
+    },
+    "cloth=cyan,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_cyan_1",
+      "y": 180
+    },
+    "cloth=cyan,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_cyan_1",
+      "y": 270
+    },
+    "cloth=cyan,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_cyan_2"
+    },
+    "cloth=cyan,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_cyan_2",
+      "y": 90
+    },
+    "cloth=cyan,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_cyan_2",
+      "y": 180
+    },
+    "cloth=cyan,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_cyan_2",
+      "y": 270
+    },
+    "cloth=cyan,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_cyan_3"
+    },
+    "cloth=cyan,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_cyan_3",
+      "y": 90
+    },
+    "cloth=cyan,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_cyan_3",
+      "y": 180
+    },
+    "cloth=cyan,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_cyan_3",
+      "y": 270
+    },
+    "cloth=purple,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_purple_0"
+    },
+    "cloth=purple,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_purple_0",
+      "y": 90
+    },
+    "cloth=purple,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_purple_0",
+      "y": 180
+    },
+    "cloth=purple,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_purple_0",
+      "y": 270
+    },
+    "cloth=purple,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_purple_1"
+    },
+    "cloth=purple,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_purple_1",
+      "y": 90
+    },
+    "cloth=purple,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_purple_1",
+      "y": 180
+    },
+    "cloth=purple,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_purple_1",
+      "y": 270
+    },
+    "cloth=purple,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_purple_2"
+    },
+    "cloth=purple,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_purple_2",
+      "y": 90
+    },
+    "cloth=purple,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_purple_2",
+      "y": 180
+    },
+    "cloth=purple,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_purple_2",
+      "y": 270
+    },
+    "cloth=purple,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_purple_3"
+    },
+    "cloth=purple,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_purple_3",
+      "y": 90
+    },
+    "cloth=purple,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_purple_3",
+      "y": 180
+    },
+    "cloth=purple,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_purple_3",
+      "y": 270
+    },
+    "cloth=blue,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_blue_0"
+    },
+    "cloth=blue,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_blue_0",
+      "y": 90
+    },
+    "cloth=blue,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_blue_0",
+      "y": 180
+    },
+    "cloth=blue,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_blue_0",
+      "y": 270
+    },
+    "cloth=blue,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_blue_1"
+    },
+    "cloth=blue,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_blue_1",
+      "y": 90
+    },
+    "cloth=blue,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_blue_1",
+      "y": 180
+    },
+    "cloth=blue,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_blue_1",
+      "y": 270
+    },
+    "cloth=blue,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_blue_2"
+    },
+    "cloth=blue,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_blue_2",
+      "y": 90
+    },
+    "cloth=blue,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_blue_2",
+      "y": 180
+    },
+    "cloth=blue,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_blue_2",
+      "y": 270
+    },
+    "cloth=blue,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_blue_3"
+    },
+    "cloth=blue,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_blue_3",
+      "y": 90
+    },
+    "cloth=blue,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_blue_3",
+      "y": 180
+    },
+    "cloth=blue,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_blue_3",
+      "y": 270
+    },
+    "cloth=brown,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_brown_0"
+    },
+    "cloth=brown,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_brown_0",
+      "y": 90
+    },
+    "cloth=brown,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_brown_0",
+      "y": 180
+    },
+    "cloth=brown,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_brown_0",
+      "y": 270
+    },
+    "cloth=brown,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_brown_1"
+    },
+    "cloth=brown,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_brown_1",
+      "y": 90
+    },
+    "cloth=brown,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_brown_1",
+      "y": 180
+    },
+    "cloth=brown,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_brown_1",
+      "y": 270
+    },
+    "cloth=brown,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_brown_2"
+    },
+    "cloth=brown,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_brown_2",
+      "y": 90
+    },
+    "cloth=brown,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_brown_2",
+      "y": 180
+    },
+    "cloth=brown,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_brown_2",
+      "y": 270
+    },
+    "cloth=brown,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_brown_3"
+    },
+    "cloth=brown,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_brown_3",
+      "y": 90
+    },
+    "cloth=brown,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_brown_3",
+      "y": 180
+    },
+    "cloth=brown,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_brown_3",
+      "y": 270
+    },
+    "cloth=green,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_green_0"
+    },
+    "cloth=green,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_green_0",
+      "y": 90
+    },
+    "cloth=green,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_green_0",
+      "y": 180
+    },
+    "cloth=green,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_green_0",
+      "y": 270
+    },
+    "cloth=green,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_green_1"
+    },
+    "cloth=green,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_green_1",
+      "y": 90
+    },
+    "cloth=green,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_green_1",
+      "y": 180
+    },
+    "cloth=green,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_green_1",
+      "y": 270
+    },
+    "cloth=green,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_green_2"
+    },
+    "cloth=green,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_green_2",
+      "y": 90
+    },
+    "cloth=green,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_green_2",
+      "y": 180
+    },
+    "cloth=green,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_green_2",
+      "y": 270
+    },
+    "cloth=green,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_green_3"
+    },
+    "cloth=green,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_green_3",
+      "y": 90
+    },
+    "cloth=green,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_green_3",
+      "y": 180
+    },
+    "cloth=green,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_green_3",
+      "y": 270
+    },
+    "cloth=red,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_red_0"
+    },
+    "cloth=red,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_red_0",
+      "y": 90
+    },
+    "cloth=red,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_red_0",
+      "y": 180
+    },
+    "cloth=red,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_red_0",
+      "y": 270
+    },
+    "cloth=red,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_red_1"
+    },
+    "cloth=red,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_red_1",
+      "y": 90
+    },
+    "cloth=red,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_red_1",
+      "y": 180
+    },
+    "cloth=red,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_red_1",
+      "y": 270
+    },
+    "cloth=red,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_red_2"
+    },
+    "cloth=red,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_red_2",
+      "y": 90
+    },
+    "cloth=red,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_red_2",
+      "y": 180
+    },
+    "cloth=red,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_red_2",
+      "y": 270
+    },
+    "cloth=red,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_red_3"
+    },
+    "cloth=red,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_red_3",
+      "y": 90
+    },
+    "cloth=red,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_red_3",
+      "y": 180
+    },
+    "cloth=red,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_red_3",
+      "y": 270
+    },
+    "cloth=black,emblem=0,facing=north": {
+      "model": "hearthholm:block/settlement_banner_black_0"
+    },
+    "cloth=black,emblem=0,facing=east": {
+      "model": "hearthholm:block/settlement_banner_black_0",
+      "y": 90
+    },
+    "cloth=black,emblem=0,facing=south": {
+      "model": "hearthholm:block/settlement_banner_black_0",
+      "y": 180
+    },
+    "cloth=black,emblem=0,facing=west": {
+      "model": "hearthholm:block/settlement_banner_black_0",
+      "y": 270
+    },
+    "cloth=black,emblem=1,facing=north": {
+      "model": "hearthholm:block/settlement_banner_black_1"
+    },
+    "cloth=black,emblem=1,facing=east": {
+      "model": "hearthholm:block/settlement_banner_black_1",
+      "y": 90
+    },
+    "cloth=black,emblem=1,facing=south": {
+      "model": "hearthholm:block/settlement_banner_black_1",
+      "y": 180
+    },
+    "cloth=black,emblem=1,facing=west": {
+      "model": "hearthholm:block/settlement_banner_black_1",
+      "y": 270
+    },
+    "cloth=black,emblem=2,facing=north": {
+      "model": "hearthholm:block/settlement_banner_black_2"
+    },
+    "cloth=black,emblem=2,facing=east": {
+      "model": "hearthholm:block/settlement_banner_black_2",
+      "y": 90
+    },
+    "cloth=black,emblem=2,facing=south": {
+      "model": "hearthholm:block/settlement_banner_black_2",
+      "y": 180
+    },
+    "cloth=black,emblem=2,facing=west": {
+      "model": "hearthholm:block/settlement_banner_black_2",
+      "y": 270
+    },
+    "cloth=black,emblem=3,facing=north": {
+      "model": "hearthholm:block/settlement_banner_black_3"
+    },
+    "cloth=black,emblem=3,facing=east": {
+      "model": "hearthholm:block/settlement_banner_black_3",
+      "y": 90
+    },
+    "cloth=black,emblem=3,facing=south": {
+      "model": "hearthholm:block/settlement_banner_black_3",
+      "y": 180
+    },
+    "cloth=black,emblem=3,facing=west": {
+      "model": "hearthholm:block/settlement_banner_black_3",
+      "y": 270
+    }
+  }
+}

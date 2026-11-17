@@ -372,6 +372,21 @@ def outfit(prof, slim):
             fill_part(im, O[arm], lambda f, x, y, w, h: rgb(shade(robe, f)) if f != "bottom" and (f == "top" or y <= 6) else None)
         for leg in ("rleg", "lleg"):
             fill_part(im, O[leg], lambda f, x, y, w, h: rgb(shade(robe, f)) if f not in ("top", "bottom") and y < 7 else None)
+    elif prof == "innkeeper":
+        tunic, apron = 0x9A4F2A, 0xF0EBDD
+        O_h = parts(False, True)["head"]
+        fill_face(im, O_h["top"], lambda x, y, w, h: rgb(shade(0x5A3A22, "top"), n=4) if 1 <= x <= 6 and 1 <= y <= 6 else None)   # flat cap
+        for f in ("front", "right", "left", "back"):
+            fill_face(im, O_h[f], lambda x, y, w, h, f=f: rgb(shade(0x5A3A22, f), n=4) if y == 0 else None)
+        fill_part(im, O["body"], lambda f, x, y, w, h: rgb(shade(tunic, f)) if f not in ("top", "bottom") and y <= 8 else None)
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(apron) if 1 <= x <= 6 and y >= 4 else None)   # long apron
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(0xB8B2A0) if x in (1, 6) and y == 4 else None)
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(0x8C6A3E) if x in (3, 4) and y in (6, 7) else None)   # pocket
+        fill_face(im, O["body"]["back"], lambda x, y, w, h: rgb(apron) if y in (5, 6) else None)   # apron strings
+        for arm in ("rarm", "larm"):   # rolled-up sleeves
+            fill_part(im, O[arm], lambda f, x, y, w, h: rgb(shade(tunic, f)) if f != "bottom" and (f == "top" or y <= 3) else None)
+        for leg in ("rleg", "lleg"):
+            fill_part(im, O[leg], lambda f, x, y, w, h: rgb(shade(0x3E2E22, f)) if f not in ("top", "bottom") and y >= 8 else None)
     elif prof == "knight":
         steel, gold, red = 0xC4C9D0, 0xD8B04A, 0xB0302A
         helmet(im, steel, 4, band=gold, nose=True)
@@ -932,6 +947,211 @@ def wave_d():
     save(war_horn_icon(), "item/war_horn.png")
     save(salve_icon(), "item/healing_salve.png")
 
+# ---------------------------------------------------------------- wave E: square and market
+DYE_RGB = {"white": 0xF9FFFE, "orange": 0xF9801D, "magenta": 0xC74EBD, "light_blue": 0x3AB3DA, "yellow": 0xFED83D, "lime": 0x80C71F,
+           "pink": 0xF38BAA, "gray": 0x474F52, "light_gray": 0x9D9D97, "cyan": 0x169C9C, "purple": 0x8932B8, "blue": 0x3C44AA,
+           "brown": 0x835432, "green": 0x5E7C16, "red": 0xB02E26, "black": 0x1D1D21}
+
+def keg_textures():
+    out = {}
+    side = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            k = 1 + rnd.randint(-5, 5) / 100
+            if x % 4 == 0: k *= 0.78
+            c = 0x8A5A30
+            if y in (2, 3, 12, 13): c, k = 0x4A4D55, 1 + rnd.randint(-4, 4) / 100
+            if y in (2, 12): k *= 1.25
+            side.putpixel((x, y), (int((c >> 16 & 255) * k), int((c >> 8 & 255) * k), int((c & 255) * k), 255))
+    out["tavern_keg_side"] = side
+    front = side.copy()
+    draw(front, ["..bbbb..", ".bGGGGb.", "..bGGb..", "...GG...", "...GG...", "..GGGG.."], {"b": (70, 48, 28), "G": (201, 162, 58)}, 4, 5)
+    front.putpixel((7, 11), (201, 162, 58, 255)); front.putpixel((8, 11), (160, 120, 40, 255))
+    out["tavern_keg_front"] = front
+    top = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+            k = 1 + rnd.randint(-4, 4) / 100
+            c = 0x4A4D55 if d > 7.2 else (0xB08652 if int(d) % 3 else 0x8E6A3E)
+            top.putpixel((x, y), (int((c >> 16 & 255) * k), int((c >> 8 & 255) * k), int((c & 255) * k), 255))
+    draw(top, ["bbbb"], {"b": (50, 34, 20)}, 6, 7)
+    out["tavern_keg_top"] = top
+    return out
+
+def decor_textures():
+    out = {}
+    metal = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            k = 1 + rnd.randint(-6, 6) / 100 + (0.12 if x in (6, 7) else 0)
+            metal.putpixel((x, y), (int(0x30 * k), int(0x34 * k), int(0x3A * k), 255))
+    out["lamp_post_metal"] = metal
+    glass = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            edge = x in (0, 15) or y in (0, 15) or x == 7 or x == 8
+            c = (50, 52, 58) if edge else (255, int(205 + 30 * (1 - abs(y - 7.5) / 8)), 110)
+            glass.putpixel((x, y), c + (255,))
+    out["lamp_post_glass"] = glass
+    out["signpost_wood"] = plank_tex(0x8A6038, rows=16, seed=71)
+    board = plank_tex(0xB08A58, rows=5, seed=72)
+    draw(board, ["..........wwwwww..", "....wwwwwwwwwwww.."], {"w": (150, 112, 70)}, 0, 0)
+    for x in range(16):
+        board.putpixel((x, 0), (90, 62, 36, 255)); board.putpixel((x, 15), (90, 62, 36, 255))
+    draw(board, ["....DDDDDDDD....", "....D......D....", "....D.DDDD.D....", "....D......D....", "....DDDDDDDD...."], {"D": (80, 54, 30)}, 0, 5)
+    out["signpost_board"] = board
+    out["bench_wood"] = plank_tex(0x9A6E40, rows=4, seed=73)
+    out["well_stone"] = stone_tex(0x8E8E88, 74, True)
+    out["well_water"] = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            k = 1 + rnd.randint(-6, 6) / 100 + (0.1 if (x + y * 2) % 7 == 0 else 0)
+            out["well_water"].putpixel((x, y), (int(0x3A * k), int(0x78 * k), min(255, int(0xC8 * k)), 255))
+    out["well_roof"] = plank_tex(0x6E3E2A, rows=4, seed=75)
+    out["counter_side"] = plank_tex(0x7C5233, rows=6, seed=76)
+    ctop = plank_tex(0xB08A58, rows=4, seed=77)
+    for x in range(16):
+        ctop.putpixel((x, 0), (120, 86, 50, 255)); ctop.putpixel((x, 15), (120, 86, 50, 255))
+    out["counter_top"] = ctop
+    cfront = plank_tex(0x7C5233, rows=6, seed=78)
+    draw(cfront, ["DDDDDDDDDDDD", "D..........D", "D..........D", "D..........D", "DDDDDDDDDDDD"], {"D": (60, 40, 24)}, 2, 3)
+    draw(cfront, ["gg"], {"g": (201, 162, 58)}, 7, 6)
+    out["counter_front"] = cfront
+    out["flower_box_wood"] = plank_tex(0x7A5230, rows=3, seed=79)
+    soil = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            k = 1 + rnd.randint(-8, 8) / 100
+            soil.putpixel((x, y), (int(0x4C * k), int(0x8A * k), int(0x3C * k), 255))
+    r = random.Random(80)
+    for _ in range(14):
+        x, y = r.randint(1, 14), r.randint(1, 14)
+        c = r.choice([(214, 60, 60), (240, 210, 70), (240, 240, 245), (150, 100, 220), (240, 140, 60)])
+        soil.putpixel((x, y), c + (255,)); soil.putpixel((x + 1 if x < 15 else x, y), (70, 150, 60, 255))
+    out["flower_box_top"] = soil
+    # workshop signs: a board with a small pictogram
+    pal = {"s": (190, 195, 205), "b": (110, 74, 40), "k": (60, 60, 66), "w": (240, 240, 240), "r": (176, 80, 60), "y": (225, 190, 70),
+           "g": (110, 110, 118), "o": (225, 130, 40), "f": (250, 245, 225)}
+    icons = {
+        "carpenter": ["................", "....ssssssss....", "...sksksksksk...", "...ssssssssss...", "..bb............", "..bb............", "................", "......rrrr......", "......rbbr......", "......rrrr......"],
+        "mason": ["................", "..rrrr.rrrr.rr..", "..rrrr.rrrr.rr..", "................", "rr.rrrr.rrrr.rrr", "rr.rrrr.rrrr.rrr", "................", "..rrrr.rrrr.rr..", "..rrrr.rrrr.rr..", "................"],
+        "smith": ["................", "...gggggggggg...", "..gggggggggggg..", "...ggggggggggg..", ".....gggggg.....", ".....gggggg.....", "....gggggggg....", "...gggggggggg...", "................", "................"],
+        "cook": ["..w...w....w....", "...w...w..w.....", "................", "..kkkkkkkkkkk...", ".kkggggggggkkk..", ".kkkkkkkkkkkk...", "..kkkkkkkkkk....", "...kk....kk.....", "................", "................"],
+        "tavern": ["................", "....fffffff.....", "...fffffffff....", "....yyyyyyyy....", "....yyyyyyyy.oo.", "....yyyyyyyy.o.o", "....yyyyyyyy.o.o", "....yyyyyyyy.oo.", ".....yyyyyyy....", "................"],
+    }
+    for kind, rows in icons.items():
+        im = plank_tex(0xB89263, rows=16, seed=90 + len(kind))
+        for x in range(16):
+            im.putpixel((x, 0), (90, 62, 36, 255)); im.putpixel((x, 15), (90, 62, 36, 255))
+        for y in range(16):
+            im.putpixel((0, y), (90, 62, 36, 255)); im.putpixel((15, y), (90, 62, 36, 255))
+        draw(im, rows, pal, 0, 3)
+        out[f"sign_{kind}"] = im
+    out["sign_back"] = plank_tex(0x7A5230, rows=16, seed=95)
+    # bulletin board: pinned notes
+    bb = plank_tex(0xA37A4A, rows=4, seed=96)
+    notes = [(2, 2, 5, 6, (238, 228, 196)), (8, 3, 6, 5, (226, 214, 176)), (3, 9, 6, 5, (232, 222, 188)), (10, 9, 4, 5, (244, 236, 208))]
+    for nx, ny, nw, nh, c in notes:
+        for yy in range(ny, ny + nh):
+            for xx in range(nx, nx + nw):
+                bb.putpixel((xx, yy), c + (255,))
+        for xx in range(nx + 1, nx + nw - 1, 2):
+            bb.putpixel((xx, ny + 2), (110, 90, 70, 255)); 
+        bb.putpixel((nx + nw // 2, ny), (190, 50, 40, 255))
+    for x in range(16):
+        bb.putpixel((x, 0), (70, 46, 26, 255)); bb.putpixel((x, 15), (70, 46, 26, 255))
+    out["bulletin_board_front"] = bb
+    # market stall awning and crate
+    aw = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            c = (190, 52, 44) if (x // 4) % 2 == 0 else (240, 234, 220)
+            k = 1 + rnd.randint(-4, 4) / 100
+            aw.putpixel((x, y), (int(c[0] * k), int(c[1] * k), int(c[2] * k), 255))
+    out["market_stall_awning"] = aw
+    crate = plank_tex(0x9A6E40, rows=4, seed=97)
+    for i in range(16):
+        crate.putpixel((i, i), (70, 48, 28, 255)); crate.putpixel((15 - i, i), (70, 48, 28, 255))
+        crate.putpixel((i, 0), (70, 48, 28, 255)); crate.putpixel((i, 15), (70, 48, 28, 255))
+        crate.putpixel((0, i), (70, 48, 28, 255)); crate.putpixel((15, i), (70, 48, 28, 255))
+    out["market_stall_crate"] = crate
+    out["market_stall_wood"] = plank_tex(0x8A5E36, rows=4, seed=98)
+    return out
+
+def banner_cloth(dye, emblem):
+    base = DYE_RGB[dye]
+    lum = (0.3 * (base >> 16 & 255) + 0.59 * (base >> 8 & 255) + 0.11 * (base & 255))
+    ink = 0x1D1D21 if lum > 150 else 0xF4E6A8
+    im = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            k = 1 + rnd.randint(-4, 4) / 100 + (0.06 if y % 4 == 0 else 0)
+            im.putpixel((x, y), (min(255, int((base >> 16 & 255) * k)), min(255, int((base >> 8 & 255) * k)), min(255, int((base & 255) * k)), 255))
+    for x in range(16):   # hem
+        im.putpixel((x, 15), (int((base >> 16 & 255) * .6), int((base >> 8 & 255) * .6), int((base & 255) * .6), 255))
+    shapes = {
+        0: ["......I.........", ".....III........", "....IIIII.......", "...IIIIIII......", "...IIIIIII......", "....IIIII.......", ".....III........"],
+        1: ["................", "................", "IIIIIIIIIIIIIIII", "................", "................", "IIIIIIIIIIIIIIII", "................"],
+        2: ["......I.........", "......I.........", ".....III........", "IIIIIIIIIII.....", "...IIIII........", "..III.III.......", ".II.....II......"],
+        3: ["...IIIIIIII.....", "..I........I....", "..I..IIII..I....", "..I..I..I..I....", "..I..IIII..I....", "..I........I....", "...IIIIIIII....."],
+    }
+    # centre the 7-row motif horizontally: shift by 2
+    for j, row in enumerate(shapes[emblem]):
+        for i, ch in enumerate(row):
+            if ch == "I":
+                x = i + (0 if emblem == 1 else 0)
+                im.putpixel((x if emblem == 1 else min(15, x + 0), 4 + j), (ink >> 16 & 255, ink >> 8 & 255, ink & 255, 255))
+    return im
+
+def trader_skin():
+    im = img()
+    P, O = parts(False), parts(False, True)
+    skin, cloak, trim = 0xD9A77E, 0x2F6F78, 0xC9A23A
+    for part in P.values():
+        fill_part(im, part, lambda f, x, y, w, h: c3(skin, sk(f), 5))
+    fx, fy = 8, 8
+    for x in (1, 2, 5, 6):
+        im.putpixel((fx + x, fy + 4), (250, 250, 250, 255))
+    for x in (2, 5):
+        im.putpixel((fx + x, fy + 4), (60, 40, 30, 255))
+    for x in (3, 4):
+        im.putpixel((fx + x, fy + 6), (150, 90, 70, 255))
+    im.putpixel((fx + 3, fy + 5), (190, 130, 100, 255)); im.putpixel((fx + 4, fy + 5), (190, 130, 100, 255))
+    # trousers, boots, tunic
+    for leg in ("rleg", "lleg"):
+        fill_part(im, P[leg], lambda f, x, y, w, h: None if f == "top" else c3(0x3A2A1E, sk(f), 3) if y >= 9 or f == "bottom" else c3(0x6B5236, sk(f), 5))
+    fill_part(im, P["body"], lambda f, x, y, w, h: None if f == "bottom" else c3(0xB8553A, sk(f), 5))
+    fill_part(im, P["body"], lambda f, x, y, w, h: c3(0x4A3220, sk(f)) if f in ("front", "back", "right", "left") and y == 9 else None)
+    for arm in ("rarm", "larm"):
+        fill_part(im, P[arm], lambda f, x, y, w, h: None if f == "bottom" or (f != "top" and y > 7) else c3(0xB8553A, sk(f), 5))
+    # hooded cloak (outer layers)
+    H = O["head"]
+    fill_face(im, H["top"], lambda x, y, w, h: c3(cloak, sk("top"), 4))
+    for f in ("right", "left", "back"):
+        fill_face(im, H[f], lambda x, y, w, h, f=f: c3(cloak, sk(f), 4))
+    fill_face(im, H["front"], lambda x, y, w, h: c3(cloak, 1, 4) if y < 2 or x in (0, 7) else (c3(trim) if y == 2 and 1 <= x <= 6 and False else None))
+    fill_part(im, O["body"], lambda f, x, y, w, h: c3(cloak, sk(f), 4) if f in ("back", "right", "left") and y < 11 else
+              (c3(cloak, sk(f), 4) if f == "front" and (x in (0, 1, 6, 7) or y == 0) and y < 11 else None))
+    fill_face(im, O["body"]["front"], lambda x, y, w, h: c3(trim) if y == 0 and x in (3, 4) else None)
+    fill_face(im, O["body"]["back"], lambda x, y, w, h: c3(0x8C6A3E, 1, 4) if 2 <= x <= 5 and 3 <= y <= 8 else (c3(0x5E4426) if 2 <= x <= 5 and y == 3 else None))   # pack
+    for arm in ("rarm", "larm"):
+        fill_part(im, O[arm], lambda f, x, y, w, h: c3(cloak, sk(f), 4) if f == "top" or (f != "bottom" and y < 6) else None)
+    return im
+
+def wave_e():
+    rnd.seed(55)
+    for name, t in keg_textures().items():
+        save(t, f"block/{name}.png")
+    for name, t in decor_textures().items():
+        save(t, f"block/{name}.png")
+    for dye in DYE_RGB:
+        for e in range(4):
+            save(banner_cloth(dye, e), f"block/banner_{dye}_{e}.png")
+    save(trader_skin(), "entity/trader.png")
+    for slim in (False, True):
+        save(outfit("innkeeper", slim), f"entity/settler/profession/innkeeper_{'slim' if slim else 'wide'}.png")
+
 def main():
     for slim in (False, True):
         arms = "slim" if slim else "wide"
@@ -967,6 +1187,7 @@ def main():
     save(hearth_mark(), "item/hearth_mark.png")
     wave_c()
     wave_d()
+    wave_e()
     print("textures written to", os.path.normpath(OUT))
 
 if __name__ == "__main__":

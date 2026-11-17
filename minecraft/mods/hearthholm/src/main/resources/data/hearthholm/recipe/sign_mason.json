@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#minecraft:planks",
+    "minecraft:stick",
+    "minecraft:stonecutter"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:sign_mason"
+  }
+}

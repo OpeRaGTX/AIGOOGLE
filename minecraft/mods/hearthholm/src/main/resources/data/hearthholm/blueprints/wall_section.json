@@ -1,0 +1,25 @@
+{
+ "palette": {
+  "c": "minecraft:cobblestone",
+  "D": "hearthholm:palisade_gate[facing=north,half=lower,hinge=left,open=false]",
+  "d": "hearthholm:palisade_gate[facing=north,half=upper,hinge=left,open=false]",
+  "s": "minecraft:stone_bricks"
+ },
+ "layers": [
+  [
+   "ccccccccc"
+  ],
+  [
+   "ssssDssss"
+  ],
+  [
+   "ssssdssss"
+  ],
+  [
+   "sssssssss"
+  ],
+  [
+   "s.s.s.s.s"
+  ]
+ ]
+}

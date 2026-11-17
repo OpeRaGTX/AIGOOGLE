@@ -252,4 +252,83 @@ shapeless("healing_salve", ["minecraft:glass_bottle", "minecraft:sweet_berries",
 _snd = json.load(open(os.path.join(R, f"assets/{NS}/sounds.json"), encoding="utf-8"))
 _snd["party.horn"] = {"sounds": [f"{NS}:party/horn"], "subtitle": f"subtitles.{NS}.party.horn"}
 w(f"assets/{NS}/sounds.json", _snd)
+
+# ---- wave E: square and market
+T = lambda n: f"{NS}:block/{n}"
+ALLF = ("north", "south", "east", "west", "up", "down")
+block_model("tavern_keg", {"particle": T("tavern_keg_side"), "top": T("tavern_keg_top"), "side": T("tavern_keg_side"), "front": T("tavern_keg_front")},
+            [box_el([1, 0, 1], [15, 14, 15], {"up": "#top", "down": "#top", "north": "#front", "south": "#side", "east": "#side", "west": "#side"}),
+             box_el([6, 5, 0], [10, 8, 1], "#top")])
+block_model("lamp_post", {"particle": T("lamp_post_metal"), "metal": T("lamp_post_metal"), "glass": T("lamp_post_glass")},
+            [box_el([5, 0, 5], [11, 2, 11], "#metal"), box_el([7, 2, 7], [9, 11, 9], "#metal"), box_el([4, 11, 4], [12, 12, 12], "#metal"),
+             box_el([5, 12, 5], [11, 15, 11], "#glass"), box_el([4, 15, 4], [12, 16, 12], "#metal")])
+block_model("signpost", {"particle": T("signpost_wood"), "wood": T("signpost_wood"), "board": T("signpost_board")},
+            [box_el([7, 0, 7], [9, 16, 9], "#wood"),
+             {"from": [1, 9, 8.5], "to": [15, 14, 9.5], "faces": {"north": face("#board", [1, 2, 15, 7]), "south": face("#board", [1, 2, 15, 7]),
+                 "east": face("#wood", [0, 0, 1, 5]), "west": face("#wood", [0, 0, 1, 5]), "up": face("#wood", [0, 0, 14, 1]), "down": face("#wood", [0, 0, 14, 1])}},
+             {"from": [3, 3, 6.5], "to": [13, 7, 7.5], "faces": {"north": face("#board", [3, 8, 13, 12]), "south": face("#board", [3, 8, 13, 12]),
+                 "east": face("#wood", [0, 0, 1, 4]), "west": face("#wood", [0, 0, 1, 4]), "up": face("#wood", [0, 0, 10, 1]), "down": face("#wood", [0, 0, 10, 1])}}])
+block_model("bench", {"particle": T("bench_wood"), "wood": T("bench_wood")},
+            [box_el([1, 6, 4], [15, 8, 12], "#wood"), box_el([1, 8, 11], [15, 14, 12], "#wood"),
+             *[box_el([x, 0, z], [x + 2, 6, z + 2], "#wood") for x in (2, 12) for z in (4, 10)]])
+block_model("well", {"particle": T("well_stone"), "stone": T("well_stone"), "water": T("well_water"), "roof": T("well_roof")},
+            [box_el([0, 0, 0], [16, 7, 3], "#stone"), box_el([0, 0, 13], [16, 7, 16], "#stone"),
+             box_el([0, 0, 3], [3, 7, 13], "#stone"), box_el([13, 0, 3], [16, 7, 13], "#stone"),
+             box_el([3, 0, 3], [13, 5, 13], "#water"),
+             *[box_el([x, 7, z], [x + 2, 14, z + 2], "#roof") for x in (0, 14) for z in (0, 14)],
+             box_el([0, 14, 0], [16, 16, 16], "#roof")])
+block_model("counter", {"particle": T("counter_side"), "side": T("counter_side"), "top": T("counter_top"), "front": T("counter_front")},
+            [box_el([0, 0, 0], [16, 12, 16], {"up": "#side", "down": "#side", "north": "#front", "south": "#side", "east": "#side", "west": "#side"}),
+             box_el([0, 12, 0], [16, 14, 16], {"up": "#top", "down": "#side", "north": "#side", "south": "#side", "east": "#side", "west": "#side"})])
+block_model("flower_box", {"particle": T("flower_box_wood"), "wood": T("flower_box_wood"), "top": T("flower_box_top")},
+            [box_el([0, 0, 3], [16, 7, 13], "#wood"), box_el([1, 7, 4], [15, 9, 12], {"up": "#top", "down": "#wood", "north": "#top", "south": "#top", "east": "#top", "west": "#top"})])
+for kind in ("carpenter", "mason", "smith", "cook", "tavern"):
+    block_model(f"sign_{kind}", {"particle": T(f"sign_{kind}"), "front": T(f"sign_{kind}"), "back": T("sign_back")},
+                [{"from": [1, 2, 7], "to": [15, 14, 9], "faces": {"north": face("#front", [0, 2, 16, 14]), "south": face("#back", [0, 2, 16, 14]),
+                    "east": face("#back", [0, 2, 2, 14]), "west": face("#back", [0, 2, 2, 14]), "up": face("#back", [0, 0, 16, 2]), "down": face("#back", [0, 0, 16, 2])}},
+                 box_el([0, 14, 7], [16, 16, 9], "#back")])
+block_model("bulletin_board", {"particle": T("marker_post"), "post": T("marker_post"), "board": T("bulletin_board_front"), "back": T("order_board_back")},
+            [box_el([1, 0, 7], [3, 16, 9], "#post"), box_el([13, 0, 7], [15, 16, 9], "#post"),
+             {"from": [0, 3, 7.5], "to": [16, 16, 8.5], "faces": {"north": face("#board", [0, 0, 16, 13]), "south": face("#back", [0, 0, 16, 13]),
+                 "east": face("#post", [0, 0, 1, 13]), "west": face("#post", [0, 0, 1, 13]), "up": face("#post", [0, 0, 16, 1]), "down": face("#post", [0, 0, 16, 1])}}])
+block_model("market_stall", {"particle": T("market_stall_wood"), "wood": T("market_stall_wood"), "awning": T("market_stall_awning"), "crate": T("market_stall_crate")},
+            [box_el([0, 0, 4], [16, 10, 12], "#wood"), box_el([0, 10, 3], [16, 11, 13], "#crate"),
+             box_el([0, 0, 12], [2, 16, 14], "#wood"), box_el([14, 0, 12], [16, 16, 14], "#wood"),
+             box_el([0, 14, 2], [16, 16, 14], {"up": "#awning", "down": "#awning", "north": "#awning", "south": "#awning", "east": "#awning", "west": "#awning"}),
+             box_el([2, 11, 5], [7, 14, 10], "#crate"), box_el([9, 11, 6], [13, 13, 10], "#crate")])
+# banner: pole, cross bar and a cloth model per colour and emblem
+DYES = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"]
+w(f"assets/{NS}/models/block/settlement_banner_template.json", {"parent": "block/block", "display": DISPLAY, "textures": {"particle": T("marker_post")},
+    "elements": [box_el([7, 0, 7], [9, 16, 9], "#pole"), box_el([2, 14, 7], [14, 16, 9], "#pole"), box_el([5, 0, 5], [11, 1, 11], "#pole"),
+        {"from": [3, 1, 7.5], "to": [13, 14, 8.5], "faces": {"north": face("#cloth", [0, 0, 16, 16]), "south": face("#cloth", [0, 0, 16, 16]),
+            "east": face("#cloth", [0, 0, 1, 16]), "west": face("#cloth", [0, 0, 1, 16]), "up": face("#cloth", [0, 0, 16, 1]), "down": face("#cloth", [0, 0, 16, 1])}}]})
+variants = {}
+for dye in DYES:
+    for e in range(4):
+        w(f"assets/{NS}/models/block/settlement_banner_{dye}_{e}.json", {"parent": f"{NS}:block/settlement_banner_template",
+            "textures": {"pole": T("marker_post"), "cloth": T(f"banner_{dye}_{e}")}})
+        for d, rot in STD.items():
+            v = {"model": f"{NS}:block/settlement_banner_{dye}_{e}"}
+            if rot: v["y"] = rot
+            variants[f"cloth={dye},emblem={e},facing={d}"] = v
+w(f"assets/{NS}/blockstates/settlement_banner.json", {"variants": variants})
+w(f"assets/{NS}/items/settlement_banner.json", {"model": {"type": "minecraft:model", "model": f"{NS}:block/settlement_banner_red_0"}})
+for name in ("tavern_keg", "lamp_post", "signpost", "bench", "well", "counter", "flower_box", "bulletin_board", "market_stall",
+             "sign_carpenter", "sign_mason", "sign_smith", "sign_cook", "sign_tavern"):
+    item(name)
+    loot(name)
+loot("settlement_banner")
+shapeless("tavern_keg", ["minecraft:barrel", "minecraft:bowl"])
+shaped("lamp_post", ["L", "I", "I"], {"L": "minecraft:lantern", "I": "minecraft:iron_ingot"})
+shaped("signpost", ["PPP", " S ", " S "], {"P": "#minecraft:planks", "S": "minecraft:stick"}, 2)
+shaped("bench", ["PPP", "S S"], {"P": "#minecraft:planks", "S": "minecraft:stick"})
+shaped("well", ["C C", "CBC", "CCC"], {"C": "minecraft:cobblestone", "B": "minecraft:water_bucket"})
+shaped("counter", ["SSS", "PPP"], {"S": "#minecraft:wooden_slabs", "P": "#minecraft:planks"})
+shaped("flower_box", ["DDD", "PPP"], {"D": "#minecraft:small_flowers", "P": "#minecraft:planks"})
+for kind, extra in (("carpenter", "minecraft:crafting_table"), ("mason", "minecraft:stonecutter"), ("smith", "minecraft:iron_ingot"),
+                    ("cook", "minecraft:furnace"), ("tavern", "minecraft:barrel")):
+    shapeless(f"sign_{kind}", ["#minecraft:planks", "minecraft:stick", extra])
+shaped("settlement_banner", ["WW", "WW", " S"], {"W": "#minecraft:wool", "S": "minecraft:stick"})
+shapeless("bulletin_board", ["#minecraft:planks", "minecraft:paper", "minecraft:paper", "minecraft:stick"])
+shaped("market_stall", ["WWW", "P P"], {"W": "#minecraft:wool", "P": "#minecraft:planks"})
 print("assets written")

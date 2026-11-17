@@ -148,6 +148,25 @@ B = {
   ("Fight someone your size!", "Выбери противника по себе!"),
   ("Come get me!", "Попробуй возьми!"),
  ],
+ "tavern": [
+  ("Cheers, friends!", "За здоровье, друзья!"),
+  ("Nothing beats an evening at the tavern.", "Нет ничего лучше вечера в таверне."),
+  ("Pour me another!", "Налей-ка ещё!"),
+  ("Did you hear the one about the Ashborn?", "Слышали про пепельника?"),
+  ("A warm fire and good company.", "Тёплый очаг и добрая компания."),
+  ("To %1$s!", "За %1$s!"),
+ ],
+ "street": [
+  ("What a pretty street!", "Какая красивая улица!"),
+  ("I love these lamps.", "Обожаю эти фонари."),
+  ("%1$s looks lovely tonight.", "%1$s сегодня так красиво."),
+  ("Flowers on every corner.", "Цветы на каждом углу."),
+ ],
+ "trader": [
+  ("Fine wares from far away!", "Диковинки из дальних краёв!"),
+  ("The caravan has arrived!", "Караван прибыл!"),
+  ("Let's see what the trader brought.", "Посмотрим, что привёз торговец."),
+ ],
 }
 
 # work lines per profession path

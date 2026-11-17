@@ -1,0 +1,7 @@
+{
+  "parent": "hearthholm:block/settlement_banner_template",
+  "textures": {
+    "pole": "hearthholm:block/marker_post",
+    "cloth": "hearthholm:block/banner_cyan_2"
+  }
+}

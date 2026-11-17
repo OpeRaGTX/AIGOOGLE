@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/sign_cook"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/sign_cook",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/sign_cook",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/sign_cook",
+      "y": 270
+    }
+  }
+}

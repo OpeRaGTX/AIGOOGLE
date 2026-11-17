@@ -7,6 +7,10 @@
   "workshop",
   "watchtower",
   "palisade_segment",
-  "barracks"
+  "barracks",
+  "tavern",
+  "market_stall",
+  "farmhouse",
+  "wall_section"
  ]
 }

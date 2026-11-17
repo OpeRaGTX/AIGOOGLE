@@ -4,6 +4,7 @@ import io.github.operagtx.hearthholm.blueprint.Blueprint;
 import io.github.operagtx.hearthholm.blueprint.BlueprintLibrary;
 import io.github.operagtx.hearthholm.network.Payloads;
 import io.github.operagtx.hearthholm.network.Views;
+import io.github.operagtx.hearthholm.settlement.SettlementTier;
 import io.github.operagtx.hearthholm.worksite.SiteOption;
 import io.github.operagtx.hearthholm.worksite.WorkSiteType;
 import io.github.operagtx.hearthholm.worksite.WorkSiteTypes;
@@ -39,6 +40,15 @@ public final class WorkSiteScreen extends HhScreen {
 
     private void send(String key, int value) {
         ClientPlayNetworking.send(new Payloads.WorkSiteAction(view.pos(), key, value));
+    }
+
+    /** Tier index that unlocks blueprint {@code index} when the settlement has not reached it (and it is not bought), else -1. */
+    private int lockedTier(int index) {
+        Blueprint bp = BlueprintLibrary.byIndex(index);
+        if (bp == null || !view.values().containsKey("_tier")) return -1;
+        int need = BlueprintLibrary.requiredTier(bp.id());
+        if (view.values().getOrDefault("_tier", 0) >= need || view.values().containsKey("_u" + index)) return -1;
+        return need;
     }
 
     private int hintHeight() {
@@ -92,14 +102,17 @@ public final class WorkSiteScreen extends HhScreen {
             text(g, o.label(), x, oy + 4, TEXT);
             if (o.kind() != SiteOption.Kind.TOGGLE) {
                 Component v = o.valueLabel(value);
-                g.text(font, v, left + 221 - font.width(v) / 2, oy + 4, TITLE, false);
+                boolean locked = o.key().equals("blueprint") && lockedTier(value) >= 0;
+                g.text(font, v, left + 221 - font.width(v) / 2, oy + 4, locked ? DIM : TITLE, false);
             }
             oy += 20;
         }
         if (type.id().equals(WorkSiteTypes.CONSTRUCTION_ID)) {
             Blueprint bp = BlueprintLibrary.byIndex(view.values().getOrDefault("blueprint", 0));
             if (bp != null) {
-                text(g, Component.translatable("gui.hearthholm.materials", bp.width(), bp.depth(), bp.height()), x, oy + 4, DIM);
+                int lock = lockedTier(view.values().getOrDefault("blueprint", 0));
+                if (lock >= 0) text(g, Component.translatable("gui.hearthholm.needs_tier", SettlementTier.TIERS.get(lock).label()), x, oy + 4, BAD);
+                else text(g, Component.translatable("gui.hearthholm.materials", bp.width(), bp.depth(), bp.height()), x, oy + 4, DIM);
                 int i = 0;
                 for (Map.Entry<Item, Integer> e : bp.materials().entrySet()) {
                     int ix = x + (i % 14) * 20, iy = oy + 16 + (i / 14) * 20;

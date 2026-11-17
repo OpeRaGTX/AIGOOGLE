@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/sign_carpenter"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/sign_carpenter",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/sign_carpenter",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/sign_carpenter",
+      "y": 270
+    }
+  }
+}

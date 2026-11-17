@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/well"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/well",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/well",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/well",
+      "y": 270
+    }
+  }
+}

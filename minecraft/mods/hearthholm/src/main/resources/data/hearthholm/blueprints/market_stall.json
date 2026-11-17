@@ -1,0 +1,27 @@
+{
+ "palette": {
+  "g": "minecraft:gravel",
+  "p": "hearthholm:lamp_post[facing=north]",
+  "b": "hearthholm:bench[facing=east]",
+  "B": "hearthholm:bench[facing=west]",
+  "C": "hearthholm:counter[facing=north]",
+  "M": "hearthholm:market_stall[facing=north]",
+  "f": "hearthholm:flower_box[facing=north]"
+ },
+ "layers": [
+  [
+   "ggggggg",
+   "ggggggg",
+   "ggggggg",
+   "ggggggg",
+   "ggggggg"
+  ],
+  [
+   "p.....p",
+   ".......",
+   ".b...B.",
+   ".CCMCC.",
+   "f.....f"
+  ]
+ ]
+}
