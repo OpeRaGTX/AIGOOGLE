@@ -305,7 +305,7 @@ final class WaveDTest {
             h.teleportTo(O.getX() + 20.5, O.getY(), O.getZ() - 4.5);
             HEALER = h.getUUID();
             // a wounded cook and a wounded guard in the open
-            SettlerEntity cook = ensure(s, Professions.COOK, Professions.HAULER);
+            SettlerEntity cook = get(s, PATIENT);
             cook.teleportTo(O.getX() + 18.5, O.getY(), O.getZ() - 2.5);
             cook.setHealth(4f);
             LUMBER = cook.getUUID();
