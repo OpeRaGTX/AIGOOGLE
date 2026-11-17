@@ -219,13 +219,14 @@ final class WaveGTest {
                 int y = l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
                 ss.get(i).teleportTo(x + 0.5, y, z + 0.5);
             }
-            look(p, O.getX() + 8.5, O.getY() + 24, O.getZ() - 28, O.getX() + 8.5, O.getY(), O.getZ() + 2);
+            look(p, O.getX() + 8.5, O.getY() + 30, O.getZ() - 22, O.getX() + 8.5, O.getY(), O.getZ() + 4);
+            p.getInventory().setSelectedSlot(8);
         });
-        ctx.runOnClient(mc -> mc.options.hideGui = true);
+        ctx.getInput().pressKey(o -> o.keyToggleGui);
         ctx.waitTicks(10);
         sp.getConnection().waitForChunksRender();
         ctx.takeScreenshot("hh_g1_town_overview");
-        ctx.runOnClient(mc -> mc.options.hideGui = false);
+        ctx.getInput().pressKey(o -> o.keyToggleGui);
         log("GAPG screenshots: hh_g1_town_overview taken, GUI hidden");
         log("WAVE G OK");
     }
