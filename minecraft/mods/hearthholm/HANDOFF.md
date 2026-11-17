@@ -57,10 +57,14 @@ No PR unless asked. Stop hook demands commit+push before ending a turn.
   order catalogues (lazy `Supplier` catalogue, paged picker), watchtower needs village tier, trade label ellipsis,
   README/DESIGN refreshed, screenshots in `docs/screenshots/`, zip rebuilt. Test: `WaveFTest` (`HH_ONLY_F=1`).
 
+- **G Reshoot and gaps**: retroactive guide book (desk visit), `config/hearthholm.json` (Balance via reflection), `party/PartyRoster` +
+  force-load rescue of members in unloaded chunks, nether round trip tested, horn summons stragglers, GUI-less overview shot
+  (GUI hidden via `ctx.getInput().pressKey(o -> o.keyToggleGui)`), tavern reshoot. Test: `WaveGTest` (`HH_ONLY_G=1`).
+
 ## Remaining gaps / ideas
-- Balance is theory + headless test only: tune `Balance.java` after real play; no config file for it yet.
-- Party members in unloaded chunks stay behind; cross-dimension teleport untested; raid casualties non-deterministic.
-- Legendary hire, mason and smith lightly covered by the test; guide book not given retroactively to old saves.
+- Balance is theory + headless test only: tune after real play (now via `config/hearthholm.json`).
+- End dimension untested for the party; raid casualties non-deterministic.
+- Legendary hire, mason and smith lightly covered by the test.
 - Ideas: ghost preview of blueprints, families and children, custom particle types, Balance as a JSON config.
 
 ## Agent prompt template

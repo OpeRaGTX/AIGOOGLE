@@ -144,6 +144,14 @@ final class WaveFTest {
                 }
                 log("DECOR stocked " + add.getHoverName().getString() + " leftover=" + rest.getCount());
             }
+            if (settlers(s).stream().noneMatch(e -> e.professionId().equals(io.github.operagtx.hearthholm.core.Professions.CARPENTER.id()))) {
+                // wave E's fuel test may have turned the only carpenter into the cook: give the trade back
+                for (var e : settlers(s)) if (e.professionId().equals(io.github.operagtx.hearthholm.core.Professions.COOK.id())) {
+                    e.setProfession(io.github.operagtx.hearthholm.core.Professions.CARPENTER);
+                    log("DECOR no carpenter left, " + e.getName().getString() + " retrains as carpenter");
+                    break;
+                }
+            }
             SettlementService.setOrder(st, ModBlocks.BENCH.asItem(), 2);
             log("DECOR order bench placed, benches in stock=" + stock(s, ModBlocks.BENCH.asItem()));
         });

@@ -51,6 +51,7 @@ import static io.github.operagtx.hearthholm.test.HearthholmClientTest.*;
 
 /** Wave E checks: tier-locked blueprints, tavern evening, caravan trade, decor thought, bulletin board quests, fuel, fire markers. */
 final class WaveETest {
+    private static final java.util.Map<java.util.UUID, net.minecraft.world.phys.Vec3> SAVED = new java.util.HashMap<>();
     private static BlockPos TAV_KEG, TAV_CAM, TAV_KEEPER, MARKET, BULLETIN;
     private static int oldRenown, coal0;
 
@@ -252,13 +253,20 @@ final class WaveETest {
             // wave G: guests step out for the shot, only the innkeeper stays (beside the counter); camera inside, keg + counter in view
             for (SettlerEntity e : settlers(s)) {
                 if (e.professionId().equals(Professions.INNKEEPER.id())) e.teleportTo(TAV_KEEPER.getX() + 0.5, TAV_KEEPER.getY(), TAV_KEEPER.getZ() + 0.5);
-                else e.teleportTo(O.getX() + 4.5, O.getY(), O.getZ() + 30.5);
+                else { SAVED.put(e.getUUID(), e.position()); e.teleportTo(O.getX() + 4.5, O.getY(), O.getZ() + 30.5); }
             }
             lookAt(p, TAV_CAM.getX() + 0.5, TAV_CAM.getY(), TAV_CAM.getZ() + 0.5, TAV_KEG.getX() + 0.5, TAV_KEG.getY() + 0.4, TAV_KEG.getZ() + 0.5);
         });
         ctx.waitTicks(10);
         sp.getConnection().waitForChunksRender();
         ctx.takeScreenshot("hh_e2_tavern");
+        sp.getServer().runOnServer(s -> {   // guests go back where they were
+            for (SettlerEntity e : settlers(s)) {
+                var at = SAVED.get(e.getUUID());
+                if (at != null) e.teleportTo(at.x, at.y, at.z);
+            }
+            SAVED.clear();
+        });
 
         // the decorated street at dusk (chat from the tier checks has faded by now)
         sp.getServer().runOnServer(s -> lookAt(player(s), O.getX() + 14.5, O.getY(), O.getZ() - 1.5, O.getX() + 5.0, O.getY() + 1.2, O.getZ() - 3.0));
