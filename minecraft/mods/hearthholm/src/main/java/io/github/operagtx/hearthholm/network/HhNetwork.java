@@ -12,6 +12,10 @@ public final class HhNetwork {
         PayloadTypeRegistry.clientboundPlay().register(Payloads.OpenSettler.TYPE, Payloads.OpenSettler.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(Payloads.OpenWorkSite.TYPE, Payloads.OpenWorkSite.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(Payloads.OpenOrders.TYPE, Payloads.OpenOrders.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(Payloads.OpenTrade.TYPE, Payloads.OpenTrade.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(Payloads.OpenBoard.TYPE, Payloads.OpenBoard.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(Payloads.TradeAction.TYPE, Payloads.TradeAction.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(Payloads.BoardAction.TYPE, Payloads.BoardAction.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(Payloads.OrderAction.TYPE, Payloads.OrderAction.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(Payloads.TownHallAction.TYPE, Payloads.TownHallAction.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(Payloads.SettlerAction.TYPE, Payloads.SettlerAction.CODEC);
@@ -25,5 +29,9 @@ public final class HhNetwork {
                 (p, ctx) -> ctx.server().execute(() -> SettlementService.handleOrders(ctx.player(), p)));
         ServerPlayNetworking.registerGlobalReceiver(Payloads.WorkSiteAction.TYPE,
                 (p, ctx) -> ctx.server().execute(() -> SettlementService.handleWorkSite(ctx.player(), p)));
+        ServerPlayNetworking.registerGlobalReceiver(Payloads.TradeAction.TYPE,
+                (p, ctx) -> ctx.server().execute(() -> io.github.operagtx.hearthholm.town.Caravan.handle(ctx.player(), p)));
+        ServerPlayNetworking.registerGlobalReceiver(Payloads.BoardAction.TYPE,
+                (p, ctx) -> ctx.server().execute(() -> io.github.operagtx.hearthholm.town.Quests.handle(ctx.player(), p)));
     }
 }

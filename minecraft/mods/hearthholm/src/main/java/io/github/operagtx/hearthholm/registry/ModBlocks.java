@@ -44,6 +44,9 @@ public final class ModBlocks {
     public static WorkSiteBlock PATROL_POST;
     public static WorkSiteBlock TERRITORY_BANNER;
     public static WorkshopBlock HERBALIST_TABLE, WEAPON_RACK;
+    public static WorkshopBlock TAVERN_KEG;
+    public static Block LAMP_POST, SIGNPOST, BENCH, WELL, COUNTER, FLOWER_BOX, SETTLEMENT_BANNER, BULLETIN_BOARD, MARKET_STALL;
+    public static final List<Block> SIGNS = new ArrayList<>();
     public static Block ALARM_BELL, PALISADE, PALISADE_GATE, RIFT_CORE, RIFT_LANTERN, CHIEFTAIN_BANNER;
 
     private ModBlocks() {}
@@ -107,5 +110,26 @@ public final class ModBlocks {
                 BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(2f).sound(SoundType.WOOD).noOcclusion());
         WEAPON_RACK = register("weapon_rack", p -> new WorkshopBlock(p, Workshop.BARRACKS, Block.box(0, 0, 0, 16, 16, 16)),
                 BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2f).sound(SoundType.WOOD).noOcclusion());
+        // wave E: square and market
+        TAVERN_KEG = register("tavern_keg", p -> new WorkshopBlock(p, Workshop.TAVERN, Block.box(1, 0, 1, 15, 14, 15)),
+                BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2f).sound(SoundType.WOOD).noOcclusion());
+        BlockBehaviour.Properties wood = BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5f).sound(SoundType.WOOD).noOcclusion();
+        LAMP_POST = register("lamp_post", p -> new DecorBlock(p, Block.box(5, 0, 5, 11, 16, 11)), BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL).strength(1.5f).sound(SoundType.LANTERN).lightLevel(st -> 15).noOcclusion());
+        SIGNPOST = register("signpost", p -> new DecorBlock(p, Block.box(5, 0, 5, 11, 16, 11)), wood);
+        BENCH = register("bench", p -> new DecorBlock(p, Block.box(1, 0, 3, 15, 9, 13)), wood);
+        WELL = register("well", p -> new DecorBlock(p, Block.box(0, 0, 0, 16, 14, 16)), BlockBehaviour.Properties.of()
+                .mapColor(MapColor.STONE).strength(2f).sound(SoundType.STONE).noOcclusion());
+        COUNTER = register("counter", p -> new DecorBlock(p, Block.box(0, 0, 0, 16, 14, 16)), wood);
+        FLOWER_BOX = register("flower_box", p -> new DecorBlock(p, Block.box(0, 0, 3, 16, 10, 13)), wood);
+        for (String kind : List.of("carpenter", "mason", "smith", "cook", "tavern")) {
+            SIGNS.add(register("sign_" + kind, p -> new DecorBlock(p, Block.box(1, 2, 6, 15, 15, 10)), BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD).strength(1f).sound(SoundType.WOOD).noOcclusion().noCollision()));
+        }
+        SETTLEMENT_BANNER = register("settlement_banner", SettlementBannerBlock::new, BlockBehaviour.Properties.of()
+                .mapColor(MapColor.COLOR_RED).strength(1.5f).sound(SoundType.WOOD).noOcclusion());
+        BULLETIN_BOARD = register("bulletin_board", BulletinBoardBlock::new, wood);
+        MARKET_STALL = register("market_stall", MarketStallBlock::new, BlockBehaviour.Properties.of()
+                .mapColor(MapColor.WOOD).strength(2f).sound(SoundType.WOOD).noOcclusion());
     }
 }

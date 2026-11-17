@@ -35,7 +35,8 @@ public final class BuilderJob extends SiteJob {
 
     @Override
     protected boolean available(Settlement st, WorkSiteBlockEntity w) {
-        return w.flag("build") && BlueprintLibrary.byIndex(w.option("blueprint")) != null && super.available(st, w);
+        Blueprint bp = BlueprintLibrary.byIndex(w.option("blueprint"));
+        return w.flag("build") && bp != null && BlueprintLibrary.isUnlocked(bp.id(), st.tier().index(), st.civic.unlocked) && super.available(st, w);
     }
 
     @Override

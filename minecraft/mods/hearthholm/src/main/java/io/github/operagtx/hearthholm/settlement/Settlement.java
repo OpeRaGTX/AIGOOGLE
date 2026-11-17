@@ -55,7 +55,7 @@ public final class Settlement {
 
     /** Fields added after the first release (kept in a second map codec: a record codec holds 16 fields). */
     private record Extra(List<BlockPos> workshops, List<Order> orders, int marksMinted, long lastFestival, long festivalStart, long festivalEnd,
-                         RaidState raid, RiftState rift, boolean alarm, List<BlockPos> bells, List<BlockPos> gates, List<BlockPos> trophies) {
+                         RaidState raid, RiftState rift, boolean alarm, List<BlockPos> bells, List<BlockPos> gates, List<BlockPos> trophies, Civic civic) {
         static final MapCodec<Extra> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 BlockPos.CODEC.listOf().optionalFieldOf("workshops", List.of()).forGetter(Extra::workshops),
                 Order.CODEC.listOf().optionalFieldOf("orders", List.of()).forGetter(Extra::orders),
@@ -68,9 +68,11 @@ public final class Settlement {
                 Codec.BOOL.optionalFieldOf("alarm", false).forGetter(Extra::alarm),
                 BlockPos.CODEC.listOf().optionalFieldOf("bells", List.of()).forGetter(Extra::bells),
                 BlockPos.CODEC.listOf().optionalFieldOf("gates", List.of()).forGetter(Extra::gates),
-                BlockPos.CODEC.listOf().optionalFieldOf("trophies", List.of()).forGetter(Extra::trophies)
-        ).apply(i, (w, o, m, lf, fs, fe, raid, rift, alarm, bells, gates, trophies) -> new Extra(w, o, m, lf, fs, fe,
-                raid.orElseGet(RaidState::new), rift.orElseGet(RiftState::new), alarm, bells, gates, trophies)));
+                BlockPos.CODEC.listOf().optionalFieldOf("trophies", List.of()).forGetter(Extra::trophies),
+                Civic.CODEC.optionalFieldOf("civic").forGetter(e -> java.util.Optional.of(e.civic()))
+        ).apply(i, (w, o, m, lf, fs, fe, raid, rift, alarm, bells, gates, trophies, civic) -> new Extra(w, o, m, lf, fs, fe,
+                raid.orElseGet(RaidState::new), rift.orElseGet(RiftState::new), alarm, bells, gates, trophies,
+                civic.orElseGet(Civic::new))));
     }
 
     private static final MapCodec<Settlement> BASE_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -122,10 +124,11 @@ public final class Settlement {
         s.bells.addAll(p.getSecond().bells());
         s.gates.addAll(p.getSecond().gates());
         s.trophies.addAll(p.getSecond().trophies());
+        s.civic = p.getSecond().civic();
         return s;
     }, s -> Pair.of(s, new Extra(List.copyOf(s.workshops), List.copyOf(s.orders), s.marksMinted,
             s.lastFestival, s.festivalStart, s.festivalEnd, s.raid, s.rift, s.alarm, List.copyOf(s.bells),
-            List.copyOf(s.gates), List.copyOf(s.trophies)))).codec();
+            List.copyOf(s.gates), List.copyOf(s.trophies), s.civic))).codec();
 
     public final UUID id;
     public final UUID owner;
@@ -155,6 +158,8 @@ public final class Settlement {
     public final List<BlockPos> bells = new ArrayList<>();
     public final List<BlockPos> gates = new ArrayList<>();
     public final List<BlockPos> trophies = new ArrayList<>();
+    /** Wave E: decor, market, quests, caravan, fire markers. */
+    public Civic civic = new Civic();
     /** Not saved: a chieftain's banner stands inside the town hall (checked on every room scan). */
     public boolean trophyInHall;
     /** Not saved: the open spot by the town hall where the festival is held. */
@@ -305,6 +310,9 @@ public final class Settlement {
                 }
             }
 
+        civic.decor.removeIf(p -> level.isLoaded(p) && !(level.getBlockState(p).getBlock() instanceof io.github.operagtx.hearthholm.block.DecorBlock));
+        civic.markets.removeIf(p -> level.isLoaded(p) && !(level.getBlockState(p).getBlock() instanceof io.github.operagtx.hearthholm.block.MarketStallBlock));
+        civic.boards.removeIf(p -> level.isLoaded(p) && !(level.getBlockState(p).getBlock() instanceof io.github.operagtx.hearthholm.block.BulletinBoardBlock));
         trophies.removeIf(p -> level.isLoaded(p) && !(level.getBlockState(p).getBlock() instanceof io.github.operagtx.hearthholm.block.ChieftainBannerBlock));
         trophyInHall = deskPresent && !rooms.isEmpty() && trophies.stream().anyMatch(p -> rooms.getFirst().contains(p));
         bells.removeIf(p -> level.isLoaded(p) && !(level.getBlockState(p).getBlock() instanceof io.github.operagtx.hearthholm.block.AlarmBellBlock));

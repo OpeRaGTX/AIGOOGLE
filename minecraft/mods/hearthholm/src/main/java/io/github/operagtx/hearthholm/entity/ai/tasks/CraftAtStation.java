@@ -64,7 +64,7 @@ public final class CraftAtStation implements Task {
                 case SMITHY -> ParticleTypes.CRIT;
                 case MASONRY -> ParticleTypes.WHITE_ASH;
                 case CARPENTRY -> ParticleTypes.WHITE_ASH;
-                case HERBALISM, BARRACKS -> ParticleTypes.HAPPY_VILLAGER;
+                case HERBALISM, BARRACKS, TAVERN -> ParticleTypes.HAPPY_VILLAGER;
             };
             level.sendParticles(extra, top.x, top.y + 0.1, top.z, kind == Workshop.KITCHEN ? 2 : 4, 0.2, 0.1, 0.2, 0.02);
         }
@@ -80,6 +80,11 @@ public final class CraftAtStation implements Task {
         Map<Item, Integer> pocket = CraftPlanner.stock(s.inventory().getItems());
         Map<Item, Integer> used = CraftPlanner.allocate(option, pocket);
         if (used == null) return false;
+        Settlement fuelFor = s.settlement();
+        if (option.cooking() && fuelFor != null && !io.github.operagtx.hearthholm.crafting.Fuel.consume((ServerLevel) s.level(), fuelFor, io.github.operagtx.hearthholm.crafting.Fuel.BATCH)) {
+            s.setStatus("no_fuel");
+            return false;
+        }
         used.forEach((item, n) -> s.takeItem(item, n));
         ItemStack out = option.output().copy();
         s.store(out);

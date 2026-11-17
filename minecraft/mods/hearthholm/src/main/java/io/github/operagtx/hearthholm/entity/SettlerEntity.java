@@ -775,6 +775,7 @@ public class SettlerEntity extends PathfinderMob {
         tickNeeds();
         if (tickCount % 20 == 0) tickMilitary(level);
         if (tickCount % 100 == 0) {
+            io.github.operagtx.hearthholm.town.Decor.tick(this);
             if (settlementId != null && settlement() == null && !leaving) leave(Component.translatable("message.hearthholm.left_unhappy", getName()));
             syncRecord();
         }

@@ -158,15 +158,23 @@ public final class Threats {
 
     // ---- per-second tick ---------------------------------------------------------------------------
 
+    private static boolean firesRestored;
+
     public static void serverTick(MinecraftServer server) {
-        if (FIRES.isEmpty()) return;
         long now = server.overworld().getGameTime();
+        if (!firesRestored) {
+            firesRestored = true;
+            for (Settlement st : SettlementManager.get(server).all())
+                for (BlockPos p : st.civic.fires) FIRES.add(new FireMark(st.dimension, p, now, 2));
+        }
+        if (FIRES.isEmpty()) return;
         List<FireMark> again = new ArrayList<>();
         FIRES.removeIf(m -> {
             if (m.sweepAt() > now) return false;
             ServerLevel level = server.getLevel(m.dim());
             if (level != null) extinguish(level, m.pos(), 5);
             if (m.sweeps() > 1) again.add(new FireMark(m.dim(), m.pos(), now + 200, m.sweeps() - 1));
+            else if (level != null) forget(level, m.pos());
             return true;
         });
         FIRES.addAll(again);
@@ -392,14 +400,31 @@ public final class Threats {
     public static boolean ignite(ServerLevel level, BlockPos pos) {
         if (!ThreatConfig.raidFire || FIRES.size() >= MAX_FIRES || !level.getBlockState(pos).isAir()) return false;
         level.setBlock(pos, BaseFireBlock.getState(level, pos), 11);
-        FIRES.add(new FireMark(level.dimension(), pos.immutable(), level.getGameTime() + 160, 2));
+        FIRES.add(new FireMark(level.dimension(), pos.immutable(), level.getGameTime() + 100, 2));
+        Settlement st = SettlementService.manager(level).at(level.dimension(), pos);
+        if (st != null) {
+            st.civic.fires.add(pos.immutable());
+            SettlementService.manager(level).setDirty();
+        }
         return true;
+    }
+
+    /** The fire marker is gone for good: drop it from the saved list. */
+    private static void forget(ServerLevel level, BlockPos pos) {
+        Settlement st = SettlementService.manager(level).at(level.dimension(), pos);
+        if (st != null && st.civic.fires.remove(pos)) SettlementService.manager(level).setDirty();
     }
 
     private static void extinguish(ServerLevel level, BlockPos center, int r) {
         for (BlockPos p : BlockPos.betweenClosed(center.offset(-r, -r, -r), center.offset(r, r, r))) {
             if (level.getBlockState(p).getBlock() instanceof BaseFireBlock) level.removeBlock(p, false);
         }
+    }
+
+    /** Test hook: forget the in-memory fire list (as after a server restart); the saved list restores it. */
+    public static void resetFiresForTest() {
+        FIRES.clear();
+        firesRestored = false;
     }
 
     public static int activeFires() {

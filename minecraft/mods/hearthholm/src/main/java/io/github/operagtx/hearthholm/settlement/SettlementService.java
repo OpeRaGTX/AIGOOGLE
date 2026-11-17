@@ -56,11 +56,11 @@ public final class SettlementService {
         return SettlementManager.get(level.getServer());
     }
 
-    private static void say(ServerPlayer p, String key, Object... args) {
+    public static void say(ServerPlayer p, String key, Object... args) {
         p.sendSystemMessage(Component.translatable("message.hearthholm." + key, args));
     }
 
-    private static boolean canManage(ServerPlayer p, Settlement s) {
+    public static boolean canManage(ServerPlayer p, Settlement s) {
         return p.getUUID().equals(s.owner) || p.isCreative();
     }
 
@@ -223,7 +223,16 @@ public final class SettlementService {
                 out.add(Component.translatable("hint.hearthholm.build_workshop", w.label()));
         }
         SettlementTier next = s.nextTier();
-        if (next != null && out.size() < 4) out.add(Component.translatable("hint.hearthholm.next_tier", next.label(), next.renown()));
+        if (next != null && out.size() < 4) {
+            out.add(Component.translatable("hint.hearthholm.next_tier", next.label(), next.renown()));
+            List<String> unlocks = io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.unlockedAt(next.index());
+            if (!unlocks.isEmpty() && out.size() < 5) {
+                net.minecraft.network.chat.MutableComponent names = Component.empty();
+                for (int i = 0; i < unlocks.size(); i++)
+                    names.append(i == 0 ? Component.empty() : Component.literal(", ")).append(Component.translatable("blueprint.hearthholm." + unlocks.get(i)));
+                out.add(Component.translatable("hint.hearthholm.tier_unlocks", next.label(), names));
+            }
+        }
         return out;
     }
 
@@ -383,6 +392,10 @@ public final class SettlementService {
                     Component.translatable("problem.hearthholm." + b.problem())).withStyle(ChatFormatting.RED));
             return;
         }
+        if (kind == Workshop.TAVERN) {
+            player.sendSystemMessage(Component.translatable("message.hearthholm.tavern_ok").withStyle(ChatFormatting.GREEN));
+            return;
+        }
         if (kind == Workshop.BARRACKS) {
             int fighters = 0;
             for (ResidentRecord r : s.residents) if (Professions.get(r.profession).isCombat()) fighters++;
@@ -538,6 +551,13 @@ public final class SettlementService {
             Blueprint bp = io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.byIndex(w.option("blueprint"));
             if (bp != null) total = bp.ops(w.getBlockPos(), w.facing()).size();
         }
+        if (s != null) {
+            values.put("_tier", s.tier().index());
+            for (String name : s.civic.unlocked) {
+                int idx = io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.ids().indexOf(io.github.operagtx.hearthholm.Hearthholm.id(name));
+                if (idx >= 0) values.put("_u" + idx, 1);
+            }
+        }
         return new Views.WorkSite(w.getBlockPos(), w.type().id(), values, status, worker, w.progress(), total);
     }
 
@@ -548,8 +568,19 @@ public final class SettlementService {
         Settlement s = manager(level).byId(w.settlementId());
         if (s != null && !canManage(player, s)) return;
         if (Payloads.WorkSiteAction.RESET.equals(a.key())) w.setProgress(0);
-        else w.setOption(a.key(), a.value());
+        else if ("blueprint".equals(a.key()) && s != null && w.type().id().equals(WorkSiteTypes.CONSTRUCTION_ID)
+                && !blueprintOpen(s, a.value())) {
+            Blueprint bp = io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.byIndex(a.value());
+            player.sendSystemMessage(Component.translatable("message.hearthholm.blueprint_locked", bp == null ? "?" : bp.label(),
+                    SettlementTier.TIERS.get(io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.requiredTier(bp.id())).label()).withStyle(ChatFormatting.RED));
+        } else w.setOption(a.key(), a.value());
         ServerPlayNetworking.send(player, new Payloads.OpenWorkSite(siteView(level, w, s)));
+    }
+
+    /** Whether the settlement may build blueprint {@code index} (tier reached, or bought from a trader). */
+    public static boolean blueprintOpen(Settlement s, int index) {
+        Blueprint bp = io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.byIndex(index);
+        return bp == null || io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.isUnlocked(bp.id(), s.tier().index(), s.civic.unlocked);
     }
 
     public static void finishConstruction(ServerLevel level, WorkSiteBlockEntity w, Blueprint bp, SettlerEntity builder) {

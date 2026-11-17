@@ -84,4 +84,42 @@ public final class Payloads {
                 OrderAction::new);
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
+
+    public record OpenTrade(Views.Trade view) implements CustomPacketPayload {
+        public static final Type<OpenTrade> TYPE = new Type<>(Hearthholm.id("open_trade"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, OpenTrade> CODEC =
+                Views.Trade.CODEC.map(OpenTrade::new, OpenTrade::view);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** Trade with the caravan at {@code pos} (market stall or trader): buy offer {@code index}, or sell spare item {@code index}. */
+    public record TradeAction(BlockPos pos, int action, int index) implements CustomPacketPayload {
+        public static final int REFRESH = 0, BUY = 1, SELL = 2;
+        public static final Type<TradeAction> TYPE = new Type<>(Hearthholm.id("trade_action"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, TradeAction> CODEC = StreamCodec.composite(
+                BlockPos.STREAM_CODEC, TradeAction::pos,
+                ByteBufCodecs.VAR_INT, TradeAction::action,
+                ByteBufCodecs.VAR_INT, TradeAction::index,
+                TradeAction::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    public record OpenBoard(Views.Board view) implements CustomPacketPayload {
+        public static final Type<OpenBoard> TYPE = new Type<>(Hearthholm.id("open_board"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, OpenBoard> CODEC =
+                Views.Board.CODEC.map(OpenBoard::new, OpenBoard::view);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** Bulletin board: hand in the items of quest {@code quest} or claim its reward. */
+    public record BoardAction(BlockPos pos, int action, int quest) implements CustomPacketPayload {
+        public static final int REFRESH = 0, DELIVER = 1, CLAIM = 2;
+        public static final Type<BoardAction> TYPE = new Type<>(Hearthholm.id("board_action"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, BoardAction> CODEC = StreamCodec.composite(
+                BlockPos.STREAM_CODEC, BoardAction::pos,
+                ByteBufCodecs.VAR_INT, BoardAction::action,
+                ByteBufCodecs.VAR_INT, BoardAction::quest,
+                BoardAction::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
 }

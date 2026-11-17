@@ -135,6 +135,10 @@ public final class CraftPlanner {
         }
         Component lack = null;
         for (Option o : opts) {
+            if (o.cooking() && Fuel.available(stock) <= 0 && st.stats.getOrDefault(Fuel.BUFFER, 0) < Fuel.BATCH) {
+                if (lack == null) lack = Component.translatable("order.hearthholm.needs_fuel");
+                continue;
+            }
             int perBatch = Math.max(1, o.output().getCount());
             int wantBatches = Math.min(MAX_BATCHES, (order.amount() - have + perBatch - 1) / perBatch);
             Map<Item, Integer> take = new HashMap<>();

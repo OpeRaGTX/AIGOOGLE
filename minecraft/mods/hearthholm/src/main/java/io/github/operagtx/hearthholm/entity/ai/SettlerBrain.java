@@ -30,6 +30,7 @@ public final class SettlerBrain {
                 new MedicActivity(settler),
                 new BarracksActivity(settler),
                 new FestivalActivity(settler),
+                new TavernActivity(settler),
                 new ChatActivity(settler),
                 new WorkActivity(settler),
                 new IdleActivity(settler));

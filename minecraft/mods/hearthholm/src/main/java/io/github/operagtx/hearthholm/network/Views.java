@@ -225,4 +225,82 @@ public final class Views {
             return new Orders(pos, name, lines, shops);
         }
     }
+
+    // ---- wave E: trader caravan and bulletin board ----------------------------------------------
+
+    /** Something the trader sells: a stack (or an icon), its price in hearth marks, a label, whether it is gone. */
+    public record TradeOffer(ItemStack stack, int price, Component label, boolean soldOut) {}
+
+    /** A surplus the trader buys: one item type, how many the warehouse can spare, how many items make a mark. */
+    public record SellLine(ItemStack stack, int spare, int perMark) {}
+
+    public record Trade(BlockPos pos, Component trader, int marks, List<TradeOffer> offers, List<SellLine> sells) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, Trade> CODEC = StreamCodec.of(Trade::write, Trade::read);
+
+        static void write(RegistryFriendlyByteBuf b, Trade v) {
+            b.writeBlockPos(v.pos);
+            COMP.encode(b, v.trader);
+            b.writeVarInt(v.marks);
+            b.writeVarInt(v.offers.size());
+            for (TradeOffer o : v.offers) {
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(b, o.stack);
+                b.writeVarInt(o.price);
+                COMP.encode(b, o.label);
+                b.writeBoolean(o.soldOut);
+            }
+            b.writeVarInt(v.sells.size());
+            for (SellLine l : v.sells) {
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(b, l.stack);
+                b.writeVarInt(l.spare);
+                b.writeVarInt(l.perMark);
+            }
+        }
+
+        static Trade read(RegistryFriendlyByteBuf b) {
+            BlockPos pos = b.readBlockPos();
+            Component trader = COMP.decode(b);
+            int marks = b.readVarInt();
+            List<TradeOffer> offers = new ArrayList<>();
+            for (int i = b.readVarInt(); i > 0; i--)
+                offers.add(new TradeOffer(ItemStack.OPTIONAL_STREAM_CODEC.decode(b), b.readVarInt(), COMP.decode(b), b.readBoolean()));
+            List<SellLine> sells = new ArrayList<>();
+            for (int i = b.readVarInt(); i > 0; i--)
+                sells.add(new SellLine(ItemStack.OPTIONAL_STREAM_CODEC.decode(b), b.readVarInt(), b.readVarInt()));
+            return new Trade(pos, trader, marks, offers, sells);
+        }
+    }
+
+    public record QuestLine(int id, ItemStack icon, Component text, int progress, int count, boolean done, boolean claimed,
+                            boolean canDeliver, Component reward) {}
+
+    public record Board(BlockPos pos, Component name, List<QuestLine> quests) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, Board> CODEC = StreamCodec.of(Board::write, Board::read);
+
+        static void write(RegistryFriendlyByteBuf b, Board v) {
+            b.writeBlockPos(v.pos);
+            COMP.encode(b, v.name);
+            b.writeVarInt(v.quests.size());
+            for (QuestLine q : v.quests) {
+                b.writeVarInt(q.id);
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(b, q.icon);
+                COMP.encode(b, q.text);
+                b.writeVarInt(q.progress);
+                b.writeVarInt(q.count);
+                b.writeBoolean(q.done);
+                b.writeBoolean(q.claimed);
+                b.writeBoolean(q.canDeliver);
+                COMP.encode(b, q.reward);
+            }
+        }
+
+        static Board read(RegistryFriendlyByteBuf b) {
+            BlockPos pos = b.readBlockPos();
+            Component name = COMP.decode(b);
+            List<QuestLine> out = new ArrayList<>();
+            for (int i = b.readVarInt(); i > 0; i--)
+                out.add(new QuestLine(b.readVarInt(), ItemStack.OPTIONAL_STREAM_CODEC.decode(b), COMP.decode(b), b.readVarInt(), b.readVarInt(),
+                        b.readBoolean(), b.readBoolean(), b.readBoolean(), COMP.decode(b)));
+            return new Board(pos, name, out);
+        }
+    }
 }

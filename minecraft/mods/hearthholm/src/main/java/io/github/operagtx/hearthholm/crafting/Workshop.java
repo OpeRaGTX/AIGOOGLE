@@ -37,7 +37,9 @@ public enum Workshop {
     /** Wave D: the healer's herbalist table. No orders: the healer brews salves on its own (see HealerJob). */
     HERBALISM("herbalism", 128, "healer", false, List.of(), List.of()),
     /** Wave D: a barracks is a room with a weapon rack; combat settlers rest there. Has no crafter. */
-    BARRACKS("barracks", 256, "barracks_none", false, List.of(), List.of());
+    BARRACKS("barracks", 256, "barracks_none", false, List.of(), List.of()),
+    /** Wave E: a tavern is a room with a keg; the innkeeper serves food from storage, off-duty settlers gather there in the evening. */
+    TAVERN("tavern", 512, "innkeeper", false, List.of(), List.of());
 
     /** Without any kitchen order, cooks keep this many meals in the warehouse. */
     public static final int DEFAULT_MEALS = 32;
@@ -80,7 +82,7 @@ public enum Workshop {
             case MASONRY -> io.github.operagtx.hearthholm.registry.ModSounds.CHISEL;
             case SMITHY -> io.github.operagtx.hearthholm.registry.ModSounds.HAMMER;
             case KITCHEN -> io.github.operagtx.hearthholm.registry.ModSounds.SIZZLE;
-            case HERBALISM, BARRACKS -> io.github.operagtx.hearthholm.registry.ModSounds.SIZZLE;
+            case HERBALISM, BARRACKS, TAVERN -> io.github.operagtx.hearthholm.registry.ModSounds.SIZZLE;
         };
     }
 

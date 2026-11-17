@@ -20,6 +20,7 @@ public final class ModEntities {
     public static EntityType<AshBruteEntity> ASH_BRUTE;
     public static EntityType<AshChieftainEntity> ASH_CHIEFTAIN;
     public static EntityType<RiftWispEntity> RIFT_WISP;
+    public static EntityType<io.github.operagtx.hearthholm.entity.trader.TraderEntity> TRADER;
 
     private ModEntities() {}
 
@@ -45,6 +46,9 @@ public final class ModEntities {
                 .sized(0.6f, 1.95f).eyeHeight(1.62f).fireImmune().clientTrackingRange(12));
         RIFT_WISP = reg("rift_wisp", EntityType.Builder.<RiftWispEntity>of(RiftWispEntity::new, MobCategory.MONSTER)
                 .sized(0.5f, 0.5f).eyeHeight(0.25f).clientTrackingRange(8));
+        TRADER = reg("trader", EntityType.Builder.<io.github.operagtx.hearthholm.entity.trader.TraderEntity>of(io.github.operagtx.hearthholm.entity.trader.TraderEntity::new, MobCategory.MISC)
+                .sized(0.6f, 1.95f).eyeHeight(1.62f).clientTrackingRange(10));
+        FabricDefaultAttributeRegistry.register(TRADER, io.github.operagtx.hearthholm.entity.trader.TraderEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(ASH_RAIDER, AshbornEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(ASH_ARSONIST, AshArsonistEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(ASH_ARCHER, AshArcherEntity.createAttributes());

@@ -48,13 +48,25 @@ public final class IgniteGoal extends Goal {
         for (int i = 0; i < 24; i++) {
             BlockPos p = base.offset(r.nextInt(21) - 10, r.nextInt(5) - 1, r.nextInt(21) - 10);
             BlockState s = mob.level().getBlockState(p);
-            if (!(s.is(BlockTags.PLANKS) || s.is(BlockTags.LOGS))) continue;
+            if (!intendedTarget(s)) continue;
             for (Direction d : Direction.Plane.HORIZONTAL) {
                 BlockPos air = p.relative(d);
-                if (mob.level().getBlockState(air).isAir() && BaseFireBlock.canBePlacedAt(mob.level(), air, d.getOpposite())) return air.immutable();
+                if (mob.level().getBlockState(air).isAir() && openToSky(mob.level(), air)
+                        && BaseFireBlock.canBePlacedAt(mob.level(), air, d.getOpposite())) return air.immutable();
             }
         }
         return null;
+    }
+
+    /** Wave E: only palisades, gates, doors and fences are fair game; planks and logs (walls, roofs) are never targets. */
+    public static boolean intendedTarget(BlockState s) {
+        return s.is(io.github.operagtx.hearthholm.registry.ModBlocks.PALISADE) || s.is(io.github.operagtx.hearthholm.registry.ModBlocks.PALISADE_GATE)
+                || s.is(BlockTags.WOODEN_DOORS) || s.is(BlockTags.WOODEN_FENCES) || s.is(BlockTags.FENCE_GATES);
+    }
+
+    /** The fire spot has no ceiling above it, so the flames cannot lick a roof or an eave. */
+    public static boolean openToSky(net.minecraft.world.level.Level level, BlockPos p) {
+        return level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, p.getX(), p.getZ()) <= p.getY() + 1;
     }
 
     @Override

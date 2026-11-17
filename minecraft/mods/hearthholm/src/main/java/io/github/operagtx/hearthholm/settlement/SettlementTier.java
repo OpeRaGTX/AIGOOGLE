@@ -13,6 +13,10 @@ public record SettlementTier(String key, int renown, int popCap, int radius, boo
             new SettlementTier("town", 1000, 16, 88, true),
             new SettlementTier("city", 3000, 24, 104, true));
 
+    public int index() {
+        return TIERS.indexOf(this);
+    }
+
     public Component label() {
         return Component.translatable("tier.hearthholm." + key);
     }

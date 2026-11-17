@@ -55,6 +55,25 @@ public final class BlueprintLibrary {
         }
     }
 
+    /** Wave E: settlement tier index (camp 0, hamlet 1, village 2, town 3) that unlocks a blueprint; unlisted ones are free. */
+    private static final Map<String, Integer> TIER = Map.of("workshop", 1, "farmhouse", 1, "tavern", 2, "market_stall", 2,
+            "barracks", 3, "wall_section", 3);
+
+    public static int requiredTier(Identifier id) {
+        return TIER.getOrDefault(id.getPath(), 0);
+    }
+
+    /** Blueprints a tier unlocks (file names), for hints. */
+    public static List<String> unlockedAt(int tier) {
+        List<String> out = new ArrayList<>();
+        for (Identifier id : IDS) if (requiredTier(id) == tier) out.add(id.getPath());
+        return out;
+    }
+
+    public static boolean isUnlocked(Identifier id, int tierIndex, java.util.Collection<String> bought) {
+        return tierIndex >= requiredTier(id) || bought.contains(id.getPath());
+    }
+
     public static synchronized void register(Blueprint bp) {
         if (!IDS.contains(bp.id())) IDS.add(bp.id());
         PARSED.put(bp.id(), bp);

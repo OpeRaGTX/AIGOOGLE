@@ -30,6 +30,7 @@ public final class Professions {
     public static Profession ARCHER;
     public static Profession HEALER;
     public static Profession KNIGHT;
+    public static Profession INNKEEPER;
     public static final Identifier KNIGHT_ID = Hearthholm.id("knight");
 
     private Professions() {}
@@ -110,6 +111,10 @@ public final class Professions {
                 .weight(Stat.WITS, 3).weight(Stat.PERCEPTION, 2).weight(Stat.ENDURANCE, 1)
                 .color(0x7FD4A0).icon(() -> new ItemStack(Items.GLISTERING_MELON_SLICE))
                 .job(HealerJob::new).build());
+        INNKEEPER = reg(Profession.builder(Workshop.TAVERN.profession())
+                .weight(Stat.WITS, 2).weight(Stat.PERCEPTION, 2).weight(Stat.ENDURANCE, 1)
+                .color(0xC8873A).icon(() -> new ItemStack(Items.BARREL))
+                .job(InnkeeperJob::new).build());
         KNIGHT = reg(Profession.builder(KNIGHT_ID)
                 .weight(Stat.STRENGTH, 3).weight(Stat.ENDURANCE, 3).weight(Stat.PERCEPTION, 1)
                 .tool(s -> s.is(ItemTags.SWORDS) || s.is(ItemTags.AXES)).site(WorkSiteTypes.TERRITORY_ID)
