@@ -53,14 +53,22 @@ final class WaveDTest {
         return null;
     }
 
-    /** First settler of this profession, or a civilian turned into one (with gear). */
+    private static final java.util.Set<UUID> USED = new java.util.HashSet<>();
+
+    /** A settler of this profession not used by another check, or a free civilian turned into one. */
     private static SettlerEntity ensure(MinecraftServer s, Profession p, Profession... spare) {
-        SettlerEntity e = byProf(s, p);
-        if (e == null) {
-            for (Profession q : spare) { e = byProf(s, q); if (e != null) break; }
-            if (e == null) for (SettlerEntity x : settlers(s)) if (!x.isCombatant()) { e = x; break; }
-            e.setProfession(p);
+        SettlerEntity e = null;
+        List<Profession> order = new java.util.ArrayList<>();
+        order.add(p);
+        order.addAll(List.of(spare));
+        for (Profession q : order) {
+            for (SettlerEntity x : settlers(s)) if (x.professionId().equals(q.id()) && !USED.contains(x.getUUID())) { e = x; break; }
+            if (e != null) break;
         }
+        if (e == null) for (SettlerEntity x : settlers(s)) if (!x.isCombatant() && !USED.contains(x.getUUID())) { e = x; break; }
+        if (e == null) throw new AssertionError("no free settler for " + p.id());
+        if (!e.professionId().equals(p.id())) e.setProfession(p);
+        USED.add(e.getUUID());
         return e;
     }
 
@@ -91,6 +99,7 @@ final class WaveDTest {
     }
 
     static void run(ClientGameTestContext ctx, TestSingleplayerContext sp) {
+        USED.clear();
         sp.getServer().runCommand("gamemode creative @a");
         sp.getServer().runCommand("time set 10000");
         sp.getServer().runOnServer(s -> {
@@ -193,8 +202,7 @@ final class WaveDTest {
         sp.getServer().runOnServer(s -> {
             ServerLevel l = s.overworld();
             Settlement st = town(s);
-            SettlerEntity a = byProf(s, Professions.LUMBERJACK);
-            if (a == null) a = ensure(s, Professions.LUMBERJACK, Professions.MINER);
+            SettlerEntity a = ensure(s, Professions.ARCHER, Professions.LUMBERJACK, Professions.MINER);
             a.setProfession(Professions.ARCHER);
             a.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
             a.inventory().clearContent();
@@ -262,8 +270,7 @@ final class WaveDTest {
 
         // ---- 3. salves: with no healer around a hurt settler drinks one
         sp.getServer().runOnServer(s -> {
-            SettlerEntity m = byProf(s, Professions.MINER);
-            if (m == null) m = ensure(s, Professions.MINER, Professions.CARPENTER);
+            SettlerEntity m = ensure(s, Professions.MINER, Professions.CARPENTER);
             m.teleportTo(O.getX() - 10.5, O.getY(), O.getZ() + 14.5);
             m.setHealth(Math.min(5f, m.getMaxHealth() * 0.2f));
             m.store(new ItemStack(ModItems.HEALING_SALVE));
@@ -293,14 +300,12 @@ final class WaveDTest {
             for (var b : st.buildings) if (b.is(io.github.operagtx.hearthholm.crafting.Workshop.HERBALISM.role()))
                 log("HERBALIST building roles=" + b.roles() + " valid=" + b.valid() + " problem=" + b.problem() + " title=" + b.title().getString());
             stockUp(s, new ItemStack(Items.GLASS_BOTTLE, 4), new ItemStack(Items.SWEET_BERRIES, 12), new ItemStack(Items.DANDELION, 4));
-            SettlerEntity h = byProf(s, Professions.FARMER);
-            if (h == null) h = ensure(s, Professions.FARMER, Professions.CARPENTER);
+            SettlerEntity h = ensure(s, Professions.HEALER, Professions.FARMER, Professions.CARPENTER);
             h.setProfession(Professions.HEALER);
             h.teleportTo(O.getX() + 20.5, O.getY(), O.getZ() - 4.5);
             HEALER = h.getUUID();
             // a wounded cook and a wounded guard in the open
-            SettlerEntity cook = byProf(s, Professions.COOK);
-            if (cook == null) cook = ensure(s, Professions.COOK, Professions.HAULER);
+            SettlerEntity cook = ensure(s, Professions.COOK, Professions.HAULER);
             cook.teleportTo(O.getX() + 18.5, O.getY(), O.getZ() - 2.5);
             cook.setHealth(4f);
             LUMBER = cook.getUUID();
