@@ -16,7 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /** Walks the route of all patrol posts (in placement order) day and night. */
-public final class GuardJob extends SiteJob {
+public class GuardJob extends SiteJob {
     private int postIndex;
 
     public GuardJob(SettlerEntity settler) {

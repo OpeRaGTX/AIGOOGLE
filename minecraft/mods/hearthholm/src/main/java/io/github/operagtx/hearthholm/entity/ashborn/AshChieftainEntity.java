@@ -70,8 +70,10 @@ public class AshChieftainEntity extends AshbornEntity {
     }
 
     @Override
+    protected boolean breaksPalisades() { return true; }
+
+    @Override
     protected void addCombatGoals() {
-        goalSelector.addGoal(1, new BreakBarrierGoal(this));
         goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.1, true) {
             @Override
             protected int getAttackInterval() {

@@ -11,6 +11,6 @@ public final class SettlerMeleeGoal extends MeleeAttackGoal {
         this.settler = settler;
     }
 
-    @Override public boolean canUse() { return settler.isCombatant() && !settler.isSleeping() && super.canUse(); }
-    @Override public boolean canContinueToUse() { return settler.isCombatant() && super.canContinueToUse(); }
+    @Override public boolean canUse() { return settler.isCombatant() && !settler.isSleeping() && !settler.isRetreating() && !settler.isRanged() && super.canUse(); }
+    @Override public boolean canContinueToUse() { return settler.isCombatant() && !settler.isRetreating() && !settler.isRanged() && super.canContinueToUse(); }
 }

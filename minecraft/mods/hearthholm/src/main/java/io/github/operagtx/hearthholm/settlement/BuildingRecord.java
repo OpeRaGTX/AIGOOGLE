@@ -18,7 +18,7 @@ import java.util.List;
 public record BuildingRecord(int roles, BlockPos anchor, List<BlockPos> beds, List<BlockPos> containers,
                              int comfort, int size, String problem, List<BlockPos> stations, int features) {
     public static final int HALL = 1, WAREHOUSE = 2, HOUSING = 4;
-    public static final int WORKSHOPS = 8 | 16 | 32 | 64;
+    public static final int WORKSHOPS = 8 | 16 | 32 | 64 | 128 | 256;
     public static final int FURNACE = 1;
 
     public static final Codec<BuildingRecord> CODEC = RecordCodecBuilder.create(i -> i.group(

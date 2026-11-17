@@ -74,5 +74,11 @@
       "hearthholm:threat/boss_roar"
     ],
     "subtitle": "subtitles.hearthholm.threat.boss_roar"
+  },
+  "party.horn": {
+    "sounds": [
+      "hearthholm:party/horn"
+    ],
+    "subtitle": "subtitles.hearthholm.party.horn"
   }
 }

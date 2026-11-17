@@ -30,6 +30,7 @@ public final class SettlementEvents {
     }
 
     private static void tick(MinecraftServer server) {
+        io.github.operagtx.hearthholm.party.Party.tick(server);
         if (server.getTickCount() % 20 != 0) return;
         io.github.operagtx.hearthholm.threat.Threats.serverTick(server);
         SettlementManager m = SettlementManager.get(server);

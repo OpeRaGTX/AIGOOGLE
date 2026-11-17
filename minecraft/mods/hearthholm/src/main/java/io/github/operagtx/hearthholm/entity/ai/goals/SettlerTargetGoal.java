@@ -18,6 +18,6 @@ public final class SettlerTargetGoal extends NearestAttackableTargetGoal<Mob> {
 
     @Override
     public boolean canUse() {
-        return settler.isCombatant() && !settler.isSleeping() && super.canUse();
+        return settler.isCombatant() && !settler.isSleeping() && !settler.isRetreating() && super.canUse();
     }
 }

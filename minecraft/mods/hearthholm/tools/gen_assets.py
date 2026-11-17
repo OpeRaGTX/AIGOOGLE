@@ -227,4 +227,29 @@ w(f"assets/{NS}/sounds.json", {f"workshop.{n}": {"sounds": [f"{NS}:workshop/{n}{
     "social.murmur": {"sounds": [f"{NS}:social/murmur{i}" for i in (1, 2, 3, 4)], "subtitle": f"subtitles.{NS}.social.murmur"},
     "social.festival": {"sounds": [{"name": f"{NS}:social/festival", "stream": True}], "subtitle": f"subtitles.{NS}.social.festival"}} | {
     f"threat.{n}": {"sounds": [f"{NS}:threat/{n}"], "subtitle": f"subtitles.{NS}.threat.{n}"} for n in ("raid_horn", "alarm_bell", "rift_hum", "boss_roar")})
+
+# ---- wave D: party and military
+legs_d = [box_el([x, 0, z], [x + 2, 11, z + 2], "#side") for x in (1, 13) for z in (1, 13)]
+block_model("herbalist_table", {"particle": f"{NS}:block/herbalist_table_side", "top": f"{NS}:block/herbalist_table_top",
+                                "side": f"{NS}:block/herbalist_table_side", "front": f"{NS}:block/herbalist_table_front"},
+            [box_el([0, 11, 0], [16, 14, 16], {"up": "#top", "down": "#side", "north": "#front", "south": "#side", "east": "#side", "west": "#side"}),
+             *legs_d, box_el([2, 4, 2], [14, 5, 14], "#side"),
+             box_el([2, 14, 2], [6, 17, 6], "#top"), box_el([10, 14, 9], [13, 16, 12], "#top")])
+block_model("weapon_rack", {"particle": f"{NS}:block/weapon_rack_side", "front": f"{NS}:block/weapon_rack_front",
+                            "side": f"{NS}:block/weapon_rack_side", "bar": f"{NS}:block/weapon_rack_bar"},
+            [box_el([0, 0, 12], [16, 16, 16], {"north": "#front", "south": "#side", "east": "#side", "west": "#side", "up": "#side", "down": "#side"}),
+             box_el([0, 0, 6], [2, 2, 16], "#bar"), box_el([14, 0, 6], [16, 2, 16], "#bar"),
+             box_el([1, 4, 10], [15, 6, 12], "#bar"), box_el([1, 11, 10], [15, 13, 12], "#bar")])
+for name in ("herbalist_table", "weapon_rack"):
+    item(name)
+    loot(name)
+gen_item("war_horn")
+gen_item("healing_salve")
+shaped("weapon_rack", ["SIS", "PPP"], {"S": "minecraft:stick", "I": "minecraft:iron_ingot", "P": "#minecraft:planks"})
+shapeless("herbalist_table", ["minecraft:crafting_table", "minecraft:sweet_berries", "minecraft:glass_bottle"])
+shaped("war_horn", ["II ", "IGI", " IL"], {"I": "minecraft:iron_ingot", "G": "minecraft:gold_ingot", "L": "minecraft:leather"})
+shapeless("healing_salve", ["minecraft:glass_bottle", "minecraft:sweet_berries", "minecraft:sweet_berries"])
+_snd = json.load(open(os.path.join(R, f"assets/{NS}/sounds.json"), encoding="utf-8"))
+_snd["party.horn"] = {"sounds": [f"{NS}:party/horn"], "subtitle": f"subtitles.{NS}.party.horn"}
+w(f"assets/{NS}/sounds.json", _snd)
 print("assets written")

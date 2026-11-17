@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The four kinds of workshop. Each one is a building role (bit flag in {@code BuildingRecord}),
+ * The kinds of workshop (plus the herbalist table and the barracks rack). Each one is a building role (bit flag in {@code BuildingRecord}),
  * an anchor block, a crafter profession, a curated list of things the crafter may make (also the
  * order-board catalogue) and the vanilla recipe types it may use. Smelting-type recipes need a
  * furnace in the room, except in the kitchen where the stove itself is the heat source.
@@ -33,7 +33,11 @@ public enum Workshop {
     KITCHEN("kitchen", 64, "cook", true, List.of(RecipeType.CRAFTING, RecipeType.SMOKING, RecipeType.SMELTING, RecipeType.CAMPFIRE_COOKING),
             List.of(Items.BREAD, Items.BAKED_POTATO, Items.COOKED_BEEF, Items.COOKED_PORKCHOP, Items.COOKED_CHICKEN,
                     Items.COOKED_MUTTON, Items.COOKED_COD, Items.COOKED_SALMON, Items.MUSHROOM_STEW, Items.BEETROOT_SOUP,
-                    Items.PUMPKIN_PIE, Items.COOKIE));
+                    Items.PUMPKIN_PIE, Items.COOKIE)),
+    /** Wave D: the healer's herbalist table. No orders: the healer brews salves on its own (see HealerJob). */
+    HERBALISM("herbalism", 128, "healer", false, List.of(), List.of()),
+    /** Wave D: a barracks is a room with a weapon rack; combat settlers rest there. Has no crafter. */
+    BARRACKS("barracks", 256, "barracks_none", false, List.of(), List.of());
 
     /** Without any kitchen order, cooks keep this many meals in the warehouse. */
     public static final int DEFAULT_MEALS = 32;
@@ -63,6 +67,9 @@ public enum Workshop {
     /** Whether cooking-type recipes work here without a furnace in the room. */
     public boolean ownHeat() { return ownHeat; }
 
+    /** Whether orders can be placed for this kind (it has a catalogue). */
+    public boolean hasCatalog() { return !catalog.isEmpty(); }
+
     public Component label() {
         return Component.translatable("workshop.hearthholm." + key);
     }
@@ -73,6 +80,7 @@ public enum Workshop {
             case MASONRY -> io.github.operagtx.hearthholm.registry.ModSounds.CHISEL;
             case SMITHY -> io.github.operagtx.hearthholm.registry.ModSounds.HAMMER;
             case KITCHEN -> io.github.operagtx.hearthholm.registry.ModSounds.SIZZLE;
+            case HERBALISM, BARRACKS -> io.github.operagtx.hearthholm.registry.ModSounds.SIZZLE;
         };
     }
 

@@ -62,7 +62,7 @@ public final class OrdersScreen extends HhScreen {
     @Override
     protected void init() {
         super.init();
-        Workshop[] kinds = Workshop.values();
+        Workshop[] kinds = java.util.Arrays.stream(Workshop.values()).filter(Workshop::hasCatalog).toArray(Workshop[]::new);
         for (int i = 0; i < kinds.length; i++) {
             Workshop w = kinds[i];
             Profession p = Professions.get(w.profession());

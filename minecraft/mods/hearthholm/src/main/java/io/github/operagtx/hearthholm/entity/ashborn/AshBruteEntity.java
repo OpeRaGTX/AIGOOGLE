@@ -31,8 +31,10 @@ public class AshBruteEntity extends AshbornEntity {
     }
 
     @Override
+    protected boolean breaksPalisades() { return true; }
+
+    @Override
     protected void addCombatGoals() {
-        goalSelector.addGoal(1, new BreakBarrierGoal(this));
         goalSelector.addGoal(2, new net.minecraft.world.entity.ai.goal.MeleeAttackGoal(this, 1.0, true));
     }
 

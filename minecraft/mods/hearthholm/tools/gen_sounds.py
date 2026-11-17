@@ -214,4 +214,26 @@ def boss_roar(r):
 for name, fn in (("raid_horn", raid_horn), ("alarm_bell", alarm_bell), ("rift_hum", rift_hum), ("boss_roar", boss_roar)):
     write(name, fn(random.Random(len(name) * 13)), THREAT)
 
+# ---- wave D: the war horn (a bright two-note brass call, shorter and higher than the raid horn)
+PARTY = os.path.join(BASE, "party")
+
+def war_horn(r):
+    out = []
+    dur = 1.7
+    for i in range(int(RATE * dur)):
+        t = i / RATE
+        f = 196.0 if t < 0.55 else 261.6 if t < 1.0 else 293.7
+        glide = min(1, (t % 0.55) / 0.05) if t < 1.0 else min(1, (t - 1.0) / 0.05)
+        e = min(1, t / 0.05) * min(1, (dur - t) / 0.35) * (0.8 + 0.2 * math.sin(2 * math.pi * 5.5 * t))
+        if 0.5 < t < 0.57 or 0.95 < t < 1.02: e *= 0.35
+        fm = f * (0.97 + 0.03 * glide)
+        v = 0.0
+        for h in range(1, 10):
+            v += math.sin(2 * math.pi * fm * h * t + h * 0.3) * (1.0 / h ** 1.1)
+        v += 0.03 * r.uniform(-1, 1)
+        out.append(math.tanh(1.8 * v) * e)
+    return out
+
+write("horn", war_horn(random.Random(77)), PARTY)
+
 print("sounds written to", os.path.normpath(OUT))

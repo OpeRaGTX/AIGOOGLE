@@ -64,6 +64,7 @@ public final class CraftAtStation implements Task {
                 case SMITHY -> ParticleTypes.CRIT;
                 case MASONRY -> ParticleTypes.WHITE_ASH;
                 case CARPENTRY -> ParticleTypes.WHITE_ASH;
+                case HERBALISM, BARRACKS -> ParticleTypes.HAPPY_VILLAGER;
             };
             level.sendParticles(extra, top.x, top.y + 0.1, top.z, kind == Workshop.KITCHEN ? 2 : 4, 0.2, 0.1, 0.2, 0.02);
         }

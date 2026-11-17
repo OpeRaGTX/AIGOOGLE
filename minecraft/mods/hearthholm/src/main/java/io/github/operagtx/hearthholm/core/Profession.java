@@ -27,6 +27,7 @@ public final class Profession {
     private final Function<SettlerEntity, Job> jobFactory;
     private final boolean combat;
     private final boolean nightShift;
+    private final boolean promotionOnly;
     private final int color;
     private final Supplier<ItemStack> icon;
 
@@ -38,6 +39,7 @@ public final class Profession {
         this.jobFactory = b.jobFactory;
         this.combat = b.combat;
         this.nightShift = b.nightShift;
+        this.promotionOnly = b.promotionOnly;
         this.color = b.color;
         this.icon = b.icon;
     }
@@ -49,6 +51,8 @@ public final class Profession {
     public Identifier id() { return id; }
     public boolean isCombat() { return combat; }
     public boolean nightShift() { return nightShift; }
+    /** Cannot be picked in the settler screen (the knight is reached by promotion). */
+    public boolean promotionOnly() { return promotionOnly; }
     public int color() { return color; }
     public @Nullable Identifier siteType() { return siteType; }
     public boolean isTool(ItemStack stack) { return !stack.isEmpty() && tool.test(stack); }
@@ -82,6 +86,7 @@ public final class Profession {
         private Function<SettlerEntity, Job> jobFactory = s -> Job.NONE;
         private boolean combat;
         private boolean nightShift;
+        private boolean promotionOnly;
         private int color = 0xFFFFFF;
         private Supplier<ItemStack> icon = () -> new ItemStack(Items.BREAD);
 
@@ -93,6 +98,7 @@ public final class Profession {
         public Builder job(Function<SettlerEntity, Job> factory) { this.jobFactory = factory; return this; }
         public Builder combat() { this.combat = true; return this; }
         public Builder nightShift() { this.nightShift = true; return this; }
+        public Builder promotionOnly() { this.promotionOnly = true; return this; }
         public Builder color(int rgb) { this.color = rgb; return this; }
         public Builder icon(Supplier<ItemStack> icon) { this.icon = icon; return this; }
         public Profession build() { return new Profession(this); }

@@ -42,6 +42,11 @@ public class SettlerRenderer extends HumanoidMobRenderer<SettlerEntity, SettlerR
         state.slim = Appearance.unpack(look).female();
         state.texture = SettlerTextures.get(look, entity.professionId());
         state.bubble = entity.hasBubble() ? entity.bubble() : null;
+        if (entity.isUsingItem() && entity.getMainHandItem().is(net.minecraft.world.item.Items.BOW)) {
+            // archers drawing the bow
+            if (state.mainArm == net.minecraft.world.entity.HumanoidArm.RIGHT) state.rightArmPose = HumanoidModel.ArmPose.BOW_AND_ARROW;
+            else state.leftArmPose = HumanoidModel.ArmPose.BOW_AND_ARROW;
+        }
         // vanilla only fills the name-tag anchor for the entity under the crosshair; bubbles need it for everyone
         if (state.bubble != null && state.nameTagAttachment == null) {
             state.nameTagAttachment = entity.getAttachments().getNullable(net.minecraft.world.entity.EntityAttachment.NAME_TAG, 0, entity.getYRot(partialTick));

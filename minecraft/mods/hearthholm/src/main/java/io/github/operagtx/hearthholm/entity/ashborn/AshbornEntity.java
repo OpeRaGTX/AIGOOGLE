@@ -39,6 +39,10 @@ import java.util.UUID;
 public class AshbornEntity extends Monster {
     private @Nullable BlockPos raidTarget;
     private @Nullable UUID raidSettlement;
+    /** Targets given up on (unreachable) with the game time until which they are ignored. */
+    private final java.util.Map<UUID, Long> ignored = new java.util.HashMap<>();
+    private @Nullable BlockPos breakGoal;
+    private int unreachable;
 
     public AshbornEntity(EntityType<? extends AshbornEntity> type, Level level) {
         super(type, level);
@@ -57,6 +61,7 @@ public class AshbornEntity extends Monster {
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
+        goalSelector.addGoal(1, new BreakBarrierGoal(this, breaksPalisades()));
         addCombatGoals();
         goalSelector.addGoal(4, new MarchGoal(this));
         goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.8));
@@ -64,9 +69,12 @@ public class AshbornEntity extends Monster {
         goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new HurtByTargetGoal(this, AshbornEntity.class));
         targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, SettlerEntity.class, true));
+        targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, SettlerEntity.class, 10, true, false, (e, lvl) -> !ignores(e)));
         targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
+
+    /** Brutes and the chieftain also break palisade walls and gates (everyone breaks doors). */
+    protected boolean breaksPalisades() { return false; }
 
     /** Melee by default; archers replace it with a bow goal. */
     protected void addCombatGoals() {
@@ -95,6 +103,36 @@ public class AshbornEntity extends Monster {
     }
 
     public @Nullable BlockPos raidTarget() { return raidTarget; }
+    /** A door the raider wants to break down because every settler it could hunt is hiding behind it. */
+    public @Nullable BlockPos breakGoal() { return breakGoal; }
+    public void setBreakGoal(@Nullable BlockPos pos) { breakGoal = pos; }
+
+    public boolean ignores(Entity e) {
+        Long until = ignored.get(e.getUUID());
+        return until != null && until > level().getGameTime();
+    }
+
+    /**
+     * A target that stays out of reach (no path, not even a barrier to break) is dropped for half a minute so the raider
+     * hunts someone else, goes for a door or roams, instead of standing at the wall.
+     */
+    @Override
+    protected void customServerAiStep(ServerLevel level) {
+        super.customServerAiStep(level);
+        if (tickCount % 20 != 0 || raidTarget == null) return;
+        LivingEntity t = getTarget();
+        if (t instanceof SettlerEntity && distanceToSqr(t) > 6.25 && getNavigation().isDone()
+                && !goalSelector.getAvailableGoals().stream().anyMatch(g -> g.isRunning() && g.getGoal() instanceof BreakBarrierGoal)) {
+            if (++unreachable >= 4) {
+                ignored.put(t.getUUID(), level.getGameTime() + 600);
+                setTarget(null);
+                unreachable = 0;
+            }
+        } else {
+            unreachable = 0;
+        }
+        if (ignored.size() > 16) ignored.values().removeIf(v -> v <= level.getGameTime());
+    }
     public @Nullable UUID raidSettlement() { return raidSettlement; }
 
     // ---- combat --------------------------------------------------------------------------------

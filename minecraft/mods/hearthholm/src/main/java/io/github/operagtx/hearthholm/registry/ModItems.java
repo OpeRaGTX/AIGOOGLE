@@ -23,6 +23,10 @@ public final class ModItems {
     public static Item RIFT_SHARD;
     /** Creative-only debug tool: forces a raid, a rift or the chieftain. */
     public static Item FOUNDERS_WHISTLE;
+    /** Wave D: calls up to 4 combat settlers into a party; use again to send them home. */
+    public static Item WAR_HORN;
+    /** Wave D: brewed by healers from herbs; heals whoever drinks it. */
+    public static Item HEALING_SALVE;
     public static final List<Item> SPAWN_EGGS = new ArrayList<>();
 
     private ModItems() {}
@@ -40,6 +44,8 @@ public final class ModItems {
         HEARTH_MARK = reg("hearth_mark", Item::new, new Item.Properties().stacksTo(64));
         RIFT_SHARD = reg("rift_shard", Item::new, new Item.Properties().stacksTo(64).rarity(Rarity.UNCOMMON));
         FOUNDERS_WHISTLE = reg("founders_whistle", FoundersWhistleItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
+        WAR_HORN = reg("war_horn", io.github.operagtx.hearthholm.item.WarHornItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+        HEALING_SALVE = reg("healing_salve", io.github.operagtx.hearthholm.item.HealingSalveItem::new, new Item.Properties().stacksTo(16));
         egg("ash_raider", ModEntities.ASH_RAIDER);
         egg("ash_arsonist", ModEntities.ASH_ARSONIST);
         egg("ash_archer", ModEntities.ASH_ARCHER);

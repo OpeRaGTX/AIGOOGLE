@@ -119,7 +119,7 @@ public final class Views {
     public record Settler(int entityId, SettlerProfile profile, Identifier profession, int food, int mood,
                           List<MoodEntry> moods, Component status, int level, int xp, int nextXp,
                           List<ItemStack> inventory, List<ItemStack> equipment, boolean bed, Component settlement,
-                          Component friend, int friendValue, Component rival, int rivalValue) {
+                          Component friend, int friendValue, Component rival, int rivalValue, boolean promotable) {
         public static final StreamCodec<RegistryFriendlyByteBuf, Settler> CODEC = StreamCodec.of(Settler::write, Settler::read);
 
         static void write(RegistryFriendlyByteBuf b, Settler v) {
@@ -142,6 +142,7 @@ public final class Views {
             b.writeVarInt(v.friendValue);
             COMP.encode(b, v.rival);
             b.writeVarInt(v.rivalValue);
+            b.writeBoolean(v.promotable);
         }
 
         static Settler read(RegistryFriendlyByteBuf b) {
@@ -156,7 +157,7 @@ public final class Views {
             List<ItemStack> inv = ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(b);
             List<ItemStack> eq = ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(b);
             return new Settler(id, p, prof, food, mood, moods, status, level, xp, next, inv, eq, b.readBoolean(), COMP.decode(b),
-                    COMP.decode(b), b.readVarInt(), COMP.decode(b), b.readVarInt());
+                    COMP.decode(b), b.readVarInt(), COMP.decode(b), b.readVarInt(), b.readBoolean());
         }
     }
 

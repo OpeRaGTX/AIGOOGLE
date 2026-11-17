@@ -26,19 +26,43 @@ public final class MarchGoal extends Goal {
     public boolean canUse() {
         BlockPos t = mob.raidTarget();
         if (t == null || mob.getTarget() != null) return false;
+        BlockPos door = mob.breakGoal();
+        if (door != null) {
+            if (mob.level().getBlockState(door).getBlock() instanceof net.minecraft.world.level.block.DoorBlock && mob.blockPosition().distSqr(door) < 30 * 30) return true;
+            mob.setBreakGoal(null);
+        }
         if (mob.blockPosition().distSqr(t) > 36) return true;
         if (--huntCooldown <= 0) {
             huntCooldown = 20;
             hunt();
+            if (mob.getTarget() == null && mob.breakGoal() == null) pickDoor();
+            return mob.breakGoal() != null;
         }
         return false;
+    }
+
+    /** Nobody left to hunt in the open: go and break down the nearest closed door (that is where they hide). */
+    private void pickDoor() {
+        var level = mob.level();
+        BlockPos from = mob.blockPosition();
+        BlockPos best = null;
+        double bd = Double.MAX_VALUE;
+        for (BlockPos p : BlockPos.betweenClosed(from.offset(-18, -2, -18), from.offset(18, 3, 18))) {
+            var st = level.getBlockState(p);
+            if (!(st.getBlock() instanceof net.minecraft.world.level.block.DoorBlock) || st.getValue(net.minecraft.world.level.block.DoorBlock.OPEN)
+                    || st.getBlock() instanceof io.github.operagtx.hearthholm.block.PalisadeGateBlock) continue;
+            if (st.getValue(net.minecraft.world.level.block.DoorBlock.HALF) != net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER) continue;
+            double d = p.distSqr(from);
+            if (d < bd) { bd = d; best = p.immutable(); }
+        }
+        if (best != null) mob.setBreakGoal(best);
     }
 
     private void hunt() {
         var level = mob.level();
         io.github.operagtx.hearthholm.entity.SettlerEntity best = null;
         double bd = Double.MAX_VALUE;
-        for (var e : level.getEntitiesOfClass(io.github.operagtx.hearthholm.entity.SettlerEntity.class, mob.getBoundingBox().inflate(48, 12, 48), x -> x.isAlive())) {
+        for (var e : level.getEntitiesOfClass(io.github.operagtx.hearthholm.entity.SettlerEntity.class, mob.getBoundingBox().inflate(48, 12, 48), x -> x.isAlive() && !mob.ignores(x))) {
             double d = mob.distanceToSqr(e);
             boolean open = level.getHeight(Heightmap.Types.MOTION_BLOCKING, e.getBlockX(), e.getBlockZ()) <= e.getBlockY() + 1;
             if (!open) d += 48 * 48;
@@ -79,6 +103,13 @@ public final class MarchGoal extends Goal {
         recalc = 40;
         BlockPos t = mob.raidTarget();
         if (t == null) return;
+        BlockPos door = mob.breakGoal();
+        if (door != null) {
+            if (!mob.getNavigation().moveTo(door.getX() + 0.5, door.getY(), door.getZ() + 0.5, 1.0)) {
+                mob.getNavigation().moveTo(door.getX() + 0.5, door.getY(), door.getZ() + 0.5, 1.0);
+            }
+            return;
+        }
         Vec3 from = mob.position();
         Vec3 to = Vec3.atBottomCenterOf(t);
         Vec3 d = to.subtract(from);

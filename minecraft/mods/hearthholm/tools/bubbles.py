@@ -101,6 +101,53 @@ B = {
   ("Mind your own business.", "Не лезь не в своё дело."),
   ("Always complaining!", "Вечно ты недоволен!"),
  ],
+ "party_join": [
+  ("Lead the way, %2$s!", "Веди, %2$s!"),
+  ("The horn! I am with you.", "Горн! Я с тобой."),
+  ("Ready for the road.", "К дороге готов."),
+  ("Spears up, we march!", "Копья вверх, идём!"),
+  ("Where to, captain?", "Куда, капитан?"),
+ ],
+ "party_leave": [
+  ("Back to the hearth, then.", "Что ж, домой, к очагу."),
+  ("Until the next horn.", "До следующего горна."),
+  ("A good march. Farewell.", "Славный поход. Прощай."),
+  ("Home at last!", "Наконец-то дома!"),
+  ("Call us again, %2$s.", "Зови ещё, %2$s."),
+ ],
+ "party_idle": [
+  ("Keep your eyes open.", "Смотрите в оба."),
+  ("I smell trouble.", "Чую неприятности."),
+  ("Long road ahead.", "Дорога дальняя."),
+  ("We have your back, %2$s.", "Мы прикроем тебя, %2$s."),
+  ("Is it supper time yet?", "А ужин скоро?"),
+  ("Nothing moves out there.", "Там всё тихо."),
+ ],
+ "retreat": [
+  ("I need to catch my breath!", "Мне надо перевести дух!"),
+  ("Falling back to patch up!", "Отхожу подлататься!"),
+  ("Cover me, I am hurt!", "Прикройте, я ранен!"),
+  ("Too many wounds...", "Слишком много ран..."),
+ ],
+ "healed": [
+  ("Thank you, healer!", "Спасибо, знахарь!"),
+  ("Good as new.", "Как новенький."),
+  ("That salve works wonders.", "Эта мазь творит чудеса."),
+  ("I feel much better!", "Мне гораздо лучше!"),
+  ("Bless your herbs.", "Благослови твои травы."),
+ ],
+ "knighted": [
+  ("A knight of the hearth!", "Рыцарь очага!"),
+  ("I will not fail you.", "Я вас не подведу."),
+  ("My shield is yours.", "Мой щит - ваш."),
+  ("Steel on my shoulders at last.", "Наконец-то сталь на плечах."),
+ ],
+ "taunt": [
+  ("Face me, cowards!", "Сюда, трусы!"),
+  ("Over here!", "Я здесь!"),
+  ("Fight someone your size!", "Выбери противника по себе!"),
+  ("Come get me!", "Попробуй возьми!"),
+ ],
 }
 
 # work lines per profession path
@@ -118,6 +165,9 @@ W = {
  "cook": [("Something smells delicious!", "Пахнет просто восхитительно!"), ("A pinch of salt...", "Щепотку соли..."), ("Supper is almost ready.", "Ужин почти готов."), ("Hot bread, fresh from the oven!", "Горячий хлеб, прямо из печи!")],
  "hauler": [("Heavy crates today.", "Сегодня тяжёлые ящики."), ("To the warehouse we go!", "На склад, друзья!"), ("Back and forth, back and forth.", "Туда-сюда, туда-сюда."), ("Everything in its place.", "Всё на своём месте.")],
  "unemployed": [("I could use some work.", "Мне бы работу."), ("Idle hands...", "Руки без дела..."), ("Give me a job, boss!", "Дай мне работу, хозяин!"), ("What should I do today?", "Чем бы сегодня заняться?")],
+ "archer": [("Wind is calm. Perfect shot.", "Ветра нет. Идеальный выстрел."), ("An arrow for every foe.", "Каждому врагу по стреле."), ("Steady hands, steady aim.", "Твёрдая рука, верный глаз."), ("I count my arrows twice.", "Свои стрелы считаю дважды."), ("Nothing slips past my sight.", "Ничто не проскользнёт мимо взгляда.")],
+ "healer": [("Chamomile and a little patience.", "Ромашка и немного терпения."), ("Show me where it hurts.", "Покажи, где болит."), ("A salve a day keeps the grave away.", "Мазь на ночь - смерть прочь."), ("These herbs smell wonderful.", "Как чудесно пахнут травы."), ("Drink water, rest well.", "Пейте воду, хорошо отдыхайте.")],
+ "knight": [("Honour before glory.", "Честь прежде славы."), ("My shield guards this town.", "Мой щит хранит этот город."), ("No raider passes while I stand.", "Пока я стою, налётчик не пройдёт."), ("Steel and duty.", "Сталь и долг."), ("I swore an oath at the hearth.", "Я дал клятву у очага.")],
 }
 
 # trait flavoured lines (trait path -> lines)

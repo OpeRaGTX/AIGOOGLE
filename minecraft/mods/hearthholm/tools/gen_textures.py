@@ -342,6 +342,53 @@ def outfit(prof, slim):
         for side in ("right", "left"):
             fill_face(im, O["body"][side], lambda x, y, w, h: rgb(shade(pack, "right")) if x >= 2 and 1 <= y <= 9 else None)
         fill_face(im, O["body"]["top"], lambda x, y, w, h: rgb(pack) if y >= 2 and 1 <= x <= 6 else None)
+    elif prof == "archer":
+        green, dark = 0x4F8A45, 0x2E5530
+        O_h = parts(False, True)["head"]
+        fill_face(im, O_h["top"], lambda x, y, w, h: rgb(shade(green, "top")))
+        for f in ("front", "right", "left", "back"):
+            fill_face(im, O_h[f], lambda x, y, w, h, f=f: rgb(shade(green if y < 2 or f != "front" else dark, f)) if y < 3 and (y < 2 or f != "front" or x in (0, 1, 6, 7)) else None)
+        fill_face(im, O_h["right"], lambda x, y, w, h: rgb(0xE8E4D0) if x in (1, 2) and y in (0, 1, 2) and (x + y) % 2 == 0 else None)   # feather
+        fill_part(im, O["body"], lambda f, x, y, w, h: rgb(shade(green, f)) if f not in ("top", "bottom") and y <= 9 else None)
+        fill_part(im, O["body"], lambda f, x, y, w, h: rgb(0x5A3A22) if f in ("front", "back") and y == 9 else None)
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(0x6B4A2A) if (x + y) in (7, 8) and y < 8 else None)   # bandolier
+        fill_face(im, O["body"]["back"], lambda x, y, w, h: rgb(0x7A5230) if 5 <= x <= 7 and y <= 8 else (rgb(0xD8D4C0) if x in (5, 6) and y == 0 else None))  # quiver
+        for arm in ("rarm", "larm"):
+            fill_part(im, O[arm], lambda f, x, y, w, h: rgb(shade(0x7A5230, f)) if f not in ("top", "bottom") and 7 <= y <= 10 else None)
+        for leg in ("rleg", "lleg"):
+            fill_part(im, O[leg], lambda f, x, y, w, h: rgb(shade(dark, f)) if f not in ("top", "bottom") and y >= 6 else None)
+    elif prof == "healer":
+        robe, white = 0x6FBF8F, 0xF2F0E6
+        O_h = parts(False, True)["head"]
+        fill_face(im, O_h["top"], lambda x, y, w, h: rgb(shade(white, "top"), n=3))
+        for f in ("front", "right", "left", "back"):
+            fill_face(im, O_h[f], lambda x, y, w, h, f=f: rgb(shade(white, f), n=3) if y < 2 else None)
+        fill_face(im, O_h["front"], lambda x, y, w, h: rgb(0xC0392B) if y == 0 and x in (3, 4) else None)   # red mark on the band
+        fill_part(im, O["body"], lambda f, x, y, w, h: rgb(shade(robe, f)) if f not in ("top", "bottom") else None)
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(white) if 1 <= x <= 6 and y >= 5 else None)   # apron
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(0xC0392B) if (x in (3, 4) and 6 <= y <= 10) or (y in (8, 9) and 2 <= x <= 5) else None)
+        fill_face(im, O["body"]["back"], lambda x, y, w, h: rgb(0x8C6A3E) if 2 <= x <= 5 and 3 <= y <= 7 else None)   # herb satchel
+        for arm in ("rarm", "larm"):
+            fill_part(im, O[arm], lambda f, x, y, w, h: rgb(shade(robe, f)) if f != "bottom" and (f == "top" or y <= 6) else None)
+        for leg in ("rleg", "lleg"):
+            fill_part(im, O[leg], lambda f, x, y, w, h: rgb(shade(robe, f)) if f not in ("top", "bottom") and y < 7 else None)
+    elif prof == "knight":
+        steel, gold, red = 0xC4C9D0, 0xD8B04A, 0xB0302A
+        helmet(im, steel, 4, band=gold, nose=True)
+        O_h = parts(False, True)["head"]
+        for f in ("front", "right", "left", "back"):   # plume
+            fill_face(im, O_h[f], lambda x, y, w, h, f=f: rgb(shade(red, f)) if y == 0 and 2 <= x <= 5 and f in ("right", "left", "back") else None)
+        fill_face(im, O_h["top"], lambda x, y, w, h: rgb(shade(red, "top")) if 3 <= x <= 4 else None)
+        fill_face(im, O_h["front"], lambda x, y, w, h: (30, 30, 36, 255) if y == 3 and x in (1, 2, 5, 6) else None)   # visor slits
+        plate = lambda f, x, y: rgb(shade(steel if (x + y) % 3 else 0xA6ABB4, f), n=3)
+        fill_part(im, O["body"], lambda f, x, y, w, h: plate(f, x, y) if f != "bottom" else None)
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(red) if 2 <= x <= 5 and y >= 4 else None)   # tabard
+        fill_face(im, O["body"]["front"], lambda x, y, w, h: rgb(gold) if (x in (3, 4) and 5 <= y <= 9) or (y == 7 and 2 <= x <= 5) else None)
+        fill_face(im, O["body"]["back"], lambda x, y, w, h: rgb(red) if 2 <= x <= 5 and y >= 3 else None)
+        for arm in ("rarm", "larm"):
+            fill_part(im, O[arm], lambda f, x, y, w, h: plate(f, x, y) if f == "top" or y <= 3 or 7 <= y <= 11 else (rgb(gold) if y == 4 else None))
+        for leg in ("rleg", "lleg"):
+            fill_part(im, O[leg], lambda f, x, y, w, h: plate(f, x, y) if f not in ("top",) and y >= 5 else (rgb(gold) if f != "bottom" and y == 4 else None))
     return im
 
 # ---------------------------------------------------------------- blocks
@@ -815,6 +862,76 @@ def wave_c():
     for k, (b, sp) in eggs.items():
         save(egg_icon(b, sp), f"item/{k}_spawn_egg.png")
 
+# ---------------------------------------------------------------- wave D: party and military
+def herbalist_textures():
+    out = {}
+    top = plank_tex(0x8A6A44, seed=81)
+    draw(top, [".gg..", "gGGg.", "gGGg.", ".gg.."], {"g": (60, 120, 50), "G": (110, 180, 80)}, 1, 2)
+    draw(top, ["..p..", ".pYp.", "..p.."], {"p": (210, 120, 170), "Y": (250, 220, 90)}, 10, 3)
+    draw(top, ["bbb", "bBb", "bbb"], {"b": (150, 200, 220), "B": (90, 170, 120)}, 9, 9)
+    draw(top, ["..LL", ".LLL", "LLL."], {"L": (80, 150, 60)}, 2, 10)
+    out["herbalist_table_top"] = top
+    out["herbalist_table_side"] = plank_tex(0x6E5233, seed=82)
+    front = plank_tex(0x6E5233, seed=83)
+    for x in range(2, 14):
+        front.putpixel((x, 2), (50, 36, 22, 255))
+    draw(front, ["h.h.h.h", "hhhhhhh"], {"h": (70, 140, 60)}, 4, 4)
+    draw(front, ["bb.bb", "bb.bb"], {"b": (140, 190, 210)}, 5, 8)
+    out["herbalist_table_front"] = front
+    return out
+
+def weapon_rack_front():
+    im = plank_tex(0x6A4A2C, seed=91)
+    for x in range(16):
+        im.putpixel((x, 0), (40, 28, 18, 255)); im.putpixel((x, 15), (40, 28, 18, 255))
+    steel, edge, hilt, shaft = (190, 196, 204), (120, 126, 136), (130, 90, 40), (150, 110, 60)
+    # sword
+    for y in range(2, 10):
+        im.putpixel((3, y), steel + (255,)); im.putpixel((2, y), edge + (255,))
+    for x in range(1, 5): im.putpixel((x, 10), hilt + (255,))
+    for y in (11, 12): im.putpixel((3, y), hilt + (255,))
+    # axe
+    for y in range(2, 13): im.putpixel((8, y), shaft + (255,))
+    draw(im, ["ss", "sss", "ss"], {"s": steel}, 9, 2)
+    draw(im, ["ee", "ee"], {"e": edge}, 9, 3)
+    # spear
+    for y in range(4, 14): im.putpixel((13, y), shaft + (255,))
+    draw(im, [".s.", "sss", ".s."], {"s": steel}, 12, 1)
+    # shelf bars
+    for x in range(16):
+        im.putpixel((x, 13), (52, 36, 22, 255)); im.putpixel((x, 5), (52, 36, 22, 255))
+    return im
+
+def war_horn_icon():
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw(im, ["..........HHH.", ".........HbbbH", "........HbBBBbH", ".......HbBhhhBbH", "......HbBh...hBH", ".....HbBh.....HH",
+              "....HbBh.........", "...HbBh..........", "..HbBh...........", ".HbBh............", "HbBh.............", "HHH.............."],
+         {"H": (110, 70, 25), "b": (205, 160, 70), "B": (236, 200, 110), "h": (150, 105, 40)}, 0, 2)
+    for x, y in ((10, 3), (11, 4)): im.putpixel((x, y), (255, 240, 180, 255))
+    draw(im, ["r", "r", "r"], {"r": (170, 40, 30)}, 3, 13)
+    return im
+
+def salve_icon():
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    draw(im, ["..sss..", ".sSSSs.", "sSSgSSs", "sSgGgSs", "sSSgSSs", ".sSSSs.", "..sss.."], {"s": (60, 110, 70), "S": (110, 175, 110), "g": (190, 230, 150), "G": (240, 250, 200)}, 4, 6)
+    draw(im, ["ccccc", "cCCCc"], {"c": (150, 100, 55), "C": (190, 140, 80)}, 5, 4)
+    draw(im, ["..", ".."], {"x": (0, 0, 0)}, 0, 0)
+    im.putpixel((7, 3), (130, 80, 40, 255)); im.putpixel((8, 3), (130, 80, 40, 255))
+    return im
+
+def wave_d():
+    rnd.seed(41)
+    for slim in (False, True):
+        for prof in ("archer", "healer", "knight"):
+            save(outfit(prof, slim), f"entity/settler/profession/{prof}_{'slim' if slim else 'wide'}.png")
+    for name, t in herbalist_textures().items():
+        save(t, f"block/{name}.png")
+    save(weapon_rack_front(), "block/weapon_rack_front.png")
+    save(plank_tex(0x6A4A2C, seed=92), "block/weapon_rack_side.png")
+    save(plank_tex(0x4A3220, rows=2, seed=93), "block/weapon_rack_bar.png")
+    save(war_horn_icon(), "item/war_horn.png")
+    save(salve_icon(), "item/healing_salve.png")
+
 def main():
     for slim in (False, True):
         arms = "slim" if slim else "wide"
@@ -849,6 +966,7 @@ def main():
         save(t, f"block/{name}.png")
     save(hearth_mark(), "item/hearth_mark.png")
     wave_c()
+    wave_d()
     print("textures written to", os.path.normpath(OUT))
 
 if __name__ == "__main__":

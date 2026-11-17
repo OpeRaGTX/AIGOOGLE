@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "G": "minecraft:gold_ingot",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "II ",
+    "IGI",
+    " IL"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:war_horn"
+  }
+}

@@ -43,6 +43,7 @@ public final class ModBlocks {
     public static WorkSiteBlock FISHING_MARKER;
     public static WorkSiteBlock PATROL_POST;
     public static WorkSiteBlock TERRITORY_BANNER;
+    public static WorkshopBlock HERBALIST_TABLE, WEAPON_RACK;
     public static Block ALARM_BELL, PALISADE, PALISADE_GATE, RIFT_CORE, RIFT_LANTERN, CHIEFTAIN_BANNER;
 
     private ModBlocks() {}
@@ -101,5 +102,10 @@ public final class ModBlocks {
                 .mapColor(MapColor.COLOR_PURPLE).strength(1.5f).sound(SoundType.LANTERN).lightLevel(st -> 15).noOcclusion());
         CHIEFTAIN_BANNER = register("chieftain_banner", ChieftainBannerBlock::new, BlockBehaviour.Properties.of()
                 .mapColor(MapColor.COLOR_RED).strength(1.5f).sound(SoundType.WOOD).noOcclusion());
+        // wave D: party and military
+        HERBALIST_TABLE = register("herbalist_table", p -> new WorkshopBlock(p, Workshop.HERBALISM, Block.box(0, 0, 0, 16, 14, 16)),
+                BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(2f).sound(SoundType.WOOD).noOcclusion());
+        WEAPON_RACK = register("weapon_rack", p -> new WorkshopBlock(p, Workshop.BARRACKS, Block.box(0, 0, 0, 16, 16, 16)),
+                BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2f).sound(SoundType.WOOD).noOcclusion());
     }
 }

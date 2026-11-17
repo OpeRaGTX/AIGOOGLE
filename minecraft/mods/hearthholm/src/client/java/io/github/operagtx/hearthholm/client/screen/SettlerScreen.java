@@ -45,6 +45,7 @@ public final class SettlerScreen extends HhScreen {
     protected void init() {
         super.init();
         List<Profession> list = new ArrayList<>(Professions.REGISTRY.values());
+        list.removeIf(Profession::promotionOnly);
         int cols = 5, rows = (list.size() + cols - 1) / cols;
         int x0 = left + 8, y0 = top + panelH - 24 - rows * 15;
         for (int i = 0; i < list.size(); i++) {
@@ -66,6 +67,10 @@ public final class SettlerScreen extends HhScreen {
                     }
                 });
         button(Component.translatable("gui.hearthholm.refresh"), left + 8, top + panelH - 22, 80, 16, b -> send(Payloads.SettlerAction.REFRESH, ""));
+        if (view.promotable()) {
+            Button promote = button(Component.translatable("gui.hearthholm.promote"), left + 92, top + panelH - 22, 134, 16, b -> send(Payloads.SettlerAction.PROMOTE, ""));
+            promote.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.promote_tip")));
+        }
     }
 
     @Override

@@ -22,6 +22,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -38,6 +39,7 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -90,6 +92,10 @@ public class SettlerEntity extends PathfinderMob {
     private final Map<String, Integer> xp = new HashMap<>();
     private List<MoodEntry> moodEntries = List.of();
     private final SettlerBrain brain;
+    /** The player whose war-horn party this settler belongs to (saved); null at home. */
+    private @Nullable UUID partyOwner;
+    private long nextTaunt;
+    private boolean retreating;
 
     public SettlerEntity(EntityType<? extends SettlerEntity> type, Level level) {
         super(type, level);
@@ -112,11 +118,14 @@ public class SettlerEntity extends PathfinderMob {
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(1, new OpenDoorGoal(this, true));
+        goalSelector.addGoal(1, new SettlerRetreatGoal(this));
         goalSelector.addGoal(2, new SettlerFleeGoal(this));
+        goalSelector.addGoal(2, new SettlerRangedGoal(this));
         goalSelector.addGoal(2, new SettlerMeleeGoal(this));
         goalSelector.addGoal(5, new SettlerBrainGoal(this));
         goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6f));
         goalSelector.addGoal(9, new RandomLookAroundGoal(this));
+        targetSelector.addGoal(0, new PartyTargetGoal(this));
         targetSelector.addGoal(1, new SettlerDefendGoal(this));
         targetSelector.addGoal(2, new SettlerTargetGoal(this));
     }
@@ -139,10 +148,7 @@ public class SettlerEntity extends PathfinderMob {
         this.arrived = false;
         entityData.set(DATA_LOOK, profile.appearance());
         entityData.set(DATA_NAME, profile.nameIndex() | (profile.female() ? 1 << 16 : 0));
-        float hp = 20 + profile.stat(io.github.operagtx.hearthholm.core.Stat.ENDURANCE) / 2f;
-        for (Trait t : profile.traitList()) hp += t.maxHealthBonus();
-        Objects.requireNonNull(getAttribute(Attributes.MAX_HEALTH)).setBaseValue(hp);
-        Objects.requireNonNull(getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(1 + profile.stat(io.github.operagtx.hearthholm.core.Stat.STRENGTH) * 0.25);
+        refreshCombatStats();
         setHealth(getMaxHealth());
         refreshName();
     }
@@ -265,12 +271,160 @@ public class SettlerEntity extends PathfinderMob {
         if (p.id().equals(professionId())) return;
         brain.onProfessionChanged();
         entityData.set(DATA_PROFESSION, p.id().toString());
+        refreshCombatStats();
         refreshName();
         syncRecord();
     }
 
     public boolean isCombatant() {
         return profession().isCombat();
+    }
+
+    // ---- wave D: party, combat strength, healing, shield, taunt ----------------------------------
+
+    public @Nullable UUID partyOwner() { return partyOwner; }
+    public boolean inParty() { return partyOwner != null; }
+
+    public void joinParty(UUID owner) {
+        partyOwner = owner;
+        io.github.operagtx.hearthholm.party.Party.markOwner(owner);
+        brain.pause();
+        getNavigation().stop();
+        if (isSleeping()) stopSleeping();
+        setTarget(null);
+        setStatus("party_with");
+        syncRecord();
+    }
+
+    public void leaveParty() {
+        if (partyOwner == null) return;
+        partyOwner = null;
+        brain.pause();
+        getNavigation().stop();
+        setTarget(null);
+    }
+
+    public boolean isRetreating() { return retreating; }
+    public void setRetreating(boolean v) { retreating = v; }
+
+    public boolean isKnight() { return professionId().equals(Professions.KNIGHT_ID); }
+
+    /** A settler fighting with a bow and with arrows left shoots instead of swinging. */
+    public boolean isRanged() {
+        return professionId().equals(Professions.ARCHER.id()) && getMainHandItem().is(Items.BOW) && has(Items.ARROW);
+    }
+
+    /**
+     * Health, damage and natural armour of combat settlers grow with level (a guard or warrior starts sturdier
+     * than a civilian and gains with every level), knights get a large bonus on top. Gear adds its own attributes.
+     */
+    public void refreshCombatStats() {
+        int lvl = level(professionId());
+        float hp = 20 + profile.stat(io.github.operagtx.hearthholm.core.Stat.ENDURANCE) / 2f;
+        for (Trait t : profile.traitList()) hp += t.maxHealthBonus();
+        double atk = 1 + profile.stat(io.github.operagtx.hearthholm.core.Stat.STRENGTH) * 0.25;
+        double armor = 0;
+        if (isCombatant()) {
+            hp += 10 + 3 * (lvl - 1);
+            atk = 2 + profile.stat(io.github.operagtx.hearthholm.core.Stat.STRENGTH) * 0.3 + 0.6 * (lvl - 1);
+            armor = 1 + 0.4 * (lvl - 1);
+            if (isKnight()) { hp += 16; atk += 2; armor += 3; }
+        }
+        var maxHp = Objects.requireNonNull(getAttribute(Attributes.MAX_HEALTH));
+        float old = getMaxHealth();
+        if (Math.abs(maxHp.getBaseValue() - hp) > 0.01) {
+            maxHp.setBaseValue(hp);
+            setHealth(Math.min(hp, Math.max(1f, getHealth() * (hp / Math.max(1f, old)))));
+        }
+        Objects.requireNonNull(getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(atk);
+        Objects.requireNonNull(getAttribute(Attributes.ARMOR)).setBaseValue(armor);
+    }
+
+    /** Test hook and promotion: sets the experience of a profession. */
+    public void setXp(Identifier profession, int value) {
+        xp.put(profession.toString(), value);
+        refreshCombatStats();
+    }
+
+    /** Near a weapon rack of a valid barracks of this settlement. */
+    public boolean inBarracks() {
+        Settlement st = settlement();
+        if (st == null) return false;
+        for (BuildingRecord b : st.buildings) {
+            if (!b.valid() || !b.is(io.github.operagtx.hearthholm.crafting.Workshop.BARRACKS.role())) continue;
+            for (BlockPos p : b.stations()) if (p.distSqr(blockPosition()) <= 64 && Math.abs(p.getY() - getBlockY()) <= 3) return true;
+        }
+        return false;
+    }
+
+    /** The nearest weapon rack of a valid barracks, or null. */
+    public @Nullable BlockPos barracksSpot() {
+        Settlement st = settlement();
+        if (st == null) return null;
+        BlockPos best = null;
+        double bd = Double.MAX_VALUE;
+        for (BuildingRecord b : st.buildings) {
+            if (!b.valid() || !b.is(io.github.operagtx.hearthholm.crafting.Workshop.BARRACKS.role())) continue;
+            for (BlockPos p : b.stations()) {
+                double d = p.distSqr(blockPosition());
+                if (d < bd) { bd = d; best = p; }
+            }
+        }
+        return best;
+    }
+
+    /** Where a badly hurt fighter withdraws to: the nearest barracks rack, else the nearest healer. */
+    public @Nullable BlockPos retreatSpot() {
+        BlockPos best = barracksSpot();
+        if (best != null) return best;
+        double bd = Double.MAX_VALUE;
+        for (SettlerEntity o : level().getEntitiesOfClass(SettlerEntity.class, getBoundingBox().inflate(64, 16, 64),
+                x -> x.isAlive() && x.professionId().equals(Professions.HEALER.id()) && Objects.equals(x.settlementId, settlementId))) {
+            double d = o.distanceToSqr(this);
+            if (d < bd) { bd = d; best = o.blockPosition(); }
+        }
+        return best;
+    }
+
+    public boolean wantsRetreat() {
+        return isCombatant() && !inParty() && getHealth() < getMaxHealth() * 0.3f && retreatSpot() != null;
+    }
+
+    /** Once a second: slow natural healing (fast in a barracks), salves, the knight's taunt, "comrades" mood. */
+    private void tickMilitary(ServerLevel sl) {
+        long now = sl.getGameTime();
+        boolean barracks = isCombatant() && inBarracks();
+        if (getHealth() < getMaxHealth() && food > 4 && now - lastHurt > 100) heal(barracks ? 1.25f : 0.25f);
+        if (barracks && !isSleeping()) {
+            addThought("comrades", 4, 6000);
+            if (getHealth() < getMaxHealth() && getRandom().nextInt(8) == 0)
+                sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + 1.6, getZ(), 1, 0.2, 0.2, 0.2, 0.0);
+        }
+        if (getHealth() < getMaxHealth() * 0.5f && has(io.github.operagtx.hearthholm.registry.ModItems.HEALING_SALVE)
+                && !io.github.operagtx.hearthholm.entity.ai.jobs.HealerJob.healerNear(this, 24)) {
+            takeItem(io.github.operagtx.hearthholm.registry.ModItems.HEALING_SALVE, 1);
+            heal(io.github.operagtx.hearthholm.item.HealingSalveItem.HEAL);
+            sl.sendParticles(ParticleTypes.HEART, getX(), getY() + 1.9, getZ(), 4, 0.3, 0.2, 0.3, 0.02);
+            sl.playSound(null, blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.NEUTRAL, 0.7f, 1.2f);
+            Settlement st = settlement();
+            if (st != null) st.stats.merge("salves_used", 1, Integer::sum);
+        }
+        if (isKnight() && now >= nextTaunt && getHealth() > getMaxHealth() * 0.35f) {
+            int n = 0;
+            for (Mob m : sl.getEntitiesOfClass(Mob.class, getBoundingBox().inflate(10, 4, 10),
+                    x -> x instanceof net.minecraft.world.entity.monster.Enemy && x.isAlive() && x.getTarget() != null && x.getTarget() != this)) {
+                m.setTarget(this);
+                n++;
+            }
+            if (n > 0) {
+                nextTaunt = now + 160;
+                sl.sendParticles(ParticleTypes.ANGRY_VILLAGER, getX(), getY() + 2.2, getZ(), 6, 0.4, 0.3, 0.4, 0.0);
+                sl.playSound(null, blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.NEUTRAL, 0.5f, 1.7f);
+                Social.say(this, "taunt", 99);
+                Settlement st = settlement();
+                if (st != null) st.stats.merge("taunts", 1, Integer::sum);
+            }
+        }
     }
 
     /** Combatants only fight inside the settlement or close to themselves. */
@@ -353,6 +507,7 @@ public class SettlerEntity extends PathfinderMob {
         int before = level(p);
         xp.merge(p.toString(), amount, Integer::sum);
         int after = level(p);
+        if (after > before) refreshCombatStats();
         if (after > before && level() instanceof ServerLevel sl) {
             sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + 2, getZ(), 12, 0.4, 0.4, 0.4, 0.1);
             sl.playSound(null, blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.6f, 1.3f);
@@ -615,6 +770,7 @@ public class SettlerEntity extends PathfinderMob {
     protected void customServerAiStep(ServerLevel level) {
         super.customServerAiStep(level);
         tickNeeds();
+        if (tickCount % 20 == 0) tickMilitary(level);
         if (tickCount % 100 == 0) {
             if (settlementId != null && settlement() == null && !leaving) leave(Component.translatable("message.hearthholm.left_unhappy", getName()));
             syncRecord();
@@ -623,6 +779,15 @@ public class SettlerEntity extends PathfinderMob {
 
     @Override
     public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+        if (isKnight() && !source.is(DamageTypeTags.BYPASSES_SHIELD) && source.getSourcePosition() != null) {
+            Vec3 look = getViewVector(1f).multiply(1, 0, 1).normalize();
+            Vec3 to = source.getSourcePosition().subtract(position()).multiply(1, 0, 1).normalize();
+            if (to.dot(look) > 0.2) {
+                amount *= 0.35f;
+                level.playSound(null, blockPosition(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.NEUTRAL, 0.8f, 1f);
+                level.sendParticles(ParticleTypes.CRIT, getX() + to.x * 0.6, getY() + 1.2, getZ() + to.z * 0.6, 4, 0.15, 0.2, 0.15, 0.1);
+            }
+        }
         boolean hurt = super.hurtServer(level, source, amount);
         if (hurt) {
             lastHurt = level.getGameTime();
@@ -631,6 +796,13 @@ public class SettlerEntity extends PathfinderMob {
             }
         }
         return hurt;
+    }
+
+    @Override
+    public boolean doHurtTarget(ServerLevel level, Entity target) {
+        boolean hit = super.doHurtTarget(level, target);
+        if (hit && isCombatant() && target instanceof LivingEntity le) gainXp(le.isDeadOrDying() ? 6 : 1);
+        return hit;
     }
 
     @Override
@@ -682,6 +854,7 @@ public class SettlerEntity extends PathfinderMob {
         out.putBoolean("Arrived", arrived);
         out.store("Thoughts", Thought.CODEC.listOf(), List.copyOf(thoughts));
         out.store("Affinity", AFFINITY_CODEC, Map.copyOf(affinity));
+        out.storeNullable("PartyOwner", UUIDUtil.CODEC, partyOwner);
         out.putLong("LastChatDay", lastChatDay);
         out.store("Xp", XP_CODEC, Map.copyOf(xp));
         inventory.storeAsItemList(out.list("Inventory", ItemStack.CODEC));
@@ -707,10 +880,13 @@ public class SettlerEntity extends PathfinderMob {
         if (legacyTasty > 0 && thoughts.stream().noneMatch(t -> t.id().equals("tasty_meal"))) thoughts.add(new Thought("tasty_meal", 8, legacyTasty));
         affinity.clear();
         in.read("Affinity", AFFINITY_CODEC).ifPresent(affinity::putAll);
+        partyOwner = in.read("PartyOwner", UUIDUtil.CODEC).orElse(null);
+        if (partyOwner != null) io.github.operagtx.hearthholm.party.Party.markOwner(partyOwner);
         lastChatDay = in.getLongOr("LastChatDay", -1L);
         xp.clear();
         in.read("Xp", XP_CODEC).ifPresent(xp::putAll);
         inventory.fromItemList(in.listOrEmpty("Inventory", ItemStack.CODEC));
+        refreshCombatStats();
         refreshName();
     }
 }

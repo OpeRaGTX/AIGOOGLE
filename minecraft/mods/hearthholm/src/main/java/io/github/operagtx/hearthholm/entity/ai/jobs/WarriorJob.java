@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /** Defends the territory of a banner: roams it, holds the banner or escorts the settlement owner. */
-public final class WarriorJob extends SiteJob {
+public class WarriorJob extends SiteJob {
     public static final int PATROL = 0, FOLLOW = 1, HOLD = 2;
 
     public WarriorJob(SettlerEntity settler) {

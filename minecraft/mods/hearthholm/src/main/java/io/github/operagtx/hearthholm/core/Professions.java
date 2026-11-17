@@ -27,6 +27,10 @@ public final class Professions {
     public static Profession SMITH;
     public static Profession COOK;
     public static Profession HAULER;
+    public static Profession ARCHER;
+    public static Profession HEALER;
+    public static Profession KNIGHT;
+    public static final Identifier KNIGHT_ID = Hearthholm.id("knight");
 
     private Professions() {}
 
@@ -97,5 +101,19 @@ public final class Professions {
                 .weight(Stat.ENDURANCE, 3).weight(Stat.STRENGTH, 2).weight(Stat.DEXTERITY, 1)
                 .color(0x8FA35A).icon(() -> new ItemStack(Items.CHEST))
                 .job(HaulerJob::new).build());
+        ARCHER = reg(Profession.builder(Hearthholm.id("archer"))
+                .weight(Stat.PERCEPTION, 3).weight(Stat.DEXTERITY, 3).weight(Stat.ENDURANCE, 1)
+                .tool(s -> s.is(Items.BOW)).site(WorkSiteTypes.PATROL_ID)
+                .combat().nightShift().color(0x5FA05A).icon(() -> new ItemStack(Items.BOW))
+                .job(ArcherJob::new).build());
+        HEALER = reg(Profession.builder(Workshop.HERBALISM.profession())
+                .weight(Stat.WITS, 3).weight(Stat.PERCEPTION, 2).weight(Stat.ENDURANCE, 1)
+                .color(0x7FD4A0).icon(() -> new ItemStack(Items.GLISTERING_MELON_SLICE))
+                .job(HealerJob::new).build());
+        KNIGHT = reg(Profession.builder(KNIGHT_ID)
+                .weight(Stat.STRENGTH, 3).weight(Stat.ENDURANCE, 3).weight(Stat.PERCEPTION, 1)
+                .tool(s -> s.is(ItemTags.SWORDS) || s.is(ItemTags.AXES)).site(WorkSiteTypes.TERRITORY_ID)
+                .combat().promotionOnly().color(0xD8B04A).icon(() -> new ItemStack(Items.IRON_CHESTPLATE))
+                .job(KnightJob::new).build());
     }
 }
