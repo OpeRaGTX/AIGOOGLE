@@ -16,6 +16,14 @@ public final class HearthholmClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         EntityRendererRegistry.register(ModEntities.SETTLER, SettlerRenderer::new);
+        EntityRendererRegistry.register(ModEntities.ASH_RAIDER, io.github.operagtx.hearthholm.client.render.AshbornRenderer::new);
+        EntityRendererRegistry.register(ModEntities.ASH_ARSONIST, io.github.operagtx.hearthholm.client.render.AshbornRenderer::new);
+        EntityRendererRegistry.register(ModEntities.ASH_ARCHER, io.github.operagtx.hearthholm.client.render.AshbornRenderer::new);
+        EntityRendererRegistry.register(ModEntities.ASH_BRUTE, io.github.operagtx.hearthholm.client.render.AshbornRenderer::new);
+        EntityRendererRegistry.register(ModEntities.ASH_CHIEFTAIN, io.github.operagtx.hearthholm.client.render.AshbornRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(
+                io.github.operagtx.hearthholm.client.render.RiftWispModel.LAYER, io.github.operagtx.hearthholm.client.render.RiftWispModel::createLayer);
+        EntityRendererRegistry.register(ModEntities.RIFT_WISP, io.github.operagtx.hearthholm.client.render.RiftWispRenderer::new);
         ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenTownHall.TYPE,
                 (p, ctx) -> ctx.client().execute(() -> TownHallScreen.show(p.view())));
         ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenSettler.TYPE,

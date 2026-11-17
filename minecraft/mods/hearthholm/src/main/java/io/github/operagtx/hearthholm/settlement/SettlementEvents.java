@@ -31,6 +31,7 @@ public final class SettlementEvents {
 
     private static void tick(MinecraftServer server) {
         if (server.getTickCount() % 20 != 0) return;
+        io.github.operagtx.hearthholm.threat.Threats.serverTick(server);
         SettlementManager m = SettlementManager.get(server);
         for (Settlement s : m.all()) {
             ServerLevel level = server.getLevel(s.dimension);
@@ -40,6 +41,7 @@ public final class SettlementEvents {
                 m.setDirty();
             }
             Festival.tick(level, s);
+            io.github.operagtx.hearthholm.threat.Threats.tick(level, s);
             Social.tickSettlement(level, s);
             int day = (int) SettlementService.day(level);
             if (s.stats.getOrDefault("last_day", -1) != day) {

@@ -77,7 +77,7 @@ public final class IgniteGoal extends Goal {
             return;
         }
         if (mob.level() instanceof ServerLevel sl && Threats.ignite(sl, fireAt)) {
-            mob.swing(InteractionHand.MAIN_HAND);
+            mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT);
             sl.playSound(null, fireAt, SoundEvents.FLINTANDSTEEL_USE, SoundSource.HOSTILE, 1f, 0.9f);
             mob.addFire();
         }

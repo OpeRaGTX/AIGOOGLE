@@ -88,7 +88,7 @@ public final class BreakBarrierGoal extends Goal {
         mob.getLookControl().setLookAt(Vec3.atCenterOf(barrier));
         progress++;
         if (progress % 15 == 0) {
-            mob.swing(InteractionHand.MAIN_HAND);
+            mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT);
             mob.level().playSound(null, barrier, SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.HOSTILE, 0.9f, 0.8f);
         }
         mob.level().destroyBlockProgress(mob.getId(), barrier, (int) (progress / (float) needed * 10f));

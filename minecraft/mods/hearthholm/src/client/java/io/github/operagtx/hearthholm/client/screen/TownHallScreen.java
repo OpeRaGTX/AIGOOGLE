@@ -21,7 +21,7 @@ import java.util.List;
 
 /** The town hall: overview with next steps, residents, hiring and buildings. */
 public final class TownHallScreen extends HhScreen {
-    private static final int OVERVIEW = 0, PEOPLE = 1, HIRE = 2, BUILDINGS = 3;
+    private static final int OVERVIEW = 0, PEOPLE = 1, HIRE = 2, BUILDINGS = 3, DEFENSE = 4;
     private static int lastTab = OVERVIEW;
     private Views.Settlement view;
     private int tab = lastTab;
@@ -50,10 +50,10 @@ public final class TownHallScreen extends HhScreen {
     @Override
     protected void init() {
         super.init();
-        String[] tabs = {"overview", "people", "hire", "buildings"};
+        String[] tabs = {"overview", "people", "hire", "buildings", "defense"};
         for (int i = 0; i < tabs.length; i++) {
             int t = i;
-            Button b = button(Component.translatable("gui.hearthholm.tab." + tabs[i]), left + 8 + i * 81, top + 30, 79, 16, x -> {
+            Button b = button(Component.translatable("gui.hearthholm.tab." + tabs[i]), left + 8 + i * 65, top + 30, 63, 16, x -> {
                 tab = t;
                 lastTab = t;
                 scroll = 0;
@@ -86,6 +86,12 @@ public final class TownHallScreen extends HhScreen {
                         left + 178, top + 177, panelW - 188, 14, b -> send(Payloads.TownHallAction.FESTIVAL, 0, ""));
                 fest.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.festival_tip")));
                 fest.active = view.festivalDays() >= 0 && view.food() >= view.festivalCost() && view.residents() > 0;
+            }
+            case DEFENSE -> {
+                boolean on = view.stats().getOrDefault("d.alarm", 0) == 1;
+                Button alarm = button(Component.translatable(on ? "gui.hearthholm.alarm_off" : "gui.hearthholm.alarm_on"), left + 8, bottom, 160, 18,
+                        b -> send(Payloads.TownHallAction.ALARM, 0, ""));
+                alarm.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.alarm_tip")));
             }
             case BUILDINGS -> button(Component.translatable("gui.hearthholm.rescan"), left + 8, bottom, 160, 18,
                     b -> send(Payloads.TownHallAction.RESCAN, 0, ""));
@@ -124,6 +130,7 @@ public final class TownHallScreen extends HhScreen {
             case PEOPLE -> people(g, mx, my);
             case HIRE -> hire(g, mx, my);
             case BUILDINGS -> buildings(g);
+            case DEFENSE -> defense(g);
             default -> {}
         }
     }
@@ -164,6 +171,49 @@ public final class TownHallScreen extends HhScreen {
                 : view.festivalDays() == 1 ? Component.translatable("gui.hearthholm.festival_day1")
                 : Component.translatable("gui.hearthholm.festival_days", view.festivalDays());
         g.text(font, fs, hx, top + 165, view.festivalDays() < 0 ? GOOD : TEXT, false);
+    }
+
+    private int stat(String k) {
+        return view.stats().getOrDefault("d." + k, 0);
+    }
+
+    /** Wave C: raid log, rift status and the alarm. */
+    private void defense(GuiGraphicsExtractor g) {
+        int x = left + 10, y = top + 52;
+        text(g, Component.translatable("gui.hearthholm.raids"), x, y, TITLE);
+        int eta = stat("raid_eta");
+        Component next = Component.translatable("gui.hearthholm.raid_eta." + eta);
+        line(g, "raid_next", next.getString(), x, y += 12, eta == 3 ? BAD : eta == 1 ? WARN : eta == 2 ? GOOD : DIM);
+        line(g, "raid_strength", stat("raid_strength"), x, y += 11, TEXT);
+        if (eta == 3) line(g, "raid_alive", stat("raid_alive"), x, y += 11, BAD);
+        int last = stat("raid_last");
+        line(g, "raid_last", Component.translatable("gui.hearthholm.raid_result." + last).getString(), x, y += 11,
+                last == 1 ? GOOD : last == 2 ? BAD : DIM);
+        line(g, "raid_record", stat("raid_won") + " / " + stat("raid_lost"), x, y += 11, TEXT);
+        line(g, "defenders", stat("defenders"), x, y += 11, stat("defenders") > 0 ? GOOD : WARN);
+        y += 15;
+        text(g, Component.translatable("gui.hearthholm.rift"), x, y, TITLE);
+        Component rift = stat("rift_open") == 1 ? Component.translatable("gui.hearthholm.rift_open", stat("rift_hp"))
+                : stat("rift_days") < 0 ? Component.translatable("gui.hearthholm.rift_none")
+                : Component.translatable("gui.hearthholm.rift_days", stat("rift_days"));
+        g.text(font, rift, x, y += 12, stat("rift_open") == 1 ? 0xFFC77DFF : TEXT, false);
+        line(g, "rift_closed", stat("rift_closed"), x, y += 11, TEXT);
+
+        int hx = left + 178, hy = top + 54, hw = panelW - 188;
+        inset(g, hx - 4, hy - 4, hw + 8, 138);
+        text(g, Component.translatable("gui.hearthholm.defense"), hx, hy, TITLE);
+        boolean on = stat("alarm") == 1;
+        g.text(font, Component.translatable(on ? "gui.hearthholm.alarm_state_on" : "gui.hearthholm.alarm_state_off"), hx, hy += 13, on ? BAD : GOOD, false);
+        line2(g, "bells", stat("bells"), hx, hy += 12);
+        line2(g, "gates", stat("gates"), hx, hy += 11);
+        g.text(font, Component.translatable(stat("trophy") == 1 ? "gui.hearthholm.trophy_yes" : "gui.hearthholm.trophy_no"), hx, hy += 12,
+                stat("trophy") == 1 ? 0xFFFFD35A : DIM, false);
+        g.textWithWordWrap(font, Component.translatable("gui.hearthholm.defense_tip"), hx, hy + 14, hw, DIM);
+    }
+
+    private void line2(GuiGraphicsExtractor g, String key, Object value, int x, int y) {
+        text(g, Component.translatable("gui.hearthholm." + key).append(": "), x, y, DIM);
+        g.text(font, Component.literal(String.valueOf(value)), x + 100, y, TEXT, false);
     }
 
     private int rows() {

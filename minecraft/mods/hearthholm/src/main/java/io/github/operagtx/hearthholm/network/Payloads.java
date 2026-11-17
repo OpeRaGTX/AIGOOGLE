@@ -34,7 +34,7 @@ public final class Payloads {
 
     /** Town hall actions; see constants. */
     public record TownHallAction(BlockPos desk, int action, int arg, String text) implements CustomPacketPayload {
-        public static final int REFRESH = 0, HIRE = 1, REROLL = 2, RESCAN = 3, RENAME = 4, OPEN_RESIDENT = 5, MINT = 6, FESTIVAL = 7;
+        public static final int REFRESH = 0, HIRE = 1, REROLL = 2, RESCAN = 3, RENAME = 4, OPEN_RESIDENT = 5, MINT = 6, FESTIVAL = 7, ALARM = 8;
         public static final Type<TownHallAction> TYPE = new Type<>(Hearthholm.id("town_hall_action"));
         public static final StreamCodec<RegistryFriendlyByteBuf, TownHallAction> CODEC = StreamCodec.composite(
                 BlockPos.STREAM_CODEC, TownHallAction::desk,

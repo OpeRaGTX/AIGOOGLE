@@ -176,9 +176,35 @@ public final class SettlementService {
         return new Views.Settlement(s.center, s.displayName(), tier.key(), s.renown, next == null ? -1 : next.renown(),
                 next == null ? "" : next.key(), s.residents.size(), s.popCap(), s.housingBeds().size(), s.freeBeds(),
                 Storage.totalNutrition(storage), s.hireCost(), s.radius(), s.hallValid(), s.warehouseValid(),
-                people, buildings, List.copyOf(s.candidates), hints(s, storage), new LinkedHashMap<>(s.stats),
+                people, buildings, List.copyOf(s.candidates), hints(s, storage), defenseStats(level, s),
                 Storage.count(storage, st -> st.is(ModItems.HEARTH_MARK)), Mint.describe(),
                 Festival.daysUntil(level, s), Festival.cost(s));
+    }
+
+    /** Saved stats plus the wave C defence figures the town hall shows (not saved). */
+    private static Map<String, Integer> defenseStats(ServerLevel level, Settlement s) {
+        Map<String, Integer> out = new LinkedHashMap<>(s.stats);
+        var r = s.raid;
+        out.put("d.raid_eta", io.github.operagtx.hearthholm.threat.Threats.raidEta(level, s));
+        out.put("d.raid_last", r.lastResult);
+        out.put("d.raid_last_day", (int) Math.max(-1, r.lastDay));
+        out.put("d.raid_won", r.won);
+        out.put("d.raid_lost", r.lost);
+        out.put("d.raid_strength", r.phase != io.github.operagtx.hearthholm.threat.RaidState.NONE ? r.strength
+                : io.github.operagtx.hearthholm.threat.Threats.strength(level, s));
+        out.put("d.raid_alive", io.github.operagtx.hearthholm.threat.Threats.alive(level, s));
+        out.put("d.rift_open", s.rift.open() ? 1 : 0);
+        out.put("d.rift_hp", s.rift.hp);
+        out.put("d.rift_days", s.rift.nextDay < 0 ? -1 : (int) Math.max(0, s.rift.nextDay - day(level)));
+        out.put("d.rift_closed", s.rift.closed);
+        out.put("d.alarm", s.alarm ? 1 : 0);
+        out.put("d.bells", s.bells.size());
+        out.put("d.gates", s.gates.size());
+        out.put("d.trophy", s.trophyInHall ? 1 : 0);
+        int guards = 0;
+        for (ResidentRecord rr : s.residents) if (Professions.get(rr.profession).isCombat()) guards++;
+        out.put("d.defenders", guards);
+        return out;
     }
 
     private static List<Component> hints(Settlement s, List<Container> storage) {
@@ -219,6 +245,10 @@ public final class SettlementService {
                 say(player, "rescanned", s.buildings.size());
             }
             case Payloads.TownHallAction.MINT -> mint(player, level, s);
+            case Payloads.TownHallAction.ALARM -> {
+                s.stats.remove("auto_alarm");
+                io.github.operagtx.hearthholm.threat.Defense.setAlarm(level, s, !s.alarm, player);
+            }
             case Payloads.TownHallAction.FESTIVAL -> {
                 if (Festival.active(level, s)) say(player, "festival_running");
                 else if (!Festival.start(level, s, true)) say(player, "festival_denied", Festival.cost(s));

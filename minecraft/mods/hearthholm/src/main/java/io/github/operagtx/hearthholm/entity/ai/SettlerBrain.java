@@ -23,6 +23,7 @@ public final class SettlerBrain {
         this.activities = List.of(
                 new LeaveActivity(settler),
                 new ArriveActivity(settler),
+                new AlarmActivity(settler),
                 new SleepActivity(settler),
                 new EatActivity(settler),
                 new FestivalActivity(settler),

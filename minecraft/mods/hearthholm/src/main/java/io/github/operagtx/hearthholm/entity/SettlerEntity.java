@@ -541,6 +541,7 @@ public class SettlerEntity extends PathfinderMob {
         if (level().getGameTime() - lastHurt < 2400) entries.add(MoodEntry.of("hurt", -10));
         if (level().isRainingAt(blockPosition())) putThought("wet", -3, 1800);
         if (profile.legendary()) entries.add(MoodEntry.thought("legend", 5));
+        if (s != null && s.trophyInHall) entries.add(MoodEntry.thought("trophy", 5));
         for (Thought t : thoughts) entries.add(MoodEntry.thought(t.id(), t.value()));
         if (s != null && s.residents.stream().anyMatch(r -> Professions.get(r.profession).isCombat()))
             entries.add(MoodEntry.of("protected", 5));
@@ -637,6 +638,7 @@ public class SettlerEntity extends PathfinderMob {
         if (level() instanceof ServerLevel sl && !isRemoved()) {
             Settlement s = settlement();
             if (s != null) {
+                io.github.operagtx.hearthholm.threat.Threats.onSettlerDied(sl, s);
                 SettlementService.notifyOwner(this, Component.translatable("message.hearthholm.died", getName(),
                         source.getLocalizedDeathMessage(this)).withStyle(ChatFormatting.RED));
                 s.removeResident(getUUID());
