@@ -1,7 +1,7 @@
 import React from 'react';
 import {Composition} from 'remotion';
-import {DURATION, FPS, Video} from './Video';
+import {AatroxVsMordekaiser, FPS, FRAMES} from './AatroxVsMordekaiser';
 
 export const RemotionRoot: React.FC = () => (
-	<Composition id="lore-aatrox-vs-mordekaiser" component={Video} durationInFrames={DURATION} fps={FPS} width={1080} height={1920} />
+	<Composition id="aatrox-vs-mordekaiser" component={AatroxVsMordekaiser} durationInFrames={FRAMES} fps={FPS} width={1080} height={1920} />
 );
