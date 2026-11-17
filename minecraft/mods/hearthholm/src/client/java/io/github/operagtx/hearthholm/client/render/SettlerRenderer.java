@@ -48,22 +48,35 @@ public class SettlerRenderer extends HumanoidMobRenderer<SettlerEntity, SettlerR
         }
     }
 
-    /** The speech bubble: the line (wrapped to at most 2 rows) above the head, over the nameplate. */
-    private void submitBubble(SettlerRenderState state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
-        String text = state.bubble.getString();
-        var style = state.bubble.getStyle();
+    /** Wraps a line into rows of at most {@code width} characters (at most 3 rows, the last one cut with "…"). */
+    static java.util.List<String> wrap(String text, int width) {
         java.util.List<String> rows = new java.util.ArrayList<>();
-        if (text.length() <= 24) rows.add(text);
-        else {
-            int cut = text.lastIndexOf(' ', Math.min(text.length() - 1, 26));
-            if (cut < 8) cut = Math.min(text.length(), 24);
-            rows.add(text.substring(0, cut).strip());
-            rows.add(text.substring(cut).strip());
+        String rest = text.strip();
+        while (!rest.isEmpty() && rows.size() < 3) {
+            if (rest.length() <= width) { rows.add(rest); break; }
+            int cut = rest.lastIndexOf(' ', width);
+            if (cut < width / 2) cut = width;
+            if (rows.size() == 2) { rows.add(rest.substring(0, Math.min(rest.length(), width - 1)).strip() + "…"); break; }
+            rows.add(rest.substring(0, cut).strip());
+            rest = rest.substring(cut).strip();
         }
+        return rows;
+    }
+
+    /**
+     * The speech bubble: the line in narrow rows, drawn smaller than a name tag above the head so the bubbles
+     * of settlers standing side by side do not run into each other.
+     */
+    private void submitBubble(SettlerRenderState state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
+        var style = state.bubble.getStyle();
+        java.util.List<String> rows = wrap(state.bubble.getString(), 18);
+        var at = state.nameTagAttachment;
         pose.pushPose();
+        pose.translate(at.x, at.y + 0.32, at.z);
+        pose.scale(0.7f, 0.7f, 0.7f);
         for (int i = 0; i < rows.size(); i++) {
-            int y = -(16 + (rows.size() - 1 - i) * 10);
-            collector.submitNameTag(pose, state.nameTagAttachment, y, net.minecraft.network.chat.Component.literal(rows.get(i)).withStyle(style),
+            int y = -(rows.size() - 1 - i) * 10;
+            collector.submitNameTag(pose, net.minecraft.world.phys.Vec3.ZERO, y, net.minecraft.network.chat.Component.literal(rows.get(i)).withStyle(style),
                     !state.isDiscrete, state.lightCoords, camera);
         }
         pose.popPose();

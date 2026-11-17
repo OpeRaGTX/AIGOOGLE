@@ -57,6 +57,17 @@ public final class AlarmActivity implements Activity {
         }
         if (--recheck > 0) return true;
         recheck = 40;
+        if (s.isCombatant() && st.raid.phase == io.github.operagtx.hearthholm.threat.RaidState.ACTIVE && s.getTarget() == null) {
+            // the raid is on: go after the nearest raider inside the settlement
+            var foes = s.level().getEntitiesOfClass(io.github.operagtx.hearthholm.entity.ashborn.AshbornEntity.class,
+                    new net.minecraft.world.phys.AABB(st.center).inflate(st.radius() + 8, 24, st.radius() + 8),
+                    a -> a.isAlive() && st.contains(s.level().dimension(), a.blockPosition()));
+            var nearest = foes.stream().min(java.util.Comparator.comparingDouble(s::distanceToSqr)).orElse(null);
+            if (nearest != null) {
+                s.setTarget(nearest);
+                return true;
+            }
+        }
         double near = s.isCombatant() ? (rift ? 2.5 : 4) : 1.8;
         if (s.blockPosition().distSqr(post) > near * near) {
             walk = s.isCombatant() ? MoveTo.block(post, near) : MoveTo.block(post, near);

@@ -7,7 +7,10 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.EnumSet;
 
-/** With nobody to fight, raid members march on the town hall in 16-block legs (paths stay short and cheap). */
+/**
+ * With nobody to fight, raid members march on the town hall in 16-block legs (paths stay short and cheap).
+ * Once there they hunt: the nearest settler out in the open (else anyone) becomes the target, sight or not.
+ */
 public final class MarchGoal extends Goal {
     private final AshbornEntity mob;
     private int recalc;
@@ -17,10 +20,31 @@ public final class MarchGoal extends Goal {
         setFlags(EnumSet.of(Flag.MOVE));
     }
 
+    private int huntCooldown;
+
     @Override
     public boolean canUse() {
         BlockPos t = mob.raidTarget();
-        return t != null && mob.getTarget() == null && mob.blockPosition().distSqr(t) > 36;
+        if (t == null || mob.getTarget() != null) return false;
+        if (mob.blockPosition().distSqr(t) > 36) return true;
+        if (--huntCooldown <= 0) {
+            huntCooldown = 20;
+            hunt();
+        }
+        return false;
+    }
+
+    private void hunt() {
+        var level = mob.level();
+        io.github.operagtx.hearthholm.entity.SettlerEntity best = null;
+        double bd = Double.MAX_VALUE;
+        for (var e : level.getEntitiesOfClass(io.github.operagtx.hearthholm.entity.SettlerEntity.class, mob.getBoundingBox().inflate(48, 12, 48), x -> x.isAlive())) {
+            double d = mob.distanceToSqr(e);
+            boolean open = level.getHeight(Heightmap.Types.MOTION_BLOCKING, e.getBlockX(), e.getBlockZ()) <= e.getBlockY() + 1;
+            if (!open) d += 48 * 48;
+            if (d < bd) { bd = d; best = e; }
+        }
+        if (best != null) mob.setTarget(best);
     }
 
     @Override
@@ -49,7 +73,13 @@ public final class MarchGoal extends Goal {
             int y = mob.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
             to = new Vec3(x + 0.5, y, z + 0.5);
         }
-        mob.getNavigation().moveTo(to.x, to.y, to.z, 1.0);
+        if (!mob.getNavigation().moveTo(to.x, to.y, to.z, 1.0)) {
+            // no path to the leg target (water, a wall): try a short random step towards the hall instead
+            Vec3 near = from.add(d.x / Math.max(1, len) * 6 + mob.getRandom().nextInt(7) - 3, 0, d.z / Math.max(1, len) * 6 + mob.getRandom().nextInt(7) - 3);
+            int x = (int) Math.floor(near.x), z = (int) Math.floor(near.z);
+            mob.getNavigation().moveTo(x + 0.5, mob.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z + 0.5, 1.0);
+            recalc = 20;
+        }
     }
 
     @Override

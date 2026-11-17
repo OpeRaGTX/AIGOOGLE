@@ -14,7 +14,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /** Rift lanterns: no natural hostile spawns within 24 blocks (a cheap POI lookup per spawn attempt). */
-@Mixin(Mob.class)
+/* PathfinderMob overrides Mob#checkSpawnRules without calling super, so both are hooked. */
+@Mixin({Mob.class, net.minecraft.world.entity.PathfinderMob.class})
 public abstract class MobSpawnMixin {
     @Inject(method = "checkSpawnRules", at = @At("HEAD"), cancellable = true)
     private void hearthholm$riftLantern(LevelAccessor level, EntitySpawnReason reason, CallbackInfoReturnable<Boolean> cir) {

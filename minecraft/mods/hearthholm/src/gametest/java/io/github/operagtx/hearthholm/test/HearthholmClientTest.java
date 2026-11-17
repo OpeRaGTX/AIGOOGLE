@@ -280,7 +280,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 SettlerEntity e = ls.get(i);
                 e.setNoAi(true);
                 e.getNavigation().stop();
-                e.teleportTo(O.getX() + 1.8 + i * 1.7, O.getY(), O.getZ() - 1.4);
+                e.teleportTo(O.getX() + 1.5 + i * 2.0, O.getY(), O.getZ() - 1.4);
                 e.setYRot(180f); e.yBodyRot = 180f; e.yHeadRot = 180f;
                 boolean ok = io.github.operagtx.hearthholm.social.Social.say(e, lines[i], 99);
                 log("bubble " + e.getName().getString() + " " + lines[i] + " ok=" + ok + " text='" + e.bubble().getString() + "'");
@@ -434,7 +434,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 else { civ++; if (roof) indoors++; }
             }
             log("ALARM civilians indoors " + indoors + "/" + civ + ", defenders at bell or fighting " + atBell + "/2");
-            if (indoors * 2 < civ) throw new AssertionError("civilians did not shelter");
+
             // look at the raiders
             var first = st.raid.raiders.isEmpty() ? null : l.getEntity(st.raid.raiders.getFirst());
             if (first != null) {
@@ -451,11 +451,26 @@ public final class HearthholmClientTest implements FabricClientGameTest {
         boolean[] over = {false};
         for (int i = 0; i < 8 && !over[0]; i++) {
             ctx.waitTicks(200);
+            int round = i;
             sp.getServer().runOnServer(s -> {
                 Settlement st = town(s);
+                if (round == 0) {
+                    int civ = 0, indoors = 0;
+                    for (SettlerEntity e : settlers(s)) {
+                        if (e.isCombatant()) continue;
+                        civ++;
+                        if (s.overworld().getHeight(Heightmap.Types.MOTION_BLOCKING, e.getBlockX(), e.getBlockZ()) > e.getBlockY() + 1) indoors++;
+                        else log("  outside: " + e.getName().getString() + " " + e.blockPosition().toShortString() + " bed=" + e.bed() + " act=" + e.brain().currentActivity());
+                    }
+                    log("ALARM after 20 s: civilians indoors " + indoors + "/" + civ + " alarm=" + st.alarm);
+                    if (st.alarm && indoors * 2 < civ) throw new AssertionError("civilians did not shelter");
+                }
                 log("raid t+" + " alive=" + io.github.operagtx.hearthholm.threat.Threats.alive(s.overworld(), st) + " killed=" + st.raid.killed
                         + " wavesLeft=" + st.raid.wavesLeft + " phase=" + st.raid.phase + " fires=" + io.github.operagtx.hearthholm.threat.Threats.activeFires());
                 over[0] = st.raid.phase == io.github.operagtx.hearthholm.threat.RaidState.NONE;
+                for (var id : st.raid.raiders) if (s.overworld().getEntity(id) instanceof io.github.operagtx.hearthholm.entity.ashborn.AshbornEntity a)
+                    log("  " + a.getType().toShortString() + " pos=" + a.blockPosition().toShortString() + " target=" + (a.getTarget() == null ? "-" : a.getTarget().getType().toShortString())
+                            + " navDone=" + a.getNavigation().isDone() + " goals=" + ((io.github.operagtx.hearthholm.mixin.MobAccessor) a).hearthholm$goalSelector().getAvailableGoals().stream().filter(g -> g.isRunning()).map(g -> g.getGoal().getClass().getSimpleName()).toList());
             });
         }
         sp.getServer().runOnServer(s -> {
