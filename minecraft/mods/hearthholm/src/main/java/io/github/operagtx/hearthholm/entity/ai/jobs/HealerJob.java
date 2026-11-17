@@ -44,6 +44,8 @@ public final class HealerJob extends BaseJob {
     public static final Predicate<ItemStack> SALVE = st -> st.is(ModItems.HEALING_SALVE);
 
     private long nextBrewCheck;
+    /** Patients that could not be mended (unreachable, walked off) are left alone for a while. */
+    private final java.util.Map<java.util.UUID, Long> skip = new java.util.HashMap<>();
 
     public HealerJob(SettlerEntity settler) {
         super(settler);
@@ -51,10 +53,14 @@ public final class HealerJob extends BaseJob {
 
     /** Hurt settlers of the same settlement near this one, most hurt first. */
     public static @Nullable SettlerEntity findPatient(SettlerEntity healer, double range) {
+        return findPatient(healer, range, x -> true);
+    }
+
+    public static @Nullable SettlerEntity findPatient(SettlerEntity healer, double range, Predicate<SettlerEntity> allowed) {
         SettlerEntity best = null;
         float bestRatio = HURT;
         for (SettlerEntity o : healer.level().getEntitiesOfClass(SettlerEntity.class, healer.getBoundingBox().inflate(range, 12, range),
-                x -> x != healer && x.isAlive() && !x.isLeaving() && x.hasArrived() && java.util.Objects.equals(x.settlementId(), healer.settlementId()))) {
+                x -> x != healer && x.isAlive() && !x.isLeaving() && x.hasArrived() && allowed.test(x) && java.util.Objects.equals(x.settlementId(), healer.settlementId()))) {
             float ratio = o.getHealth() / o.getMaxHealth();
             if (ratio < bestRatio) { bestRatio = ratio; best = o; }
         }
@@ -73,10 +79,11 @@ public final class HealerJob extends BaseJob {
     public @Nullable Task next(SettlerEntity s) {
         Settlement st = s.settlement();
         if (st == null || !(s.level() instanceof ServerLevel level)) return new Wait(100);
-        SettlerEntity patient = findPatient(s, 48);
+        long nowTick = level.getGameTime();
+        SettlerEntity patient = findPatient(s, 48, x -> skip.getOrDefault(x.getUUID(), 0L) <= nowTick);
         if (patient != null) {
             s.setStatus("healing", patient.getName());
-            return new Heal(patient);
+            return new Heal(patient, () -> skip.put(patient.getUUID(), nowTick + 1200));
         }
         BuildingRecord shop = CraftPlanner.workshop(st, Workshop.HERBALISM);
         BlockPos station = shop == null ? null : station(shop);
@@ -131,13 +138,15 @@ public final class HealerJob extends BaseJob {
     /** Walks up to a hurt settler and mends them: +1 health every half second with hearts. */
     private static final class Heal implements Task {
         private final SettlerEntity patient;
+        private final Runnable giveUp;
         private int ticks, repath;
 
-        Heal(SettlerEntity patient) { this.patient = patient; }
+        Heal(SettlerEntity patient, Runnable giveUp) { this.patient = patient; this.giveUp = giveUp; }
 
         @Override
         public Status tick(SettlerEntity s) {
-            if (!patient.isAlive() || patient.isRemoved() || ++ticks > 900) return Status.DONE;
+            if (!patient.isAlive() || patient.isRemoved()) return Status.DONE;
+            if (++ticks > 500) { giveUp.run(); return Status.DONE; }
             if (patient.getHealth() >= patient.getMaxHealth() * 0.95f) {
                 patient.addThought("patched_up", 3, 12000);
                 s.gainXp(2);

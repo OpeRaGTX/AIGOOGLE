@@ -324,12 +324,13 @@ public class SettlerEntity extends PathfinderMob {
         float hp = 20 + profile.stat(io.github.operagtx.hearthholm.core.Stat.ENDURANCE) / 2f;
         for (Trait t : profile.traitList()) hp += t.maxHealthBonus();
         double atk = 1 + profile.stat(io.github.operagtx.hearthholm.core.Stat.STRENGTH) * 0.25;
-        double armor = 0;
+        double armor = 0, toughness = 0;
         if (isCombatant()) {
-            hp += 10 + 3 * (lvl - 1);
-            atk = 2 + profile.stat(io.github.operagtx.hearthholm.core.Stat.STRENGTH) * 0.3 + 0.6 * (lvl - 1);
-            armor = 1 + 0.4 * (lvl - 1);
-            if (isKnight()) { hp += 16; atk += 2; armor += 3; }
+            hp += 20 + 4 * (lvl - 1);
+            atk = 2.5 + profile.stat(io.github.operagtx.hearthholm.core.Stat.STRENGTH) * 0.35 + 0.7 * (lvl - 1);
+            armor = 2 + 0.5 * (lvl - 1);
+            toughness = 2;
+            if (isKnight()) { hp += 24; atk += 2; armor += 3; toughness += 2; }
         }
         var maxHp = Objects.requireNonNull(getAttribute(Attributes.MAX_HEALTH));
         float old = getMaxHealth();
@@ -339,6 +340,7 @@ public class SettlerEntity extends PathfinderMob {
         }
         Objects.requireNonNull(getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(atk);
         Objects.requireNonNull(getAttribute(Attributes.ARMOR)).setBaseValue(armor);
+        Objects.requireNonNull(getAttribute(Attributes.ARMOR_TOUGHNESS)).setBaseValue(toughness);
     }
 
     /** Test hook and promotion: sets the experience of a profession. */
@@ -780,6 +782,7 @@ public class SettlerEntity extends PathfinderMob {
 
     @Override
     public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+        if (source.getEntity() instanceof SettlerEntity) return false;   // no friendly fire (arrows, stray blows): it would start a brawl
         if (isKnight() && !source.is(DamageTypeTags.BYPASSES_SHIELD) && source.getSourcePosition() != null) {
             Vec3 look = getViewVector(1f).multiply(1, 0, 1).normalize();
             Vec3 to = source.getSourcePosition().subtract(position()).multiply(1, 0, 1).normalize();

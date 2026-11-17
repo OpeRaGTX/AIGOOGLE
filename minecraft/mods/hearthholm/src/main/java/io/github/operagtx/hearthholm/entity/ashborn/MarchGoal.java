@@ -20,7 +20,7 @@ public final class MarchGoal extends Goal {
         setFlags(EnumSet.of(Flag.MOVE));
     }
 
-    private int huntCooldown;
+    private int huntCooldown, noProgress;
 
     @Override
     public boolean canUse() {
@@ -31,14 +31,15 @@ public final class MarchGoal extends Goal {
             if (mob.level().getBlockState(door).getBlock() instanceof net.minecraft.world.level.block.DoorBlock && mob.blockPosition().distSqr(door) < 30 * 30) return true;
             mob.setBreakGoal(null);
         }
-        if (mob.blockPosition().distSqr(t) > 36) return true;
         if (--huntCooldown <= 0) {
             huntCooldown = 20;
             hunt();
-            if (mob.getTarget() == null && mob.breakGoal() == null) pickDoor();
-            return mob.breakGoal() != null;
+            // nobody to hunt in the open and the hall is reached or walled off: go and break a door
+            if (mob.getTarget() == null && mob.breakGoal() == null && (mob.blockPosition().distSqr(t) <= 36 || ++noProgress > 3)) pickDoor();
         }
-        return false;
+        if (mob.getTarget() != null) return false;
+        if (mob.breakGoal() != null) return true;
+        return mob.blockPosition().distSqr(t) > 36;
     }
 
     /** Nobody left to hunt in the open: go and break down the nearest closed door (that is where they hide). */

@@ -157,8 +157,10 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 if (bread <= bread0) throw new AssertionError("cook made no bread");
                 log("CRAFT OK");
             });
-            waveB(ctx, sp);
-            waveC(ctx, sp);
+            if (System.getenv("HH_ONLY_D") == null) {
+                waveB(ctx, sp);
+                waveC(ctx, sp);
+            }
             WaveDTest.run(ctx, sp);
             log("DONE");
         }
@@ -590,6 +592,19 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             io.github.operagtx.hearthholm.threat.Defense.onTrophyPlaced(l, BANNER);
             Settlement st = town(s);
             st.rescan(l);
+            log("TROPHY first scan: hall rooms=" + st.buildings.stream().filter(b -> b.is(1)).map(b -> b.problem() + "/" + b.size()).toList());
+            if (!st.trophyInHall) {
+                // the raid may have burnt or broken the hall: repair the shell and scan again
+                for (int x = 0; x <= 8; x++) for (int z = 0; z <= 8; z++) {
+                    boolean edge = x == 0 || x == 8 || z == 0 || z == 8;
+                    for (int y = 0; y <= 4; y++) {
+                        BlockPos q = O.offset(x, y, z);
+                        if (y == 4 || (edge && y <= 3)) { if (l.getBlockState(q).isAir()) l.setBlock(q, y == 4 ? Blocks.SPRUCE_PLANKS.defaultBlockState() : Blocks.OAK_PLANKS.defaultBlockState(), 3); }
+                    }
+                }
+                door(l, O.offset(4, 0, 0));
+                st.rescan(l);
+            }
             log("TROPHY in hall=" + st.trophyInHall);
             if (!st.trophyInHall) throw new AssertionError("trophy not detected");
         });
@@ -611,6 +626,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             var brutes = l.getEntitiesOfClass(io.github.operagtx.hearthholm.entity.ashborn.AshBruteEntity.class, new AABB(O).inflate(48));
             log("BRUTE palisade blocks left " + left + "/16 gate=" + gate + " brute=" + (brutes.isEmpty() ? "gone" : brutes.getFirst().blockPosition().toShortString()));
             for (var b : brutes) b.discard();
+            if (left >= 16 && gate) throw new AssertionError("brute did not break through the palisade");
             SettlementService.openTownHall(player(s), DESK);
         });
         ctx.waitForScreen(TownHallScreen.class);

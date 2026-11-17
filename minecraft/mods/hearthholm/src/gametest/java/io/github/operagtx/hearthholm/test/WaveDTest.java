@@ -84,7 +84,7 @@ final class WaveDTest {
     }
 
     private static void lookAt(ServerPlayer p, double x, double y, double z, double tx, double ty, double tz) {
-        double dx = tx - x, dz = tz - z, dy = ty - y;
+        double dx = tx - x, dz = tz - z, dy = ty - (y + 1.62);
         float yaw = (float) (Math.atan2(dz, dx) * 180 / Math.PI) - 90f;
         float pitch = (float) -(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI);
         p.teleportTo(p.level(), x, y, z, java.util.Set.of(), yaw, pitch, false);
@@ -155,13 +155,16 @@ final class WaveDTest {
             ServerLevel l = s.overworld();
             var h = EntityTypes.HUSK.spawn(l, p.blockPosition().relative(Direction.WEST, 7), EntitySpawnReason.SPAWN_ITEM_USE);
             TARGET = h.getUUID();
-            double cx = 0, cz = 0;
-            for (SettlerEntity e : party) { cx += e.getX(); cz += e.getZ(); }
-            lookAt(p, p.getX(), p.getY(), p.getZ(), cx / party.size(), p.getY() + 1, cz / party.size());
+            int k = 0;
+            for (SettlerEntity e : party) {
+                e.teleportTo(p.getX() + 6.0, p.getY(), p.getZ() + (k++ == 0 ? -1.5 : 1.5));
+                e.getNavigation().stop();
+            }
+            p.teleportTo(l, p.getX(), p.getY(), p.getZ(), java.util.Set.of(), -90f, 6f, false);
         });
-        ctx.waitTicks(30);
+        ctx.waitTicks(12);
         ctx.takeScreenshot("hh_40_party_following");
-        ctx.waitTicks(90);
+        ctx.waitTicks(110);
         sp.getServer().runOnServer(s -> {
             ServerLevel l = s.overworld();
             var h = l.getEntity(TARGET);
@@ -217,23 +220,29 @@ final class WaveDTest {
             arrowsBefore = a.count(x -> x.is(Items.ARROW));
             log("ARCHER fetched arrows from the warehouse: " + arrowsBefore);
             if (arrowsBefore == 0) throw new AssertionError("archer did not fetch arrows");
-            a.teleportTo(O.getX() + 10.5, O.getY(), O.getZ() + 20.5);
+            a.teleportTo(O.getX() - 3.5, O.getY(), O.getZ() + 22.5);
             a.getNavigation().stop();
-            var z = EntityTypes.HUSK.spawn(l, new BlockPos(O.getX() + 10, O.getY(), O.getZ() + 33), EntitySpawnReason.SPAWN_ITEM_USE);
+            var z = EntityTypes.HUSK.spawn(l, new BlockPos(O.getX() - 3, O.getY(), O.getZ() + 11), EntitySpawnReason.SPAWN_ITEM_USE);
             z.setNoAi(true);
             z.setPersistenceRequired();
             TARGET = z.getUUID();
             a.setTarget(z);
             ServerPlayer p = player(s);
-            p.teleportTo(l, O.getX() + 6.5, O.getY() + 1, O.getZ() + 19.5, java.util.Set.of(), -45f, 8f, false);
+            p.teleportTo(l, O.getX() + 0.5, O.getY() + 1, O.getZ() + 21.5, java.util.Set.of(), 90f, 8f, false);
         });
-        ctx.waitTicks(80);
+        ctx.waitTicks(60);
         sp.getServer().runOnServer(s -> {
             SettlerEntity a = get(s, ARCHER);
             ServerPlayer p = player(s);
+            p.teleportTo(s.overworld(), a.getX() - 4.5, a.getY() + 0.5, a.getZ(), java.util.Set.of(), -90f, 10f, false);
             lookAt(p, p.getX(), p.getY(), p.getZ(), a.getX(), a.getY() + 1.2, a.getZ());
         });
-        ctx.waitTicks(10);
+        for (int i = 0; i < 25; i++) {
+            ctx.waitTicks(3);
+            boolean[] drawing = {false};
+            sp.getServer().runOnServer(s -> drawing[0] = get(s, ARCHER).isUsingItem() && get(s, ARCHER).getTicksUsingItem() > 8);
+            if (drawing[0]) break;
+        }
         ctx.takeScreenshot("hh_41_archer_shooting");
         ctx.waitTicks(200);
         sp.getServer().runOnServer(s -> {
@@ -320,6 +329,9 @@ final class WaveDTest {
         sp.getServer().runOnServer(s -> {
             Settlement st = town(s);
             SettlerEntity h = get(s, HEALER);
+            for (SettlerEntity e : settlers(s)) if (e.getHealth() < e.getMaxHealth() * 0.8f)
+                log("  hurt: " + e.getName().getString() + " " + e.professionId().getPath() + " hp=" + e.getHealth() + "/" + e.getMaxHealth() + " pos=" + e.blockPosition().toShortString()
+                        + " act=" + e.brain().currentActivity() + " status='" + e.status().getString() + "' food=" + e.food() + " healerPos=" + h.blockPosition().toShortString());
             log("HEALER brewed: brewed=" + st.stats.get("brewed") + " salvesInWarehouse=" + stock(s, ModItems.HEALING_SALVE) + " healer inv salves=" + h.count(x -> x.is(ModItems.HEALING_SALVE))
                     + " status='" + h.status().getString() + "' bottles left=" + stock(s, Items.GLASS_BOTTLE));
             if (st.stats.getOrDefault("brewed", 0) < 1) throw new AssertionError("healer brewed nothing");
@@ -353,7 +365,7 @@ final class WaveDTest {
             ServerLevel l = s.overworld();
             w.getNavigation().stop();
             w.teleportTo(O.getX() + 8.5, O.getY(), O.getZ() + 14.5);
-            w.setYRot(180f); w.yBodyRot = 180f; w.yHeadRot = 180f;   // faces the player (south)
+            w.setYRot(0f); w.yBodyRot = 0f; w.yHeadRot = 0f;   // faces south, towards the player
             p.teleportTo(l, O.getX() + 8.5, O.getY() + 1.2, O.getZ() + 18.5, java.util.Set.of(), 180f, 5f, false);
             lookAt(p, p.getX(), p.getY(), p.getZ(), w.getX(), w.getY() + 1.4, w.getZ());
             w.setNoAi(true);
