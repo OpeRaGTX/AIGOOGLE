@@ -35,10 +35,10 @@ import java.util.List;
 
 /** End-to-end check: build a tiny settlement, hire, assign jobs, let time run, take screenshots. */
 public final class HearthholmClientTest implements FabricClientGameTest {
-    private static BlockPos O, DESK, MINE, FARM, STAKE, FOREST, BENCH, STOVE, BOARD;
+    static BlockPos O, DESK, MINE, FARM, STAKE, FOREST, BENCH, STOVE, BOARD;
     private static int planks0, bread0;
 
-    private static void log(String s) {
+    static void log(String s) {
         System.out.println("HHTEST " + s);
     }
 
@@ -159,13 +159,14 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             });
             waveB(ctx, sp);
             waveC(ctx, sp);
+            WaveDTest.run(ctx, sp);
             log("DONE");
         }
     }
 
     // ---- wave B: speech bubbles, relationships, thoughts, festival, legendary candidates -------------
 
-    private static Settlement town(MinecraftServer s) {
+    static Settlement town(MinecraftServer s) {
         return SettlementManager.get(s).all().iterator().next();
     }
 
@@ -623,17 +624,17 @@ public final class HearthholmClientTest implements FabricClientGameTest {
         });
     }
 
-    private static ServerPlayer player(MinecraftServer s) {
+    static ServerPlayer player(MinecraftServer s) {
         return s.getPlayerList().getPlayers().getFirst();
     }
 
-    private static List<SettlerEntity> settlers(MinecraftServer s) {
+    static List<SettlerEntity> settlers(MinecraftServer s) {
         List<SettlerEntity> l = new java.util.ArrayList<>(s.overworld().getEntitiesOfClass(SettlerEntity.class, new AABB(O).inflate(96)));
         l.sort(java.util.Comparator.comparing(SettlerEntity::getUUID));
         return l;
     }
 
-    private static void box(ServerLevel l, int x0, int y0, int z0, int x1, int y1, int z1, BlockState wall, BlockState roof) {
+    static void box(ServerLevel l, int x0, int y0, int z0, int x1, int y1, int z1, BlockState wall, BlockState roof) {
         for (int x = x0; x <= x1; x++)
             for (int z = z0; z <= z1; z++)
                 for (int y = y0; y <= y1 + 1; y++) {
@@ -644,7 +645,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 }
     }
 
-    private static void door(ServerLevel l, BlockPos p) {
+    static void door(ServerLevel l, BlockPos p) {
         BlockState d = Blocks.OAK_DOOR.defaultBlockState().setValue(DoorBlock.FACING, Direction.NORTH);
         l.setBlock(p, d.setValue(DoorBlock.HALF, DoubleBlockHalf.LOWER), 2);
         l.setBlock(p.above(), d.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), 3);
@@ -812,7 +813,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
         return sb.append("]").toString();
     }
 
-    private static int stock(MinecraftServer s, Item item) {
+    static int stock(MinecraftServer s, Item item) {
         Settlement st = SettlementManager.get(s).all().iterator().next();
         return io.github.operagtx.hearthholm.settlement.Storage.count(
                 io.github.operagtx.hearthholm.settlement.Storage.resolve(s.overworld(), st.storagePositions()), x -> x.is(item));

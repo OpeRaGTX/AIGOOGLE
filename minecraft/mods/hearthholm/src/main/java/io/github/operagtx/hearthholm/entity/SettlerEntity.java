@@ -159,6 +159,7 @@ public class SettlerEntity extends PathfinderMob {
     public SimpleContainer inventory() { return inventory; }
     public SettlerBrain brain() { return brain; }
     public float food() { return food; }
+    public void setFood(float v) { food = Mth.clamp(v, 0f, MAX_FOOD); }
     public float mood() { return mood; }
     public List<MoodEntry> moodEntries() { return moodEntries; }
     public boolean isLeaving() { return leaving; }
