@@ -49,6 +49,13 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             sp.getServer().runCommand("time set 1000");
             sp.getServer().runCommand("gamerule doDaylightCycle false");
             sp.getServer().runOnServer(HearthholmClientTest::build);
+            sp.getServer().runOnServer(s -> {   // wave F: founding the settlement handed over the guide book
+                int books = 0;
+                var inv = player(s).getInventory();
+                for (int i = 0; i < inv.getContainerSize(); i++) if (inv.getItem(i).is(io.github.operagtx.hearthholm.registry.ModItems.FOUNDERS_CHRONICLE)) books += inv.getItem(i).getCount();
+                log("GUIDE book in inventory right after founding: " + books);
+                if (books != 1) throw new AssertionError("founder did not get the guide book");
+            });
             sp.getConnection().waitForChunksRender();
             sp.getServer().runOnServer(HearthholmClientTest::hire);
             ctx.waitTicks(40);

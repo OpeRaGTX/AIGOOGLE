@@ -15,7 +15,7 @@ background Sonnet agent (`Agent`, model sonnet, `run_in_background`), verifies, 
     `threat`, `party`, `blueprint`, `network`, `block`, `item`, `registry`, `api` (extension point), `mixin`.
   - Client `src/client/...`: `render/` (HumanoidModel settlers, layered tinted skins), `screen/` (town hall tabs,
     settler, work site, order board).
-  - Test `src/gametest/...` (`HearthholmClientTest` + per-wave classes such as `WaveDTest`). `HH_ONLY_D=1` = wave D only.
+  - Test `src/gametest/...` (`HearthholmClientTest` + per-wave classes such as `WaveDTest`). `HH_ONLY_D/E/F=1` = run only that wave (plus the base).
   - Resource generators `tools/gen_textures.py, gen_assets.py, gen_lang.py (EN+RU), gen_sounds.py, bubbles.py`.
   - Blueprints `src/main/resources/data/hearthholm/blueprints/index.json` (append only).
 - Tools: `minecraft/tools/{setup-jdk.sh, run-client-test.sh, package-mod.sh}`; zip → `minecraft/dist/hearthholm-0.1.0-mc26.3.zip`.
@@ -33,7 +33,7 @@ Git: branch `claude/lucid-hypatia-ri79og`, commit trailers
 `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` + `Claude-Session: https://claude.ai/code/session_01BohTuQyGzzPGhLp7A8XBtr`.
 No PR unless asked. Stop hook demands commit+push before ending a turn.
 
-## Status (all built, tested headless, pushed)
+## Status (waves A-F built, tested headless, pushed)
 - **Base v0.1**: town hall desk, hiring (food + bed + renown), rooms/houses auto-detect, warehouse, stats/traits,
   builder (blueprints + free mode), miner (spiral/tunnel/shaft), lumberjack, farmer, fisher, guard, warrior, zone markers.
 - **RU/EN localization** (all strings in `gen_lang.py`).
@@ -49,15 +49,19 @@ No PR unless asked. Stop hook demands commit+push before ending a turn.
   retreat at 30% HP, raider door-breaking/target drop, no friendly fire. Gaps: party members in unloaded chunks stay
   behind; cross-dimension teleport untested.
 
-## Next
-- **Wave E "Square and market"** (CONCEPTS.md §E): tier-unlocked buildings (hamlet → workshops, village → tavern &
-  market, town → barracks & walls); new blueprints (tavern, market stall, farmhouse, wall section, workshop);
-  tavern + innkeeper profession (evening gathering, mood); trader caravan weekly with llama, buys surplus for hearth
-  marks, sells seeds/saplings/blueprints/rare-trait candidates; decor blocks (lamp post, signpost, settlement banner
-  with colors, flower box, bench, well, counter, workshop signs) + "Beautiful street" thought; bulletin board quests
-  (bring items, kill mob near a site) rewarding marks/renown/gifts. Also fix: fuel consumption, roof burning.
-- **Wave F "Polish"**: in-game guide book "Founder's Chronicle" given on founding; balance pass; particles/sounds;
-  fresh screenshots into `docs/screenshots/`; README/DESIGN refresh; final zip.
+- **E Square and market**: tier-unlocked blueprints (hamlet: workshop, farmhouse; village: tavern, market stall, watchtower;
+  town: barracks, wall), tavern + innkeeper, trader caravan (weekly, llama, buys surplus for marks), decor blocks +
+  "Beautiful street", bulletin board quests, fuel consumption, roof-fire fix.
+- **F Polish**: Founder's Chronicle guide book (given once at founding, `civic.guideGiven`), `core/Balance.java` (all economy
+  numbers; changes in DESIGN §7), `town/Fx` particles + 5 new procedural sounds, decor items in the carpenter/mason/smith
+  order catalogues (lazy `Supplier` catalogue, paged picker), watchtower needs village tier, trade label ellipsis,
+  README/DESIGN refreshed, screenshots in `docs/screenshots/`, zip rebuilt. Test: `WaveFTest` (`HH_ONLY_F=1`).
+
+## Remaining gaps / ideas
+- Balance is theory + headless test only: tune `Balance.java` after real play; no config file for it yet.
+- Party members in unloaded chunks stay behind; cross-dimension teleport untested; raid casualties non-deterministic.
+- Legendary hire, mason and smith lightly covered by the test; guide book not given retroactively to old saves.
+- Ideas: ghost preview of blueprints, families and children, custom particle types, Balance as a JSON config.
 
 ## Agent prompt template
 "Read `minecraft/mods/hearthholm/AGENTS_BRIEF.md` first and follow its token rules. Implement wave X: <scope>.
