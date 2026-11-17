@@ -56,7 +56,7 @@ public final class FestivalActivity implements Activity {
             cheered = true;
             if (s.festivalSeen() != st.festivalStart) {
                 s.setFestivalSeen(st.festivalStart);
-                s.addThought("festival", 12, 72000);
+                s.addThought("festival", io.github.operagtx.hearthholm.core.Balance.MOOD_FESTIVAL, 72000);
             }
             Social.say(s, "festival", 4);
         }

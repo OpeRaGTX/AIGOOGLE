@@ -57,8 +57,8 @@ public final class ChatActivity implements Activity {
         }
         if (talk >= LINE_TICKS * LINES && s.isChatInitiator()) {
             Social.bond(s, p, 4);
-            s.addThought("friend", 5, 36000);
-            p.addThought("friend", 5, 36000);
+            s.addThought("friend", io.github.operagtx.hearthholm.core.Balance.MOOD_FRIEND, 36000);
+            p.addThought("friend", io.github.operagtx.hearthholm.core.Balance.MOOD_FRIEND, 36000);
             p.endChat();
             s.endChat();
             return false;

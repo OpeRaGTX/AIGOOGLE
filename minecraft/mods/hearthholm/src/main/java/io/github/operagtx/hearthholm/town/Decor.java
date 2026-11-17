@@ -34,7 +34,7 @@ public final class Decor {
         if (s == null || !e.hasArrived() || e.isSleeping() || s.civic.decor.size() < NEEDED) return;
         if (near(s, e.blockPosition()) >= NEEDED) {
             if (!e.hasThought("beautiful_street")) io.github.operagtx.hearthholm.social.Social.say(e, "street", 3);
-            e.addThought("beautiful_street", 6, 12000);
+            e.addThought("beautiful_street", io.github.operagtx.hearthholm.core.Balance.MOOD_STREET, 12000);
         }
     }
 }

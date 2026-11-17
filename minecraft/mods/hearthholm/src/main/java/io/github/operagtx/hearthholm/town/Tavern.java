@@ -43,7 +43,7 @@ public final class Tavern {
     /** A patron arrived: the gathering mood bonus and a line. */
     public static void arrive(SettlerEntity s) {
         if (!s.hasThought("tavern_evening")) {
-            s.addThought("tavern_evening", 8, 24000);
+            s.addThought("tavern_evening", io.github.operagtx.hearthholm.core.Balance.MOOD_TAVERN_EVENING, 24000);
             Social.say(s, "tavern", 4);
             if (s.settlement() != null) s.settlement().count("tavern_visits", 1);
         }
@@ -64,7 +64,7 @@ public final class Tavern {
         }
         Storage.consumeNutrition(storage, MEAL_POINTS);
         guest.setFood(guest.food() + MEAL_POINTS);
-        guest.addThought("tavern_meal", 6, 24000);
+        guest.addThought("tavern_meal", io.github.operagtx.hearthholm.core.Balance.MOOD_TAVERN_MEAL, 24000);
         keeper.swingArm(net.minecraft.world.InteractionHand.MAIN_HAND);
         level.playSound(null, keg, SoundEvents.GENERIC_DRINK.value(), SoundSource.NEUTRAL, 0.7f, 1f);
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, guest.getX(), guest.getY() + 2, guest.getZ(), 4, 0.3, 0.2, 0.3, 0.0);

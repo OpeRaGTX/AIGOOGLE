@@ -7,10 +7,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.List;
 
 /** Caravan trade screen: goods for sale on the left (paid in hearth marks from the warehouse), spare stock to sell on the right. */
 public final class TradeScreen extends HhScreen {
@@ -62,8 +60,9 @@ public final class TradeScreen extends HhScreen {
     }
 
     private void line(GuiGraphicsExtractor g, Component c, int x, int y, int w, int color) {
-        List<FormattedCharSequence> parts = font.split(c, w);
-        if (!parts.isEmpty()) g.text(font, parts.getFirst(), x, y, color, false);
+        String str = c.getString();
+        if (font.width(str) > w) str = font.plainSubstrByWidth(str, w - font.width("…")) + "…";
+        g.text(font, str, x, y, color, false);
     }
 
     private void content(GuiGraphicsExtractor g, int mx, int my) {
@@ -81,7 +80,7 @@ public final class TradeScreen extends HhScreen {
             int y = y0 + i * ROW_H;
             g.item(o.stack(), x, y + 1);
             if (o.stack().getCount() > 1) g.itemDecorations(font, o.stack(), x, y + 1);
-            line(g, o.label(), x + 20, y + 5, 80, o.soldOut() ? DIM : TEXT);
+            line(g, o.label(), x + 20, y + 5, 78, o.soldOut() ? DIM : TEXT);
             if (inside(mx, my, x, y, 100, 18)) g.setTooltipForNextFrame(font, o.label(), mx, my);
         }
         if (view.sells().isEmpty()) g.textWithWordWrap(font, Component.translatable("gui.hearthholm.trade_no_surplus"), left + 160, y0 + 4, 136, DIM);

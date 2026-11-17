@@ -1,6 +1,7 @@
 package io.github.operagtx.hearthholm.crafting;
 
 import io.github.operagtx.hearthholm.Hearthholm;
+import io.github.operagtx.hearthholm.registry.ModBlocks;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
@@ -8,7 +9,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.Set;
 
 /**
@@ -19,27 +22,28 @@ import java.util.Set;
  */
 public enum Workshop {
     CARPENTRY("carpentry", 8, "carpenter", false, List.of(RecipeType.CRAFTING),
-            List.of(Items.OAK_PLANKS, Items.SPRUCE_PLANKS, Items.BIRCH_PLANKS, Items.STICK, Items.CHEST, Items.BARREL,
+            () -> List.of(Items.OAK_PLANKS, Items.SPRUCE_PLANKS, Items.BIRCH_PLANKS, Items.STICK, Items.CHEST, Items.BARREL,
                     Items.LADDER, Items.CRAFTING_TABLE, Items.OAK_DOOR, Items.OAK_TRAPDOOR, Items.OAK_FENCE, Items.BOWL,
-                    Items.BED.red(), Items.TORCH)),
+                    Items.BED.red(), Items.TORCH, deco(ModBlocks.TAVERN_KEG), deco(ModBlocks.BENCH), deco(ModBlocks.COUNTER),
+                    deco(ModBlocks.FLOWER_BOX), deco(ModBlocks.SIGNPOST), deco(ModBlocks.SIGNS.get(0)), deco(ModBlocks.SIGNS.get(4)))),
     MASONRY("masonry", 16, "mason", false, List.of(RecipeType.CRAFTING, RecipeType.STONECUTTING, RecipeType.SMELTING),
-            List.of(Items.STONE_BRICKS, Items.STONE, Items.SMOOTH_STONE, Items.STONE_BRICK_STAIRS, Items.STONE_BRICK_SLAB,
+            () -> List.of(Items.STONE_BRICKS, Items.STONE, Items.SMOOTH_STONE, Items.STONE_BRICK_STAIRS, Items.STONE_BRICK_SLAB,
                     Items.COBBLESTONE_STAIRS, Items.COBBLESTONE_SLAB, Items.COBBLESTONE_WALL, Items.STONE_STAIRS,
-                    Items.STONE_SLAB, Items.FURNACE)),
+                    Items.STONE_SLAB, Items.FURNACE, deco(ModBlocks.WELL), deco(ModBlocks.SIGNS.get(1)))),
     SMITHY("smithy", 32, "smith", false, List.of(RecipeType.CRAFTING, RecipeType.BLASTING, RecipeType.SMELTING),
-            List.of(Items.IRON_INGOT, Items.IRON_PICKAXE, Items.IRON_AXE, Items.IRON_SHOVEL, Items.IRON_HOE, Items.IRON_SWORD,
+            () -> List.of(Items.IRON_INGOT, Items.IRON_PICKAXE, Items.IRON_AXE, Items.IRON_SHOVEL, Items.IRON_HOE, Items.IRON_SWORD,
                     Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS, Items.SHEARS,
-                    Items.BUCKET, Items.LANTERN, Items.IRON_BARS)),
+                    Items.BUCKET, Items.LANTERN, Items.IRON_BARS, deco(ModBlocks.LAMP_POST), deco(ModBlocks.SIGNS.get(2)))),
     KITCHEN("kitchen", 64, "cook", true, List.of(RecipeType.CRAFTING, RecipeType.SMOKING, RecipeType.SMELTING, RecipeType.CAMPFIRE_COOKING),
-            List.of(Items.BREAD, Items.BAKED_POTATO, Items.COOKED_BEEF, Items.COOKED_PORKCHOP, Items.COOKED_CHICKEN,
+            () -> List.of(Items.BREAD, Items.BAKED_POTATO, Items.COOKED_BEEF, Items.COOKED_PORKCHOP, Items.COOKED_CHICKEN,
                     Items.COOKED_MUTTON, Items.COOKED_COD, Items.COOKED_SALMON, Items.MUSHROOM_STEW, Items.BEETROOT_SOUP,
-                    Items.PUMPKIN_PIE, Items.COOKIE)),
+                    Items.PUMPKIN_PIE, Items.COOKIE, deco(ModBlocks.SIGNS.get(3)))),
     /** Wave D: the healer's herbalist table. No orders: the healer brews salves on its own (see HealerJob). */
-    HERBALISM("herbalism", 128, "healer", false, List.of(), List.of()),
+    HERBALISM("herbalism", 128, "healer", false, List.of(), List::of),
     /** Wave D: a barracks is a room with a weapon rack; combat settlers rest there. Has no crafter. */
-    BARRACKS("barracks", 256, "barracks_none", false, List.of(), List.of()),
+    BARRACKS("barracks", 256, "barracks_none", false, List.of(), List::of),
     /** Wave E: a tavern is a room with a keg; the innkeeper serves food from storage, off-duty settlers gather there in the evening. */
-    TAVERN("tavern", 512, "innkeeper", false, List.of(), List.of());
+    TAVERN("tavern", 512, "innkeeper", false, List.of(), List::of);
 
     /** Without any kitchen order, cooks keep this many meals in the warehouse. */
     public static final int DEFAULT_MEALS = 32;
@@ -49,28 +53,35 @@ public enum Workshop {
     private final Identifier profession;
     private final boolean ownHeat;
     private final List<RecipeType<?>> types;
-    private final List<Item> catalog;
+    private final Supplier<List<Item>> catalogSupplier;
+    private List<Item> catalog;
 
-    Workshop(String key, int role, String profession, boolean ownHeat, List<RecipeType<?>> types, List<Item> catalog) {
+    Workshop(String key, int role, String profession, boolean ownHeat, List<RecipeType<?>> types, Supplier<List<Item>> catalog) {
         this.key = key;
         this.role = role;
         this.profession = Hearthholm.id(profession);
         this.ownHeat = ownHeat;
         this.types = types;
-        this.catalog = catalog;
+        this.catalogSupplier = catalog;
     }
 
     public String key() { return key; }
     public int role() { return role; }
     public Identifier profession() { return profession; }
-    public List<Item> catalog() { return catalog; }
+    /** Resolved lazily: decor blocks (wave F) are registered after this enum loads. */
+    public synchronized List<Item> catalog() {
+        if (catalog == null) catalog = List.copyOf(new ArrayList<>(catalogSupplier.get()));
+        return catalog;
+    }
+
+    private static Item deco(net.minecraft.world.level.block.Block b) { return b.asItem(); }
     public List<RecipeType<?>> recipeTypes() { return types; }
 
     /** Whether cooking-type recipes work here without a furnace in the room. */
     public boolean ownHeat() { return ownHeat; }
 
     /** Whether orders can be placed for this kind (it has a catalogue). */
-    public boolean hasCatalog() { return !catalog.isEmpty(); }
+    public boolean hasCatalog() { return this != HERBALISM && this != BARRACKS && this != TAVERN; }
 
     public Component label() {
         return Component.translatable("workshop.hearthholm." + key);
@@ -92,7 +103,7 @@ public enum Workshop {
     }
 
     public static @Nullable Workshop forItem(Item item) {
-        for (Workshop w : values()) if (w.catalog.contains(item)) return w;
+        for (Workshop w : values()) if (w.catalog().contains(item)) return w;
         return null;
     }
 

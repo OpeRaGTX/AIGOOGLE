@@ -119,8 +119,8 @@ public final class Social {
         a.addAffinity(b.getUUID(), delta);
         b.addAffinity(a.getUUID(), delta);
         if (before <= FRIEND_AFFINITY && a.affinity(b.getUUID()) > FRIEND_AFFINITY) {
-            a.addThought("friend", 5, 36000);
-            b.addThought("friend", 5, 36000);
+            a.addThought("friend", io.github.operagtx.hearthholm.core.Balance.MOOD_FRIEND, 36000);
+            b.addThought("friend", io.github.operagtx.hearthholm.core.Balance.MOOD_FRIEND, 36000);
             SettlementService.notifyOwner(a, Component.translatable("message.hearthholm.friends_made", a.getName(), b.getName()).withStyle(ChatFormatting.GREEN));
         }
     }
@@ -128,8 +128,8 @@ public final class Social {
     public static void quarrel(SettlerEntity a, SettlerEntity b) {
         a.addAffinity(b.getUUID(), -8);
         b.addAffinity(a.getUUID(), -8);
-        a.addThought("quarrel", -6, 24000);
-        b.addThought("quarrel", -6, 24000);
+        a.addThought("quarrel", io.github.operagtx.hearthholm.core.Balance.MOOD_QUARREL, 24000);
+        b.addThought("quarrel", io.github.operagtx.hearthholm.core.Balance.MOOD_QUARREL, 24000);
         say(a, "quarrel", 4);
         say(b, "quarrel", 4);
         if (a.level() instanceof ServerLevel sl) {

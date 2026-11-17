@@ -719,7 +719,7 @@ public final class SettlementService {
         e.setXp(Professions.KNIGHT_ID, Math.max(e.xp(Professions.KNIGHT_ID), e.xp(old)));
         e.setProfession(Professions.KNIGHT);
         e.setHealth(e.getMaxHealth());
-        e.addThought("knighted", 10, 48000);
+        e.addThought("knighted", io.github.operagtx.hearthholm.core.Balance.MOOD_KNIGHTED, 48000);
         e.say("knighted");
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.TOTEM_OF_UNDYING, e.getX(), e.getY() + 1.2, e.getZ(), 30, 0.4, 0.6, 0.4, 0.3);
         level.playSound(null, e.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.8f, 0.8f);

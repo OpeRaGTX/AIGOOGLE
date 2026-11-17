@@ -24,7 +24,7 @@ public final class Festival {
     private Festival() {}
 
     public static int cost(Settlement s) {
-        return 4 * s.residents.size();
+        return io.github.operagtx.hearthholm.core.Balance.FESTIVAL_COST_PER_RESIDENT * s.residents.size();
     }
 
     public static boolean active(ServerLevel level, Settlement s) {
@@ -62,7 +62,7 @@ public final class Festival {
     /** Ends the running festival at once (used by the end timer and tests). */
     public static void end(ServerLevel level, Settlement s) {
         s.festivalEnd = -1;
-        int renown = 10 + s.residents.size();
+        int renown = io.github.operagtx.hearthholm.core.Balance.FESTIVAL_RENOWN_BASE + s.residents.size();
         s.addRenown(renown);
         BlockPos sq = square(level, s);
         level.playSound(null, sq, ModSounds.BELL, SoundSource.RECORDS, 2f, 0.8f);

@@ -87,12 +87,12 @@ public final class Quests {
             BlockPos site = s.center;
             if (!s.sites.isEmpty()) site = s.sites.get(r.nextInt(s.sites.size())).pos();
             int count = 3 + r.nextInt(3);
-            int amount = switch (reward) { case "marks" -> 6 + count; case "renown" -> 20 + 4 * count; default -> giftCount; };
+            int amount = switch (reward) { case "marks" -> io.github.operagtx.hearthholm.core.Balance.QUEST_KILL_MARKS_BASE + count; case "renown" -> io.github.operagtx.hearthholm.core.Balance.QUEST_KILL_RENOWN_BASE + io.github.operagtx.hearthholm.core.Balance.QUEST_KILL_RENOWN_PER_MOB * count; default -> giftCount; };
             return new Quest(id, "kill", BuiltInRegistries.ENTITY_TYPE.getKey(type), count, 0, site, 28, reward, amount, giftId, false, false);
         }
         Want w = WANTS.get(r.nextInt(WANTS.size()));
         int count = w.min() + r.nextInt(w.max() - w.min() + 1);
-        int amount = switch (reward) { case "marks" -> 3 + count / 4; case "renown" -> 12 + count / 2; default -> giftCount; };
+        int amount = switch (reward) { case "marks" -> io.github.operagtx.hearthholm.core.Balance.QUEST_BRING_MARKS_BASE + count / io.github.operagtx.hearthholm.core.Balance.QUEST_BRING_MARKS_DIV; case "renown" -> io.github.operagtx.hearthholm.core.Balance.QUEST_BRING_RENOWN_BASE + count / io.github.operagtx.hearthholm.core.Balance.QUEST_BRING_RENOWN_DIV; default -> giftCount; };
         return new Quest(id, "bring", BuiltInRegistries.ITEM.getKey(w.item()), count, 0, BlockPos.ZERO, 0, reward, amount, giftId, false, false);
     }
 

@@ -65,19 +65,19 @@ public final class Caravan {
     public static List<Offer> offers(Settlement s) {
         Random r = new Random(s.civic.caravanSeed);
         List<Offer> out = new ArrayList<>();
-        out.add(new Offer("item", new ItemStack(Items.WHEAT_SEEDS, 16), 2, ""));
-        out.add(new Offer("item", new ItemStack(Items.BEETROOT_SEEDS, 16), 2, ""));
-        out.add(new Offer("item", new ItemStack(r.nextBoolean() ? Items.MELON_SEEDS : Items.PUMPKIN_SEEDS, 8), 3, ""));
+        out.add(new Offer("item", new ItemStack(Items.WHEAT_SEEDS, 16), io.github.operagtx.hearthholm.core.Balance.PRICE_SEEDS, ""));
+        out.add(new Offer("item", new ItemStack(Items.BEETROOT_SEEDS, 16), io.github.operagtx.hearthholm.core.Balance.PRICE_SEEDS, ""));
+        out.add(new Offer("item", new ItemStack(r.nextBoolean() ? Items.MELON_SEEDS : Items.PUMPKIN_SEEDS, 8), io.github.operagtx.hearthholm.core.Balance.PRICE_SEEDS_RARE, ""));
         int a = r.nextInt(SAPLINGS.size()), b = (a + 1 + r.nextInt(SAPLINGS.size() - 1)) % SAPLINGS.size();
-        out.add(new Offer("item", new ItemStack(SAPLINGS.get(a), 4), 5, ""));
-        out.add(new Offer("item", new ItemStack(SAPLINGS.get(b), 4), 5, ""));
+        out.add(new Offer("item", new ItemStack(SAPLINGS.get(a), 4), io.github.operagtx.hearthholm.core.Balance.PRICE_SAPLING, ""));
+        out.add(new Offer("item", new ItemStack(SAPLINGS.get(b), 4), io.github.operagtx.hearthholm.core.Balance.PRICE_SAPLING, ""));
         List<String> locked = new ArrayList<>();
         for (Identifier id : BlueprintLibrary.ids()) if (BlueprintLibrary.requiredTier(id) > 0) locked.add(id.getPath());
         if (!locked.isEmpty()) {
             String bp = locked.get(r.nextInt(locked.size()));
-            out.add(new Offer("blueprint", new ItemStack(Items.PAPER), 15 + 10 * BlueprintLibrary.requiredTier(Hearthholm.id(bp)), bp));
+            out.add(new Offer("blueprint", new ItemStack(Items.PAPER), io.github.operagtx.hearthholm.core.Balance.PRICE_BLUEPRINT_BASE + io.github.operagtx.hearthholm.core.Balance.PRICE_BLUEPRINT_PER_TIER * BlueprintLibrary.requiredTier(Hearthholm.id(bp)), bp));
         }
-        out.add(new Offer("hire", new ItemStack(Items.NAME_TAG), 30, ""));
+        out.add(new Offer("hire", new ItemStack(Items.NAME_TAG), io.github.operagtx.hearthholm.core.Balance.PRICE_RARE_HIRE, ""));
         return out;
     }
 

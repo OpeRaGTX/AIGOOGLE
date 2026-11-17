@@ -88,13 +88,14 @@ public final class Threats {
         SettlementService.manager(level).setDirty();
     }
 
-    /** Raid strength (= number of raiders) from renown, warehouse contents and population: 3..24. */
+    /** Raid strength (= number of raiders) from renown, warehouse contents and population, capped by tier (Balance): 3..24. */
     public static int strength(ServerLevel level, Settlement s) {
         int stacks = 0;
         for (Container c : Storage.resolve(level, s.storagePositions()))
             for (int i = 0; i < c.getContainerSize(); i++) if (!c.getItem(i).isEmpty()) stacks++;
-        int v = 3 + s.renown / 200 + stacks / 8 + s.residents.size() / 2;
-        return Math.max(3, Math.min(24, v));
+        int v = io.github.operagtx.hearthholm.core.Balance.RAID_BASE + s.renown / io.github.operagtx.hearthholm.core.Balance.RAID_RENOWN_DIV + stacks / io.github.operagtx.hearthholm.core.Balance.RAID_STACKS_DIV + s.residents.size() / io.github.operagtx.hearthholm.core.Balance.RAID_POP_DIV;
+        int cap = io.github.operagtx.hearthholm.core.Balance.RAID_CAP_BY_TIER[Math.max(0, Math.min(io.github.operagtx.hearthholm.core.Balance.RAID_CAP_BY_TIER.length - 1, tierIndex(s)))];
+        return Math.max(io.github.operagtx.hearthholm.core.Balance.RAID_BASE, Math.min(cap, v));
     }
 
     /** A standing spot on solid ground near {@code around}, or null. */
@@ -366,18 +367,18 @@ public final class Threats {
         dropBar(s.id + "/raid");
         if (won) {
             r.won++;
-            int renown = 20 + 5 * r.strength;
-            int marks = 2 + r.strength;
+            int renown = io.github.operagtx.hearthholm.core.Balance.RAID_WIN_RENOWN_BASE + io.github.operagtx.hearthholm.core.Balance.RAID_WIN_RENOWN_PER_STRENGTH * r.strength;
+            int marks = io.github.operagtx.hearthholm.core.Balance.RAID_WIN_MARKS_BASE + r.strength;
             s.addRenown(renown);
             reward(level, s, new ItemStack(ModItems.HEARTH_MARK, marks));
-            thought(level, s, "held_line", 10);
+            thought(level, s, "held_line", io.github.operagtx.hearthholm.core.Balance.MOOD_HELD_LINE);
             SettlementService.notify(level, s, Component.translatable("message.hearthholm.raid_won", r.killed, renown, marks).withStyle(ChatFormatting.GOLD));
         } else {
             r.lost++;
-            thought(level, s, "raid_losses", -10);
+            thought(level, s, "raid_losses", io.github.operagtx.hearthholm.core.Balance.MOOD_RAID_LOSSES);
             SettlementService.notify(level, s, Component.translatable("message.hearthholm.raid_retreat").withStyle(ChatFormatting.RED));
         }
-        if (r.deaths > 0) thought(level, s, "raid_losses", -10);
+        if (r.deaths > 0) thought(level, s, "raid_losses", io.github.operagtx.hearthholm.core.Balance.MOOD_RAID_LOSSES);
         s.count("raids", 1);
         if (s.alarm && s.stats.getOrDefault("auto_alarm", 0) == 1) {
             s.stats.remove("auto_alarm");

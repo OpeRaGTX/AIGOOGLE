@@ -399,7 +399,7 @@ public class SettlerEntity extends PathfinderMob {
         boolean barracks = isCombatant() && inBarracks();
         if (getHealth() < getMaxHealth() && food > 4 && now - lastHurt > 100) heal(barracks ? 1.25f : 0.25f);
         if (barracks && !isSleeping()) {
-            addThought("comrades", 4, 6000);
+            addThought("comrades", io.github.operagtx.hearthholm.core.Balance.MOOD_COMRADES, 6000);
             if (getHealth() < getMaxHealth() && getRandom().nextInt(8) == 0)
                 sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + 1.6, getZ(), 1, 0.2, 0.2, 0.2, 0.0);
         }
@@ -514,7 +514,7 @@ public class SettlerEntity extends PathfinderMob {
         if (after > before && level() instanceof ServerLevel sl) {
             sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + 2, getZ(), 12, 0.4, 0.4, 0.4, 0.1);
             sl.playSound(null, blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.6f, 1.3f);
-            addThought("proud", 6, 24000);
+            addThought("proud", io.github.operagtx.hearthholm.core.Balance.MOOD_PROUD, 24000);
             Social.say(this, "levelup", 4);
             SettlementService.notifyOwner(this, Component.translatable("message.hearthholm.level_up", getName(), profession().label(), after));
         }
@@ -650,7 +650,7 @@ public class SettlerEntity extends PathfinderMob {
         if (n <= 0) return;
         food = Math.min(MAX_FOOD, food + n);
         if (io.github.operagtx.hearthholm.crafting.Workshop.MEALS.contains(stack.getItem())) {
-            addThought("tasty_meal", 8, 24000);
+            addThought("tasty_meal", io.github.operagtx.hearthholm.core.Balance.MOOD_TASTY_MEAL, 24000);
             Social.say(this, "tasty", 4);
         }
         if (level() instanceof ServerLevel sl) {

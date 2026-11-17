@@ -218,7 +218,7 @@ public final class Settlement {
     }
 
     public int hireCost() {
-        return 10 + 6 * residents.size();
+        return io.github.operagtx.hearthholm.core.Balance.HIRE_BASE + io.github.operagtx.hearthholm.core.Balance.HIRE_PER_RESIDENT * residents.size();
     }
 
     // ---- buildings ------------------------------------------------------------------------

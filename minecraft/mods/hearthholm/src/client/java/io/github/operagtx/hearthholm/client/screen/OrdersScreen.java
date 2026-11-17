@@ -29,6 +29,8 @@ public final class OrdersScreen extends HhScreen {
     private Item selected = lastTab.catalog().getFirst();
     private int amount = 64;
     private int scroll;
+    private int page;
+    private static final int PAGE_ITEMS = GRID_COLS * 2;
 
     public OrdersScreen(Views.Orders view) {
         super(Component.translatable("gui.hearthholm.orders"), 364, 226);
@@ -69,12 +71,21 @@ public final class OrdersScreen extends HhScreen {
             Button b = button(p.label(), px() + (i % 2) * 68, top + 20 + (i / 2) * 16, 66, 14, x -> {
                 tab = w;
                 lastTab = w;
+                page = 0;
                 selected = w.catalog().getFirst();
                 int ex = existing(selected);
                 amount = ex > 0 ? ex : 64;
                 rebuildWidgets();
             });
             b.active = w != tab;
+        }
+        if (tab.catalog().size() > PAGE_ITEMS) {
+            int pages = (tab.catalog().size() + PAGE_ITEMS - 1) / PAGE_ITEMS;
+            page = Math.min(page, pages - 1);
+            button(Component.literal("<"), px() + 100, top + 110, 12, 12, b -> { page = (page + pages - 1) % pages; rebuildWidgets(); });
+            button(Component.literal(">"), px() + 114, top + 110, 12, 12, b -> { page = (page + 1) % pages; rebuildWidgets(); });
+        } else {
+            page = 0;
         }
         int ay = top + 124;
         int[] steps = {-10, -1, 1, 10};
@@ -143,8 +154,8 @@ public final class OrdersScreen extends HhScreen {
             text(g, font.plainSubstrByWidth(crafters.getString(), w), x, top + 64, info.crafters() > 0 ? TEXT : WARN);
         }
         List<Item> items = tab.catalog();
-        for (int i = 0; i < items.size(); i++) {
-            int ix = x + (i % GRID_COLS) * 18, iy = top + 76 + (i / GRID_COLS) * 18;
+        for (int i = page * PAGE_ITEMS; i < Math.min(items.size(), (page + 1) * PAGE_ITEMS); i++) {
+            int ix = x + (i % GRID_COLS) * 18, iy = top + 76 + ((i % PAGE_ITEMS) / GRID_COLS) * 18;
             Item it = items.get(i);
             boolean sel = it == selected;
             g.fill(ix, iy, ix + 17, iy + 17, sel ? TRIM : 0xFF120D09);
@@ -155,7 +166,7 @@ public final class OrdersScreen extends HhScreen {
             if (inside(mx, my, ix, iy, 17, 17)) g.setTooltipForNextFrame(font, st.getHoverName(), mx, my);
         }
         Component name = new ItemStack(selected).getHoverName();
-        text(g, font.plainSubstrByWidth(name.getString(), w), x, top + 113, TITLE);
+        text(g, font.plainSubstrByWidth(name.getString(), items.size() > PAGE_ITEMS ? w - 34 : w), x, top + 113, TITLE);
         String a = String.valueOf(amount);
         text(g, a, x + 63 - font.width(a) / 2, top + 127, TEXT);
         g.textWithWordWrap(font, Component.translatable("gui.hearthholm.order_explain", amount, name), x, top + 162, w, DIM);
@@ -164,8 +175,8 @@ public final class OrdersScreen extends HhScreen {
     @Override
     public boolean mouseClicked(MouseButtonEvent e, boolean dbl) {
         List<Item> items = tab.catalog();
-        for (int i = 0; i < items.size(); i++) {
-            int ix = px() + (i % GRID_COLS) * 18, iy = top + 76 + (i / GRID_COLS) * 18;
+        for (int i = page * PAGE_ITEMS; i < Math.min(items.size(), (page + 1) * PAGE_ITEMS); i++) {
+            int ix = px() + (i % GRID_COLS) * 18, iy = top + 76 + ((i % PAGE_ITEMS) / GRID_COLS) * 18;
             if (inside(e.x(), e.y(), ix, iy, 17, 17)) {
                 selected = items.get(i);
                 int ex = existing(selected);
@@ -183,6 +194,7 @@ public final class OrdersScreen extends HhScreen {
                     tab = w;
                     lastTab = w;
                     selected = it;
+                    page = Math.max(0, w.catalog().indexOf(it)) / PAGE_ITEMS;
                     amount = view.lines().get(i).target();
                     rebuildWidgets();
                     return true;

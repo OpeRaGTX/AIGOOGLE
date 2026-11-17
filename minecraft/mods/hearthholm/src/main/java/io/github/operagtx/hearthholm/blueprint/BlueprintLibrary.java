@@ -55,9 +55,9 @@ public final class BlueprintLibrary {
         }
     }
 
-    /** Wave E: settlement tier index (camp 0, hamlet 1, village 2, town 3) that unlocks a blueprint; unlisted ones are free. */
+    /** Wave E: settlement tier index (camp 0, hamlet 1, village 2, town 3) that unlocks a blueprint; unlisted ones are free. The watchtower needs a village (wave F; already built towers are unaffected). */
     private static final Map<String, Integer> TIER = Map.of("workshop", 1, "farmhouse", 1, "tavern", 2, "market_stall", 2,
-            "barracks", 3, "wall_section", 3);
+            "barracks", 3, "wall_section", 3, "watchtower", 2);
 
     public static int requiredTier(Identifier id) {
         return TIER.getOrDefault(id.getPath(), 0);

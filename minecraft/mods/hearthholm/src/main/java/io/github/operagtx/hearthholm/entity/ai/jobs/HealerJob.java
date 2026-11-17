@@ -148,7 +148,7 @@ public final class HealerJob extends BaseJob {
             if (!patient.isAlive() || patient.isRemoved()) return Status.DONE;
             if (++ticks > 500) { giveUp.run(); return Status.DONE; }
             if (patient.getHealth() >= patient.getMaxHealth() * 0.95f) {
-                patient.addThought("patched_up", 3, 12000);
+                patient.addThought("patched_up", io.github.operagtx.hearthholm.core.Balance.MOOD_PATCHED, 12000);
                 s.gainXp(2);
                 if (s.settlement() != null) s.settlement().stats.merge("healed", 1, Integer::sum);
                 patient.say("healed");
