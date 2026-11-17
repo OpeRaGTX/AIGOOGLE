@@ -29,7 +29,7 @@ public class AshArcherEntity extends AshbornEntity implements RangedAttackMob {
 
     @Override
     protected void addCombatGoals() {
-        goalSelector.addGoal(2, new RangedBowAttackGoal<>(this, 1.0, 30, 15f));
+        goalSelector.addGoal(2, new RangedBowAttackGoal<>(this, 1.0, 40, 15f));
     }
 
     @Override

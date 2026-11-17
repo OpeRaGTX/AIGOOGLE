@@ -57,8 +57,24 @@ public final class MarchGoal extends Goal {
         recalc = 0;
     }
 
+    private Vec3 lastPos = Vec3.ZERO;
+    private int still;
+
     @Override
     public void tick() {
+        if (mob.position().distanceToSqr(lastPos) < 1) {
+            if (++still > 60) {
+                // wedged against something: side-step a few blocks and try again
+                still = 0;
+                int x = mob.getBlockX() + mob.getRandom().nextInt(13) - 6, z = mob.getBlockZ() + mob.getRandom().nextInt(13) - 6;
+                mob.getNavigation().moveTo(x + 0.5, mob.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z + 0.5, 1.0);
+                recalc = 40;
+                return;
+            }
+        } else {
+            still = 0;
+            lastPos = mob.position();
+        }
         if (--recalc > 0 && !mob.getNavigation().isDone()) return;
         recalc = 40;
         BlockPos t = mob.raidTarget();
