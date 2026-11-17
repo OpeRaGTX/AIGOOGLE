@@ -306,7 +306,7 @@ T = {
  "gui.hearthholm.legendary": ("Legendary", "Легендарный"),
  "gui.hearthholm.legendary.tip": ("A rare candidate: two traits, better abilities and a famous title.", "Редкий кандидат: две черты, лучшие способности и громкое прозвище."),
  "gui.hearthholm.festival": ("Harvest festival", "Праздник урожая"),
- "gui.hearthholm.festival_active": ("In progress! Everyone is dancing.", "Идёт! Все пляшут."),
+ "gui.hearthholm.festival_active": ("Festival in progress!", "Праздник идёт!"),
  "gui.hearthholm.festival_days": ("Next festival in %s days", "Следующий праздник через %s дн."),
  "gui.hearthholm.festival_day1": ("Next festival tomorrow", "Следующий праздник завтра"),
  "gui.hearthholm.festival_due": ("Festival at noon (needs %s food)", "Праздник в полдень (нужно %s еды)"),

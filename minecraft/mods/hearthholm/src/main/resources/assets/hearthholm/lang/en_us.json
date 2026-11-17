@@ -339,7 +339,7 @@
  "gui.hearthholm.legendary": "Legendary",
  "gui.hearthholm.legendary.tip": "A rare candidate: two traits, better abilities and a famous title.",
  "gui.hearthholm.festival": "Harvest festival",
- "gui.hearthholm.festival_active": "In progress! Everyone is dancing.",
+ "gui.hearthholm.festival_active": "Festival in progress!",
  "gui.hearthholm.festival_days": "Next festival in %s days",
  "gui.hearthholm.festival_day1": "Next festival tomorrow",
  "gui.hearthholm.festival_due": "Festival at noon (needs %s food)",

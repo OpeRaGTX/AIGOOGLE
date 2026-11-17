@@ -339,7 +339,7 @@
  "gui.hearthholm.legendary": "Легендарный",
  "gui.hearthholm.legendary.tip": "Редкий кандидат: две черты, лучшие способности и громкое прозвище.",
  "gui.hearthholm.festival": "Праздник урожая",
- "gui.hearthholm.festival_active": "Идёт! Все пляшут.",
+ "gui.hearthholm.festival_active": "Праздник идёт!",
  "gui.hearthholm.festival_days": "Следующий праздник через %s дн.",
  "gui.hearthholm.festival_day1": "Следующий праздник завтра",
  "gui.hearthholm.festival_due": "Праздник в полдень (нужно %s еды)",

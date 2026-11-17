@@ -228,7 +228,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             BlockPos sq = io.github.operagtx.hearthholm.settlement.Festival.square(s.overworld(), st);
             log("festival square " + sq + " center " + st.center);
             ServerPlayer p = player(s);
-            p.teleportTo(s.overworld(), sq.getX() + 0.5, sq.getY() + 1.5, sq.getZ() + 9.5, java.util.Set.of(), 180f, 14f, false);
+            p.teleportTo(s.overworld(), sq.getX() - 7.5, sq.getY(), sq.getZ() + 0.5, java.util.Set.of(), 270f, 12f, false);
         });
         ctx.waitTicks(450);
         sp.getServer().runOnServer(s -> {
@@ -253,6 +253,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             io.github.operagtx.hearthholm.settlement.Festival.end(s.overworld(), st);
         });
         // auto-start at noon after 7 days
+        sp.getServer().runCommand("time set 222000");
         sp.getServer().runOnServer(s -> {
             Settlement st = town(s);
             st.lastFestival = SettlementService.day(s.overworld()) - 8;
