@@ -289,6 +289,7 @@ public class SettlerEntity extends PathfinderMob {
     public void joinParty(UUID owner) {
         partyOwner = owner;
         io.github.operagtx.hearthholm.party.Party.markOwner(owner);
+        io.github.operagtx.hearthholm.party.Party.remember(this);
         brain.pause();
         getNavigation().stop();
         if (isSleeping()) stopSleeping();

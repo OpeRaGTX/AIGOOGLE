@@ -479,6 +479,7 @@
  "status.hearthholm.resting_wounded": "Отдыхает, тяжело ранен",
  "status.hearthholm.resting_barracks": "Отдыхает в казарме",
  "message.hearthholm.party_called": "Горн трубит! В дружину вступило бойцов: %s. Ещё раз в горн - и они вернутся домой.",
+ "message.hearthholm.party_summoned": "Горн созывает дружину: к вам спешат бойцы (%s).",
  "message.hearthholm.party_none": "Рядом (48 блоков) нет ваших стражников, воинов, лучников или рыцарей.",
  "message.hearthholm.party_empty": "В вашей дружине никого нет.",
  "message.hearthholm.party_dismissed": "Дружина распущена: бойцов отправлено домой: %s.",

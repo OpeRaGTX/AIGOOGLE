@@ -51,7 +51,7 @@ import static io.github.operagtx.hearthholm.test.HearthholmClientTest.*;
 
 /** Wave E checks: tier-locked blueprints, tavern evening, caravan trade, decor thought, bulletin board quests, fuel, fire markers. */
 final class WaveETest {
-    private static BlockPos TAV_KEG, MARKET, BULLETIN;
+    private static BlockPos TAV_KEG, TAV_CAM, TAV_KEEPER, MARKET, BULLETIN;
     private static int oldRenown, coal0;
 
     private WaveETest() {}
@@ -203,6 +203,8 @@ final class WaveETest {
             BlockPos tavStake = O.offset(-11, 0, -12);
             Blueprint bp = place(l, "tavern", tavStake, Direction.SOUTH);
             TAV_KEG = bp.toWorld(tavStake, Direction.SOUTH, 4, 1, 5);
+            TAV_CAM = bp.toWorld(tavStake, Direction.SOUTH, 1, 1, 3);      // wave G: camera spot inside, keg and counter in view
+            TAV_KEEPER = bp.toWorld(tavStake, Direction.SOUTH, 6, 1, 3);
             log("TAVERN built, keg at " + TAV_KEG.toShortString() + " block=" + l.getBlockState(TAV_KEG).getBlock().getDescriptionId());
             SettlementService.onWorkshopPlaced(l, TAV_KEG, p);
             boolean found = false;
@@ -234,16 +236,6 @@ final class WaveETest {
             if (ok[0]) break;
         }
         sp.getServer().runOnServer(s -> {
-            ServerPlayer p = player(s);
-            // inside the door, looking at the counter and the guests
-            // wave F: from the side so the innkeeper does not hide the keg; the innkeeper steps aside for the shot
-            for (SettlerEntity e : settlers(s)) if (e.professionId().equals(Professions.INNKEEPER.id())) e.teleportTo(TAV_KEG.getX() + 2.5, TAV_KEG.getY(), TAV_KEG.getZ() - 1.5);
-            lookAt(p, TAV_KEG.getX() - 1.5, TAV_KEG.getY(), TAV_KEG.getZ() - 2.6, TAV_KEG.getX() + 0.5, TAV_KEG.getY() + 0.5, TAV_KEG.getZ() + 0.5);
-        });
-        ctx.waitTicks(10);
-        sp.getConnection().waitForChunksRender();
-        ctx.takeScreenshot("hh_e2_tavern");
-        sp.getServer().runOnServer(s -> {
             Settlement st = town(s);
             List<SettlerEntity> cs = civilians(s);
             long patrons = cs.stream().filter(io.github.operagtx.hearthholm.town.Tavern::isPatron).count();
@@ -254,6 +246,19 @@ final class WaveETest {
             if (patrons < 2) throw new AssertionError("nobody gathered at the tavern");
             if (st.stats.getOrDefault("tavern_served", 0) < 1) throw new AssertionError("innkeeper served nobody");
         });
+        sp.getServer().runOnServer(s -> {
+            ServerPlayer p = player(s);
+            // inside the door, looking at the counter and the guests
+            // wave G: guests step out for the shot, only the innkeeper stays (beside the counter); camera inside, keg + counter in view
+            for (SettlerEntity e : settlers(s)) {
+                if (e.professionId().equals(Professions.INNKEEPER.id())) e.teleportTo(TAV_KEEPER.getX() + 0.5, TAV_KEEPER.getY(), TAV_KEEPER.getZ() + 0.5);
+                else e.teleportTo(O.getX() + 4.5, O.getY(), O.getZ() + 30.5);
+            }
+            lookAt(p, TAV_CAM.getX() + 0.5, TAV_CAM.getY(), TAV_CAM.getZ() + 0.5, TAV_KEG.getX() + 0.5, TAV_KEG.getY() + 0.4, TAV_KEG.getZ() + 0.5);
+        });
+        ctx.waitTicks(10);
+        sp.getConnection().waitForChunksRender();
+        ctx.takeScreenshot("hh_e2_tavern");
 
         // the decorated street at dusk (chat from the tier checks has faded by now)
         sp.getServer().runOnServer(s -> lookAt(player(s), O.getX() + 14.5, O.getY(), O.getZ() - 1.5, O.getX() + 5.0, O.getY() + 1.2, O.getZ() - 3.0));

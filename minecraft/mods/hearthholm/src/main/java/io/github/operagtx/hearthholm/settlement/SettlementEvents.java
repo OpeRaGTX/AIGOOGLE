@@ -21,6 +21,11 @@ public final class SettlementEvents {
 
     public static void init() {
         ServerTickEvents.END_SERVER_TICK.register(SettlementEvents::tick);
+        ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
+            // wave G: a party member whose chunk unloads leaves its last position on the roster
+            if (entity instanceof SettlerEntity se && se.partyOwner() != null && se.getRemovalReason() != null && se.getRemovalReason().shouldSave())
+                io.github.operagtx.hearthholm.party.Party.remember(se);
+        });
         ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
             if (entity instanceof Zombie || entity instanceof AbstractSkeleton || entity instanceof Spider || entity instanceof AbstractIllager) {
                 Mob mob = (Mob) entity;

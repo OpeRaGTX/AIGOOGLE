@@ -162,6 +162,7 @@ public final class SettlementService {
             say(player, "not_owner", s.ownerName);
             return;
         }
+        giveGuide(player, s);   // old saves: the founder gets the book retroactively at the desk
         if (level.getGameTime() - s.lastScan > 100) {
             for (Component c : s.rescan(level)) notify(level, s, c);
             manager(level).setDirty();

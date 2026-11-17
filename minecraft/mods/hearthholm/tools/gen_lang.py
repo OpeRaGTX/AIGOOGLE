@@ -442,6 +442,7 @@ T = {
  "status.hearthholm.resting_wounded": ("Resting, badly wounded", "Отдыхает, тяжело ранен"),
  "status.hearthholm.resting_barracks": ("Resting in the barracks", "Отдыхает в казарме"),
  "message.hearthholm.party_called": ("The war horn sounds! %s fighters join your party. Use it again to send them home.", "Горн трубит! В дружину вступило бойцов: %s. Ещё раз в горн - и они вернутся домой."),
+ "message.hearthholm.party_summoned": ("The horn calls your party to you: %s members are on their way.", "Горн созывает дружину: к вам спешат бойцы (%s)."),
  "message.hearthholm.party_none": ("No guards, warriors, archers or knights of yours within 48 blocks.", "Рядом (48 блоков) нет ваших стражников, воинов, лучников или рыцарей."),
  "message.hearthholm.party_empty": ("Nobody is in your party.", "В вашей дружине никого нет."),
  "message.hearthholm.party_dismissed": ("The party is dismissed: %s fighters go home.", "Дружина распущена: бойцов отправлено домой: %s."),

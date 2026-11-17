@@ -479,6 +479,7 @@
  "status.hearthholm.resting_wounded": "Resting, badly wounded",
  "status.hearthholm.resting_barracks": "Resting in the barracks",
  "message.hearthholm.party_called": "The war horn sounds! %s fighters join your party. Use it again to send them home.",
+ "message.hearthholm.party_summoned": "The horn calls your party to you: %s members are on their way.",
  "message.hearthholm.party_none": "No guards, warriors, archers or knights of yours within 48 blocks.",
  "message.hearthholm.party_empty": "Nobody is in your party.",
  "message.hearthholm.party_dismissed": "The party is dismissed: %s fighters go home.",

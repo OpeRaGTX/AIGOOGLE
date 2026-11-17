@@ -14,6 +14,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
@@ -62,8 +63,10 @@ public final class Party {
     public static void toggle(ServerLevel level, ServerPlayer player, boolean forceDismiss) {
         List<SettlerEntity> current = members(level.getServer(), player.getUUID());
         level.playSound(null, player.blockPosition(), ModSounds.WAR_HORN, SoundSource.PLAYERS, 2f, 1f);
-        if (!current.isEmpty() || forceDismiss) {
-            if (current.isEmpty()) say(player, "party_empty");
+        int lost = unloadedMembers(level.getServer(), player.getUUID()).size();
+        if (!current.isEmpty() || lost > 0 || forceDismiss) {
+            if (current.isEmpty() && lost == 0) say(player, "party_empty");
+            else if (!forceDismiss && summon(level.getServer(), player, current, lost)) { /* members were called in */ }
             else dismiss(level.getServer(), player, current);
         } else {
             call(level, player);
@@ -91,8 +94,26 @@ public final class Party {
         return n;
     }
 
+    /**
+     * Horn with a party that has stragglers (far away, another dimension or in unloaded chunks): calls them in instead
+     * of dismissing. Returns false when everybody is already close.
+     */
+    private static boolean summon(MinecraftServer server, ServerPlayer player, List<SettlerEntity> loaded, int unloaded) {
+        int moved = 0;
+        for (SettlerEntity e : loaded) {
+            if (e.level() != player.level() || e.distanceToSqr(player) > 24 * 24) {
+                teleportNear(e, player);
+                moved++;
+            }
+        }
+        int queued = requestUnloaded(server, player, Action.JOIN, true);
+        if (moved == 0 && queued == 0 && unloaded == 0) return false;
+        say(player, "party_summoned", moved + queued);
+        return true;
+    }
+
     public static void dismiss(MinecraftServer server, ServerPlayer player, List<SettlerEntity> members) {
-        int n = 0;
+        int n = requestUnloaded(server, player, Action.DISMISS, true);
         for (SettlerEntity e : members) {
             e.leaveParty();
             e.say("party_leave");
@@ -100,6 +121,8 @@ public final class Party {
             n++;
         }
         say(player, "party_dismissed", n);
+        PartyRoster roster = PartyRoster.get(server);
+        for (SettlerEntity e : members) roster.remove(e.getUUID());
     }
 
     /** Teleports a released member home when it is far from (or in another dimension than) its settlement. */
@@ -147,19 +170,135 @@ public final class Party {
         teleportTo(e, owner.level(), base);
     }
 
+    // ---- members in unloaded chunks (wave G) ------------------------------------------------------
+
+    public enum Action { JOIN, DISMISS }
+
+    private record Pending(UUID owner, ResourceKey<Level> dim, int cx, int cz, boolean wasForced, long deadline, Action action) {}
+
+    private static final Map<UUID, Pending> PENDING = new HashMap<>();
+    private static final int SCAN_EVERY = 100, ROSTER_EVERY = 40, PENDING_EVERY = 5, MAX_PENDING = 3, TIMEOUT = 300, RETRY_AFTER = 400;
+    /** Statistics for the test and the logs. */
+    public static int forcedLoads, rescued;
+
+    /** Roster entries of this leader whose settler is not currently loaded anywhere. */
+    public static List<PartyRoster.Entry> unloadedMembers(MinecraftServer server, UUID owner) {
+        List<PartyRoster.Entry> out = new ArrayList<>();
+        for (PartyRoster.Entry e : PartyRoster.get(server).all())
+            if (e.owner.equals(owner) && !isLoaded(server, e.member)) out.add(e);
+        return out;
+    }
+
+    private static boolean isLoaded(MinecraftServer server, UUID member) {
+        for (ServerLevel l : server.getAllLevels()) {
+            if (l.getEntity(member) != null) return true;
+        }
+        return false;
+    }
+
+    /** Remembers where a member stands now (called when it joins, periodically and when its chunk unloads). */
+    public static void remember(SettlerEntity e) {
+        UUID owner = e.partyOwner();
+        if (owner == null || !(e.level() instanceof ServerLevel l)) return;
+        PartyRoster.get(l.getServer()).put(e.getUUID(), owner, l.dimension(), e.blockPosition());
+    }
+
+    /** Queues force-loading of the chunks of unloaded members; returns how many were queued (at most {@link #MAX_PENDING} in flight). */
+    public static int requestUnloaded(MinecraftServer server, ServerPlayer leader, Action action, boolean ignoreRetry) {
+        int queued = 0;
+        for (PartyRoster.Entry e : unloadedMembers(server, leader.getUUID())) {
+            if (PENDING.containsKey(e.member)) continue;
+            if (PENDING.size() >= MAX_PENDING) break;
+            if (!ignoreRetry && server.getTickCount() < e.retryAt) continue;
+            ServerLevel l = server.getLevel(e.dim);
+            if (l == null) continue;   // dimension gone: nothing to do
+            int cx = e.pos.getX() >> 4, cz = e.pos.getZ() >> 4;
+            boolean was = l.getForceLoadedChunks().contains(net.minecraft.world.level.ChunkPos.pack(cx, cz));
+            l.setChunkForced(cx, cz, true);
+            forcedLoads++;
+            e.retryAt = server.getTickCount() + RETRY_AFTER;
+            PENDING.put(e.member, new Pending(leader.getUUID(), e.dim, cx, cz, was, server.getTickCount() + TIMEOUT, action));
+            queued++;
+        }
+        return queued;
+    }
+
+    private static void finish(MinecraftServer server, UUID member, Pending p) {
+        PENDING.remove(member);
+        ServerLevel l = server.getLevel(p.dim);
+        if (l != null && !p.wasForced) l.setChunkForced(p.cx, p.cz, false);
+    }
+
+    private static void processPending(MinecraftServer server) {
+        if (PENDING.isEmpty()) return;
+        PartyRoster roster = PartyRoster.get(server);
+        for (Map.Entry<UUID, Pending> me : new ArrayList<>(PENDING.entrySet())) {
+            UUID id = me.getKey();
+            Pending p = me.getValue();
+            ServerLevel l = server.getLevel(p.dim);
+            if (l == null) { PENDING.remove(id); continue; }
+            Entity found = l.getEntity(id);
+            if (found instanceof SettlerEntity e && e.isAlive()) {
+                ServerPlayer leader = server.getPlayerList().getPlayer(p.owner);
+                if (p.action == Action.DISMISS) {
+                    e.leaveParty();
+                    sendHome(server, e);
+                    roster.remove(id);
+                    rescued++;
+                } else if (leader != null && e.partyOwner() != null) {
+                    teleportNear(e, leader);
+                    rescued++;
+                }
+                finish(server, id, p);
+            } else if (server.getTickCount() >= p.deadline) {
+                PartyRoster.Entry re = roster.get(id);
+                if (re != null && ++re.fails >= 3) roster.remove(id);   // never showed up: dead or removed
+                finish(server, id, p);
+            }
+        }
+    }
+
+    /** Throttled: members that are loaded get their place saved; stragglers in unloaded chunks are brought in. */
+    private static void keepRoster(MinecraftServer server) {
+        int t = server.getTickCount();
+        if (t % PENDING_EVERY == 0) processPending(server);
+        if (t % ROSTER_EVERY == 0) {
+            PartyRoster roster = PartyRoster.get(server);
+            for (UUID owner : OWNERS) {
+                for (SettlerEntity e : members(server, owner)) remember(e);
+            }
+            // a loaded settler that left the party (or died) must not stay on the roster
+            for (PartyRoster.Entry re : new ArrayList<>(roster.all())) {
+                for (ServerLevel l : server.getAllLevels()) {
+                    if (l.getEntity(re.member) instanceof SettlerEntity e && (!e.isAlive() || !re.owner.equals(e.partyOwner()))) roster.remove(re.member);
+                }
+            }
+        }
+        if (t % SCAN_EVERY == 0) {
+            for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+                if (!OWNERS.contains(p.getUUID())) continue;
+                for (PartyRoster.Entry e : unloadedMembers(server, p.getUUID())) {
+                    boolean far = !e.dim.equals(p.level().dimension()) || e.pos.distSqr(p.blockPosition()) > 64 * 64;
+                    if (far) { requestUnloaded(server, p, Action.JOIN, false); break; }
+                }
+            }
+        }
+    }
+
     /** Every server tick: when a leader suddenly jumps (teleport, portal), pull the members that are still loaded. */
     public static void tick(MinecraftServer server) {
         if (OWNERS.isEmpty()) return;
+        keepRoster(server);
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             if (!OWNERS.contains(p.getUUID())) continue;
             Sample prev = LAST.put(p.getUUID(), new Sample(p.level().dimension(), p.position()));
             if (prev == null) continue;
             boolean jumped = !prev.dim.equals(p.level().dimension()) || prev.pos.distanceToSqr(p.position()) > 20 * 20;
             if (!jumped) continue;
-            ServerLevel from = server.getLevel(prev.dim);
-            if (from == null) continue;
-            for (SettlerEntity e : from.getEntities(EntityTypeTest.forClass(SettlerEntity.class), x -> x.isAlive() && p.getUUID().equals(x.partyOwner())))
-                teleportNear(e, p);
+            for (SettlerEntity e : members(server, p.getUUID())) {
+                if (e.level() != p.level() || e.distanceToSqr(p) > 20 * 20) teleportNear(e, p);
+            }
+            requestUnloaded(server, p, Action.JOIN, false);
         }
     }
 }

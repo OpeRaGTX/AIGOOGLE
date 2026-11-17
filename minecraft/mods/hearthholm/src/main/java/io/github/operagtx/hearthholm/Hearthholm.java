@@ -41,6 +41,7 @@ public final class Hearthholm implements ModInitializer {
         BlueprintLibrary.bootstrap();
         HhNetwork.init();
         io.github.operagtx.hearthholm.crafting.Mint.load();
+        io.github.operagtx.hearthholm.core.Balance.load();
         io.github.operagtx.hearthholm.threat.ThreatConfig.load();
         RIFT_LANTERN_POI = net.fabricmc.fabric.api.object.builder.v1.world.poi.PoiHelper.register(id("rift_lantern"), 0, 1, ModBlocks.RIFT_LANTERN);
         SettlementEvents.init();

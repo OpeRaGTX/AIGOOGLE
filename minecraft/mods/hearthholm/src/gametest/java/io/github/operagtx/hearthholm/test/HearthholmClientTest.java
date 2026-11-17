@@ -164,14 +164,15 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 if (bread <= bread0) throw new AssertionError("cook made no bread");
                 log("CRAFT OK");
             });
-            boolean onlyF = System.getenv("HH_ONLY_F") != null, onlyE = System.getenv("HH_ONLY_E") != null, onlyD = System.getenv("HH_ONLY_D") != null;
-            if (!onlyD && !onlyE && !onlyF) {
+            boolean onlyF = System.getenv("HH_ONLY_F") != null, onlyE = System.getenv("HH_ONLY_E") != null, onlyD = System.getenv("HH_ONLY_D") != null, onlyG = System.getenv("HH_ONLY_G") != null;
+            if (!onlyD && !onlyE && !onlyF && !onlyG) {
                 waveB(ctx, sp);
                 waveC(ctx, sp);
             }
-            if (!onlyE && !onlyF) WaveDTest.run(ctx, sp);
-            if (!onlyF) WaveETest.run(ctx, sp);
-            WaveFTest.run(ctx, sp);
+            if (!onlyE && !onlyF && !onlyG) WaveDTest.run(ctx, sp);
+            if (!onlyF && !onlyG) WaveETest.run(ctx, sp);
+            if (!onlyG) WaveFTest.run(ctx, sp);
+            WaveGTest.run(ctx, sp);
             log("DONE");
         }
     }
