@@ -405,15 +405,15 @@ model("well_basin", w_tex, [box_el([0, 0, 0], [16, 1, 16], "#stone"), box_el([0,
 model("well_ring_edge", w_tex, [box_el([0, 0, 0], [16, 10, 5], "#stone"), box_el([0, 0, 5], [16, 1, 16], "#stone"), box_el([0, 1, 5], [16, 6, 16], "#water")])
 model("well_ring_corner", w_tex, [box_el([0, 0, 0], [16, 10, 5], "#stone"), box_el([0, 0, 5], [5, 10, 16], "#stone"),
     box_el([5, 0, 5], [16, 1, 16], "#stone"), box_el([5, 1, 5], [16, 6, 16], "#water")])
-model("well_post", w_tex, [box_el([6, 0, 0.5], [10, 16, 4.5], "#post")])
-model("well_rope", w_tex, [box_el([7.5, 6, 7.5], [8.5, 16, 8.5], "#rope"), box_el([5, 0, 5], [11, 6, 11], "#bucket"), box_el([5.5, 6, 7.5], [10.5, 6.8, 8.5], "#post")])
+model("well_post", w_tex, [box_el([6, -6, 0.5], [10, 16, 4.5], "#post")])   # starts on the rim top (ring wall is 10 high)
+model("well_rope", w_tex, [box_el([7.5, 2, 7.5], [8.5, 16, 8.5], "#rope"), box_el([5, -4, 5], [11, 2, 11], "#bucket"), box_el([5.5, 2, 7.5], [10.5, 2.8, 8.5], "#post")])
 model("well_roof_edge", w_tex, [box_el([0, 6, 0], [16, 8, 16], "#roof"), box_el([0, 8, 3], [16, 10, 16], "#roof"), box_el([0, 10, 8], [16, 12, 16], "#roof")])
 model("well_roof_post", w_tex, [box_el([6, 0, 0.5], [10, 6, 4.5], "#post"), box_el([6.5, 2, 4.5], [9.5, 4.5, 16], "#axle"),
     box_el([0, 6, 0], [16, 8, 16], "#roof"), box_el([0, 8, 3], [16, 10, 16], "#roof"), box_el([0, 10, 8], [16, 12, 16], "#roof")])
 model("well_roof_corner", w_tex, [box_el([0, 6, 0], [16, 8, 16], "#roof"), box_el([3, 8, 3], [16, 10, 16], "#roof"), box_el([8, 10, 8], [16, 12, 16], "#roof")])
 model("well_roof_center", w_tex, [box_el([0, 6, 0], [16, 8, 16], "#roof"), box_el([0, 8, 0], [16, 10, 16], "#roof"), box_el([0, 10, 0], [16, 12, 16], "#roof"),
     box_el([3, 12, 3], [13, 14, 13], "#roof"), box_el([6, 14, 6], [10, 16, 10], "#roof"),
-    box_el([0, 2, 6.5], [16, 4.5, 9.5], "#axle"), box_el([6, 1.5, 6], [10, 5, 10], "#rope"), box_el([14.5, 0.5, 7], [15.5, 6.5, 8], "#axle")])
+    box_el([0, 2, 6.5], [16, 4.5, 9.5], "#axle"), box_el([6, 1.5, 6], [10, 5, 10], "#rope"), box_el([7.5, 0, 7.5], [8.5, 2, 8.5], "#rope"), box_el([14.5, 0.5, 7], [15.5, 6.5, 8], "#axle")])
 PARTS = {"ring_edge": "well_ring_edge", "ring_corner": "well_ring_corner", "post": "well_post", "rope": "well_rope", "roof_corner": "well_roof_corner",
          "roof_edge": "well_roof_edge", "roof_post": "well_roof_post", "roof_center": "well_roof_center"}
 w(f"assets/{NS}/blockstates/well_part.json", {"variants": {f"facing={d},part={p}": {"model": f"{NS}:block/{m}", **({"y": r} if r else {})}
