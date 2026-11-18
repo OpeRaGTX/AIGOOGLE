@@ -514,13 +514,20 @@ final class WaveH3Test {
             }
         });
         ctx.runOnClient(mc -> mc.particleEngine.clearParticles());
-        ctx.waitTicks(60);
+        ctx.waitTicks(20);
         sp.getConnection().waitForChunksRender();
-        ctx.runOnClient(mc -> {
-            String n = mc.particleEngine.countParticles();
-            log("HHTEST H3 chimney smoke particles alive (engine was cleared, only the cap emits): " + n);
-            if (!java.util.regex.Pattern.compile("[1-9]").matcher(n).find()) fail("no smoke particles near the chimney cap");
-        });
+        // robust: smoke is random and short-lived, so sample for a while instead of looking at one instant
+        AtomicBoolean smoke = new AtomicBoolean();
+        String[] last = {""};
+        for (int i = 0; i < 40 && !smoke.get(); i++) {
+            ctx.waitTicks(5);
+            ctx.runOnClient(mc -> {
+                last[0] = mc.particleEngine.countParticles();
+                if (java.util.regex.Pattern.compile("[1-9]").matcher(last[0]).find()) smoke.set(true);
+            });
+        }
+        log("HHTEST H3 chimney smoke particles alive (engine was cleared, only the cap emits): " + last[0] + " seen=" + smoke.get());
+        if (!smoke.get()) fail("no smoke particles near the chimney cap");
         ctx.takeScreenshot("hh_h3_chimney");
 
         // 6e. line-ups: 5 women and 5 men, then working settlers with profession accents, then the women from behind
