@@ -33,6 +33,11 @@ public final class HearthholmApi {
         return WorkSiteTypes.REGISTRY.register(type.id(), type);
     }
 
+    /** Wave J1: replaces the default adapter of a profession (job, site screen, zone) - register before {@code ProfessionModules.bootstrap}. */
+    public static ProfessionModule registerModule(ProfessionModule module) {
+        return ProfessionModules.register(module);
+    }
+
     public static Trait registerTrait(Trait trait) {
         return Traits.REGISTRY.register(trait.id(), trait);
     }

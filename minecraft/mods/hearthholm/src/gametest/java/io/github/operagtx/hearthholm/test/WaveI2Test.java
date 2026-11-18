@@ -512,7 +512,7 @@ final class WaveI2Test {
             log("I2 alarm calls the off-duty guard: awake=" + !g.isSleeping() + " activity=" + g.brain().currentActivity() + " status=" + g.status().getString() + " onDuty=" + g.isOnDuty());
             check(called.get(), "alarm did not call the off-duty guard");
             io.github.operagtx.hearthholm.threat.Defense.setAlarm(s.overworld(), town(s), false, player(s));
-            g.setShift(SettlerEntity.SHIFT_ALWAYS);
+            g.setShift(SettlerEntity.SHIFT_POST);
             // codec: the shift survives a save, and an old save without it reads as always
             ServerLevel l = s.overworld();
             g.setShift(SettlerEntity.SHIFT_DAY);

@@ -541,7 +541,12 @@ public final class SettlementService {
         if (!(level.getBlockEntity(pos) instanceof WorkSiteBlockEntity w)) return;
         Settlement s = manager(level).byId(w.settlementId());
         if (s != null && !canManage(player, s)) { say(player, "not_owner", s.ownerName); return; }
-        ServerPlayNetworking.send(player, new Payloads.OpenWorkSite(siteView(level, w, s)));
+        io.github.operagtx.hearthholm.api.ProfessionModules.openSite(player, w, s);   // wave J1: through the profession module (generic screen by default)
+    }
+
+    /** The generic work-site option screen (the default {@code SiteScreenOpener}). */
+    public static void sendWorkSiteScreen(ServerPlayer player, WorkSiteBlockEntity w, @Nullable Settlement s) {
+        ServerPlayNetworking.send(player, new Payloads.OpenWorkSite(siteView(player.level(), w, s)));
     }
 
     private static Views.WorkSite siteView(ServerLevel level, WorkSiteBlockEntity w, @Nullable Settlement s) {

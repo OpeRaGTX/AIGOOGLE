@@ -32,6 +32,7 @@ public final class Hearthholm implements ModInitializer {
         Traits.bootstrap();
         Professions.bootstrap();
         WorkSiteTypes.bootstrap();
+        io.github.operagtx.hearthholm.api.ProfessionModules.bootstrap();   // wave J1: modules for the professions above
         ModSounds.init();
         ModBlocks.init();
         ModBlockEntities.init();

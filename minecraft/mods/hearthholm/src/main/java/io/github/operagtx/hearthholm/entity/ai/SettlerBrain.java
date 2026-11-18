@@ -40,7 +40,7 @@ public final class SettlerBrain {
         Identifier p = settler.professionId();
         if (job == null || !p.equals(jobFor)) {
             if (job != null) job.release(settler);
-            job = settler.profession().createJob(settler);
+            job = io.github.operagtx.hearthholm.api.ProfessionModules.createJob(settler);
             jobFor = p;
         }
         return job;
