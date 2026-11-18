@@ -138,6 +138,10 @@ final class WaveI1Test {
             Settlement st = town(s);
             st.alarm = false;
             st.renown = Math.max(st.renown, 400);
+            // robust: earlier waves (raids, parties, spawned showcase settlers) leave a varying cast; gather the residents at the hall, hire more if needed
+            for (SettlerEntity e : l.getEntitiesOfClass(SettlerEntity.class, new net.minecraft.world.phys.AABB(O).inflate(600))) e.teleportTo(DESK.getX() + 0.5, DESK.getY(), DESK.getZ() - 2.5);
+            topUp(s, 7);
+            log("I1 cast: settlers=" + settlers(s).size() + " residents=" + st.residents.size());
             I = O.offset(-4, 0, 30);
             for (int dx = -4; dx <= 36; dx++)
                 for (int dz = -4; dz <= 24; dz++) {

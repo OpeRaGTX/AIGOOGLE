@@ -31,6 +31,8 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
+import io.github.operagtx.hearthholm.settlement.SettlerProfile;
+
 import java.util.List;
 
 /** End-to-end check: build a tiny settlement, hire, assign jobs, let time run, take screenshots. */
@@ -820,6 +822,14 @@ public final class HearthholmClientTest implements FabricClientGameTest {
         for (int i = 0; i < 6 && settlers(s).size() < want; i++) {
             if (st.candidates.isEmpty()) SettlementService.handleTownHall(p, new Payloads.TownHallAction(DESK, Payloads.TownHallAction.REROLL, 0, ""));
             SettlementService.handleTownHall(p, new Payloads.TownHallAction(DESK, Payloads.TownHallAction.HIRE, 0, ""));
+        }
+        for (int i = 0; settlers(s).size() < Math.min(want, 4) && i < 8; i++) {   // no free bed or food any more: move new residents in directly
+            SettlerProfile profile = SettlerProfile.random(net.minecraft.util.RandomSource.create(7000 + i), i % 2 == 0);
+            SettlerEntity e = io.github.operagtx.hearthholm.registry.ModEntities.SETTLER.create(l, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+            e.setup(profile, st.id);
+            e.snapTo(DESK.getX() + 0.5, DESK.getY(), DESK.getZ() - 2.5, 0f, 0f);
+            l.addFreshEntity(e);
+            st.residents.add(new io.github.operagtx.hearthholm.settlement.ResidentRecord(e.getUUID(), profile));
         }
         for (SettlerEntity e : settlers(s)) {
             e.markArrived();
