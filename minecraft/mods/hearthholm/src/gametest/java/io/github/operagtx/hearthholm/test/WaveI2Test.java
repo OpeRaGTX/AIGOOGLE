@@ -53,6 +53,7 @@ final class WaveI2Test {
     private static UUID GUARD, ARCHER;
     private static BlockPos POST;
     private static UUID DROP;
+    private static ItemEntity DROP_E;
 
     private WaveI2Test() {}
 
@@ -308,6 +309,7 @@ final class WaveI2Test {
             z.discard();
             boolean tagged = drop.entityTags().contains(Loot.TAG);
             DROP = drop.getUUID();
+            DROP_E = drop;
             log("I2 loot: zombie killed by the guard, drop tagged=" + tagged + " at " + at.toShortString() + " post=" + POST.toShortString());
             check(tagged, "drop of the killed zombie is not claimed");
         });
@@ -320,6 +322,11 @@ final class WaveI2Test {
                 SettlerEntity g = get(s, GUARD);
                 if (g.count(x -> x.is(Items.EMERALD)) > 0) picked.set(true);
                 var d = s.overworld().getEntity(DROP);
+                if (d == null) {
+                    StringBuilder near = new StringBuilder();
+                    for (SettlerEntity o : settlers(s)) if (o.distanceToSqr(DROP_E) < 100) near.append(o.getName().getString()).append(':').append(o.professionId().getPath()).append('@').append(o.blockPosition().toShortString()).append(" inv=").append(o.count(x -> x.is(Items.EMERALD))).append(' ');
+                    log("I2 diag drop removal=" + DROP_E.getRemovalReason() + " item=" + DROP_E.getItem() + " near: " + near);
+                }
                 log("I2 diag drop " + (d == null ? "GONE" : d.blockPosition().toShortString() + " alive=" + d.isAlive() + " tags=" + d.entityTags() + " age=" + d.tickCount));
                 var near = Loot.nearest(g, Vec3.atBottomCenterOf(POST), 12);
                 log("I2 diag loot guard=" + g.blockPosition().toShortString() + " act=" + g.brain().currentActivity() + " status=" + g.status().getString() + " free=" + g.freeSlots()
