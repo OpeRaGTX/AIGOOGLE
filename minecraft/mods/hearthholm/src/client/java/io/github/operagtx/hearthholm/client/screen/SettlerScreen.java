@@ -20,7 +20,7 @@ import java.util.List;
 /** One settler: who they are, how they feel and why, their kit, and their profession. */
 public final class SettlerScreen extends HhScreen {
     private Views.Settler view;
-    private static final String[] SHIFTS = {"always", "day", "night"};
+    private static final String[] SHIFTS = {"post", "day", "night", "always"};
     private boolean confirmDismiss;
 
     public SettlerScreen(Views.Settler view) {
@@ -68,13 +68,15 @@ public final class SettlerScreen extends HhScreen {
                     }
                 });
         if (view.fighter()) {
-            Component shift = Component.translatable("gui.hearthholm.shift", Component.translatable("option.hearthholm.shift." + SHIFTS[Math.floorMod(view.shift(), 3)]));
-            Button sb = button(fitLabel(shift, 104), left + 178, top + 85, 112, 14, b -> send(Payloads.SettlerAction.SET_SHIFT, Integer.toString((view.shift() + 1) % 3)));
+            Component shift = Component.translatable("gui.hearthholm.shift", Component.translatable("option.hearthholm.shift." + SHIFTS[Math.floorMod(view.shift(), 4)]));
+            Button sb = button(fitLabel(shift, 104), left + 178, top + 85, 112, 14, b -> send(Payloads.SettlerAction.SET_SHIFT, Integer.toString((view.shift() + 1) % 4)));
             sb.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.shift_tip")));
         }
-        button(fitLabel(Component.translatable("gui.hearthholm.refresh"), 72), left + 8, top + panelH - 22, 80, 16, b -> send(Payloads.SettlerAction.REFRESH, ""));
+        button(fitLabel(Component.translatable("gui.hearthholm.refresh"), 56), left + 8, top + panelH - 22, 64, 16, b -> send(Payloads.SettlerAction.REFRESH, ""));
+        Button inv = button(fitLabel(Component.translatable("gui.hearthholm.inventory"), 66), left + 76, top + panelH - 22, 74, 16, b -> send(Payloads.SettlerAction.INVENTORY, ""));
+        inv.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.inventory_tip")));
         if (view.promotable()) {
-            Button promote = button(fitLabel(Component.translatable("gui.hearthholm.promote"), 126), left + 92, top + panelH - 22, 134, 16, b -> send(Payloads.SettlerAction.PROMOTE, ""));
+            Button promote = button(fitLabel(Component.translatable("gui.hearthholm.promote"), 108), left + 154, top + panelH - 22, 116, 16, b -> send(Payloads.SettlerAction.PROMOTE, ""));
             promote.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.promote_tip")));
         }
     }

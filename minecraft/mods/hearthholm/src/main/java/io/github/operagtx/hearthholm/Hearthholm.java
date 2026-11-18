@@ -35,6 +35,7 @@ public final class Hearthholm implements ModInitializer {
         ModSounds.init();
         ModBlocks.init();
         ModBlockEntities.init();
+        ModMenus.init();
         ModEntities.init();
         ModItems.init();
         ModTab.init();

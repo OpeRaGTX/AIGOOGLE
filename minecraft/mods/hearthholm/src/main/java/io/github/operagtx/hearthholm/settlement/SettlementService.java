@@ -632,34 +632,20 @@ public final class SettlementService {
         Settlement s = e.settlement();
         if (s == null) return;
         if (!canManage(player, s)) { say(player, "not_owner", s.ownerName); return; }
-        ItemStack held = player.getItemInHand(hand);
-        if (player.isShiftKeyDown() && !held.isEmpty()) {
-            give(player, e, hand, held);
+        if (player.isShiftKeyDown()) {   // wave J1: Shift+RMB = the inventory of the settler (items are put in there by hand or Shift-click)
+            openInventory(player, e);
             return;
         }
         openSettler(player, e);
     }
 
-    private static void give(ServerPlayer player, SettlerEntity e, InteractionHand hand, ItemStack held) {
-        ItemStack one = held.copy();
-        Equippable eq = held.get(DataComponents.EQUIPPABLE);
-        if (e.profession().isTool(held)) {
-            ItemStack old = e.getMainHandItem();
-            e.setItemSlot(EquipmentSlot.MAINHAND, one.copyWithCount(1));
-            held.shrink(1);
-            if (!old.isEmpty() && !player.getInventory().add(old)) e.spawnAtLocation(player.level(), old);
-        } else if (eq != null && eq.slot().getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
-            ItemStack old = e.getItemBySlot(eq.slot());
-            e.setItemSlot(eq.slot(), one.copyWithCount(1));
-            held.shrink(1);
-            if (!old.isEmpty() && !player.getInventory().add(old)) e.spawnAtLocation(player.level(), old);
-        } else {
-            ItemStack rest = e.inventory().addItem(one);
-            held.setCount(rest.getCount());
-        }
-        player.setItemInHand(hand, held);
-        e.level().playSound(null, e.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.NEUTRAL, 0.5f, 1f);
-        say(player, "gave", one.getHoverName(), e.getName());
+    /** Wave J1: opens the settler inventory menu; refused for strangers and from afar. */
+    public static boolean openInventory(ServerPlayer player, SettlerEntity e) {
+        Settlement s = e.settlement();
+        if (s == null || !e.isAlive() || e.isLeaving()) return false;
+        if (!canManage(player, s)) { say(player, "not_owner", s.ownerName); return false; }
+        if (player.distanceToSqr(e) > io.github.operagtx.hearthholm.menu.SettlerMenu.REACH * io.github.operagtx.hearthholm.menu.SettlerMenu.REACH) return false;
+        return player.openMenu(new io.github.operagtx.hearthholm.menu.SettlerMenuProvider(e)).isPresent();
     }
 
     private static Component relationName(@Nullable Settlement s, @Nullable java.util.Map.Entry<UUID, Integer> rel) {
@@ -703,9 +689,13 @@ public final class SettlementService {
                 }
             }
             case Payloads.SettlerAction.PROMOTE -> promote(player, e, s);
+            case Payloads.SettlerAction.INVENTORY -> {
+                openInventory(player, e);
+                return;
+            }
             case Payloads.SettlerAction.SET_SHIFT -> {
                 if (e.isCombatant()) {
-                    try { e.setShift(Integer.parseInt(a.arg())); } catch (NumberFormatException ignored) { /* keep */ }
+                    try { e.setShift(Math.floorMod(Integer.parseInt(a.arg()), 4)); } catch (NumberFormatException ignored) { /* keep */ }
                 }
             }
             case Payloads.SettlerAction.DISMISS -> {

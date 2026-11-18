@@ -14,6 +14,9 @@ public final class SettlerRetreatGoal extends Goal {
     private final SettlerEntity settler;
     private BlockPos spot;
     private int repath;
+    /** Wave J1: archer without arrows withdrawing to the post / warehouse (a bounded retreat so it can go fetch arrows afterwards). */
+    private boolean archer;
+    private long archerUntil;
 
     public SettlerRetreatGoal(SettlerEntity settler) {
         this.settler = settler;
@@ -22,11 +25,12 @@ public final class SettlerRetreatGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        return settler.isAlive() && settler.wantsRetreat();
+        return settler.isAlive() && (settler.wantsRetreat() || settler.wantsArcherRetreat());
     }
 
     @Override
     public boolean canContinueToUse() {
+        if (archer) return settler.isAlive() && spot != null && settler.needsArrows() && settler.level().getGameTime() < archerUntil;
         return settler.isAlive() && settler.isCombatant() && !settler.inParty() && settler.getHealth() < settler.getMaxHealth() * 0.7f && spot != null;
     }
 
@@ -34,13 +38,15 @@ public final class SettlerRetreatGoal extends Goal {
 
     @Override
     public void start() {
+        archer = !settler.wantsRetreat();
+        archerUntil = settler.level().getGameTime() + 160;
         settler.setRetreating(true);
         settler.setTarget(null);
         settler.setAggressive(false);
         settler.stopUsingItem();
         settler.setStatus("retreating");
         settler.say("retreat");
-        spot = settler.retreatSpot();
+        spot = archer ? settler.archerRetreatSpot() : settler.retreatSpot();
         repath = 0;
     }
 
@@ -55,7 +61,7 @@ public final class SettlerRetreatGoal extends Goal {
         if (settler.getTarget() != null && settler.tickCount % 10 == 0) settler.setTarget(null);
         if (--repath > 0) return;
         repath = 20;
-        BlockPos fresh = settler.retreatSpot();
+        BlockPos fresh = archer ? settler.archerRetreatSpot() : settler.retreatSpot();
         if (fresh != null) spot = fresh;
         if (spot.distSqr(settler.blockPosition()) > 9) {
             settler.setStatus("retreating");

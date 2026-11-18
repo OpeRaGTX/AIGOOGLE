@@ -57,7 +57,7 @@ public final class LumberjackJob extends SiteJob {
         int r = w.option("radius");
         BlockPos c = w.getBlockPos();
         AABB zone = new AABB(c).inflate(r + 1, 6, r + 1);
-        List<ItemEntity> items = s.level().getEntitiesOfClass(ItemEntity.class, zone, e -> e.isAlive() && !e.getItem().isEmpty());
+        List<ItemEntity> items = s.level().getEntitiesOfClass(ItemEntity.class, zone, e -> e.isAlive() && wanted(e.getItem()));
         if (!items.isEmpty()) {
             ItemEntity item = Collections.min(items, Comparator.comparingDouble(e -> e.distanceToSqr(s)));
             s.setStatus("collecting");
@@ -74,8 +74,13 @@ public final class LumberjackJob extends SiteJob {
         return new Sequence(MoveTo.block(tree, 2.6), new Chop(tree, w.flag("replant")));
     }
 
+    /** Wave J1: the zone sweep only takes what a forest gives: wood, saplings, sticks and apples. */
+    static boolean wanted(ItemStack st) {
+        return !st.isEmpty() && (st.is(ItemTags.LOGS) || st.is(ItemTags.PLANKS) || st.is(ItemTags.SAPLINGS) || st.is(net.minecraft.world.item.Items.STICK) || st.is(net.minecraft.world.item.Items.APPLE));
+    }
+
     static void pickUpAround(SettlerEntity s) {
-        for (ItemEntity e : s.level().getEntitiesOfClass(ItemEntity.class, s.getBoundingBox().inflate(1.8))) {
+        for (ItemEntity e : s.level().getEntitiesOfClass(ItemEntity.class, s.getBoundingBox().inflate(1.8), x -> wanted(x.getItem()))) {
             ItemStack rest = s.inventory().addItem(e.getItem().copy());
             if (rest.isEmpty()) e.discard(); else e.setItem(rest);
         }

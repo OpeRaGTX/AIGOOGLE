@@ -26,6 +26,8 @@ public final class HearthholmClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.RIFT_WISP, io.github.operagtx.hearthholm.client.render.RiftWispRenderer::new);
         EntityRendererRegistry.register(ModEntities.SEAT, io.github.operagtx.hearthholm.client.render.SeatRenderer::new);
         EntityRendererRegistry.register(ModEntities.TRADER, io.github.operagtx.hearthholm.client.render.TraderRenderer::new);
+        net.minecraft.client.gui.screens.MenuScreens.register(io.github.operagtx.hearthholm.registry.ModMenus.SETTLER,
+                io.github.operagtx.hearthholm.client.screen.SettlerInventoryScreen::new);
         ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenTrade.TYPE,
                 (p, ctx) -> ctx.client().execute(() -> io.github.operagtx.hearthholm.client.screen.TradeScreen.show(p.view())));
         ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenBoard.TYPE,

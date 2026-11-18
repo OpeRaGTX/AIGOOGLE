@@ -96,8 +96,11 @@ public class SettlerEntity extends PathfinderMob {
     private @Nullable UUID partyOwner;
     private long nextTaunt;
     private boolean retreating;
-    /** Wave I2: duty shift of a fighter (0 always, 1 day, 2 night), saved; 0 follows the shift of the post. */
-    public static final int SHIFT_ALWAYS = 0, SHIFT_DAY = 1, SHIFT_NIGHT = 2;
+    /**
+     * Wave I2/J1: duty shift of a fighter, saved. 0 = post default (follows the shift of the post; the old saved value, so old
+     * saves behave as before), 1 day, 2 night, 3 = always (explicit, overrides the post).
+     */
+    public static final int SHIFT_POST = 0, SHIFT_DAY = 1, SHIFT_NIGHT = 2, SHIFT_ALWAYS = 3;
     private int shift;
     private int postShift;
     private long postShiftAt = -1000;
@@ -346,23 +349,66 @@ public class SettlerEntity extends PathfinderMob {
     public void addTestGoal(net.minecraft.world.entity.ai.goal.Goal g) { goalSelector.addGoal(0, g); }
     public void removeTestGoal(net.minecraft.world.entity.ai.goal.Goal g) { goalSelector.removeGoal(g); }
 
+    // ---- wave J1: inventory screen pause -----------------------------------------------------
+
+    private long inventoryHeldUntil;
+    private @Nullable UUID inventoryViewer;
+
+    /** Called every tick by the open inventory menu: the settler stands still and looks at the viewer. */
+    public void holdForInventory(Player viewer) {
+        inventoryHeldUntil = level().getGameTime() + 8;
+        inventoryViewer = viewer.getUUID();
+        getNavigation().stop();
+    }
+
+    public void releaseInventory() {
+        inventoryHeldUntil = 0;
+        inventoryViewer = null;
+    }
+
+    /** True while a player has the inventory screen of this settler open. */
+    public boolean isInventoryOpen() {
+        return inventoryHeldUntil > level().getGameTime();
+    }
+
+    @Override
+    protected boolean isImmobile() {
+        return super.isImmobile() || isInventoryOpen();
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!level().isClientSide() && inventoryViewer != null && isInventoryOpen()
+                && level() instanceof ServerLevel sl && sl.getPlayerByUUID(inventoryViewer) instanceof Player p) {
+            getNavigation().stop();
+            double dx = p.getX() - getX(), dz = p.getZ() - getZ(), dy = p.getEyeY() - getEyeY();
+            float yaw = (float) (Math.atan2(dz, dx) * 180 / Math.PI) - 90f;
+            float pitch = (float) -(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)) * 180 / Math.PI);
+            setYRot(yaw);
+            setYHeadRot(yaw);
+            setYBodyRot(yaw);
+            setXRot(pitch);
+        }
+    }
+
     // ---- wave I2: shifts ---------------------------------------------------------------------
 
     public int shift() { return shift; }
 
     public void setShift(int v) {
-        shift = Mth.clamp(v, SHIFT_ALWAYS, SHIFT_NIGHT);
+        shift = Mth.clamp(v, SHIFT_POST, SHIFT_ALWAYS);
         syncRecord();
     }
 
     /** The shift in force: the own setting, else the shift of the nearest post of the profession (the post screen), else always. */
     public int effectiveShift() {
-        if (!isCombatant()) return SHIFT_ALWAYS;
-        if (shift != SHIFT_ALWAYS) return shift;
+        if (!isCombatant() || shift == SHIFT_ALWAYS) return SHIFT_POST;   // 0 = no restriction: the profession's own hours
+        if (shift != SHIFT_POST) return shift;
         long now = level().getGameTime();
         if (now - postShiftAt > 100 || now < postShiftAt) {
             postShiftAt = now;
-            postShift = SHIFT_ALWAYS;
+            postShift = SHIFT_POST;
             Settlement st = settlement();
             Identifier site = profession().siteType();
             if (st != null && site != null) {
@@ -382,7 +428,7 @@ public class SettlerEntity extends PathfinderMob {
 
     private boolean nightWindow() {
         int m = effectiveShift();
-        return m == SHIFT_NIGHT || (m == SHIFT_ALWAYS && profession().nightShift());
+        return m == SHIFT_NIGHT || (m == SHIFT_POST && profession().nightShift());
     }
 
     /** Whether this settler is on duty (working hours of the shift, awake and not leaving). */
@@ -476,6 +522,39 @@ public class SettlerEntity extends PathfinderMob {
 
     public boolean wantsRetreat() {
         return isCombatant() && !inParty() && getHealth() < getMaxHealth() * 0.3f && retreatSpot() != null;
+    }
+
+    /** Wave J1: a melee weapon (sword or axe) in the pockets or the off hand that an archer without arrows could fall back on. */
+    public boolean hasMeleeWeapon() {
+        java.util.function.Predicate<ItemStack> melee = st -> st.is(net.minecraft.tags.ItemTags.SWORDS) || st.is(net.minecraft.tags.ItemTags.AXES);
+        return melee.test(getOffhandItem()) || count(melee) > 0;
+    }
+
+    /**
+     * Wave J1: an archer out of arrows, facing an enemy, withdraws when it has no melee weapon to fall back on or is below half
+     * health; otherwise it fights with what it has, as before.
+     */
+    public boolean wantsArcherRetreat() {
+        return isCombatant() && !inParty() && needsArrows() && getTarget() != null && getTarget().isAlive()
+                && (!hasMeleeWeapon() || getHealth() < getMaxHealth() * 0.5f) && archerRetreatSpot() != null;
+    }
+
+    /** The nearest patrol post of this profession, else the warehouse. */
+    public @Nullable BlockPos archerRetreatSpot() {
+        Settlement st = settlement();
+        if (st == null) return null;
+        BlockPos best = null;
+        double bd = Double.MAX_VALUE;
+        Identifier site = profession().siteType();
+        if (site != null) for (Settlement.SiteRecord r : st.sitesOf(site)) {
+            double d = r.pos().distSqr(blockPosition());
+            if (d < bd) { bd = d; best = r.pos(); }
+        }
+        if (best == null) for (BlockPos p : st.storagePositions()) {
+            double d = p.distSqr(blockPosition());
+            if (d < bd) { bd = d; best = p; }
+        }
+        return best;
     }
 
     /** Once a second: slow natural healing (fast in a barracks), salves, the knight's taunt, "comrades" mood. */
@@ -776,6 +855,7 @@ public class SettlerEntity extends PathfinderMob {
 
     private boolean workAt(long t) {
         if (sleepAt(t)) return false;
+        if (shift == SHIFT_ALWAYS && isCombatant()) return true;   // J1: explicit "always" - every waking hour, whatever the post says
         return switch (effectiveShift()) {
             case SHIFT_NIGHT -> t >= 11800 || t < 3000;
             case SHIFT_DAY -> t < 11800 || t >= 23400;
@@ -1042,7 +1122,7 @@ public class SettlerEntity extends PathfinderMob {
         lastChatDay = in.getLongOr("LastChatDay", -1L);
         xp.clear();
         in.read("Xp", XP_CODEC).ifPresent(xp::putAll);
-        shift = in.getIntOr("Shift", SHIFT_ALWAYS);
+        shift = in.getIntOr("Shift", SHIFT_POST);
         inventory.fromItemList(in.listOrEmpty("Inventory", ItemStack.CODEC));
         refreshCombatStats();
         refreshName();

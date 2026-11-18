@@ -1162,6 +1162,59 @@ def wave_e():
     for slim in (False, True):
         save(outfit("innkeeper", slim), f"entity/settler/profession/innkeeper_{'slim' if slim else 'wide'}.png")
 
+def settler_inventory_bg():
+    """Wave J1: background of the settler inventory screen (176x194 used of 256x256): dark wood frame, parchment panel,
+    slot wells at the positions of SettlerMenu and ghost icons for empty equipment slots. Original pixel art."""
+    from PIL import ImageDraw
+    im = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    W, H = 176, 194
+    d.rectangle([0, 0, W - 1, H - 1], fill=(58, 40, 26, 255))                 # outer frame
+    d.rectangle([1, 1, W - 2, H - 2], fill=(92, 64, 40, 255))
+    d.rectangle([3, 3, W - 4, H - 4], fill=(214, 196, 152, 255))              # parchment
+    d.rectangle([3, 3, W - 4, 3], fill=(236, 220, 178, 255))
+    d.rectangle([3, 3, 3, H - 4], fill=(236, 220, 178, 255))
+    d.rectangle([3, H - 4, W - 4, H - 4], fill=(170, 146, 104, 255))
+    d.rectangle([W - 4, 3, W - 4, H - 4], fill=(170, 146, 104, 255))
+    for cx, cy in ((2, 2), (W - 3, 2), (2, H - 3), (W - 3, H - 3)):         # brass studs
+        d.rectangle([cx - 1, cy - 1, cx, cy], fill=(196, 150, 70, 255))
+    def well(x, y):
+        d.rectangle([x - 1, y - 1, x + 16, y + 16], fill=(150, 126, 90, 255))
+        d.rectangle([x, y, x + 16, y + 16], fill=(236, 220, 178, 255))
+        d.rectangle([x, y, x + 15, y + 15], fill=(120, 98, 70, 255))
+        d.rectangle([x + 1, y + 1, x + 15, y + 15], fill=(172, 150, 112, 255))
+    for i in range(9):
+        for r in range(2): well(8 + i * 18, 50 + r * 18)                      # pockets
+        for r in range(3): well(8 + i * 18, 112 + r * 18)                     # player inventory
+        well(8 + i * 18, 170)                                                 # hotbar
+    eq = [(8, 20), (26, 20), (44, 20), (62, 20), (108, 20), (126, 20)]
+    for x, y in eq: well(x, y)
+    g = (126, 106, 80, 255)
+    def ghost(x, y, kind):
+        if kind == "helmet":
+            d.rectangle([x + 3, y + 4, x + 12, y + 8], fill=g); d.rectangle([x + 2, y + 8, x + 4, y + 12], fill=g); d.rectangle([x + 11, y + 8, x + 13, y + 12], fill=g)
+        elif kind == "chest":
+            d.rectangle([x + 3, y + 3, x + 12, y + 13], fill=g); d.rectangle([x + 1, y + 3, x + 3, y + 7], fill=g); d.rectangle([x + 12, y + 3, x + 14, y + 7], fill=g)
+            d.rectangle([x + 6, y + 3, x + 9, y + 5], fill=(172, 150, 112, 255))
+        elif kind == "legs":
+            d.rectangle([x + 3, y + 2, x + 12, y + 6], fill=g); d.rectangle([x + 3, y + 7, x + 6, y + 13], fill=g); d.rectangle([x + 9, y + 7, x + 12, y + 13], fill=g)
+        elif kind == "feet":
+            d.rectangle([x + 2, y + 6, x + 6, y + 11], fill=g); d.rectangle([x + 1, y + 10, x + 7, y + 12], fill=g)
+            d.rectangle([x + 9, y + 6, x + 13, y + 11], fill=g); d.rectangle([x + 8, y + 10, x + 14, y + 12], fill=g)
+        elif kind == "main":
+            for k in range(9): d.rectangle([x + 3 + k, y + 11 - k, x + 4 + k, y + 12 - k], fill=g)   # blade
+            d.rectangle([x + 2, y + 10, x + 6, y + 11], fill=g); d.rectangle([x + 1, y + 12, x + 3, y + 14], fill=g)
+        elif kind == "off":
+            d.rectangle([x + 3, y + 2, x + 12, y + 9], fill=g); d.rectangle([x + 4, y + 10, x + 11, y + 11], fill=g); d.rectangle([x + 6, y + 12, x + 9, y + 13], fill=g)
+            d.rectangle([x + 7, y + 3, x + 8, y + 11], fill=(172, 150, 112, 255))
+    for (x, y), k in zip(eq, ("helmet", "chest", "legs", "feet", "main", "off")): ghost(x, y, k)
+    # divider between armour and hands, and between the pockets and the player's items
+    d.rectangle([84, 22, 104, 22], fill=(150, 126, 90, 255)); d.rectangle([84, 36, 104, 36], fill=(150, 126, 90, 255))
+    d.rectangle([88, 29, 100, 29], fill=(150, 126, 90, 255)); d.rectangle([96, 27, 98, 31], fill=(150, 126, 90, 255))
+    d.rectangle([8, 94, W - 9, 94], fill=(150, 126, 90, 255))
+    return im
+
+
 def main():
     for slim in (False, True):
         arms = "slim" if slim else "wide"
@@ -1199,6 +1252,7 @@ def main():
     wave_d()
     wave_e()
     save(chronicle_icon(), "item/founders_chronicle.png")   # wave F
+    save(settler_inventory_bg(), "gui/settler_inventory.png")   # wave J1
     import sys
     sys.path.insert(0, os.path.dirname(__file__))
     import gen_h1_tex

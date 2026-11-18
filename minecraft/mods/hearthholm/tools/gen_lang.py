@@ -82,8 +82,8 @@ T = {
  "option.hearthholm.shift": ("Shift", "Смена"), "option.hearthholm.shift.always": ("Always", "Всегда"),
  "option.hearthholm.shift.day": ("Day", "День"), "option.hearthholm.shift.night": ("Night", "Ночь"),
  "gui.hearthholm.shift": ("Shift: %s", "Смена: %s"), "gui.hearthholm.on_duty": ("On duty", "На службе"), "gui.hearthholm.off_duty": ("Off duty", "Отдыхает"),
- "gui.hearthholm.shift_tip": ("Day, night or always (the shift of the nearest post). Off duty a fighter sleeps or walks around town and the tavern; the alarm calls everyone.",
-                              "День, ночь или всегда (смена ближайшего поста). После смены боец спит или гуляет по городу и таверне; тревога поднимает всех."),
+ "gui.hearthholm.shift_tip": ("Post default (the shift of the nearest post), day, night, or always (overrides the post). Off duty a fighter sleeps or walks around town and the tavern; the alarm calls everyone.",
+                              "По посту (смена ближайшего поста), день, ночь или всегда (перекрывает пост). После смены боец спит или гуляет по городу и таверне; тревога поднимает всех."),
  "gui.hearthholm.duty_count": ("%s on duty, %s off duty", "%s на службе, %s отдыхают"),
  "gui.hearthholm.shift_now": ("Shift of this post: %s", "Смена этого поста: %s"),
  "status.hearthholm.needs_arrows": ("Needs arrows", "Нужны стрелы"), "status.hearthholm.collecting_loot": ("Collecting loot", "Собирает трофеи"),
@@ -668,6 +668,18 @@ T.update({
  "status.hearthholm.mining_vein": ("Mining out an ore vein (%s left)", "Выбирает жилу руды (осталось %s)"),
  "thought.hearthholm.no_tool": ("No proper tool", "Нет подходящего инструмента"),
  # I1_MARK
+ # wave J1: settler inventory screen, shifts
+ "gui.hearthholm.inventory": ("Inventory", "Инвентарь"),
+ "gui.hearthholm.inventory_tip": ("Pockets and equipment of this settler. Shift+right-click on a settler opens it directly.",
+                                  "Карманы и снаряжение поселенца. Тот же экран открывает Shift+ПКМ по поселенцу."),
+ "gui.hearthholm.inventory_title": ("%s: inventory", "Инвентарь: %s"),
+ "gui.hearthholm.inv_pockets": ("Pockets", "Карманы"),
+ "gui.hearthholm.inv_gear": ("Equipment", "Снаряжение"),
+ "gui.hearthholm.slot.head": ("Helmet", "Шлем"), "gui.hearthholm.slot.chest": ("Chestplate", "Нагрудник"),
+ "gui.hearthholm.slot.legs": ("Leggings", "Поножи"), "gui.hearthholm.slot.feet": ("Boots", "Ботинки"),
+ "gui.hearthholm.slot.mainhand": ("Main hand (tool or weapon)", "Основная рука (инструмент или оружие)"),
+ "gui.hearthholm.slot.offhand": ("Off hand", "Вторая рука"),
+ "option.hearthholm.shift.post": ("Post default", "По посту"),
 })
 
 # speech bubbles
