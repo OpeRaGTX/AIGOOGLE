@@ -467,7 +467,12 @@ final class WaveJ1Test {
         }
         for (int[] size : new int[][]{{1280, 720}, {854, 480}}) {
             setWindow(ctx, size[0], size[1]);
-            sp.getServer().runOnServer(s -> check(SettlementService.openInventory(player(s), get(s, MINER)), "screen shot: menu did not open"));
+            sp.getServer().runOnServer(s -> {
+                SettlerEntity a = get(s, MINER);
+                a.getNavigation().stop();
+                player(s).teleportTo(s.overworld(), a.getX() + 2.0, a.getY(), a.getZ() - 1.0, Set.of(), 0f, 10f, false);
+                check(SettlementService.openInventory(player(s), a), "screen shot: menu did not open");
+            });
             ctx.waitForScreen(SettlerInventoryScreen.class);
             ctx.waitTicks(6);
             ctx.takeScreenshot("hh_j1_inventory_ru_" + size[0] + "x" + size[1]);
