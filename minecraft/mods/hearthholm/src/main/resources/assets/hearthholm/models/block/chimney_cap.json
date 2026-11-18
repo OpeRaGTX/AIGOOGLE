@@ -1,0 +1,863 @@
+{
+  "parent": "block/block",
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.625,
+        0.625,
+        0.625
+      ]
+    },
+    "ground": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        3,
+        0
+      ],
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        2.5,
+        0
+      ],
+      "scale": [
+        0.375,
+        0.375,
+        0.375
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
+    }
+  },
+  "textures": {
+    "particle": "hearthholm:block/chimney_cap",
+    "chimney_cap": "hearthholm:block/chimney_cap",
+    "chimney_cap_rim": "hearthholm:block/chimney_cap_rim",
+    "chimney_cap_soot": "hearthholm:block/chimney_cap_soot"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        5,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#chimney_cap",
+          "uv": [
+            3,
+            11,
+            13,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#chimney_cap",
+          "uv": [
+            3,
+            11,
+            13,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#chimney_cap",
+          "uv": [
+            3,
+            11,
+            13,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#chimney_cap",
+          "uv": [
+            3,
+            11,
+            13,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#chimney_cap",
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ]
+        },
+        "down": {
+          "texture": "#chimney_cap",
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        5,
+        1
+      ],
+      "to": [
+        15,
+        7,
+        4
+      ],
+      "faces": {
+        "north": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            9,
+            15,
+            11
+          ]
+        },
+        "south": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            9,
+            15,
+            11
+          ]
+        },
+        "east": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            9,
+            4,
+            11
+          ]
+        },
+        "west": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            9,
+            4,
+            11
+          ]
+        },
+        "up": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            1,
+            15,
+            4
+          ]
+        },
+        "down": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            1,
+            15,
+            4
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        5,
+        12
+      ],
+      "to": [
+        15,
+        7,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            9,
+            15,
+            11
+          ]
+        },
+        "south": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            9,
+            15,
+            11
+          ]
+        },
+        "east": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            12,
+            9,
+            15,
+            11
+          ]
+        },
+        "west": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            12,
+            9,
+            15,
+            11
+          ]
+        },
+        "up": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            12,
+            15,
+            15
+          ]
+        },
+        "down": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            12,
+            15,
+            15
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        5,
+        4
+      ],
+      "to": [
+        4,
+        7,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            9,
+            4,
+            11
+          ]
+        },
+        "south": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            9,
+            4,
+            11
+          ]
+        },
+        "east": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            4,
+            9,
+            12,
+            11
+          ]
+        },
+        "west": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            4,
+            9,
+            12,
+            11
+          ]
+        },
+        "up": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            4,
+            4,
+            12
+          ]
+        },
+        "down": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            1,
+            4,
+            4,
+            12
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        12,
+        5,
+        4
+      ],
+      "to": [
+        15,
+        7,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            12,
+            9,
+            15,
+            11
+          ]
+        },
+        "south": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            12,
+            9,
+            15,
+            11
+          ]
+        },
+        "east": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            4,
+            9,
+            12,
+            11
+          ]
+        },
+        "west": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            4,
+            9,
+            12,
+            11
+          ]
+        },
+        "up": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            12,
+            4,
+            15,
+            12
+          ]
+        },
+        "down": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            12,
+            4,
+            15,
+            12
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        5,
+        4
+      ],
+      "to": [
+        12,
+        6,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#chimney_cap_soot",
+          "uv": [
+            4,
+            10,
+            12,
+            11
+          ]
+        },
+        "south": {
+          "texture": "#chimney_cap_soot",
+          "uv": [
+            4,
+            10,
+            12,
+            11
+          ]
+        },
+        "east": {
+          "texture": "#chimney_cap_soot",
+          "uv": [
+            4,
+            10,
+            12,
+            11
+          ]
+        },
+        "west": {
+          "texture": "#chimney_cap_soot",
+          "uv": [
+            4,
+            10,
+            12,
+            11
+          ]
+        },
+        "up": {
+          "texture": "#chimney_cap_soot",
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ]
+        },
+        "down": {
+          "texture": "#chimney_cap_soot",
+          "uv": [
+            4,
+            4,
+            12,
+            12
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        1.5,
+        7,
+        1.5
+      ],
+      "to": [
+        3.5,
+        11,
+        3.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#chimney_cap",
+          "uv": [
+            1.5,
+            5,
+            3.5,
+            9
+          ]
+        },
+        "south": {
+          "texture": "#chimney_cap",
+          "uv": [
+            1.5,
+            5,
+            3.5,
+            9
+          ]
+        },
+        "east": {
+          "texture": "#chimney_cap",
+          "uv": [
+            1.5,
+            5,
+            3.5,
+            9
+          ]
+        },
+        "west": {
+          "texture": "#chimney_cap",
+          "uv": [
+            1.5,
+            5,
+            3.5,
+            9
+          ]
+        },
+        "up": {
+          "texture": "#chimney_cap",
+          "uv": [
+            1.5,
+            1.5,
+            3.5,
+            3.5
+          ]
+        },
+        "down": {
+          "texture": "#chimney_cap",
+          "uv": [
+            1.5,
+            1.5,
+            3.5,
+            3.5
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        1.5,
+        7,
+        12.5
+      ],
+      "to": [
+        3.5,
+        11,
+        14.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#chimney_cap",
+          "uv": [
+            1.5,
+            5,
+            3.5,
+            9
+          ]
+        },
+        "south": {
+          "texture": "#chimney_cap",
+          "uv": [
+            1.5,
+            5,
+            3.5,
+            9
+          ]
+        },
+        "east": {
+          "texture": "#chimney_cap",
+          "uv": [
+            12.5,
+            5,
+            14.5,
+            9
+          ]
+        },
+        "west": {
+          "texture": "#chimney_cap",
+          "uv": [
+            12.5,
+            5,
+            14.5,
+            9
+          ]
+        },
+        "up": {
+          "texture": "#chimney_cap",
+          "uv": [
+            1.5,
+            12.5,
+            3.5,
+            14.5
+          ]
+        },
+        "down": {
+          "texture": "#chimney_cap",
+          "uv": [
+            1.5,
+            12.5,
+            3.5,
+            14.5
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        12.5,
+        7,
+        1.5
+      ],
+      "to": [
+        14.5,
+        11,
+        3.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#chimney_cap",
+          "uv": [
+            12.5,
+            5,
+            14.5,
+            9
+          ]
+        },
+        "south": {
+          "texture": "#chimney_cap",
+          "uv": [
+            12.5,
+            5,
+            14.5,
+            9
+          ]
+        },
+        "east": {
+          "texture": "#chimney_cap",
+          "uv": [
+            1.5,
+            5,
+            3.5,
+            9
+          ]
+        },
+        "west": {
+          "texture": "#chimney_cap",
+          "uv": [
+            1.5,
+            5,
+            3.5,
+            9
+          ]
+        },
+        "up": {
+          "texture": "#chimney_cap",
+          "uv": [
+            12.5,
+            1.5,
+            14.5,
+            3.5
+          ]
+        },
+        "down": {
+          "texture": "#chimney_cap",
+          "uv": [
+            12.5,
+            1.5,
+            14.5,
+            3.5
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        12.5,
+        7,
+        12.5
+      ],
+      "to": [
+        14.5,
+        11,
+        14.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#chimney_cap",
+          "uv": [
+            12.5,
+            5,
+            14.5,
+            9
+          ]
+        },
+        "south": {
+          "texture": "#chimney_cap",
+          "uv": [
+            12.5,
+            5,
+            14.5,
+            9
+          ]
+        },
+        "east": {
+          "texture": "#chimney_cap",
+          "uv": [
+            12.5,
+            5,
+            14.5,
+            9
+          ]
+        },
+        "west": {
+          "texture": "#chimney_cap",
+          "uv": [
+            12.5,
+            5,
+            14.5,
+            9
+          ]
+        },
+        "up": {
+          "texture": "#chimney_cap",
+          "uv": [
+            12.5,
+            12.5,
+            14.5,
+            14.5
+          ]
+        },
+        "down": {
+          "texture": "#chimney_cap",
+          "uv": [
+            12.5,
+            12.5,
+            14.5,
+            14.5
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        0.5,
+        11,
+        0.5
+      ],
+      "to": [
+        15.5,
+        13,
+        15.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            0.5,
+            3,
+            15.5,
+            5
+          ]
+        },
+        "south": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            0.5,
+            3,
+            15.5,
+            5
+          ]
+        },
+        "east": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            0.5,
+            3,
+            15.5,
+            5
+          ]
+        },
+        "west": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            0.5,
+            3,
+            15.5,
+            5
+          ]
+        },
+        "up": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            0.5,
+            0.5,
+            15.5,
+            15.5
+          ]
+        },
+        "down": {
+          "texture": "#chimney_cap_rim",
+          "uv": [
+            0.5,
+            0.5,
+            15.5,
+            15.5
+          ]
+        }
+      }
+    }
+  ]
+}

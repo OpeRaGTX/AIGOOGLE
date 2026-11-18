@@ -50,7 +50,7 @@ public final class ModBlocks {
     public static final List<Block> SIGNS = new ArrayList<>();
     /** Wave H1: coziness. */
     public static Block WELL_PART, ROUND_TABLE, LONG_TABLE, CHAIR, STOOL, BOTTLES, MUG, PLATE_BREAD, PLATE_ROAST, PLATE_FISH, CANDLES, CANDLESTICK,
-            WALL_SHELF, HANGING_HERBS, BARREL_RACK, RUG_RED, RUG_BLUE, CRATE, FIREWOOD_PILE, HANGING_LANTERN;
+            WALL_SHELF, HANGING_HERBS, BARREL_RACK, RUG_RED, RUG_BLUE, CRATE, FIREWOOD_PILE, HANGING_LANTERN, CHIMNEY_CAP;
     public static Block ALARM_BELL, PALISADE, PALISADE_GATE, RIFT_CORE, RIFT_LANTERN, CHIEFTAIN_BANNER;
 
     private ModBlocks() {}
@@ -168,6 +168,8 @@ public final class ModBlocks {
         RUG_BLUE = register("rug_blue", p -> new FacingShapeBlock(p, new double[]{0, 0, 0, 16, 1, 16}), rug);
         CRATE = register("crate", p -> new FacingShapeBlock(p, new double[]{0, 0, 0, 16, 16, 16}), BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5f).sound(SoundType.WOOD));
         FIREWOOD_PILE = register("firewood_pile", p -> new FacingShapeBlock(p, new double[]{0, 0, 0, 16, 12, 16}), wood.get());
+        CHIMNEY_CAP = register("chimney_cap", io.github.operagtx.hearthholm.block.ChimneyCapBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+                .strength(1.5f, 6f).sound(SoundType.STONE).noOcclusion());
         HANGING_LANTERN = register("hanging_lantern", LanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.5f)
                 .sound(SoundType.LANTERN).lightLevel(st -> 13).noOcclusion());
     }

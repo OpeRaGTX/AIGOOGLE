@@ -54,7 +54,7 @@
   "U": "hearthholm:candles[facing=north,count=3,on_table=true]",
   "0": "minecraft:stone_bricks",
   "1": "minecraft:oak_slab[type=bottom]",
-  "2": "minecraft:campfire[lit=true,signal_fire=false,facing=north]"
+  "2": "hearthholm:chimney_cap[facing=north]"
  },
  "layers": [
   [

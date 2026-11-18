@@ -404,6 +404,15 @@ def new_blocks():
     t["plates"] = plates_tex()
     # hanging lantern
     t["hanging_lantern"] = hang_lantern()
+    # chimney cap: stone bricks like the chimney, a lighter rim, a sooty hollow
+    t["chimney_cap"] = stone(0x7B7A7A, seed=240)
+    t["chimney_cap_rim"] = stone(0x8C8B8A, seed=241)
+    soot = mk()
+    rs = random.Random(242)
+    for y in range(16):
+        for x in range(16):
+            px(soot, x, y, mulc((0x26, 0x24, 0x24), 1 + rs.uniform(-0.25, 0.3) + (0.5 if (x * 3 + y * 5) % 11 == 0 else 0)))
+    t["chimney_cap_soot"] = soot
     t["chain"] = metal(0x484C54, seed=260, vertical=True)
     return t
 

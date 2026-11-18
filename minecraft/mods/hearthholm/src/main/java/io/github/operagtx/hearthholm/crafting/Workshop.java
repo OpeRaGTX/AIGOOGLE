@@ -25,8 +25,8 @@ public enum Workshop {
             () -> List.of(Items.OAK_PLANKS, Items.SPRUCE_PLANKS, Items.BIRCH_PLANKS, Items.STICK, Items.CHEST, Items.BARREL,
                     Items.LADDER, Items.CRAFTING_TABLE, Items.OAK_DOOR, Items.OAK_TRAPDOOR, Items.OAK_FENCE, Items.BOWL,
                     Items.BED.red(), Items.BED.blue(), Items.BED.green(), Items.TORCH,
-                    // wave H2: roof stairs/slabs, awning wool, campfire for chimneys
-                    Items.OAK_STAIRS, Items.OAK_SLAB, Items.SPRUCE_STAIRS, Items.SPRUCE_SLAB, Items.WOOL.red(), Items.WOOL.white(), Items.CAMPFIRE,
+                    // wave H2: roof stairs/slabs, awning wool
+                    Items.OAK_STAIRS, Items.OAK_SLAB, Items.SPRUCE_STAIRS, Items.SPRUCE_SLAB, Items.WOOL.red(), Items.WOOL.white(),
                     deco(ModBlocks.CARPENTER_BENCH), deco(ModBlocks.WEAPON_RACK), deco(ModBlocks.MARKET_STALL), deco(ModBlocks.ALARM_BELL), deco(ModBlocks.TAVERN_KEG), deco(ModBlocks.BENCH), deco(ModBlocks.COUNTER),
                     deco(ModBlocks.FLOWER_BOX), deco(ModBlocks.SIGNPOST), deco(ModBlocks.SIGNS.get(0)), deco(ModBlocks.SIGNS.get(4)),
                     // wave H1: furniture and table things (data only)
@@ -37,7 +37,7 @@ public enum Workshop {
             () -> List.of(Items.STONE_BRICKS, Items.STONE, Items.SMOOTH_STONE, Items.STONE_BRICK_STAIRS, Items.STONE_BRICK_SLAB,
                     Items.COBBLESTONE_STAIRS, Items.COBBLESTONE_SLAB, Items.COBBLESTONE_WALL, Items.STONE_STAIRS,
                     Items.STONE_SLAB, Items.FURNACE, Items.TERRACOTTA, Items.DYED_TERRACOTTA.white(), Items.GLASS_PANE, deco(ModBlocks.WELL), deco(ModBlocks.SIGNS.get(1)),
-                    deco(ModBlocks.BOTTLES), deco(ModBlocks.CANDLES))),
+                    deco(ModBlocks.BOTTLES), deco(ModBlocks.CANDLES), deco(ModBlocks.CHIMNEY_CAP))),
     SMITHY("smithy", 32, "smith", false, List.of(RecipeType.CRAFTING, RecipeType.BLASTING, RecipeType.SMELTING),
             () -> List.of(Items.IRON_INGOT, Items.IRON_PICKAXE, Items.IRON_AXE, Items.IRON_SHOVEL, Items.IRON_HOE, Items.IRON_SWORD,
                     Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS, Items.SHEARS,

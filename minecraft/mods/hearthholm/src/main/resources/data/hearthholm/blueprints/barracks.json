@@ -29,7 +29,7 @@
   "Y": "minecraft:lantern[hanging=true]",
   "y": "minecraft:cobblestone_stairs[facing=north,half=bottom,shape=straight]",
   "Z": "minecraft:cobblestone_slab[type=bottom]",
-  "z": "minecraft:campfire[lit=true,signal_fire=false,facing=north]"
+  "z": "hearthholm:chimney_cap[facing=north]"
  },
  "layers": [
   [

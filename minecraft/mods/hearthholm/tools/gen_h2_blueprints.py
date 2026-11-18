@@ -48,7 +48,7 @@ def small(name, count=1, facing="north", on_table=True):
 
 LANTERN_UP = st("lantern", hanging=False)
 LANTERN_DOWN = st("lantern", hanging=True)
-CAMPFIRE = st("campfire", lit=True, signal_fire=False, facing="north")
+CHIMNEY_CAP = st("hearthholm:chimney_cap", facing="north")
 PANE = st("glass_pane")
 
 
@@ -226,7 +226,7 @@ def build_house(wings, W, D, s, door_x, yw=3, windows=(), chimney=None, ceiling=
         top = max(roof_at(wings, cx, cz, yw)[0] + 2, yw + 4)
         for y in range(1, top):
             g.set(cx, y, cz, st("cobblestone") if y < yw + 2 else st("stone_bricks"))
-        g.set(cx, top, cz, CAMPFIRE)
+        g.set(cx, top, cz, CHIMNEY_CAP)
     return g, F, perim, inner
 
 
@@ -263,7 +263,7 @@ def validate(name, g, seed):
 
 def dump(name, g):
     ch = {"cobblestone": "c", "oak_planks": "P", "spruce_planks": "R", "white_terracotta": "w", "oak_log": "L", "spruce_log": "l", "glass_pane": "G",
-          "oak_door": "D", "oak_fence": "f", "oak_trapdoor": "t", "oak_stairs": "s", "spruce_stairs": "S", "stone_bricks": "b", "campfire": "C",
+          "oak_door": "D", "oak_fence": "f", "oak_trapdoor": "t", "oak_stairs": "s", "spruce_stairs": "S", "stone_bricks": "b", "chimney_cap": "C",
           "lantern": "!", "birch_planks": "B", "terracotta": "T", "stone_brick_stairs": "u", "cobblestone_stairs": "v"}
     print("==", name)
     for y in range(g.h):

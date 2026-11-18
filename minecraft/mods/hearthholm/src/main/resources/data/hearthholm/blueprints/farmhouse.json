@@ -39,7 +39,7 @@
   "i": "minecraft:oak_stairs[facing=north,half=bottom,shape=straight]",
   "J": "minecraft:stone_bricks",
   "j": "minecraft:oak_slab[type=bottom]",
-  "k": "minecraft:campfire[lit=true,signal_fire=false,facing=north]"
+  "k": "hearthholm:chimney_cap[facing=north]"
  },
  "layers": [
   [

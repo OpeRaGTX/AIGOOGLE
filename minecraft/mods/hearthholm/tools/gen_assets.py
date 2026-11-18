@@ -612,9 +612,21 @@ model("hanging_lantern_hanging", HL, lantern_els(1) + [{"from": [7.5, 11.5, 7.5]
 w(f"assets/{NS}/blockstates/hanging_lantern.json", {"variants": {"hanging=false": {"model": f"{NS}:block/hanging_lantern"}, "hanging=true": {"model": f"{NS}:block/hanging_lantern_hanging"}}})
 simple_item("hanging_lantern")
 
+# ---- chimney cap: stone collar, rim frame around a dark hollow, 4 thin posts and a small slab hood (no fire)
+CC = tx("chimney_cap", "chimney_cap_rim", "chimney_cap_soot")
+cc_els = [box_el([3, 0, 3], [13, 5, 13], "#chimney_cap"),
+          box_el([1, 5, 1], [15, 7, 4], "#chimney_cap_rim"), box_el([1, 5, 12], [15, 7, 15], "#chimney_cap_rim"),
+          box_el([1, 5, 4], [4, 7, 12], "#chimney_cap_rim"), box_el([12, 5, 4], [15, 7, 12], "#chimney_cap_rim"),
+          box_el([4, 5, 4], [12, 6, 12], {"up": "#chimney_cap_soot", "down": "#chimney_cap_soot", "north": "#chimney_cap_soot", "south": "#chimney_cap_soot", "east": "#chimney_cap_soot", "west": "#chimney_cap_soot"})]
+cc_els += [box_el([x, 7, z], [x + 2, 11, z + 2], "#chimney_cap") for x in (1.5, 12.5) for z in (1.5, 12.5)]
+cc_els.append(box_el([0.5, 11, 0.5], [15.5, 13, 15.5], "#chimney_cap_rim"))
+model("chimney_cap", CC, cc_els)
+w(f"assets/{NS}/blockstates/chimney_cap.json", {"variants": facing_variants("chimney_cap")})
+simple_item("chimney_cap")
+
 # ---- loot tables
 for n in ("round_table", "long_table", "chair", "stool", "plate_bread", "plate_roast", "plate_fish", "candlestick", "wall_shelf", "hanging_herbs", "barrel_rack", "crate",
-          "firewood_pile", "rug_red", "rug_blue", "hanging_lantern"):
+          "firewood_pile", "rug_red", "rug_blue", "hanging_lantern", "chimney_cap"):
     loot(n)
 for n in ("bottles", "mug", "candles"):
     loot_counted(n, 3)
@@ -644,6 +656,7 @@ shaped("crate", ["PSP", "SPS", "PSP"], {"P": P, "S": S_})
 shaped("firewood_pile", ["LLL", " L "], {"L": "minecraft:oak_log"}, 2)
 shaped("rug_red", ["WW"], {"W": "minecraft:red_carpet"}, 2)
 shaped("rug_blue", ["WW"], {"W": "minecraft:blue_carpet"}, 2)
+shaped("chimney_cap", ["S S", "BBB"], {"S": "minecraft:stone_slab", "B": "minecraft:stone_bricks"})
 shaped("hanging_lantern", ["I", "L"], {"I": "minecraft:iron_nugget", "L": "minecraft:lantern"})
 
 # ---- recipes: food (vanilla ingredients; categories for the recipe book)

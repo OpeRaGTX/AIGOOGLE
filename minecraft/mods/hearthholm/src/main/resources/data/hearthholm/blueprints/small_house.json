@@ -30,7 +30,7 @@
   "y": "minecraft:spruce_planks",
   "Z": "minecraft:stone_bricks",
   "z": "minecraft:spruce_slab[type=bottom]",
-  "A": "minecraft:campfire[lit=true,signal_fire=false,facing=north]"
+  "A": "hearthholm:chimney_cap[facing=north]"
  },
  "layers": [
   [

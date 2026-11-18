@@ -32,7 +32,7 @@
   "z": "minecraft:oak_stairs[facing=north,half=bottom,shape=straight]",
   "A": "minecraft:stone_bricks",
   "a": "minecraft:oak_slab[type=bottom]",
-  "E": "minecraft:campfire[lit=true,signal_fire=false,facing=north]"
+  "E": "hearthholm:chimney_cap[facing=north]"
  },
  "layers": [
   [

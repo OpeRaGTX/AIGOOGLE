@@ -623,6 +623,7 @@ T.update({
  "block.hearthholm.rug_blue": ("Blue Rug", "Синий коврик"),
  "block.hearthholm.crate": ("Crate", "Ящик"),
  "block.hearthholm.firewood_pile": ("Firewood Pile", "Поленница"),
+ "block.hearthholm.chimney_cap": ("Chimney Cap", "Выход дымохода"),
  "block.hearthholm.hanging_lantern": ("Hanging Lantern", "Подвесной фонарь"),
  "item.hearthholm.fried_fish": ("Fried Fish", "Жареная рыба"),
  "item.hearthholm.fish_pie": ("Fish Pie", "Рыбный пирог"),

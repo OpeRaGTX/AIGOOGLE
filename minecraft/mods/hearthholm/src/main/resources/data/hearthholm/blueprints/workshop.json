@@ -34,7 +34,7 @@
   "a": "minecraft:stone_brick_stairs[facing=north,half=bottom,shape=straight]",
   "E": "minecraft:stone_bricks",
   "e": "minecraft:stone_brick_slab[type=bottom]",
-  "H": "minecraft:campfire[lit=true,signal_fire=false,facing=north]"
+  "H": "hearthholm:chimney_cap[facing=north]"
  },
  "layers": [
   [

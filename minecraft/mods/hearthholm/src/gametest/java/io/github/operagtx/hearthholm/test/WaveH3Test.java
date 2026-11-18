@@ -482,6 +482,47 @@ final class WaveH3Test {
         sp.getConnection().waitForChunksRender();
         ctx.takeScreenshot("hh_h3_street_well");
 
+        // 6d2. chimney cap: registered, no campfire on any blueprint chimney, smoke particles on the client, close-up screenshot
+        AtomicInteger capsFound = new AtomicInteger();
+        BlockPos[] capAt = new BlockPos[1];
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            if (!net.minecraft.core.registries.BuiltInRegistries.BLOCK.containsKey(Hearthholm.id("chimney_cap"))) fail("chimney_cap not registered");
+            int noCap = 0, withCampfire = 0, withCap = 0;
+            for (int i = 0; i < BlueprintLibrary.all().size(); i++) {
+                Blueprint bp = BlueprintLibrary.byIndex(i);
+                boolean chimney = false, cap = false;
+                for (var op : bp.ops(new BlockPos(0, 64, 0), Direction.SOUTH)) {
+                    if (op.clear()) continue;
+                    if (op.state().is(Blocks.CAMPFIRE)) withCampfire++;
+                    if (op.state().is(ModBlocks.CHIMNEY_CAP)) cap = true;
+                    if (op.state().is(Blocks.COBBLESTONE) || op.state().is(Blocks.STONE_BRICKS)) chimney = true;
+                }
+                boolean hasChimney = chimney && bp.id().getPath().matches("small_house|farmhouse|workshop|tavern|barracks|cottage|townhouse|l_house");
+                if (cap) withCap++;
+                if (hasChimney && !cap) noCap++;
+            }
+            log("HHTEST H3 chimney cap: registered=true blueprintsWithCap=" + withCap + " campfiresInBlueprints=" + withCampfire + " chimneyHousesWithoutCap=" + noCap);
+            if (withCampfire != 0 || withCap < 8 || noCap != 0) fail("chimney cap blueprints: campfire=" + withCampfire + " cap=" + withCap + " missing=" + noCap);
+            for (BlockPos q : BlockPos.betweenClosed(R.offset(0, 0, 8), R.offset(12, 20, 18))) {
+                if (l.getBlockState(q).is(ModBlocks.CHIMNEY_CAP)) { capsFound.incrementAndGet(); capAt[0] = q.immutable(); }
+            }
+            if (capsFound.get() != 1) fail("cottage chimney cap blocks: " + capsFound.get());
+            else {
+                BlockPos c = capAt[0];
+                look(player(s), c.getX() + 3.0, c.getY() + 1.3, c.getZ() - 3.2, c.getX() + 0.5, c.getY() + 1.0, c.getZ() + 0.5);
+            }
+        });
+        ctx.runOnClient(mc -> mc.particleEngine.clearParticles());
+        ctx.waitTicks(60);
+        sp.getConnection().waitForChunksRender();
+        ctx.runOnClient(mc -> {
+            String n = mc.particleEngine.countParticles();
+            log("HHTEST H3 chimney smoke particles alive (engine was cleared, only the cap emits): " + n);
+            if (Integer.parseInt(n.trim()) < 1) fail("no smoke particles near the chimney cap");
+        });
+        ctx.takeScreenshot("hh_h3_chimney");
+
         // 6e. line-ups: 5 women and 5 men, then working settlers with profession accents, then the women from behind
         List<UUID> spawned = new ArrayList<>();
         var U = Professions.UNEMPLOYED;
