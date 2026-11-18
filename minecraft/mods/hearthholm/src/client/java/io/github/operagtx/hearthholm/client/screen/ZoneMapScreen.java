@@ -152,13 +152,6 @@ public final class ZoneMapScreen extends HhScreen {
         ClientPlayNetworking.send(new Payloads.ZoneMapRequest(view.pos(), layerY));
     }
 
-    /** Buttons whose label was cut with an ellipsis (the test checks that none is). */
-    public List<String> truncatedLabels() {
-        List<String> out = new ArrayList<>();
-        for (var c : children()) if (c instanceof Button b && b.getMessage().getString().endsWith("…")) out.add(b.getMessage().getString());
-        return out;
-    }
-
     @Override
     public void tick() {
         super.tick();

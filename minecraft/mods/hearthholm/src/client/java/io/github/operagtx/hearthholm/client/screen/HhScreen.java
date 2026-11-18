@@ -124,6 +124,13 @@ public abstract class HhScreen extends Screen {
         return addRenderableWidget(Button.builder(label, press).bounds(x, y, w, h).build());
     }
 
+    /** Buttons whose label was cut with an ellipsis (the client test checks that none is). */
+    public List<String> truncatedLabels() {
+        List<String> out = new ArrayList<>();
+        for (var c : children()) if (c instanceof Button b && b.getMessage().getString().endsWith("…")) out.add(b.getMessage().getString());
+        return out;
+    }
+
     protected boolean inside(double mx, double my, int x, int y, int w, int h) {
         return mx >= x && my >= y && mx < x + w && my < y + h;
     }

@@ -72,11 +72,19 @@ public final class SettlerScreen extends HhScreen {
             Button sb = button(fitLabel(shift, 104), left + 178, top + 85, 112, 14, b -> send(Payloads.SettlerAction.SET_SHIFT, Integer.toString((view.shift() + 1) % 4)));
             sb.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.shift_tip")));
         }
-        button(fitLabel(Component.translatable("gui.hearthholm.refresh"), 56), left + 8, top + panelH - 22, 64, 16, b -> send(Payloads.SettlerAction.REFRESH, ""));
-        Button inv = button(fitLabel(Component.translatable("gui.hearthholm.inventory"), 66), left + 76, top + panelH - 22, 74, 16, b -> send(Payloads.SettlerAction.INVENTORY, ""));
+        // wave J2: the bottom row sizes its buttons to their labels (RU "Повысить до рыцаря" used to be cut); Dismiss keeps the right corner
+        int by = top + panelH - 22, bx = left + 8, limit = left + panelW - 110 - 4;
+        Component refresh = Component.translatable("gui.hearthholm.refresh"), invL = Component.translatable("gui.hearthholm.inventory"),
+                promoteL = Component.translatable("gui.hearthholm.promote");
+        int w1 = Math.max(56, font.width(refresh) + 12), w2 = Math.max(64, font.width(invL) + 12);
+        int w3 = view.promotable() ? Math.min(limit - (bx + w1 + 4 + w2 + 4), font.width(promoteL) + 12) : 0;
+        button(fitLabel(refresh, w1 - 8), bx, by, w1, 16, b -> send(Payloads.SettlerAction.REFRESH, ""));
+        bx += w1 + 4;
+        Button inv = button(fitLabel(invL, w2 - 8), bx, by, w2, 16, b -> send(Payloads.SettlerAction.INVENTORY, ""));
         inv.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.inventory_tip")));
+        bx += w2 + 4;
         if (view.promotable()) {
-            Button promote = button(fitLabel(Component.translatable("gui.hearthholm.promote"), 108), left + 154, top + panelH - 22, 116, 16, b -> send(Payloads.SettlerAction.PROMOTE, ""));
+            Button promote = button(fitLabel(promoteL, w3 - 8), bx, by, w3, 16, b -> send(Payloads.SettlerAction.PROMOTE, ""));
             promote.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.promote_tip")));
         }
     }
