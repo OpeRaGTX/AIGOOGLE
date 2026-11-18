@@ -27,8 +27,10 @@ public final class ResidentRecord {
             ComponentSerialization.CODEC.optionalFieldOf("status", Component.empty()).forGetter(r -> r.status),
             BlockPos.CODEC.optionalFieldOf("bed").forGetter(r -> Optional.ofNullable(r.bed)),
             BlockPos.CODEC.optionalFieldOf("pos", BlockPos.ZERO).forGetter(r -> r.lastPos),
-            Codec.INT.optionalFieldOf("level", 1).forGetter(r -> r.level)
-    ).apply(i, (uuid, profile, prof, mood, food, status, bed, pos, level) -> {
+            Codec.INT.optionalFieldOf("level", 1).forGetter(r -> r.level),
+            Codec.INT.optionalFieldOf("hp", 20).forGetter(r -> r.hp),
+            Codec.INT.optionalFieldOf("maxhp", 20).forGetter(r -> r.maxHp)
+    ).apply(i, (uuid, profile, prof, mood, food, status, bed, pos, level, hp, maxHp) -> {
         ResidentRecord r = new ResidentRecord(uuid, profile);
         r.profession = prof;
         r.mood = mood;
@@ -37,6 +39,8 @@ public final class ResidentRecord {
         r.bed = bed.orElse(null);
         r.lastPos = pos;
         r.level = level;
+        r.hp = hp;
+        r.maxHp = maxHp;
         return r;
     }));
 
@@ -49,6 +53,7 @@ public final class ResidentRecord {
     public @Nullable BlockPos bed;
     public BlockPos lastPos = BlockPos.ZERO;
     public int level = 1;
+    public int hp = 20, maxHp = 20;
 
     public ResidentRecord(UUID uuid, SettlerProfile profile) {
         this.uuid = uuid;

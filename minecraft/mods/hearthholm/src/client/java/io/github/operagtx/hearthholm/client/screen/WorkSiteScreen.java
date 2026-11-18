@@ -23,7 +23,7 @@ public final class WorkSiteScreen extends HhScreen {
     private final WorkSiteType type;
 
     public WorkSiteScreen(Views.WorkSite view) {
-        super(Component.translatable("gui.hearthholm.work_site"), 300, 230);
+        super(Component.translatable("gui.hearthholm.work_site"), 340, 230);
         this.view = view;
         this.type = WorkSiteTypes.get(view.type());
     }
@@ -66,10 +66,10 @@ public final class WorkSiteScreen extends HhScreen {
         for (SiteOption o : type.options()) {
             int value = view.values().getOrDefault(o.key(), o.def());
             if (o.kind() == SiteOption.Kind.TOGGLE) {
-                button(o.valueLabel(value), left + 150, y, 142, 16, b -> send(o.key(), o.next(value, 1)));
+                button(Component.literal(fit(o.valueLabel(value), 154)), left + 170, y, 162, 16, b -> send(o.key(), o.next(value, 1)));
             } else {
-                button(Component.literal("<"), left + 150, y, 16, 16, b -> send(o.key(), o.next(value, -1)));
-                button(Component.literal(">"), left + 276, y, 16, 16, b -> send(o.key(), o.next(value, 1)));
+                button(Component.literal("<"), left + 170, y, 16, 16, b -> send(o.key(), o.next(value, -1)));
+                button(Component.literal(">"), left + 316, y, 16, 16, b -> send(o.key(), o.next(value, 1)));
             }
             y += 20;
         }
@@ -91,19 +91,23 @@ public final class WorkSiteScreen extends HhScreen {
         y += 14;
         g.textWithWordWrap(font, type.hint(), x, y, panelW - 16, DIM);
         y += hintHeight() + 3;
-        text(g, Component.translatable("gui.hearthholm.worker").append(": ").append(view.worker()), x, y, TEXT);
-        text(g, view.status(), x, y + 10, WARN);
-        if (view.total() > 0) {
+        fitText(g, Component.translatable("gui.hearthholm.worker").append(": ").append(view.worker()), x, y, panelW - 16, TEXT, mx, my);
+        fitText(g, view.status(), x, y + 10, panelW - 16, WARN, mx, my);
+        if (view.total() > 0 && view.progress() > 0) {
             bar(g, x, y + 21, panelW - 16, 5, view.progress() / (float) view.total(), 0xFF7FC24A);
+            if (inside(mx, my, x, y + 20, panelW - 16, 7)) g.setTooltipForNextFrame(font, Component.literal(view.progress() + " / " + view.total()), mx, my);
         }
         int oy = optionsTop();
         for (SiteOption o : type.options()) {
             int value = view.values().getOrDefault(o.key(), o.def());
-            text(g, o.label(), x, oy + 4, TEXT);
+            fitText(g, o.label(), x, oy + 4, 156, TEXT, mx, my);
             if (o.kind() != SiteOption.Kind.TOGGLE) {
                 Component v = o.valueLabel(value);
                 boolean locked = o.key().equals("blueprint") && lockedTier(value) >= 0;
-                g.text(font, v, left + 221 - font.width(v) / 2, oy + 4, locked ? DIM : TITLE, false);
+                int zx = left + 190, zw = 122;   // between the arrows
+                String shown = fit(v, zw);
+                g.text(font, shown, zx + (zw - font.width(shown)) / 2, oy + 4, locked ? DIM : TITLE, false);
+                if (!shown.equals(v.getString()) && inside(mx, my, zx, oy + 2, zw, 12)) g.setTooltipForNextFrame(font, v, mx, my);
             }
             oy += 20;
         }
@@ -114,12 +118,17 @@ public final class WorkSiteScreen extends HhScreen {
                 if (lock >= 0) text(g, Component.translatable("gui.hearthholm.needs_tier", SettlementTier.TIERS.get(lock).label()), x, oy + 4, BAD);
                 else text(g, Component.translatable("gui.hearthholm.materials", bp.width(), bp.depth(), bp.height()), x, oy + 4, DIM);
                 int i = 0;
-                for (Map.Entry<Item, Integer> e : bp.materials().entrySet()) {
-                    int ix = x + (i % 14) * 20, iy = oy + 16 + (i / 14) * 20;
-                    ItemStack st = new ItemStack(e.getKey(), Math.min(99, e.getValue()));
+                for (Blueprint.Material m : bp.materialList()) {
+                    int ix = x + (i % 16) * 20, iy = oy + 16 + (i / 16) * 20;
+                    ItemStack st = new ItemStack(m.icon(), Math.min(99, m.count()));
                     g.item(st, ix, iy);
-                    g.itemDecorations(font, st, ix, iy, String.valueOf(e.getValue()));
-                    if (inside(mx, my, ix, iy, 16, 16)) g.setTooltipForNextFrame(font, Component.empty().append(st.getHoverName()).append(" ×" + e.getValue()), mx, my);
+                    g.itemDecorations(font, st, ix, iy, String.valueOf(m.count()));
+                    if (inside(mx, my, ix, iy, 16, 16)) {
+                        Component name = m.anyKey() != null ? Component.translatable("gui.hearthholm.any." + m.anyKey()) : st.getHoverName();
+                        Component tip = Component.empty().append(name).append(" ×" + m.count());
+                        if (m.anyKey() == null && Blueprint.isWoodVariant(m.icon())) tip = tip.copy().append(Component.translatable("gui.hearthholm.or_wood").withStyle(net.minecraft.ChatFormatting.GRAY));
+                        g.setTooltipForNextFrame(font, tip, mx, my);
+                    }
                     i++;
                 }
             }

@@ -42,6 +42,12 @@ public class WorkSiteBlock extends FacingEntityBlock {
         return POST;
     }
 
+    /** Walk-through like a sign: the outline (getShape) stays so the marker can be clicked and broken. */
+    @Override
+    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return net.minecraft.world.phys.shapes.Shapes.empty();
+    }
+
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new WorkSiteBlockEntity(pos, state);

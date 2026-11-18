@@ -232,14 +232,16 @@ public final class TownHallScreen extends HhScreen {
             boolean hover = inside(mx, my, left + 8, y, panelW - 16, 20);
             g.fill(left + 8, y, left + panelW - 8, y + 20, hover ? 0xFF3A2D20 : BG2);
             face(g, r.profile().appearance(), r.profession(), left + 11, y + 2, 16);
-            text(g, r.profile().listName(), left + 32, y + 2, TEXT);
+            text(g, fit(r.profile().listName(), 92), left + 32, y + 2, TEXT);
             Profession p = Professions.get(r.profession());
-            g.text(font, p.label().copy().append(" " + "I".repeat(Math.max(1, r.level()))), left + 32, y + 11, 0xFF000000 | p.color(), false);
-            g.text(font, moodFace(r.mood()) + " " + r.mood(), left + 150, y + 6, moodColor(r.mood()), false);
-            bar(g, left + 186, y + 8, 34, 5, r.food() / 20f, 0xFFD08A3A);
+            g.text(font, fit(p.label().copy().append(" " + "I".repeat(Math.max(1, r.level()))), 92), left + 32, y + 11, 0xFF000000 | p.color(), false);
+            g.text(font, moodFace(r.mood()) + " " + r.mood(), left + 128, y + 6, moodColor(r.mood()), false);
+            bar(g, left + 160, y + 8, 28, 5, r.food() / 20f, 0xFFD08A3A);
+            bar(g, left + 192, y + 8, 28, 5, r.maxHp() <= 0 ? 0 : r.hp() / (float) r.maxHp(), 0xFFD4504A);
+            if (inside(mx, my, left + 192, y + 6, 28, 9)) g.setTooltipForNextFrame(font, Component.literal("HP " + r.hp() + "/" + r.maxHp()), mx, my);
             if (!r.bed()) g.text(font, "⚑", left + 224, y + 6, BAD, false);
-            String status = font.plainSubstrByWidth(r.status().getString(), panelW - 252);
-            text(g, status, left + 236, y + 6, DIM);
+            String status = font.plainSubstrByWidth(r.status().getString(), panelW - 242);
+            text(g, status, left + 234, y + 6, DIM);
             if (hover) g.setTooltipForNextFrame(font, r.status(), mx, my);
         }
         if (list.size() > rows()) {

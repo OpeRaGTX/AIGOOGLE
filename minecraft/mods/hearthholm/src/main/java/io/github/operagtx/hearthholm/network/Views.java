@@ -21,7 +21,7 @@ public final class Views {
     private static final StreamCodec<RegistryFriendlyByteBuf, Component> COMP = ComponentSerialization.TRUSTED_STREAM_CODEC;
 
     public record Resident(UUID id, SettlerProfile profile, Identifier profession, int mood, int food,
-                           Component status, boolean bed, int level) {
+                           Component status, boolean bed, int level, int hp, int maxHp) {
         static void write(RegistryFriendlyByteBuf b, Resident r) {
             UUIDUtil.STREAM_CODEC.encode(b, r.id);
             SettlerProfile.STREAM_CODEC.encode(b, r.profile);
@@ -31,11 +31,13 @@ public final class Views {
             COMP.encode(b, r.status);
             b.writeBoolean(r.bed);
             b.writeVarInt(r.level);
+            b.writeVarInt(r.hp);
+            b.writeVarInt(r.maxHp);
         }
 
         static Resident read(RegistryFriendlyByteBuf b) {
             return new Resident(UUIDUtil.STREAM_CODEC.decode(b), SettlerProfile.STREAM_CODEC.decode(b),
-                    Identifier.STREAM_CODEC.decode(b), b.readVarInt(), b.readVarInt(), COMP.decode(b), b.readBoolean(), b.readVarInt());
+                    Identifier.STREAM_CODEC.decode(b), b.readVarInt(), b.readVarInt(), COMP.decode(b), b.readBoolean(), b.readVarInt(), b.readVarInt(), b.readVarInt());
         }
     }
 
@@ -119,7 +121,7 @@ public final class Views {
     public record Settler(int entityId, SettlerProfile profile, Identifier profession, int food, int mood,
                           List<MoodEntry> moods, Component status, int level, int xp, int nextXp,
                           List<ItemStack> inventory, List<ItemStack> equipment, boolean bed, Component settlement,
-                          Component friend, int friendValue, Component rival, int rivalValue, boolean promotable) {
+                          Component friend, int friendValue, Component rival, int rivalValue, boolean promotable, int hp, int maxHp) {
         public static final StreamCodec<RegistryFriendlyByteBuf, Settler> CODEC = StreamCodec.of(Settler::write, Settler::read);
 
         static void write(RegistryFriendlyByteBuf b, Settler v) {
@@ -143,6 +145,8 @@ public final class Views {
             COMP.encode(b, v.rival);
             b.writeVarInt(v.rivalValue);
             b.writeBoolean(v.promotable);
+            b.writeVarInt(v.hp);
+            b.writeVarInt(v.maxHp);
         }
 
         static Settler read(RegistryFriendlyByteBuf b) {
@@ -157,7 +161,7 @@ public final class Views {
             List<ItemStack> inv = ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(b);
             List<ItemStack> eq = ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(b);
             return new Settler(id, p, prof, food, mood, moods, status, level, xp, next, inv, eq, b.readBoolean(), COMP.decode(b),
-                    COMP.decode(b), b.readVarInt(), COMP.decode(b), b.readVarInt(), b.readBoolean());
+                    COMP.decode(b), b.readVarInt(), COMP.decode(b), b.readVarInt(), b.readBoolean(), b.readVarInt(), b.readVarInt());
         }
     }
 

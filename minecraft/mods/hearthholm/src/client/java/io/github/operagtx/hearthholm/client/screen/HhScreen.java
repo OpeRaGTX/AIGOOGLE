@@ -71,6 +71,23 @@ public abstract class HhScreen extends Screen {
         g.text(font, s, x, y, color, false);
     }
 
+    /** Text cut to {@code maxW} pixels with an ellipsis. */
+    protected String fit(String s, int maxW) {
+        if (font.width(s) <= maxW) return s;
+        return font.plainSubstrByWidth(s, Math.max(0, maxW - font.width("…"))) + "…";
+    }
+
+    protected String fit(Component c, int maxW) {
+        return fit(c.getString(), maxW);
+    }
+
+    /** Draws truncated text; shows the full text as a tooltip when the mouse is over it and it was cut. */
+    protected void fitText(GuiGraphicsExtractor g, Component c, int x, int y, int maxW, int color, int mx, int my) {
+        String shown = fit(c, maxW);
+        g.text(font, shown, x, y, color, false);
+        if (!shown.equals(c.getString()) && inside(mx, my, x, y - 1, maxW, 10)) g.setTooltipForNextFrame(font, c, mx, my);
+    }
+
     /** Settler face from the composed skin (front of head + hat layer). */
     protected static void face(GuiGraphicsExtractor g, int look, Identifier profession, int x, int y, int size) {
         Identifier tex = SettlerTextures.get(look, profession);
