@@ -98,7 +98,7 @@
  "gui.hearthholm.on_duty": "On duty",
  "gui.hearthholm.off_duty": "Off duty",
  "gui.hearthholm.shift_tip": "Day, night or always (the shift of the nearest post). Off duty a fighter sleeps or walks around town and the tavern; the alarm calls everyone.",
- "gui.hearthholm.duty_count": "On duty: %s, off duty: %s",
+ "gui.hearthholm.duty_count": "%s on duty, %s off duty",
  "gui.hearthholm.shift_now": "Shift of this post: %s",
  "status.hearthholm.needs_arrows": "Needs arrows",
  "status.hearthholm.collecting_loot": "Collecting loot",

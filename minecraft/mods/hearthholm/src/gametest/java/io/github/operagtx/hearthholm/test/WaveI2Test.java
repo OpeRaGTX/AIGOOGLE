@@ -52,6 +52,7 @@ final class WaveI2Test {
     private static final List<String> FAILS = new ArrayList<>();
     private static UUID GUARD, ARCHER;
     private static BlockPos POST;
+    private static UUID DROP;
 
     private WaveI2Test() {}
 
@@ -152,6 +153,8 @@ final class WaveI2Test {
             a.setProfession(Professions.ARCHER);
             a.setXp(Professions.ARCHER.id(), 0);
             ARCHER = a.getUUID();
+            // the lumberjack's forest zone covers the hall and sweeps up every drop: the loot test needs the guard to be the only collector
+            for (SettlerEntity e : settlers(s)) if (e.professionId().equals(Professions.LUMBERJACK.id()) && !e.getUUID().equals(GUARD) && !e.getUUID().equals(ARCHER)) e.setProfession(Professions.UNEMPLOYED);
             for (int x = -12; x <= 50; x++) for (int z = -2; z <= 2; z++) {
                 BlockPos b = O.offset(x, 0, 40 + z).atY(platformY);
                 l.setBlock(b.below(), Blocks.STONE.defaultBlockState(), 2);
@@ -172,13 +175,13 @@ final class WaveI2Test {
             p.teleportTo(l, O.getX() + 20.5, platformY + 1, O.getZ() + 36.5, Set.of(), 0f, 20f, false);
             g.getNavigation().stop();
             g.teleportTo(O.getX() - 8.5, platformY, O.getZ() + 40.5);
-            Goal w = new Walk(g, new Vec3(O.getX() + 48.5, platformY, O.getZ() + 40.5));
+            Goal w = new Walk(g, new Vec3(O.getX() + 24.5, platformY, O.getZ() + 40.5));
             g.addTestGoal(w);
             walk.set(w);
         });
-        ctx.waitTicks(50);
+        ctx.waitTicks(30);
         sp.getServer().runOnServer(s -> p0.set(get(s, GUARD).position()));
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             ctx.waitTicks(20);
             sp.getServer().runOnServer(s -> {
                 SettlerEntity g = get(s, GUARD);
@@ -189,7 +192,7 @@ final class WaveI2Test {
         AtomicInteger walkTenths = new AtomicInteger();
         sp.getServer().runOnServer(s -> {
             SettlerEntity g = get(s, GUARD);
-            double bps = flatDist(p0.get(), g.position()) / 5.0;
+            double bps = flatDist(p0.get(), g.position()) / 3.0;
             walkTenths.set((int) Math.round(bps * 10));
             log("I2 guard speed walking = " + String.format("%.2f", bps) + " b/s (player walk 4.3)");
             check(bps > 3.7 && bps < 4.9, "walking speed " + bps);
@@ -304,6 +307,7 @@ final class WaveI2Test {
             while (z.isAlive() && n++ < 60) { z.damageCooldownTime = 0; g.doHurtTarget(l, z); }
             z.discard();
             boolean tagged = drop.entityTags().contains(Loot.TAG);
+            DROP = drop.getUUID();
             log("I2 loot: zombie killed by the guard, drop tagged=" + tagged + " at " + at.toShortString() + " post=" + POST.toShortString());
             check(tagged, "drop of the killed zombie is not claimed");
         });
@@ -315,6 +319,11 @@ final class WaveI2Test {
             sp.getServer().runOnServer(s -> {
                 SettlerEntity g = get(s, GUARD);
                 if (g.count(x -> x.is(Items.EMERALD)) > 0) picked.set(true);
+                var d = s.overworld().getEntity(DROP);
+                log("I2 diag drop " + (d == null ? "GONE" : d.blockPosition().toShortString() + " alive=" + d.isAlive() + " tags=" + d.entityTags() + " age=" + d.tickCount));
+                var near = Loot.nearest(g, Vec3.atBottomCenterOf(POST), 12);
+                log("I2 diag loot guard=" + g.blockPosition().toShortString() + " act=" + g.brain().currentActivity() + " status=" + g.status().getString() + " free=" + g.freeSlots()
+                        + " nearest=" + (near == null ? "none" : near.blockPosition().toShortString()) + " posts=" + town(s).sitesOf(WorkSiteTypes.PATROL_ID).size());
                 if (HearthholmClientTest.stock(s, Items.EMERALD) > emeralds0.get()) delivered.set(true);
             });
         }

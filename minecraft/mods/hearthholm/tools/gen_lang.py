@@ -84,7 +84,7 @@ T = {
  "gui.hearthholm.shift": ("Shift: %s", "Смена: %s"), "gui.hearthholm.on_duty": ("On duty", "На службе"), "gui.hearthholm.off_duty": ("Off duty", "Отдыхает"),
  "gui.hearthholm.shift_tip": ("Day, night or always (the shift of the nearest post). Off duty a fighter sleeps or walks around town and the tavern; the alarm calls everyone.",
                               "День, ночь или всегда (смена ближайшего поста). После смены боец спит или гуляет по городу и таверне; тревога поднимает всех."),
- "gui.hearthholm.duty_count": ("On duty: %s, off duty: %s", "На службе: %s, отдыхают: %s"),
+ "gui.hearthholm.duty_count": ("%s on duty, %s off duty", "%s на службе, %s отдыхают"),
  "gui.hearthholm.shift_now": ("Shift of this post: %s", "Смена этого поста: %s"),
  "status.hearthholm.needs_arrows": ("Needs arrows", "Нужны стрелы"), "status.hearthholm.collecting_loot": ("Collecting loot", "Собирает трофеи"),
  "thought.hearthholm.no_arrows": ("No arrows left", "Закончились стрелы"),
