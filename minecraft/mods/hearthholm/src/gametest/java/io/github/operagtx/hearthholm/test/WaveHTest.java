@@ -279,13 +279,32 @@ final class WaveHTest {
         sp.getServer().runOnServer(s -> {
             ServerPlayer p = player(s);
             BlockPos w = H.offset(3, 0, 3);
-            look(p, w.getX() + 4.5, w.getY() + 2.2, w.getZ() + 5.0, w.getX() + 0.5, w.getY() + 1.6, w.getZ() + 0.5);
+            look(p, w.getX() + 0.5, w.getY() + 1.1, w.getZ() + 4.2, w.getX() + 0.5, w.getY() + 1.5, w.getZ() + 0.5);
             p.getInventory().setSelectedSlot(8);
         });
         ctx.getInput().pressKey(o -> o.keyToggleGui);
         ctx.waitTicks(10);
         sp.getConnection().waitForChunksRender();
         ctx.takeScreenshot("hh_h1_well");
+        // 6a2. lantern close-ups: hanging lantern under a beam, standing one on a post, lamp post (low side angle)
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            ServerPlayer p = player(s);
+            BlockPos g = H.offset(2, 0, 12);
+            l.setBlock(g.above(0), Blocks.OAK_FENCE.defaultBlockState(), 3);
+            l.setBlock(g.above(1), Blocks.OAK_FENCE.defaultBlockState(), 3);
+            l.setBlock(g.above(2), Blocks.OAK_FENCE.defaultBlockState(), 3);
+            l.setBlock(g.above(3), Blocks.OAK_PLANKS.defaultBlockState(), 3);
+            l.setBlock(g.above(3).east(), Blocks.OAK_PLANKS.defaultBlockState(), 3);
+            l.setBlock(g.above(2).east(), ModBlocks.HANGING_LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true), 3);
+            l.setBlock(g.east(3).above(0), Blocks.OAK_PLANKS.defaultBlockState(), 3);
+            l.setBlock(g.east(3).above(1), ModBlocks.HANGING_LANTERN.defaultBlockState(), 3);
+            l.setBlock(g.east(5), ModBlocks.LAMP_POST.defaultBlockState(), 3);
+            look(p, g.getX() + 3.5, g.getY() + 0.9, g.getZ() + 4.6, g.getX() + 3.0, g.getY() + 2.0, g.getZ() + 0.5);
+        });
+        ctx.waitTicks(10);
+        sp.getConnection().waitForChunksRender();
+        ctx.takeScreenshot("hh_h1b_lanterns");
         // 6b. the tavern interior
         sp.getServer().runOnServer(s -> {
             ServerPlayer p = player(s);

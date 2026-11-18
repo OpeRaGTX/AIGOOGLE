@@ -571,10 +571,15 @@ for c in ("red", "blue"):
     simple_item(f"rug_{c}")
 HL = tx("hanging_lantern", "chain")
 def lantern_els(dy):
-    return [{"from": [5, 0 + dy, 5], "to": [11, 1 + dy, 11], "faces": {d: face("#hanging_lantern", [0, 8, 8, 10]) for d in ("north", "south", "east", "west", "down")}},
-            {"from": [5.5, 1 + dy, 5.5], "to": [10.5, 8 + dy, 10.5], "faces": {**{d: face("#hanging_lantern", [0, 0, 8, 8]) for d in ("north", "south", "east", "west")}}},
-            {"from": [5, 8 + dy, 5], "to": [11, 9 + dy, 11], "faces": {d: face("#hanging_lantern", [0, 8, 8, 10]) for d in ("north", "south", "east", "west", "up")}},
-            {"from": [6.5, 9 + dy, 6.5], "to": [9.5, 10.5 + dy, 9.5], "faces": {d: face("#hanging_lantern", [8, 8, 16, 10]) for d in ("north", "south", "east", "west", "up")}}]
+    dark = lambda fr, to: {"from": fr, "to": to, "faces": {d: face("#hanging_lantern", [0, 10, 2, 14]) for d in ALL6}}
+    els = [{"from": [5, 0 + dy, 5], "to": [11, 1 + dy, 11], "faces": {d: face("#hanging_lantern", [0, 8, 8, 10]) for d in ALL6}}]       # base frame
+    for x in (5, 10):                                                                                                               # corner pillars: base -> top frame, no gaps
+        for z in (5, 10):
+            els.append(dark([x, 1 + dy, z], [x + 1, 8 + dy, z + 1]))
+    els.append({"from": [5.5, 1 + dy, 5.5], "to": [10.5, 8 + dy, 10.5], "faces": {d: face("#hanging_lantern", [1, 0, 7, 8]) for d in ("north", "south", "east", "west")}})   # glass touches base and top
+    els.append({"from": [5, 8 + dy, 5], "to": [11, 9 + dy, 11], "faces": {d: face("#hanging_lantern", [0, 8, 8, 10]) for d in ALL6}})   # top frame
+    els.append({"from": [6.5, 9 + dy, 6.5], "to": [9.5, 10.5 + dy, 9.5], "faces": {d: face("#hanging_lantern", [8, 8, 16, 10]) for d in ALL6}})   # cap
+    return els
 model("hanging_lantern", HL, lantern_els(0), DISPLAY_BIG)
 model("hanging_lantern_hanging", HL, lantern_els(1) + [{"from": [7.5, 11.5, 7.5], "to": [8.5, 16, 8.5], "faces": {d: face("#chain", [0, 0, 1, 5]) for d in ("north", "south", "east", "west")}}], DISPLAY_BIG)
 w(f"assets/{NS}/blockstates/hanging_lantern.json", {"variants": {"hanging=false": {"model": f"{NS}:block/hanging_lantern"}, "hanging=true": {"model": f"{NS}:block/hanging_lantern_hanging"}}})
