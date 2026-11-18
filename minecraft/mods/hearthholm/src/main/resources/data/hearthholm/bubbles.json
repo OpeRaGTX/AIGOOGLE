@@ -21,6 +21,7 @@
  "street": 4,
  "trader": 3,
  "need_pickaxe": 3,
+ "need_arrows": 3,
  "need_axe": 3,
  "need_hoe": 3,
  "work_miner": 4,

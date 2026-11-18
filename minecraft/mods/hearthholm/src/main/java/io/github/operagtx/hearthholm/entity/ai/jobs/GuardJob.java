@@ -12,6 +12,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import io.github.operagtx.hearthholm.core.Balance;
+import io.github.operagtx.hearthholm.entity.ai.tasks.Fetch;
+import io.github.operagtx.hearthholm.town.Loot;
+import net.minecraft.world.entity.Entity;
+
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -24,6 +30,57 @@ public class GuardJob extends SiteJob {
     }
 
     @Override protected boolean exclusive() { return false; }
+    @Override protected int toolRetryTicks() { return Balance.WEAPON_RETRY_TICKS; }
+
+    /** Patrol posts of the settlement, in route order. */
+    private List<Settlement.SiteRecord> posts(Settlement st) {
+        List<Settlement.SiteRecord> posts = st.sitesOf(WorkSiteTypes.PATROL_ID);
+        posts.sort(Comparator.comparingLong(r -> r.pos().asLong()));
+        return posts;
+    }
+
+    /** Chests next to the post nearest to the guard come first (weapons, arrows), then the warehouse. */
+    @Override
+    protected List<BlockPos> dropOffs() {
+        List<BlockPos> out = new ArrayList<>();
+        Settlement st = settler.settlement();
+        if (st != null) {
+            BlockPos near = null;
+            double best = Double.MAX_VALUE;
+            for (Settlement.SiteRecord r : st.sitesOf(WorkSiteTypes.PATROL_ID)) {
+                double d = r.pos().distSqr(settler.blockPosition());
+                if (d < best) { best = d; near = r.pos(); }
+            }
+            if (near != null) out.addAll(chestsNear(near, 3));
+        }
+        out.addAll(storage());
+        return out;
+    }
+
+    /** Loot of the fallen: walk to a claimable drop inside the patrol radius, and carry the haul home when pockets fill or the shift ends. */
+    private @Nullable Task lootTask(SettlerEntity s, Settlement st, List<Settlement.SiteRecord> posts) {
+        boolean carrying = s.inventory().getItems().stream().anyMatch(x -> !x.isEmpty() && !CombatGear.keep(s, x));
+        if (carrying && (pocketsFull() || s.shiftEndsWithin(900))) {
+            Task t = depositTrip(x -> CombatGear.keep(s, x));
+            if (t != null) return t;
+        }
+        if (pocketsFull() || s.getTarget() != null) return null;
+        Entity best = null;
+        double bestD = Double.MAX_VALUE;
+        if (posts.isEmpty()) {
+            best = Loot.nearest(s, Vec3.atBottomCenterOf(st.center), 12 + Balance.LOOT_EXTRA_RADIUS);
+        } else {
+            for (Settlement.SiteRecord r : posts) {
+                if (!s.level().isLoaded(r.pos())) continue;
+                int radius = s.level().getBlockEntity(r.pos()) instanceof WorkSiteBlockEntity w ? w.option("radius") : 8;
+                Entity e = Loot.nearest(s, Vec3.atBottomCenterOf(r.pos()), radius + Balance.LOOT_EXTRA_RADIUS);
+                if (e != null && s.distanceToSqr(e) < bestD) { best = e; bestD = s.distanceToSqr(e); }
+            }
+        }
+        if (best == null) return null;
+        s.setStatus("collecting_loot");
+        return new Fetch(best);
+    }
 
     @Override
     public @Nullable Task next(SettlerEntity s) {
@@ -31,8 +88,9 @@ public class GuardJob extends SiteJob {
         if (gear != null) return gear;
         Settlement st = s.settlement();
         if (st == null) return new Wait(100);
-        List<Settlement.SiteRecord> posts = st.sitesOf(WorkSiteTypes.PATROL_ID);
-        posts.sort(Comparator.comparingLong(r -> r.pos().asLong()));
+        List<Settlement.SiteRecord> posts = posts(st);
+        Task loot = lootTask(s, st, posts);
+        if (loot != null) return loot;
         if (posts.isEmpty()) {
             s.setStatus("patrolling_hall");
             Vec3 t = Vec3.atBottomCenterOf(st.center).add(s.getRandom().nextInt(21) - 10, 0, s.getRandom().nextInt(21) - 10);

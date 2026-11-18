@@ -46,7 +46,7 @@ public final class Payloads {
     }
 
     public record SettlerAction(int entityId, int action, String arg) implements CustomPacketPayload {
-        public static final int REFRESH = 0, SET_PROFESSION = 1, DISMISS = 2, PROMOTE = 3;
+        public static final int REFRESH = 0, SET_PROFESSION = 1, DISMISS = 2, PROMOTE = 3, SET_SHIFT = 4;
         public static final Type<SettlerAction> TYPE = new Type<>(Hearthholm.id("settler_action"));
         public static final StreamCodec<RegistryFriendlyByteBuf, SettlerAction> CODEC = StreamCodec.composite(
                 ByteBufCodecs.VAR_INT, SettlerAction::entityId,

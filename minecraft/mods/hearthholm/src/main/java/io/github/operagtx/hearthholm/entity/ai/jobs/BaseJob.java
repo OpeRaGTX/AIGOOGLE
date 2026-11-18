@@ -30,8 +30,12 @@ public abstract class BaseJob implements Job {
     // ---- containers -----------------------------------------------------------------------
 
     protected List<BlockPos> chestsNear(BlockPos pos) {
+        return chestsNear(pos, 1);
+    }
+
+    protected List<BlockPos> chestsNear(BlockPos pos, int r) {
         List<BlockPos> out = new ArrayList<>();
-        for (BlockPos p : BlockPos.betweenClosed(pos.offset(-1, -1, -1), pos.offset(1, 1, 1))) {
+        for (BlockPos p : BlockPos.betweenClosed(pos.offset(-r, -1, -r), pos.offset(r, 1, r))) {
             if (settler.level().getBlockEntity(p) instanceof Container) out.add(p.immutable());
         }
         return out;
@@ -93,6 +97,9 @@ public abstract class BaseJob implements Job {
     /** Wave I1: jobs that cannot work without their tool (miner, lumberjack) return true and name it via {@link #toolKey()}. */
     protected boolean requiresTool() { return false; }
 
+    /** Pause between look-ups for an optional tool (fighters re-arm faster: wave I2). */
+    protected int toolRetryTicks() { return 2400; }
+
     /** "pickaxe", "axe"...: suffix of the {@code tool.hearthholm.*} name and of the {@code need_*} speech bubble. */
     protected String toolKey() { return "tool"; }
 
@@ -107,7 +114,7 @@ public abstract class BaseJob implements Job {
         boolean req = requiresTool();
         long now = settler.level().getGameTime();
         if (now < nextToolTry) return req ? noTool() : null;
-        nextToolTry = now + (req ? 200 : 2400);
+        nextToolTry = now + (req ? 200 : toolRetryTicks());
         BlockPos p = findWith(dropOffs(), settler.profession()::isTool);
         if (p == null) return req ? noTool() : null;
         settler.setStatus("fetching_tool");

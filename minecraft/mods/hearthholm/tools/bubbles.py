@@ -170,6 +170,7 @@ B = {
 }
 
 B["need_pickaxe"] = [("I need a pickaxe!", "Мне нужна кирка!"), ("Can't mine without a pickaxe.", "Без кирки не покопаешь."), ("Somebody bring me a pickaxe.", "Принесите кто-нибудь кирку.")]
+B["need_arrows"] = [("I'm out of arrows!", "У меня кончились стрелы!"), ("Someone fetch me arrows.", "Принесите мне стрел."), ("A bow without arrows is just a stick.", "Лук без стрел - просто палка.")]
 B["need_axe"] = [("I need an axe!", "Мне нужен топор!"), ("Can't fell trees with my bare hands.", "Голыми руками дерево не свалишь."), ("Somebody bring me an axe.", "Принесите кто-нибудь топор.")]
 B["need_hoe"] = [("I need a hoe!", "Мне нужна мотыга!"), ("Can't till without a hoe.", "Без мотыги землю не вспашешь."), ("Somebody bring me a hoe.", "Принесите кто-нибудь мотыгу.")]
 

@@ -96,6 +96,11 @@ public class SettlerEntity extends PathfinderMob {
     private @Nullable UUID partyOwner;
     private long nextTaunt;
     private boolean retreating;
+    /** Wave I2: duty shift of a fighter (0 always, 1 day, 2 night), saved; 0 follows the shift of the post. */
+    public static final int SHIFT_ALWAYS = 0, SHIFT_DAY = 1, SHIFT_NIGHT = 2;
+    private int shift;
+    private int postShift;
+    private long postShiftAt = -1000;
 
     public SettlerEntity(EntityType<? extends SettlerEntity> type, Level level) {
         super(type, level);
@@ -111,6 +116,7 @@ public class SettlerEntity extends PathfinderMob {
                 .add(Attributes.MAX_HEALTH, 20)
                 .add(Attributes.MOVEMENT_SPEED, 0.5)
                 .add(Attributes.ATTACK_DAMAGE, 1.5)
+                .add(Attributes.ATTACK_SPEED, 4.0)
                 .add(Attributes.FOLLOW_RANGE, 32);
     }
 
@@ -316,6 +322,75 @@ public class SettlerEntity extends PathfinderMob {
         return professionId().equals(Professions.ARCHER.id()) && getMainHandItem().is(Items.BOW) && has(Items.ARROW);
     }
 
+    /** An archer with a bow in hand and no arrows left. */
+    public boolean needsArrows() {
+        return professionId().equals(Professions.ARCHER.id()) && getMainHandItem().is(Items.BOW) && !has(Items.ARROW);
+    }
+
+    /**
+     * Wave I2: combat settlers move at the speed of a player: walking 4.3 b/s, chasing a target (or retreating) 5.6 b/s,
+     * whatever speed factor the task asked for (the trait factor still nudges it by up to 15 %).
+     */
+    @Override
+    public void setSpeed(float v) {
+        if (v > 0.0001f && isCombatant()) {
+            LivingEntity t = getTarget();
+            boolean sprint = retreating || (t != null && t.isAlive());
+            float walk = (float) io.github.operagtx.hearthholm.core.Balance.COMBAT_WALK_BPS_X10 / io.github.operagtx.hearthholm.core.Balance.COMBAT_SPRINT_BPS_X10;
+            v = (float) getAttributeValue(Attributes.MOVEMENT_SPEED) * (sprint ? 1f : walk) * Mth.clamp(moveFactor(), 0.85f, 1.15f);
+        }
+        super.setSpeed(v);
+    }
+
+    // ---- wave I2: shifts ---------------------------------------------------------------------
+
+    public int shift() { return shift; }
+
+    public void setShift(int v) {
+        shift = Mth.clamp(v, SHIFT_ALWAYS, SHIFT_NIGHT);
+        syncRecord();
+    }
+
+    /** The shift in force: the own setting, else the shift of the nearest post of the profession (the post screen), else always. */
+    public int effectiveShift() {
+        if (!isCombatant()) return SHIFT_ALWAYS;
+        if (shift != SHIFT_ALWAYS) return shift;
+        long now = level().getGameTime();
+        if (now - postShiftAt > 100 || now < postShiftAt) {
+            postShiftAt = now;
+            postShift = SHIFT_ALWAYS;
+            Settlement st = settlement();
+            Identifier site = profession().siteType();
+            if (st != null && site != null) {
+                BlockPos from = bed() != null ? bed() : blockPosition();
+                double best = Double.MAX_VALUE;
+                for (Settlement.SiteRecord r : st.sitesOf(site)) {
+                    double d = r.pos().distSqr(from);
+                    if (d < best && level().isLoaded(r.pos()) && level().getBlockEntity(r.pos()) instanceof io.github.operagtx.hearthholm.worksite.WorkSiteBlockEntity w) {
+                        best = d;
+                        postShift = w.option("shift");
+                    }
+                }
+            }
+        }
+        return postShift;
+    }
+
+    private boolean nightWindow() {
+        int m = effectiveShift();
+        return m == SHIFT_NIGHT || (m == SHIFT_ALWAYS && profession().nightShift());
+    }
+
+    /** Whether this settler is on duty (working hours of the shift, awake and not leaving). */
+    public boolean isOnDuty() {
+        return isWorkTime() && !isLeaving();
+    }
+
+    /** True when the working period ends within {@code ticks}: the time to carry loot home. */
+    public boolean shiftEndsWithin(int ticks) {
+        return isWorkTime() && !workAt(Math.floorMod(dayTime() + ticks, 24000L));
+    }
+
     /**
      * Health, damage and natural armour of combat settlers grow with level (a guard or warrior starts sturdier
      * than a civilian and gains with every level), knights get a large bonus on top. Gear adds its own attributes.
@@ -328,10 +403,12 @@ public class SettlerEntity extends PathfinderMob {
         double armor = 0, toughness = 0;
         if (isCombatant()) {
             hp += 20 + 4 * (lvl - 1);
-            atk = 2.5 + profile.stat(io.github.operagtx.hearthholm.core.Stat.STRENGTH) * 0.35 + 0.7 * (lvl - 1);
+            // wave I2: a bare hand hits for 1 like a player's; the held weapon adds its own vanilla damage through its attribute modifiers
+            atk = 1 + profile.stat(io.github.operagtx.hearthholm.core.Stat.STRENGTH) * io.github.operagtx.hearthholm.core.Balance.COMBAT_DMG_PER_STRENGTH_PCT / 100.0
+                    + io.github.operagtx.hearthholm.core.Balance.COMBAT_DMG_PER_LEVEL_PCT / 100.0 * (lvl - 1);
             armor = 2 + 0.5 * (lvl - 1);
             toughness = 2;
-            if (isKnight()) { hp += 24; atk += 2; armor += 3; toughness += 2; }
+            if (isKnight()) { hp += 24; atk += io.github.operagtx.hearthholm.core.Balance.KNIGHT_DMG_BONUS_PCT / 100.0; armor += 3; toughness += 2; }
         }
         var maxHp = Objects.requireNonNull(getAttribute(Attributes.MAX_HEALTH));
         float old = getMaxHealth();
@@ -340,6 +417,9 @@ public class SettlerEntity extends PathfinderMob {
             setHealth(Math.min(hp, Math.max(1f, getHealth() * (hp / Math.max(1f, old)))));
         }
         Objects.requireNonNull(getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(atk);
+        // wave I2: movement attribute = chasing speed of a sprinting player; walking is derived in setSpeed
+        Objects.requireNonNull(getAttribute(Attributes.MOVEMENT_SPEED)).setBaseValue(isCombatant()
+                ? io.github.operagtx.hearthholm.core.Balance.COMBAT_SPRINT_BPS_X10 / 10.0 / io.github.operagtx.hearthholm.core.Balance.COMBAT_BPS_PER_ATTR : 0.5);
         Objects.requireNonNull(getAttribute(Attributes.ARMOR)).setBaseValue(armor);
         Objects.requireNonNull(getAttribute(Attributes.ARMOR_TOUGHNESS)).setBaseValue(toughness);
     }
@@ -681,16 +761,26 @@ public class SettlerEntity extends PathfinderMob {
     }
 
     public boolean isSleepTime() {
-        long t = dayTime();
-        if (profession().nightShift()) return t >= 3000 && t < 9000;
+        return sleepAt(dayTime());
+    }
+
+    private boolean sleepAt(long t) {
+        if (nightWindow()) return t >= 3000 && t < 9000;
         long start = hasTrait("night_owl") ? 14500 : 12600;
         return t >= start && t < 23400;
     }
 
+    private boolean workAt(long t) {
+        if (sleepAt(t)) return false;
+        return switch (effectiveShift()) {
+            case SHIFT_NIGHT -> t >= 11800 || t < 3000;
+            case SHIFT_DAY -> t < 11800 || t >= 23400;
+            default -> profession().nightShift() || t < 11800 || t >= 23400;
+        };
+    }
+
     public boolean isWorkTime() {
-        if (isSleepTime()) return false;
-        long t = dayTime();
-        return profession().nightShift() || t < 11800 || t >= 23400;
+        return workAt(dayTime());
     }
 
     public boolean isLunchTime() {
@@ -859,7 +949,11 @@ public class SettlerEntity extends PathfinderMob {
     @Override
     public boolean doHurtTarget(ServerLevel level, Entity target) {
         boolean hit = super.doHurtTarget(level, target);
-        if (hit && isCombatant() && target instanceof LivingEntity le) gainXp(le.isDeadOrDying() ? 6 : 1);
+        if (hit && isCombatant() && target instanceof LivingEntity le) {
+            gainXp(le.isDeadOrDying() ? 6 : 1);
+            ItemStack weapon = getMainHandItem();
+            if (weapon.isDamageableItem() && !weapon.is(Items.BOW)) weapon.hurtAndBreak(1, this, EquipmentSlot.MAINHAND);   // wave I2: weapons wear out
+        }
         return hit;
     }
 
@@ -915,6 +1009,7 @@ public class SettlerEntity extends PathfinderMob {
         out.storeNullable("PartyOwner", UUIDUtil.CODEC, partyOwner);
         out.putLong("LastChatDay", lastChatDay);
         out.store("Xp", XP_CODEC, Map.copyOf(xp));
+        out.putInt("Shift", shift);
         inventory.storeAsItemList(out.list("Inventory", ItemStack.CODEC));
     }
 
@@ -943,6 +1038,7 @@ public class SettlerEntity extends PathfinderMob {
         lastChatDay = in.getLongOr("LastChatDay", -1L);
         xp.clear();
         in.read("Xp", XP_CODEC).ifPresent(xp::putAll);
+        shift = in.getIntOr("Shift", SHIFT_ALWAYS);
         inventory.fromItemList(in.listOrEmpty("Inventory", ItemStack.CODEC));
         refreshCombatStats();
         refreshName();

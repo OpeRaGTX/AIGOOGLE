@@ -20,6 +20,7 @@ import java.util.List;
 /** One settler: who they are, how they feel and why, their kit, and their profession. */
 public final class SettlerScreen extends HhScreen {
     private Views.Settler view;
+    private static final String[] SHIFTS = {"always", "day", "night"};
     private boolean confirmDismiss;
 
     public SettlerScreen(Views.Settler view) {
@@ -66,6 +67,11 @@ public final class SettlerScreen extends HhScreen {
                         rebuildWidgets();
                     }
                 });
+        if (view.fighter()) {
+            Component shift = Component.translatable("gui.hearthholm.shift", Component.translatable("option.hearthholm.shift." + SHIFTS[Math.floorMod(view.shift(), 3)]));
+            Button sb = button(fitLabel(shift, 104), left + 178, top + 85, 112, 14, b -> send(Payloads.SettlerAction.SET_SHIFT, Integer.toString((view.shift() + 1) % 3)));
+            sb.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.shift_tip")));
+        }
         button(fitLabel(Component.translatable("gui.hearthholm.refresh"), 72), left + 8, top + panelH - 22, 80, 16, b -> send(Payloads.SettlerAction.REFRESH, ""));
         if (view.promotable()) {
             Button promote = button(fitLabel(Component.translatable("gui.hearthholm.promote"), 126), left + 92, top + panelH - 22, 134, 16, b -> send(Payloads.SettlerAction.PROMOTE, ""));
@@ -154,6 +160,10 @@ public final class SettlerScreen extends HhScreen {
         bar(g, bx, ny + 1, bw, 6, (view.mood() + 100) / 200f, moodColor(view.mood()));
         text(g, moodFace(view.mood()) + " " + view.mood(), vx, ny, moodColor(view.mood()));
         ny += 12;
+        if (view.fighter()) {
+            fitText(g, Component.translatable(view.onDuty() ? "gui.hearthholm.on_duty" : "gui.hearthholm.off_duty"), left + 296, ny + 2, rightEdge - left - 296, view.onDuty() ? GOOD : DIM, mx, my);
+            ny += 16;
+        }
         int listBottom = top + panelH - 106;
         int valX = rightEdge - 22;
         if (!view.bed()) { fitText(g, Component.translatable("gui.hearthholm.no_bed"), nx, ny, rightEdge - nx, BAD, mx, my); ny += 10; }

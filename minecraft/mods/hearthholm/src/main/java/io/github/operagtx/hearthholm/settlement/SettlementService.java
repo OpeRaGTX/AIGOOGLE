@@ -558,6 +558,16 @@ public final class SettlementService {
                 if (r.profession.equals(prof)) { worker = r.profile.name(); status = r.status; break; }
             }
         }
+        if (s != null && (w.type().id().equals(WorkSiteTypes.PATROL_ID) || w.type().id().equals(WorkSiteTypes.TERRITORY_ID))) {
+            int on = 0, off = 0;
+            for (ResidentRecord r : s.residents) {
+                if (!r.profession.equals(w.type().profession()) && !(w.type().id().equals(WorkSiteTypes.PATROL_ID) && r.profession.equals(Professions.ARCHER.id()))
+                        && !(w.type().id().equals(WorkSiteTypes.TERRITORY_ID) && r.profession.equals(Professions.KNIGHT_ID))) continue;
+                if (level.getEntity(r.uuid) instanceof SettlerEntity g) { if (g.isOnDuty()) on++; else off++; }
+            }
+            worker = Component.translatable("gui.hearthholm.duty_count", on, off);
+            status = Component.translatable("gui.hearthholm.shift_now", Component.translatable("option.hearthholm.shift." + new String[]{"always", "day", "night"}[Math.min(2, w.option("shift"))]));
+        }
         int total = 0;
         if (w.type().id().equals(WorkSiteTypes.MINE_ID)) total = io.github.operagtx.hearthholm.entity.ai.jobs.MinePlanner.plan(w).steps().size();
         if (w.type().id().equals(WorkSiteTypes.CONSTRUCTION_ID)) {
@@ -674,7 +684,7 @@ public final class SettlementService {
                 e.moodEntries(), e.status(), lvl, e.xp(prof), next, inv, equipment, e.bed() != null,
                 s == null ? Component.empty() : s.displayName(),
                 relationName(s, friend), friend == null ? 0 : friend.getValue(), relationName(s, rival), rival == null ? 0 : rival.getValue(), canPromote(e),
-                Math.round(e.getHealth()), Math.round(e.getMaxHealth()));
+                Math.round(e.getHealth()), Math.round(e.getMaxHealth()), e.shift(), e.isOnDuty(), e.isCombatant());
         ServerPlayNetworking.send(player, new Payloads.OpenSettler(v));
     }
 
@@ -693,6 +703,11 @@ public final class SettlementService {
                 }
             }
             case Payloads.SettlerAction.PROMOTE -> promote(player, e, s);
+            case Payloads.SettlerAction.SET_SHIFT -> {
+                if (e.isCombatant()) {
+                    try { e.setShift(Integer.parseInt(a.arg())); } catch (NumberFormatException ignored) { /* keep */ }
+                }
+            }
             case Payloads.SettlerAction.DISMISS -> {
                 e.leave(Component.translatable("message.hearthholm.dismissed", e.getName()));
                 return;

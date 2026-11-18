@@ -39,6 +39,12 @@ final class CombatGear {
         return null;
     }
 
+    /** What a fighter keeps in the pockets when carrying loot home: weapons, arrows, armour, food, salves. */
+    static boolean keep(SettlerEntity s, ItemStack st) {
+        return st.is(net.minecraft.world.item.Items.ARROW) || s.profession().isTool(st) || st.has(DataComponents.EQUIPPABLE)
+                || st.has(DataComponents.FOOD) || st.is(io.github.operagtx.hearthholm.registry.ModItems.HEALING_SALVE);
+    }
+
     private static boolean fits(ItemStack st, EquipmentSlot slot) {
         Equippable eq = st.get(DataComponents.EQUIPPABLE);
         return eq != null && eq.slot() == slot;

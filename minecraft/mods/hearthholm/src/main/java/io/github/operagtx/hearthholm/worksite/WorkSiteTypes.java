@@ -56,9 +56,11 @@ public final class WorkSiteTypes {
                 SiteOption.toggle("keep_junk", false)), 0x4FA3C7, be -> around(be.getBlockPos(), 4, 2, 2)));
         REGISTRY.register(PATROL_ID, new WorkSiteType(PATROL_ID, Hearthholm.id("guard"), List.of(
                 SiteOption.range("wait", 5, 60, 5, 15),
-                SiteOption.range("radius", 4, 24, 2, 8)), 0x6C7FD8, be -> around(be.getBlockPos(), be.option("radius"), 0, 3)));
+                SiteOption.range("radius", 4, 24, 2, 8),
+                SiteOption.choice("shift", 0, "always", "day", "night")), 0x6C7FD8, be -> around(be.getBlockPos(), be.option("radius"), 0, 3)));
         REGISTRY.register(TERRITORY_ID, new WorkSiteType(TERRITORY_ID, Hearthholm.id("warrior"), List.of(
                 SiteOption.range("radius", 8, 48, 4, 16),
-                SiteOption.choice("stance", 0, "patrol", "follow", "hold")), 0xC9483C, be -> around(be.getBlockPos(), be.option("radius"), 0, 3)));
+                SiteOption.choice("stance", 0, "patrol", "follow", "hold"),
+                SiteOption.choice("shift", 0, "always", "day", "night")), 0xC9483C, be -> around(be.getBlockPos(), be.option("radius"), 0, 3)));
     }
 }

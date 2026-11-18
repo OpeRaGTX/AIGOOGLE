@@ -104,4 +104,20 @@ public final class Balance {
     /** XP curve for every profession: cumulative XP for levels 1..5. One point per XP_WORK_TICKS ticks of active work. */
     public static int[] LEVEL_XP = {0, 100, 300, 600, 950};
     public static int XP_WORK_TICKS = 110, XP_ACTION_PERCENT = 10;
+
+    // ---- wave I2: combat settlers move like a player (blocks/second x10), damage comes from the held weapon
+    /** Walking and chasing speed in blocks/second x10 (player: walk 4.3, sprint 5.6). {@code COMBAT_BPS_PER_ATTR} converts: blocks/second per unit of the movement attribute (mob scale). */
+    public static int COMBAT_WALK_BPS_X10 = 43, COMBAT_SPRINT_BPS_X10 = 56, COMBAT_BPS_PER_ATTR = 43;
+    /** Bonus on top of the weapon (bare hand = 1): percent of a point per level above 1 and per Strength point; knights get a flat extra. */
+    public static int COMBAT_DMG_PER_LEVEL_PCT = 15, COMBAT_DMG_PER_STRENGTH_PCT = 6, KNIGHT_DMG_BONUS_PCT = 100;
+    /** Shortest pause between two blows in ticks (the weapon's own cooldown is 20 / attack speed). */
+    public static int ATTACK_INTERVAL_MIN_TICKS = 10;
+    /** Re-fetch pause in ticks when a fighter holds no weapon. */
+    public static int WEAPON_RETRY_TICKS = 600;
+
+    // ---- wave I2: archers (draw time, arrow stocks, bonus per level in percent of a point of arrow base damage)
+    public static int ARCHER_DRAW_TICKS = 20, ARCHER_DMG_PER_LEVEL_PCT = 5, ARROWS_LOW = 12, ARROWS_FETCH = 48;
+
+    // ---- wave I2: loot carried home (extra search radius around the post, ticks a drop stays claimable)
+    public static int LOOT_EXTRA_RADIUS = 4, LOOT_CLAIM_TICKS = 6000;
 }

@@ -23,6 +23,7 @@ public class WarriorJob extends SiteJob {
     }
 
     @Override protected boolean exclusive() { return false; }
+    @Override protected int toolRetryTicks() { return io.github.operagtx.hearthholm.core.Balance.WEAPON_RETRY_TICKS; }
 
     @Override
     public boolean defends(SettlerEntity s, LivingEntity target) {
