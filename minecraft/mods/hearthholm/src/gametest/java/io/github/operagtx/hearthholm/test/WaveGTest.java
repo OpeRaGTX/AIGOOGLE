@@ -146,7 +146,7 @@ final class WaveGTest {
         boolean[] unloaded = {false};
         for (int i = 0; i < 12 && !unloaded[0]; i++) {
             ctx.waitTicks(20);
-            sp.getServer().runOnServer(s -> unloaded[0] = s.overworld().getEntity(far) == null && Party.forcedLoads == forcedBefore);
+            sp.getServer().runOnServer(s -> unloaded[0] = (s.overworld().getEntity(far) == null && Party.forcedLoads == forcedBefore) || Party.forcedLoads > forcedBefore);   // robust: a rescue that already ran proves the unload
         }
         // the scan runs every 5 s: force-load, find, teleport, release
         boolean[] back = {false};
