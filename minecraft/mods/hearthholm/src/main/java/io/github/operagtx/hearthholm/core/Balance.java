@@ -106,8 +106,8 @@ public final class Balance {
     public static int XP_WORK_TICKS = 110, XP_ACTION_PERCENT = 10;
 
     // ---- wave I2: combat settlers move like a player (blocks/second x10), damage comes from the held weapon
-    /** Walking and chasing speed in blocks/second x10 (player: walk 4.3, sprint 5.6). {@code COMBAT_BPS_PER_ATTR} converts: blocks/second per unit of the movement attribute (mob scale). */
-    public static int COMBAT_WALK_BPS_X10 = 43, COMBAT_SPRINT_BPS_X10 = 56, COMBAT_BPS_PER_ATTR = 43;
+    /** Walking and chasing speed in blocks/second x10 (player: walk 4.3, sprint 5.6). A mob's drive is both its speed and its forward input, so blocks/second = {@code COMBAT_BPS_PER_ATTR_SQ} x attribute squared (measured: 44, e.g. 0.1 gives 0.44 b/s). */
+    public static int COMBAT_WALK_BPS_X10 = 43, COMBAT_SPRINT_BPS_X10 = 56, COMBAT_BPS_PER_ATTR_SQ = 44;
     /** Bonus on top of the weapon (bare hand = 1): percent of a point per level above 1 and per Strength point; knights get a flat extra. */
     public static int COMBAT_DMG_PER_LEVEL_PCT = 15, COMBAT_DMG_PER_STRENGTH_PCT = 6, KNIGHT_DMG_BONUS_PCT = 100;
     /** Shortest pause between two blows in ticks (the weapon's own cooldown is 20 / attack speed). */

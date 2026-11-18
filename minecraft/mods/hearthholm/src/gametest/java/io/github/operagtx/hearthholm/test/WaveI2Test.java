@@ -55,6 +55,12 @@ final class WaveI2Test {
 
     private WaveI2Test() {}
 
+    private static boolean until(String step) {
+        String u = System.getenv("HH_I2_UNTIL");
+        if (u != null && u.equals(step)) { log("I2 stopped after " + step + " fails=" + FAILS); return true; }
+        return false;
+    }
+
     private static void fail(String m) { FAILS.add(m); log("I2 FAIL " + m); }
 
     private static void check(boolean ok, String what) { if (!ok) fail(what); }
@@ -92,12 +98,11 @@ final class WaveI2Test {
     /** Hits a fresh zombie with the guard (damage per blow as in a fight) until it dies; returns the number of blows. */
     private static int hitsToKill(SettlerEntity g, ItemStack weapon, BlockPos at) {
         ServerLevel l = (ServerLevel) g.level();
-        g.setItemSlot(EquipmentSlot.MAINHAND, weapon);
         var z = zombie(l, at);
         z.setHealth(z.getMaxHealth());
         int n = 0;
         while (z.isAlive() && n < 60) {
-            z.invulnerableTime = 0;
+            z.damageCooldownTime = 0;
             g.doHurtTarget(l, z);
             n++;
         }
@@ -136,6 +141,7 @@ final class WaveI2Test {
             Settlement st = town(s);
             POST = O.offset(4, 0, -3);
             l.setBlock(POST, ModBlocks.PATROL_POST.defaultBlockState().setValue(WorkSiteBlock.FACING, Direction.SOUTH), 3);
+            SettlementService.onWorkSitePlaced(l, POST, p);
             st.rescan(l);
             log("I2 patrol posts: " + st.sitesOf(WorkSiteTypes.PATROL_ID).size());
             SettlerEntity g = pick(s, null, true);
@@ -167,12 +173,19 @@ final class WaveI2Test {
             g.getNavigation().stop();
             g.teleportTo(O.getX() - 8.5, platformY, O.getZ() + 40.5);
             Goal w = new Walk(g, new Vec3(O.getX() + 48.5, platformY, O.getZ() + 40.5));
-            g.goalSelector.addGoal(0, w);
+            g.addTestGoal(w);
             walk.set(w);
         });
         ctx.waitTicks(50);
         sp.getServer().runOnServer(s -> p0.set(get(s, GUARD).position()));
-        ctx.waitTicks(100);
+        for (int i = 0; i < 5; i++) {
+            ctx.waitTicks(20);
+            sp.getServer().runOnServer(s -> {
+                SettlerEntity g = get(s, GUARD);
+                log("I2 diag walk pos=" + g.position() + " nav=" + g.getNavigation().isInProgress() + " speed=" + g.getSpeed() + " ground=" + g.onGround() + " dm=" + g.getDeltaMovement()
+                        + " act=" + g.brain().currentActivity() + " noAi=" + g.isNoAi() + " sleeping=" + g.isSleeping());
+            });
+        }
         AtomicInteger walkTenths = new AtomicInteger();
         sp.getServer().runOnServer(s -> {
             SettlerEntity g = get(s, GUARD);
@@ -180,7 +193,7 @@ final class WaveI2Test {
             walkTenths.set((int) Math.round(bps * 10));
             log("I2 guard speed walking = " + String.format("%.2f", bps) + " b/s (player walk 4.3)");
             check(bps > 3.7 && bps < 4.9, "walking speed " + bps);
-            g.goalSelector.removeGoal(walk.get());
+            g.removeTestGoal(walk.get());
             g.getNavigation().stop();
             g.teleportTo(O.getX() - 8.5, platformY, O.getZ() + 40.5);
             var z = zombie(s.overworld(), new BlockPos(O.getX() + 24, platformY, O.getZ() + 40));
@@ -189,7 +202,14 @@ final class WaveI2Test {
         });
         ctx.waitTicks(30);
         sp.getServer().runOnServer(s -> p0.set(get(s, GUARD).position()));
-        ctx.waitTicks(40);
+        for (int i = 0; i < 2; i++) {
+            ctx.waitTicks(20);
+            sp.getServer().runOnServer(s -> {
+                SettlerEntity g = get(s, GUARD);
+                log("I2 diag chase pos=" + g.position() + " nav=" + g.getNavigation().isInProgress() + " speed=" + g.getSpeed() + " ground=" + g.onGround() + " dm=" + g.getDeltaMovement()
+                        + " act=" + g.brain().currentActivity() + " target=" + g.getTarget());
+            });
+        }
         sp.getServer().runOnServer(s -> {
             SettlerEntity g = get(s, GUARD);
             double bps = flatDist(p0.get(), g.position()) / 2.0;
@@ -201,34 +221,53 @@ final class WaveI2Test {
             g.teleportTo(O.getX() + 4.5, O.getY(), O.getZ() - 2.5);
         });
 
+        if (until("speed")) return;
         // ---- 2. damage per blow by weapon (hits to kill a 20 hp zombie), wear
+        AtomicInteger[] hitCount = {new AtomicInteger(), new AtomicInteger(), new AtomicInteger()};
+        ItemStack[] weapons = {ItemStack.EMPTY, new ItemStack(Items.WOODEN_SWORD), new ItemStack(Items.IRON_SWORD)};
         sp.getServer().runOnServer(s -> {
-            ServerLevel l = s.overworld();
             SettlerEntity g = get(s, GUARD);
             g.setHealth(g.getMaxHealth());
-            BlockPos at = O.offset(-10, 0, 10);
-            int bare = hitsToKill(g, ItemStack.EMPTY, at);
-            int wood = hitsToKill(g, new ItemStack(Items.WOODEN_SWORD), at);
-            ItemStack iron = new ItemStack(Items.IRON_SWORD);
-            int ironHits = hitsToKill(g, iron, at);
-            log("I2 hits to kill a zombie: bare hand=" + bare + " wooden sword=" + wood + " iron sword=" + ironHits + " (per blow " + 20.0 / bare + " / " + 20.0 / wood + " / " + 20.0 / ironHits
-                    + ") atk attribute with iron sword=" + g.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE));
+            g.setNoAi(true);
+            g.inventory().clearContent();
+        });
+        for (int w = 0; w < 3; w++) {
+            int idx = w;
+            sp.getServer().runOnServer(s -> get(s, GUARD).setItemSlot(EquipmentSlot.MAINHAND, weapons[idx]));
+            ctx.waitTicks(4);   // the weapon's attribute modifiers apply on the next ticks
+            sp.getServer().runOnServer(s -> {
+                SettlerEntity g = get(s, GUARD);
+                hitCount[idx].set(hitsToKill(g, g.getMainHandItem(), O.offset(-10, 0, 10)));
+                log("I2 weapon " + g.getMainHandItem().getItem() + ": attack attribute=" + g.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)
+                        + " attack speed=" + g.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_SPEED) + " hits=" + hitCount[idx].get());
+            });
+        }
+        sp.getServer().runOnServer(s -> {
+            SettlerEntity g = get(s, GUARD);
+            int bare = hitCount[0].get(), wood = hitCount[1].get(), ironHits = hitCount[2].get();
+            log("I2 hits to kill a zombie: bare hand=" + bare + " wooden sword=" + wood + " iron sword=" + ironHits);
             check(bare >= 10 && bare <= 24, "bare hand hits " + bare);
             check(wood >= 4 && wood <= 6, "wooden sword hits " + wood);
             check(ironHits >= 3 && ironHits <= 5 && ironHits < wood, "iron sword hits " + ironHits);
+            ItemStack iron = g.getMainHandItem();
             log("I2 weapon wear: iron sword damage " + iron.getDamageValue() + "/" + iron.getMaxDamage() + " after " + ironHits + " hits");
             check(iron.getDamageValue() == ironHits, "iron sword not worn by each hit");
             ItemStack frail = new ItemStack(Items.WOODEN_SWORD);
             frail.setDamageValue(frail.getMaxDamage() - 1);
-            hitsToKill(g, frail, at);
+            g.setItemSlot(EquipmentSlot.MAINHAND, frail);
+        });
+        ctx.waitTicks(4);
+        sp.getServer().runOnServer(s -> {
+            SettlerEntity g = get(s, GUARD);
+            hitsToKill(g, g.getMainHandItem(), O.offset(-10, 0, 10));
             check(g.getMainHandItem().isEmpty(), "broken sword still in the hand");
             log("I2 sword broke: hand=" + g.getMainHandItem().getItem());
+            g.setNoAi(false);
             // the warehouse has a sword: the guard (on duty) fetches the best one by himself
             remove(s, x -> x.is(net.minecraft.tags.ItemTags.SWORDS) || x.is(net.minecraft.tags.ItemTags.AXES));
             stock(s, new ItemStack(Items.STONE_SWORD));
             stock(s, new ItemStack(Items.IRON_SWORD));
             g.inventory().clearContent();
-            g.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
             g.teleportTo(O.getX() + 4.5, O.getY(), O.getZ() - 4.5);
             log("I2 shift of the guard: " + g.shift() + " effective=" + g.effectiveShift() + " onDuty=" + g.isOnDuty() + " time=" + g.dayTime());
         });
@@ -247,6 +286,7 @@ final class WaveI2Test {
             check(armed.get(), "guard did not fetch a new weapon");
         });
 
+        if (until("damage")) return;
         // ---- 3. loot: a zombie killed by the guard drops an item; it is picked up and carried to the warehouse
         AtomicInteger emeralds0 = new AtomicInteger();
         sp.getServer().runOnServer(s -> {
@@ -255,13 +295,13 @@ final class WaveI2Test {
             Settlement st = town(s);
             emeralds0.set(HearthholmClientTest.stock(s, Items.EMERALD));
             for (int i = 0; i < 15; i++) g.inventory().setItem(i, new ItemStack(Items.DIRT));   // pockets nearly full
-            BlockPos at = POST.offset(3, 0, 3).atY(l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, POST.getX() + 3, POST.getZ() + 3));
+            BlockPos at = POST.offset(2, 0, -1).atY(l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, POST.getX() + 2, POST.getZ() - 1));
             var z = zombie(l, at);
             ItemEntity drop = new ItemEntity(l, at.getX() + 0.5, at.getY() + 0.2, at.getZ() + 0.5, new ItemStack(Items.EMERALD, 3));
             drop.setNoPickUpDelay();
             l.addFreshEntity(drop);
             int n = 0;
-            while (z.isAlive() && n++ < 60) { z.invulnerableTime = 0; g.doHurtTarget(l, z); }
+            while (z.isAlive() && n++ < 60) { z.damageCooldownTime = 0; g.doHurtTarget(l, z); }
             z.discard();
             boolean tagged = drop.entityTags().contains(Loot.TAG);
             log("I2 loot: zombie killed by the guard, drop tagged=" + tagged + " at " + at.toShortString() + " post=" + POST.toShortString());
@@ -284,6 +324,7 @@ final class WaveI2Test {
             check(delivered.get(), "loot was not delivered to the warehouse");
         });
 
+        if (until("loot")) return;
         // ---- 4. archer: refills from the warehouse, consumes arrows, bow wears, no arrows -> status
         AtomicInteger arrowsAfterFetch = new AtomicInteger();
         sp.getServer().runOnServer(s -> {
@@ -304,6 +345,8 @@ final class WaveI2Test {
             sp.getServer().runCommand("time set 10000");
             boolean[] got = {false};
             sp.getServer().runOnServer(s -> {
+                SettlerEntity ar = get(s, ARCHER);
+                log("I2 diag archer pos=" + ar.blockPosition().toShortString() + " act=" + ar.brain().currentActivity() + " status=" + ar.status().getString() + " prof=" + ar.professionId() + " leaving=" + ar.isLeaving() + " arrived=" + ar.hasArrived() + " work=" + ar.isWorkTime() + " t=" + ar.dayTime());
                 int n = get(s, ARCHER).count(x -> x.is(Items.ARROW));
                 got[0] = n > 0;
                 arrowsAfterFetch.set(n);

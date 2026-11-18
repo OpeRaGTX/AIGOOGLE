@@ -329,18 +329,22 @@ public class SettlerEntity extends PathfinderMob {
 
     /**
      * Wave I2: combat settlers move at the speed of a player: walking 4.3 b/s, chasing a target (or retreating) 5.6 b/s,
-     * whatever speed factor the task asked for (the trait factor still nudges it by up to 15 %).
+     * whatever speed factor the task asked for (the trait factor still nudges it by up to 15 %). Mobs accelerate with speed squared, hence the square roots.
      */
     @Override
     public void setSpeed(float v) {
         if (v > 0.0001f && isCombatant()) {
             LivingEntity t = getTarget();
             boolean sprint = retreating || (t != null && t.isAlive());
-            float walk = (float) io.github.operagtx.hearthholm.core.Balance.COMBAT_WALK_BPS_X10 / io.github.operagtx.hearthholm.core.Balance.COMBAT_SPRINT_BPS_X10;
+            float walk = (float) Math.sqrt((double) io.github.operagtx.hearthholm.core.Balance.COMBAT_WALK_BPS_X10 / io.github.operagtx.hearthholm.core.Balance.COMBAT_SPRINT_BPS_X10);
             v = (float) getAttributeValue(Attributes.MOVEMENT_SPEED) * (sprint ? 1f : walk) * Mth.clamp(moveFactor(), 0.85f, 1.15f);
         }
         super.setSpeed(v);
     }
+
+    /** Test hooks: a goal with the highest priority (the game test drives a settler along a line with it). */
+    public void addTestGoal(net.minecraft.world.entity.ai.goal.Goal g) { goalSelector.addGoal(0, g); }
+    public void removeTestGoal(net.minecraft.world.entity.ai.goal.Goal g) { goalSelector.removeGoal(g); }
 
     // ---- wave I2: shifts ---------------------------------------------------------------------
 
@@ -419,7 +423,7 @@ public class SettlerEntity extends PathfinderMob {
         Objects.requireNonNull(getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(atk);
         // wave I2: movement attribute = chasing speed of a sprinting player; walking is derived in setSpeed
         Objects.requireNonNull(getAttribute(Attributes.MOVEMENT_SPEED)).setBaseValue(isCombatant()
-                ? io.github.operagtx.hearthholm.core.Balance.COMBAT_SPRINT_BPS_X10 / 10.0 / io.github.operagtx.hearthholm.core.Balance.COMBAT_BPS_PER_ATTR : 0.5);
+                ? Math.sqrt(io.github.operagtx.hearthholm.core.Balance.COMBAT_SPRINT_BPS_X10 / 10.0 / io.github.operagtx.hearthholm.core.Balance.COMBAT_BPS_PER_ATTR_SQ) : 0.5);
         Objects.requireNonNull(getAttribute(Attributes.ARMOR)).setBaseValue(armor);
         Objects.requireNonNull(getAttribute(Attributes.ARMOR_TOUGHNESS)).setBaseValue(toughness);
     }

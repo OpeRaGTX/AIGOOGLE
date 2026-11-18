@@ -13,6 +13,11 @@ yourself, keep going until your wave is done, built, tested and committed.
 - Screenshots: look at most at the 3–4 that show YOUR new visuals, once after the final run; skip unchanged ones.
 - Commit after each major step (crash safety), `git push` at the end.
 
+## Test runs (token saving)
+- While developing run ONLY your wave: `HH_ONLY_<WAVE>=1 bash .../run-client-test.sh ... > /tmp/x.out 2>&1; tail -40 /tmp/x.out | cut -c1-240`, plus one earlier wave if your change touches it.
+- Run the FULL client test exactly ONCE, at the end. If it fails, fix, rerun only the failing wave, then one final full run.
+- When a change makes old behaviour weaker or slower (e.g. guards no longer one-shot), update the old wave's setup (better gear, more guards) instead of weakening its checks.
+
 ## Read first (only what you need)
 - `DESIGN.md` (architecture), `CONCEPTS.md` (the feature waves), this file.
 - Key code: `core/Profession(s)`, `worksite/*`, `settlement/Settlement*`, `entity/SettlerEntity`,

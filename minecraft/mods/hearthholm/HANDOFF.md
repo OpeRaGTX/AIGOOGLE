@@ -77,6 +77,8 @@ No PR unless asked. Stop hook demands commit+push before ending a turn.
   with torches/vein mining/vanilla pickaxe speed, tools wear and are re-fetched (`BaseJob.toolTrip`, bubbles `need_pickaxe|axe|hoe`), XP time-based (`workTick`, curve `Balance.LEVEL_XP`).
   Test `WaveI1Test` (`HH_ONLY_I1=1`); earlier waves run with an accelerated builder/miner (`Balance` overridden in `HearthholmClientTest`). Next: **I2** guard/archer combat, shifts, loot pickup.
 
+- **I2 Playability: guards and archers**: combat settlers walk 4.3 / chase 5.6 b/s (`SettlerEntity.setSpeed`), damage comes from the held weapon (bare hand 1, vanilla modifiers, attack-speed cooldown, 1 durability per hit, re-arm from post chest/warehouse), archer uses real arrows (draw 1 s, ~6 dmg, bow wear, refill, `needs_arrows` status + bubble, melee fallback), loot (`town/Loot`, `tasks/Fetch`, tag `hh_loot`), shifts Always/Day/Night per settler and per post (`shift` option, settler screen button), alarm calls everybody. Test `WaveI2Test` (`HH_ONLY_I2=1`). Test rule: run only your wave while developing, full test once at the end.
+
 ## Remaining gaps / ideas
 - Balance is theory + headless test only: tune after real play (now via `config/hearthholm.json`).
 - End dimension untested for the party; raid casualties non-deterministic.
