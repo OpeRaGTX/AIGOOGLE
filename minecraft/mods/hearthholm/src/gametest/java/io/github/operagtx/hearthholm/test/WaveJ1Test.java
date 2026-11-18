@@ -428,7 +428,7 @@ final class WaveJ1Test {
                 ProfessionModule m = ProfessionModules.REGISTRY.get(p.id()).orElse(null);
                 if (m == null) { fail("no module for " + p.id()); continue; }
                 n++;
-                if (m.workSite() != null) { withSite++; check(m.zone() != null && m.zone().kind() == (p == Professions.LUMBERJACK ? ProfessionModule.ZoneData.Kind.MAP : ProfessionModule.ZoneData.Kind.BOX), "zone of " + p.id()); }
+                if (m.workSite() != null) { withSite++; check(m.zone() != null && m.zone().kind() == (p == Professions.LUMBERJACK || p == Professions.MINER ? ProfessionModule.ZoneData.Kind.MAP : ProfessionModule.ZoneData.Kind.BOX), "zone of " + p.id()); }
                 check(m.jobFactory() != null && m.screenOpener() != null && m.profession() == p, "module of " + p.id());
             }
             ProfessionModule mm = ProfessionModules.of(Professions.MINER);
@@ -437,7 +437,7 @@ final class WaveJ1Test {
             check(ProfessionModules.of(Professions.UNEMPLOYED).workSite() == null, "unemployed has a site?");
             SettlementService.openWorkSite(player(s), M);   // the site screen opens through the module
         });
-        ctx.waitForScreen(WorkSiteScreen.class);
+        ctx.waitForScreen(io.github.operagtx.hearthholm.client.screen.ZoneMapScreen.class);   // wave J3: the miner's stone opens the map
         ctx.setScreen(() -> null);
 
         // ---- 8. screenshots of the inventory screen: RU 1280x720 and 854x480

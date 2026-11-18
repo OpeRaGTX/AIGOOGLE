@@ -247,6 +247,9 @@ public final class ZoneMapScreen extends HhScreen {
         button(fitLabel(Component.empty().append(o.label()).append(": ").append(o.valueLabel(v)), HW - 8), x, y, HW, 16, b -> sendOption("torches", o.next(v, 1)));
     }
 
+    /** Shows another layer (the slider, the +/- buttons and tests use this); repeated until the server's snapshot arrives. */
+    public void showLayer(int y) { setLayer(y); }
+
     private void setLayer(int y) {
         Payloads.MineInfo info = map.data().info();
         layerY = Math.max(info.minY(), Math.min(info.maxY(), y));
@@ -278,7 +281,7 @@ public final class ZoneMapScreen extends HhScreen {
         Payloads.MineInfo info = map.data().info();
         if (drawn) {
             int y = top + 16 + 36 + 18;
-            String bs = fit(Component.translatable("gui.hearthholm.mine.brush_size", map.brush() * 2), HW - 36);
+            String bs = fit(Component.translatable("gui.hearthholm.mine.brush_size", map.brush() * 2 + "b"), HW - 36);
             g.text(font, bs, x0 + (HW - font.width(bs)) / 2, y + 4, TEXT, false);
             y += 18;
             String hs = fit(Component.translatable("gui.hearthholm.mine.height", map.height()), HW - 36);
@@ -337,6 +340,10 @@ public final class ZoneMapScreen extends HhScreen {
         long now = minecraft == null || minecraft.level == null ? 0 : minecraft.level.getGameTime();
         if (confirmClear && now > confirmUntil) { confirmClear = false; rebuildWidgets(); }
         if (confirmEverything && now > confirmUntil) { confirmEverything = false; rebuildWidgets(); }
+        if (spec.layered() && map != null && layerY != map.layer() && now - lastRefresh >= 11) {   // a throttled slider request is repeated
+            lastRefresh = now;
+            ClientPlayNetworking.send(new Payloads.ZoneMapRequest(view.pos(), layerY));
+        }
         boolean soon = editDirty && now - lastEdit >= 12 && now - lastRefresh >= 10;
         if (map != null && !map.busy() && (now - lastRefresh >= 200 || soon)) {
             lastRefresh = now;

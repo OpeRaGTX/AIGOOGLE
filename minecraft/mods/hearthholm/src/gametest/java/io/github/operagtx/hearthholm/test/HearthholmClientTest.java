@@ -142,7 +142,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             ctx.takeScreenshot("hh_07_settler");
             ctx.setScreen(() -> null);
             sp.getServer().runOnServer(s -> SettlementService.openWorkSite(player(s), MINE));
-            ctx.waitForScreen(WorkSiteScreen.class);
+            ctx.waitForScreen(io.github.operagtx.hearthholm.client.screen.ZoneMapScreen.class);   // wave J3: the miner's stone opens its map
             ctx.takeScreenshot("hh_08_mine_config");
             ctx.setScreen(() -> null);
 
@@ -171,22 +171,23 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 log("CRAFT OK");
             });
             boolean onlyF = System.getenv("HH_ONLY_F") != null, onlyE = System.getenv("HH_ONLY_E") != null, onlyD = System.getenv("HH_ONLY_D") != null, onlyG = System.getenv("HH_ONLY_G") != null, onlyH = System.getenv("HH_ONLY_H") != null,
-                    onlyH2 = System.getenv("HH_ONLY_H2") != null, onlyH3 = System.getenv("HH_ONLY_H3") != null, onlyI1 = System.getenv("HH_ONLY_I1") != null, onlyI2 = System.getenv("HH_ONLY_I2") != null, onlyJ1 = System.getenv("HH_ONLY_J1") != null, onlyJ2 = System.getenv("HH_ONLY_J2") != null;
-            if (!onlyD && !onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2) {
+                    onlyH2 = System.getenv("HH_ONLY_H2") != null, onlyH3 = System.getenv("HH_ONLY_H3") != null, onlyI1 = System.getenv("HH_ONLY_I1") != null, onlyI2 = System.getenv("HH_ONLY_I2") != null, onlyJ1 = System.getenv("HH_ONLY_J1") != null, onlyJ2 = System.getenv("HH_ONLY_J2") != null, onlyJ3 = System.getenv("HH_ONLY_J3") != null;
+            if (!onlyD && !onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2 && !onlyJ3) {
                 waveB(ctx, sp);
                 waveC(ctx, sp);
             }
-            if (!onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2) WaveDTest.run(ctx, sp);
-            if (!onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2) WaveETest.run(ctx, sp);
-            if (!onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2) WaveFTest.run(ctx, sp);
-            if (!onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2) WaveGTest.run(ctx, sp);
-            if (!onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2) WaveHTest.run(ctx, sp);
-            if (!onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2) WaveH2Test.run(ctx, sp);
-            if (!onlyH2 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2) WaveH3Test.run(ctx, sp);
-            if (!onlyH2 && !onlyI2 && !onlyJ1 && !onlyJ2) WaveI1Test.run(ctx, sp);
-            if (!onlyH2 && !onlyI1 && !onlyJ1 && !onlyJ2) WaveI2Test.run(ctx, sp);
-            if (!onlyH2 && !onlyI1 && !onlyI2 && !onlyJ2) WaveJ1Test.run(ctx, sp);
-            if (!onlyH2 && !onlyI1 && !onlyI2 && !onlyJ1) WaveJ2Test.run(ctx, sp);
+            if (!onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2 && !onlyJ3) WaveDTest.run(ctx, sp);
+            if (!onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2 && !onlyJ3) WaveETest.run(ctx, sp);
+            if (!onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2 && !onlyJ3) WaveFTest.run(ctx, sp);
+            if (!onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2 && !onlyJ3) WaveGTest.run(ctx, sp);
+            if (!onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2 && !onlyJ3) WaveHTest.run(ctx, sp);
+            if (!onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2 && !onlyJ3) WaveH2Test.run(ctx, sp);
+            if (!onlyH2 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2 && !onlyJ3) WaveH3Test.run(ctx, sp);
+            if (!onlyH2 && !onlyI2 && !onlyJ1 && !onlyJ2 && !onlyJ3) WaveI1Test.run(ctx, sp);
+            if (!onlyH2 && !onlyI1 && !onlyJ1 && !onlyJ2 && !onlyJ3) WaveI2Test.run(ctx, sp);
+            if (!onlyH2 && !onlyI1 && !onlyI2 && !onlyJ2 && !onlyJ3) WaveJ1Test.run(ctx, sp);
+            if (!onlyH2 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ3) WaveJ2Test.run(ctx, sp);
+            if (!onlyH2 && !onlyI1 && !onlyI2 && !onlyJ1 && !onlyJ2) WaveJ3Test.run(ctx, sp);
             log("DONE");
         }
     }
