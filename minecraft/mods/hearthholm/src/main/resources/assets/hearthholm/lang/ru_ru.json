@@ -694,7 +694,7 @@
  "gui.hearthholm.zone.tool.rect.tip": "Протяните прямоугольник, чтобы добавить его в зону.",
  "gui.hearthholm.zone.tool.eraser": "Ластик",
  "gui.hearthholm.zone.tool.eraser.tip": "Тяните мышью, чтобы стереть клетки зоны.",
- "gui.hearthholm.zone.tool.erase_rect": "Стереть рамкой",
+ "gui.hearthholm.zone.tool.erase_rect": "Ластик-рамка",
  "gui.hearthholm.zone.tool.erase_rect.tip": "Протяните прямоугольник: все клетки зоны внутри него будут стёрты.",
  "gui.hearthholm.zone.clear": "Очистить всё",
  "gui.hearthholm.zone.clear_confirm": "Точно? Ещё раз",

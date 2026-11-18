@@ -703,7 +703,7 @@ T.update({
  "gui.hearthholm.zone.tool.rect.tip": ("Drag a rectangle to add it to the zone.", "Протяните прямоугольник, чтобы добавить его в зону."),
  "gui.hearthholm.zone.tool.eraser": ("Eraser", "Ластик"),
  "gui.hearthholm.zone.tool.eraser.tip": ("Drag to erase cells from the zone.", "Тяните мышью, чтобы стереть клетки зоны."),
- "gui.hearthholm.zone.tool.erase_rect": ("Erase box", "Стереть рамкой"),
+ "gui.hearthholm.zone.tool.erase_rect": ("Erase box", "Ластик-рамка"),
  "gui.hearthholm.zone.tool.erase_rect.tip": ("Drag a rectangle: every zone cell inside is erased.", "Протяните прямоугольник: все клетки зоны внутри него будут стёрты."),
  "gui.hearthholm.zone.clear": ("Clear all", "Очистить всё"),
  "gui.hearthholm.zone.clear_confirm": ("Sure? Click again", "Точно? Ещё раз"),

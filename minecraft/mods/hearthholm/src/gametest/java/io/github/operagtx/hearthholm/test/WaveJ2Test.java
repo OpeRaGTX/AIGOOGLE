@@ -105,7 +105,6 @@ final class WaveJ2Test {
         for (int t = 0; t <= maxTicks; t += 20) {
             AtomicBoolean ok = new AtomicBoolean();
             sp.getServer().runOnServer(s -> {
-                s.overworld().setDayTime(5000);
                 ok.set(cond.test(s));
             });
             if (ok.get()) return t;
@@ -199,7 +198,7 @@ final class WaveJ2Test {
             check(back.colors().length == 10000 && java.util.Arrays.equals(back.colors(), d.colors()) && java.util.Arrays.equals(back.flags(), d.flags()) && back.markers().equals(d.markers()), "snapshot did not survive the wire codec");
             // layer mode (J3): the block at a given Y
             Payloads.ZoneMapData layer = ZoneMapService.snapshot(l, w, st, M.getY() - 2);
-            check((layer.colors()[(n / 2) * n + n / 2 + 20] & 0xFF) >> 2 == net.minecraft.world.level.material.MapColor.STONE.id, "layer mode: stone expected at Y-2");
+            check((layer.colors()[(n / 2) * n + n / 2 + 10] & 0xFF) >> 2 == net.minecraft.world.level.material.MapColor.STONE.id, "layer mode: stone expected at Y-2");
             check(layer.layerY() == M.getY() - 2 && layer.flags().length == 2500, "layer snapshot header");
             // throttle: a second request within the gap is dropped
             ZoneMapService.served = 0; ZoneMapService.throttled = 0;

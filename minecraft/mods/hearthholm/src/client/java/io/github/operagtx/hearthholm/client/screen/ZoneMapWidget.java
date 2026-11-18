@@ -98,7 +98,7 @@ public final class ZoneMapWidget {
         int unknown = abgr(0xFF1E1711);
         for (int i = 0; i < n * n; i++) {
             int b = data.colors()[i] & 0xFF;
-            int c = b == 0 ? unknown : MapColor.getColorFromPackedId(b);
+            int c = b == 0 ? unknown : abgr(MapColor.getColorFromPackedId(b));   // the vanilla helper returns ARGB
             int flag = data.flag(i);
             if (flag == Payloads.ZoneMapData.LEAF) c = darken(c, 0.82f);
             else if (flag == Payloads.ZoneMapData.LOG) c = abgr(0xFF000000 | TREE_TRUNK);
