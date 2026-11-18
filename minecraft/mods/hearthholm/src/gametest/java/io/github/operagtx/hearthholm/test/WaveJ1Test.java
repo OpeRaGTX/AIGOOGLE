@@ -428,7 +428,7 @@ final class WaveJ1Test {
                 ProfessionModule m = ProfessionModules.REGISTRY.get(p.id()).orElse(null);
                 if (m == null) { fail("no module for " + p.id()); continue; }
                 n++;
-                if (m.workSite() != null) { withSite++; check(m.zone() != null && m.zone().kind() == (p == Professions.LUMBERJACK ? ProfessionModule.ZoneData.Kind.MAP : ProfessionModule.ZoneData.Kind.BOX), "zone of " + p.id());   // J2: the lumberjack draws a map zone }
+                if (m.workSite() != null) { withSite++; check(m.zone() != null && m.zone().kind() == (p == Professions.LUMBERJACK ? ProfessionModule.ZoneData.Kind.MAP : ProfessionModule.ZoneData.Kind.BOX), "zone of " + p.id()); }
                 check(m.jobFactory() != null && m.screenOpener() != null && m.profession() == p, "module of " + p.id());
             }
             ProfessionModule mm = ProfessionModules.of(Professions.MINER);
