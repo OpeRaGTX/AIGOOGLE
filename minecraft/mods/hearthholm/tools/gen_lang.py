@@ -600,6 +600,50 @@ T.update({
  "subtitles.hearthholm.town.quest_done": ("Request fulfilled", "Заказ выполнен"),
 })
 
+
+# ---- wave H1: coziness (furniture, well, food)
+T.update({
+ "block.hearthholm.well_part": ("Well", "Колодец"),
+ "message.hearthholm.well_no_room": ("Not enough room for a well: it needs a free 3x3 area and 3 blocks of height.", "Не хватает места для колодца: нужна свободная площадка 3x3 и высота 3 блока."),
+ "block.hearthholm.round_table": ("Round Table", "Круглый стол"),
+ "block.hearthholm.long_table": ("Long Table", "Длинный стол"),
+ "block.hearthholm.chair": ("Chair", "Стул"),
+ "block.hearthholm.stool": ("Stool", "Табурет"),
+ "block.hearthholm.bottles": ("Bottles", "Бутылки"),
+ "block.hearthholm.mug": ("Mug", "Кружка"),
+ "block.hearthholm.plate_bread": ("Plate of Bread", "Тарелка с хлебом"),
+ "block.hearthholm.plate_roast": ("Plate of Roast", "Тарелка с жарким"),
+ "block.hearthholm.plate_fish": ("Plate of Fish", "Тарелка с рыбой"),
+ "block.hearthholm.candles": ("Candles", "Свечи"),
+ "block.hearthholm.candlestick": ("Candlestick", "Подсвечник"),
+ "block.hearthholm.wall_shelf": ("Wall Shelf", "Настенная полка"),
+ "block.hearthholm.hanging_herbs": ("Hanging Herbs", "Подвесные травы"),
+ "block.hearthholm.barrel_rack": ("Barrel Rack", "Стеллаж с бочками"),
+ "block.hearthholm.rug_red": ("Red Rug", "Красный коврик"),
+ "block.hearthholm.rug_blue": ("Blue Rug", "Синий коврик"),
+ "block.hearthholm.crate": ("Crate", "Ящик"),
+ "block.hearthholm.firewood_pile": ("Firewood Pile", "Поленница"),
+ "block.hearthholm.hanging_lantern": ("Hanging Lantern", "Подвесной фонарь"),
+ "item.hearthholm.fried_fish": ("Fried Fish", "Жареная рыба"),
+ "item.hearthholm.fish_pie": ("Fish Pie", "Рыбный пирог"),
+ "item.hearthholm.smoked_fish": ("Smoked Fish", "Копчёная рыба"),
+ "item.hearthholm.fish_soup": ("Fish Soup", "Уха"),
+ "item.hearthholm.meat_stew": ("Meat Stew", "Мясное рагу"),
+ "item.hearthholm.sausage": ("Sausage", "Колбаса"),
+ "item.hearthholm.cheese_wedge": ("Cheese Wedge", "Кусок сыра"),
+ "item.hearthholm.berry_pie": ("Berry Pie", "Ягодный пирог"),
+ "item.hearthholm.apple_pie": ("Apple Pie", "Яблочный пирог"),
+ "item.hearthholm.meat_pie": ("Meat Pie", "Мясной пирог"),
+ "item.hearthholm.rye_loaf": ("Rye Loaf", "Ржаной каравай"),
+ "item.hearthholm.honey_bun": ("Honey Bun", "Медовая булочка"),
+ "item.hearthholm.porridge": ("Porridge", "Каша"),
+ "item.hearthholm.roast_vegetables": ("Roast Vegetables", "Печёные овощи"),
+ "item.hearthholm.ale": ("Ale", "Эль"),
+ "item.hearthholm.mead": ("Mead", "Медовуха"),
+ "item.hearthholm.cider": ("Cider", "Сидр"),
+ "item.hearthholm.herbal_tea": ("Herbal Tea", "Травяной чай"),
+})
+
 # speech bubbles
 import sys
 sys.path.insert(0, os.path.dirname(__file__))

@@ -1,18 +1,33 @@
 {
   "variants": {
-    "facing=north": {
-      "model": "hearthholm:block/well"
+    "complete=false,facing=north": {
+      "model": "hearthholm:block/well_single"
     },
-    "facing=east": {
-      "model": "hearthholm:block/well",
+    "complete=false,facing=east": {
+      "model": "hearthholm:block/well_single",
       "y": 90
     },
-    "facing=south": {
-      "model": "hearthholm:block/well",
+    "complete=false,facing=south": {
+      "model": "hearthholm:block/well_single",
       "y": 180
     },
-    "facing=west": {
-      "model": "hearthholm:block/well",
+    "complete=false,facing=west": {
+      "model": "hearthholm:block/well_single",
+      "y": 270
+    },
+    "complete=true,facing=north": {
+      "model": "hearthholm:block/well_basin"
+    },
+    "complete=true,facing=east": {
+      "model": "hearthholm:block/well_basin",
+      "y": 90
+    },
+    "complete=true,facing=south": {
+      "model": "hearthholm:block/well_basin",
+      "y": 180
+    },
+    "complete=true,facing=west": {
+      "model": "hearthholm:block/well_basin",
       "y": 270
     }
   }

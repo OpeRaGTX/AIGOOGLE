@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "hearthholm:block/hanging_lantern"
+    },
+    "hanging=true": {
+      "model": "hearthholm:block/hanging_lantern_hanging"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "H": "minecraft:honeycomb",
+    "S": "minecraft:string"
+  },
+  "pattern": [
+    "H",
+    "S"
+  ],
+  "result": {
+    "count": 3,
+    "id": "hearthholm:candles"
+  }
+}

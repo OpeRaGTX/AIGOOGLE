@@ -1199,6 +1199,10 @@ def main():
     wave_d()
     wave_e()
     save(chronicle_icon(), "item/founders_chronicle.png")   # wave F
+    import sys
+    sys.path.insert(0, os.path.dirname(__file__))
+    import gen_h1_tex
+    gen_h1_tex.run(sys.modules[__name__])   # wave H1: polish + new art
     print("textures written to", os.path.normpath(OUT))
 
 if __name__ == "__main__":

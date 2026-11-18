@@ -1,0 +1,32 @@
+{
+  "variants": {
+    "axis=x,a=false,b=false": {
+      "model": "hearthholm:block/long_table_00"
+    },
+    "axis=z,a=false,b=false": {
+      "model": "hearthholm:block/long_table_00",
+      "y": 90
+    },
+    "axis=x,a=false,b=true": {
+      "model": "hearthholm:block/long_table_01"
+    },
+    "axis=z,a=false,b=true": {
+      "model": "hearthholm:block/long_table_01",
+      "y": 90
+    },
+    "axis=x,a=true,b=false": {
+      "model": "hearthholm:block/long_table_10"
+    },
+    "axis=z,a=true,b=false": {
+      "model": "hearthholm:block/long_table_10",
+      "y": 90
+    },
+    "axis=x,a=true,b=true": {
+      "model": "hearthholm:block/long_table_11"
+    },
+    "axis=z,a=true,b=true": {
+      "model": "hearthholm:block/long_table_11",
+      "y": 90
+    }
+  }
+}

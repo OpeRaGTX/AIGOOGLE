@@ -337,4 +337,303 @@ for kind, extra in (("carpenter", "minecraft:crafting_table"), ("mason", "minecr
 shaped("settlement_banner", ["WW", "WW", " S"], {"W": "#minecraft:wool", "S": "minecraft:stick"})
 shapeless("bulletin_board", ["#minecraft:planks", "minecraft:paper", "minecraft:paper", "minecraft:stick"])
 shaped("market_stall", ["WWW", "P P"], {"W": "#minecraft:wool", "P": "#minecraft:planks"})
+
+# ======================================================================= wave H1: coziness (furniture, well multiblock, food)
+import copy
+DISPLAY_BIG = copy.deepcopy(DISPLAY)
+DISPLAY_BIG["gui"]["scale"] = [1.0, 1.0, 1.0]
+DISPLAY_BIG["gui"]["translation"] = [0, -1.5, 0]
+DISPLAY_BIG["ground"]["scale"] = [0.5, 0.5, 0.5]
+DISPLAY_BIG["fixed"]["scale"] = [1.0, 1.0, 1.0]
+DISPLAY_BIG["thirdperson_righthand"]["scale"] = [0.55, 0.55, 0.55]
+DISPLAY_BIG["firstperson_righthand"]["scale"] = [0.6, 0.6, 0.6]
+DISPLAY_BIG["firstperson_lefthand"]["scale"] = [0.6, 0.6, 0.6]
+
+def model(name, textures, elements, display=None):
+    w(f"assets/{NS}/models/block/{name}.json", {"parent": "block/block", "display": display or DISPLAY, "textures": textures, "elements": elements})
+
+def shifted(elements, dy):
+    out = copy.deepcopy(elements)
+    for e in out:
+        e["from"][1] += dy; e["to"][1] += dy
+    return out
+
+def ub(fr, to, tex, uv):
+    """box with explicit uv per face: uv is a rect used on all faces or a dict face -> (tex, rect)."""
+    faces = {}
+    for d in ALL6:
+        if isinstance(uv, dict):
+            if d in uv: faces[d] = face(uv[d][0], uv[d][1])
+        else:
+            faces[d] = face(tex, uv)
+    return {"from": fr, "to": to, "faces": faces}
+
+ALL6 = ("north", "south", "east", "west", "up", "down")
+def tx(*names):
+    return {"particle": T(names[0]), **{n: T(n) for n in names}}
+
+def facing_variants(model_name, rot=STD, extra=""):
+    return {f"{extra}facing={d}": ({"model": f"{NS}:block/{model_name}", "y": r} if r else {"model": f"{NS}:block/{model_name}"}) for d, r in rot.items()}
+
+def simple_item(name, model_name=None):
+    w(f"assets/{NS}/items/{name}.json", {"model": {"type": "minecraft:model", "model": f"{NS}:block/{model_name or name}"}})
+
+def loot_counted(name, maxn):
+    entries = [{"type": "minecraft:item", "name": f"{NS}:{name}", "functions": [
+        {"function": "minecraft:set_count", "count": n, "add": False,
+         "conditions": [{"condition": "minecraft:block_state_property", "block": f"{NS}:{name}", "properties": {"count": str(n)}}]} for n in range(2, maxn + 1)]}]
+    w(f"data/{NS}/loot_table/blocks/{name}.json", {"type": "minecraft:block", "pools": [{"rolls": 1, "entries": entries,
+        "conditions": [{"condition": "minecraft:survives_explosion"}]}], "random_sequence": f"{NS}:blocks/{name}"})
+
+# ---- the well: single (legacy), basin (master of the multiblock) and the parts
+w_tex = {"particle": T("well_stone"), "stone": T("well_stone"), "water": T("well_water"), "roof": T("well_roof"), "post": T("well_post"),
+         "rope": T("rope"), "bucket": T("bucket"), "axle": T("well_axle")}
+def rot_variants(model_for_state, states, rot=STD):
+    v = {}
+    for st in states:
+        for d, r in rot.items():
+            m = model_for_state(st)
+            v[f"{st},facing={d}" if st else f"facing={d}"] = {"model": f"{NS}:block/{m}", **({"y": r} if r else {})}
+    return v
+
+# legacy one-block well (old saves) keeps the old look but with the new textures
+model("well_single", w_tex, [box_el([0, 0, 0], [16, 7, 3], "#stone"), box_el([0, 0, 13], [16, 7, 16], "#stone"),
+    box_el([0, 0, 3], [3, 7, 13], "#stone"), box_el([13, 0, 3], [16, 7, 13], "#stone"), box_el([3, 0, 3], [13, 5, 13], "#water"),
+    box_el([1, 7, 1], [3, 14, 3], "#post"), box_el([13, 7, 1], [15, 14, 3], "#post"), box_el([1, 7, 13], [3, 14, 15], "#post"), box_el([13, 7, 13], [15, 14, 15], "#post"),
+    box_el([0, 14, 0], [16, 16, 16], "#roof"), box_el([7, 7, 7], [9, 14, 9], "#rope"), box_el([5, 6, 5], [11, 9, 11], "#bucket")])
+model("well_basin", w_tex, [box_el([0, 0, 0], [16, 1, 16], "#stone"), box_el([0, 1, 0], [16, 6, 16], "#water")])
+model("well_ring_edge", w_tex, [box_el([0, 0, 0], [16, 10, 5], "#stone"), box_el([0, 0, 5], [16, 1, 16], "#stone"), box_el([0, 1, 5], [16, 6, 16], "#water")])
+model("well_ring_corner", w_tex, [box_el([0, 0, 0], [16, 10, 5], "#stone"), box_el([0, 0, 5], [5, 10, 16], "#stone"),
+    box_el([5, 0, 5], [16, 1, 16], "#stone"), box_el([5, 1, 5], [16, 6, 16], "#water")])
+model("well_post", w_tex, [box_el([6, 0, 0.5], [10, 16, 4.5], "#post")])
+model("well_rope", w_tex, [box_el([7.5, 6, 7.5], [8.5, 16, 8.5], "#rope"), box_el([5, 0, 5], [11, 6, 11], "#bucket"), box_el([5.5, 6, 7.5], [10.5, 6.8, 8.5], "#post")])
+model("well_roof_edge", w_tex, [box_el([0, 6, 0], [16, 8, 16], "#roof"), box_el([0, 8, 3], [16, 10, 16], "#roof"), box_el([0, 10, 8], [16, 12, 16], "#roof")])
+model("well_roof_post", w_tex, [box_el([6, 0, 0.5], [10, 6, 4.5], "#post"), box_el([6.5, 2, 4.5], [9.5, 4.5, 16], "#axle"),
+    box_el([0, 6, 0], [16, 8, 16], "#roof"), box_el([0, 8, 3], [16, 10, 16], "#roof"), box_el([0, 10, 8], [16, 12, 16], "#roof")])
+model("well_roof_corner", w_tex, [box_el([0, 6, 0], [16, 8, 16], "#roof"), box_el([3, 8, 3], [16, 10, 16], "#roof"), box_el([8, 10, 8], [16, 12, 16], "#roof")])
+model("well_roof_center", w_tex, [box_el([0, 6, 0], [16, 8, 16], "#roof"), box_el([0, 8, 0], [16, 10, 16], "#roof"), box_el([0, 10, 0], [16, 12, 16], "#roof"),
+    box_el([3, 12, 3], [13, 14, 13], "#roof"), box_el([6, 14, 6], [10, 16, 10], "#roof"),
+    box_el([0, 2, 6.5], [16, 4.5, 9.5], "#axle"), box_el([6, 1.5, 6], [10, 5, 10], "#rope"), box_el([14.5, 0.5, 7], [15.5, 6.5, 8], "#axle")])
+PARTS = {"ring_edge": "well_ring_edge", "ring_corner": "well_ring_corner", "post": "well_post", "rope": "well_rope", "roof_corner": "well_roof_corner",
+         "roof_edge": "well_roof_edge", "roof_post": "well_roof_post", "roof_center": "well_roof_center"}
+w(f"assets/{NS}/blockstates/well_part.json", {"variants": {f"facing={d},part={p}": {"model": f"{NS}:block/{m}", **({"y": r} if r else {})}
+                                                          for p, m in PARTS.items() for d, r in STD.items()}})
+w(f"assets/{NS}/blockstates/well.json", {"variants": {f"complete={c},facing={d}": {"model": f"{NS}:block/{'well_basin' if c == 'true' else 'well_single'}", **({"y": r} if r else {})}
+                                                      for c in ("false", "true") for d, r in STD.items()}})
+w(f"assets/{NS}/items/well.json", {"model": {"type": "minecraft:model", "model": f"{NS}:block/well_single"}})
+w(f"data/{NS}/loot_table/blocks/well.json", {"type": "minecraft:block", "pools": [], "random_sequence": f"{NS}:blocks/well"})  # dropped by code (once for the whole well)
+w(f"data/{NS}/loot_table/blocks/well_part.json", {"type": "minecraft:block", "pools": [], "random_sequence": f"{NS}:blocks/well_part"})
+
+# ---- tables
+TW = tx("table_wood", "table_top", "table_wood_dark", "long_table_top")
+model("round_table", TW, [box_el([2, 12, 2], [14, 14, 14], {"up": "#table_top", "down": "#table_wood", "north": "#table_wood", "south": "#table_wood", "east": "#table_wood", "west": "#table_wood"}),
+    box_el([0, 12, 4], [16, 14, 12], {"up": "#table_top", "down": "#table_wood", "north": "#table_wood", "south": "#table_wood", "east": "#table_wood", "west": "#table_wood"}),
+    box_el([4, 12, 0], [12, 14, 16], {"up": "#table_top", "down": "#table_wood", "north": "#table_wood", "south": "#table_wood", "east": "#table_wood", "west": "#table_wood"}),
+    box_el([6, 2, 6], [10, 12, 10], "#table_wood_dark"), box_el([3, 0, 3], [13, 2, 13], "#table_wood_dark")])
+w(f"assets/{NS}/blockstates/round_table.json", {"variants": {"": {"model": f"{NS}:block/round_table"}}})
+def long_table(a, b):
+    top = {"up": "#long_table_top", "down": "#table_wood", "north": "#table_wood", "south": "#table_wood", "east": "#table_wood", "west": "#table_wood"}
+    els = [box_el([0, 12, 0], [16, 14, 16], top), box_el([0, 10, 2], [16, 12, 3], "#table_wood_dark"), box_el([0, 10, 13], [16, 12, 14], "#table_wood_dark")]
+    if not a: els += [box_el([1, 0, 1], [3, 12, 3], "#table_wood_dark"), box_el([1, 0, 13], [3, 12, 15], "#table_wood_dark"), box_el([1, 5, 3], [3, 6, 13], "#table_wood_dark")]
+    if not b: els += [box_el([13, 0, 1], [15, 12, 3], "#table_wood_dark"), box_el([13, 0, 13], [15, 12, 15], "#table_wood_dark"), box_el([13, 5, 3], [15, 6, 13], "#table_wood_dark")]
+    return els
+lv = {}
+for a in (0, 1):
+    for b in (0, 1):
+        model(f"long_table_{a}{b}", TW, long_table(a, b))
+        for ax, r in (("x", 0), ("z", 90)):
+            lv[f"axis={ax},a={'true' if a else 'false'},b={'true' if b else 'false'}"] = {"model": f"{NS}:block/long_table_{a}{b}", **({"y": r} if r else {})}
+w(f"assets/{NS}/blockstates/long_table.json", {"variants": lv})
+simple_item("round_table"); simple_item("long_table", "long_table_00")
+
+# ---- seats
+CW = tx("chair_wood", "cushion", "stool_top")
+model("chair", CW, [box_el([3, 8, 3], [13, 10, 13], {"up": "#cushion", "down": "#chair_wood", "north": "#chair_wood", "south": "#chair_wood", "east": "#chair_wood", "west": "#chair_wood"}),
+    box_el([3, 0, 3], [5, 8, 5], "#chair_wood"), box_el([11, 0, 3], [13, 8, 5], "#chair_wood"),
+    box_el([3, 0, 11], [5, 16, 13], "#chair_wood"), box_el([11, 0, 11], [13, 16, 13], "#chair_wood"),
+    box_el([5, 11, 11.5], [11, 13, 12.5], "#chair_wood"), box_el([5, 14, 11.5], [11, 16, 12.5], "#chair_wood"), box_el([5, 4, 3.5], [11, 5, 4.5], "#chair_wood")])
+model("stool", CW, [box_el([3, 9, 3], [13, 11, 13], {"up": "#stool_top", "down": "#chair_wood", "north": "#chair_wood", "south": "#chair_wood", "east": "#chair_wood", "west": "#chair_wood"}),
+    *[box_el([x, 0, z], [x + 2, 9, z + 2], "#chair_wood") for x in (4, 10) for z in (4, 10)],
+    box_el([4, 4, 4], [12, 5, 6], "#chair_wood"), box_el([4, 4, 10], [12, 5, 12], "#chair_wood")])
+for n in ("chair", "stool"):
+    w(f"assets/{NS}/blockstates/{n}.json", {"variants": facing_variants(n)})
+    simple_item(n)
+
+# ---- small stacks: bottles, mugs, plates, candles, candlestick
+BT = tx("bottles")
+def bottle_els(pos):
+    els = []
+    for i, (x, z) in enumerate(pos):
+        x0 = (i % 3) * 5
+        els.append(ub([x, 0, z], [x + 4, 7, z + 4], "#bottles", None) | {"faces": {
+            **{d: face("#bottles", [x0, 3, x0 + 4, 10]) for d in ("north", "south", "east", "west")},
+            "up": face("#bottles", [x0, 3, x0 + 4, 4]), "down": face("#bottles", [x0, 11, x0 + 4, 12])}})
+        els.append({"from": [x + 1, 7, z + 1], "to": [x + 3, 11, z + 3], "faces": {
+            **{d: face("#bottles", [x0 + 1, 0, x0 + 3, 4]) for d in ("north", "south", "east", "west")},
+            "up": face("#bottles", [x0 + 1, 0, x0 + 3, 1])}})
+    return els
+BPOS = {1: [(6, 6)], 2: [(3, 8), (9, 3)], 3: [(2, 2), (9, 3), (5, 9)]}
+MT = tx("mug")
+def mug_els(pos):
+    els = []
+    for (x, z) in pos:
+        els.append({"from": [x, 0, z], "to": [x + 5, 5, z + 5], "faces": {**{d: face("#mug", [0, 0, 8, 6]) for d in ("north", "south", "east", "west")},
+                    "up": face("#mug", [0, 8, 8, 16]), "down": face("#mug", [0, 0, 8, 1])}})
+        els.append({"from": [x + 5, 1, z + 1.5], "to": [x + 7, 4, z + 3.5], "faces": {d: face("#mug", [8, 1, 10, 4]) for d in ALL6}})
+    return els
+MPOS = {1: [(4, 5)], 2: [(1, 2), (7, 8)], 3: [(1, 1), (8, 2), (4, 9)]}
+CT = tx("candle_wax", "candle_flame")
+def candle_els(pos):
+    els = []
+    for i, (x, z, h) in enumerate(pos):
+        els.append({"from": [x, 0, z], "to": [x + 2, h, z + 2], "faces": {**{d: face("#candle_wax", [0, 0, 8, 8]) for d in ("north", "south", "east", "west")}, "up": face("#candle_wax", [0, 0, 2, 2])}})
+        els.append({"from": [x, h, z + 1], "to": [x + 2, h + 3, z + 1], "faces": {"north": face("#candle_flame", [3, 3, 7, 9]), "south": face("#candle_flame", [3, 3, 7, 9])}})
+        els.append({"from": [x + 1, h, z], "to": [x + 1, h + 3, z + 2], "faces": {"east": face("#candle_flame", [3, 3, 7, 9]), "west": face("#candle_flame", [3, 3, 7, 9])}})
+    return els
+CPOS = {1: [(7, 7, 6)], 2: [(4, 7, 5), (9, 6, 8)], 3: [(3, 4, 5), (9, 5, 8), (6, 10, 6)]}
+def plate_els(kind):
+    base = [{"from": [2, 0, 2], "to": [14, 1, 14], "faces": {**{d: face("#plates", [8, 0, 16, 1]) for d in ("north", "south", "east", "west")}, "up": face("#plates", [0, 0, 8, 8]), "down": face("#plates", [8, 0, 16, 1])}}]
+    if kind == "bread":
+        base += [{"from": [4, 1, 5], "to": [11, 4, 11], "faces": {**{d: face("#plates", [8, 8, 16, 11]) for d in ("north", "south", "east", "west")}, "up": face("#plates", [0, 8, 8, 16])}},
+                 {"from": [10, 1, 9], "to": [13, 3, 12], "faces": {**{d: face("#plates", [8, 8, 16, 11]) for d in ("north", "south", "east", "west")}, "up": face("#plates", [0, 8, 8, 16])}}]
+    elif kind == "roast":
+        base += [{"from": [4, 1, 4], "to": [12, 5, 11], "faces": {**{d: face("#plates", [8, 12, 16, 16]) for d in ("north", "south", "east", "west")}, "up": face("#plates", [8, 12, 16, 16])}}]
+    else:
+        base += [{"from": [3, 1, 5], "to": [10, 3, 11], "faces": {**{d: face("#plates", [8, 2, 14, 6]) for d in ("north", "south", "east", "west")}, "up": face("#plates", [8, 2, 14, 6])}},
+                 {"from": [10, 1, 6], "to": [13, 2, 10], "faces": {**{d: face("#plates", [14, 2, 16, 6]) for d in ("north", "south", "east", "west")}, "up": face("#plates", [14, 2, 16, 6])}}]
+    return base
+PT = tx("plates")
+STARS = {}
+def small_family(name, tex, builder, maxn, display=DISPLAY_BIG):
+    for n in range(1, maxn + 1):
+        els = builder(n)
+        model(f"{name}_{n}", tex, els, display)
+        model(f"{name}_{n}_t", tex, shifted(els, -2), display)
+    v = {}
+    for n in range(1, 4):
+        m = min(n, maxn)
+        for d, r in STD.items():
+            for t in ("false", "true"):
+                v[f"count={n},facing={d},on_table={t}"] = {"model": f"{NS}:block/{name}_{m}{'_t' if t == 'true' else ''}", **({"y": r} if r else {})}
+    w(f"assets/{NS}/blockstates/{name}.json", {"variants": v})
+    simple_item(name, f"{name}_{maxn}")
+small_family("bottles", BT, lambda n: bottle_els(BPOS[n]), 3)
+small_family("mug", MT, lambda n: mug_els(MPOS[n]), 3)
+small_family("candles", CT, lambda n: candle_els(CPOS[n]), 3)
+for kind in ("bread", "roast", "fish"):
+    small_family(f"plate_{kind}", PT, lambda n, k=kind: plate_els(k), 1)
+CS = tx("candlestick_metal", "candle_wax", "candle_flame")
+small_family("candlestick", CS, lambda n: [box_el([4, 0, 4], [12, 1, 12], "#candlestick_metal"), box_el([7, 1, 7], [9, 6, 9], "#candlestick_metal"), box_el([5, 6, 5], [11, 7, 11], "#candlestick_metal"),
+    {"from": [7, 7, 7], "to": [9, 13, 9], "faces": {**{d: face("#candle_wax", [0, 0, 8, 8]) for d in ("north", "south", "east", "west")}, "up": face("#candle_wax", [0, 0, 2, 2])}},
+    {"from": [7, 13, 8], "to": [9, 16, 8], "faces": {"north": face("#candle_flame", [3, 3, 7, 9]), "south": face("#candle_flame", [3, 3, 7, 9])}},
+    {"from": [8, 13, 7], "to": [8, 16, 9], "faces": {"east": face("#candle_flame", [3, 3, 7, 9]), "west": face("#candle_flame", [3, 3, 7, 9])}}], 1)
+
+# ---- wall shelf, hanging herbs, barrel rack, crate, firewood, rugs, hanging lantern
+SH = tx("shelf_wood", "shelf_jars")
+def jar(x, y, q):
+    x0, y0 = (q % 2) * 8, (q // 2) * 8
+    return {"from": [x, y, 11], "to": [x + 4, y + 5, 15], "faces": {**{d: face("#shelf_jars", [x0, y0, x0 + 8, y0 + 8]) for d in ("north", "south", "east", "west", "up")}}}
+model("wall_shelf", SH, [box_el([0, 5, 10], [16, 7, 16], "#shelf_wood"), box_el([0, 12, 10], [16, 14, 16], "#shelf_wood"),
+    box_el([1, 2, 13], [3, 5, 16], "#shelf_wood"), box_el([13, 2, 13], [15, 5, 16], "#shelf_wood"), box_el([1, 9, 13], [3, 12, 16], "#shelf_wood"), box_el([13, 9, 13], [15, 12, 16], "#shelf_wood"),
+    jar(1, 7, 0), jar(6, 7, 1), jar(11, 7, 2), jar(2, 14, 3), jar(9, 14, 1)], DISPLAY_BIG)
+w(f"assets/{NS}/blockstates/wall_shelf.json", {"variants": facing_variants("wall_shelf")})
+simple_item("wall_shelf")
+HB = tx("herbs", "shelf_wood", "herb_string")
+def bunch(x, q, h=9):
+    x0, y0 = (q % 2) * 8, (q // 2) * 8
+    return {"from": [x, 14 - h, 6.5], "to": [x + 4, 14, 9.5], "faces": {d: face("#herbs", [x0, y0, x0 + 8, y0 + 8]) for d in ("north", "south", "east", "west")}}
+model("hanging_herbs", HB, [box_el([0, 14, 7], [16, 16, 9], "#shelf_wood"), bunch(1, 0), bunch(6, 1, 8), bunch(11, 2, 7),
+    box_el([2.5, 13, 7.5], [3.5, 14, 8.5], "#herb_string"), box_el([7.5, 13, 7.5], [8.5, 14, 8.5], "#herb_string"), box_el([12.5, 13, 7.5], [13.5, 14, 8.5], "#herb_string")], DISPLAY_BIG)
+w(f"assets/{NS}/blockstates/hanging_herbs.json", {"variants": facing_variants("hanging_herbs")})
+simple_item("hanging_herbs")
+BR = tx("barrel_side", "barrel_end", "shelf_wood")
+def barrel(fr, to):
+    return {"from": fr, "to": to, "faces": {"north": face("#barrel_end", [0, 0, 16, 16]), "south": face("#barrel_end", [0, 0, 16, 16]),
+            **{d: face("#barrel_side", [0, 0, 16, 16]) for d in ("east", "west", "up", "down")}}}
+model("barrel_rack", BR, [box_el([0, 0, 1], [16, 1, 15], "#shelf_wood"), box_el([0, 1, 1], [1, 9, 15], "#shelf_wood"), box_el([15, 1, 1], [16, 9, 15], "#shelf_wood"),
+    barrel([1, 1, 2], [8, 8, 14]), barrel([8, 1, 2], [15, 8, 14]), barrel([4.5, 8, 2], [11.5, 15, 14]), box_el([0, 8, 1], [16, 9, 3], "#shelf_wood")])
+w(f"assets/{NS}/blockstates/barrel_rack.json", {"variants": facing_variants("barrel_rack")})
+simple_item("barrel_rack")
+model("crate", tx("crate_side", "crate_top"), [box_el([0, 0, 0], [16, 16, 16], {"north": "#crate_side", "south": "#crate_side", "east": "#crate_side", "west": "#crate_side", "up": "#crate_top", "down": "#crate_top"})])
+w(f"assets/{NS}/blockstates/crate.json", {"variants": {"": {"model": f"{NS}:block/crate"}}})
+simple_item("crate")
+FW = tx("firewood_end", "firewood_bark")
+def log(x, y, z):
+    return {"from": [0, y, z], "to": [16, y + 4, z + 4], "faces": {"east": face("#firewood_end", [0, 0, 16, 16]), "west": face("#firewood_end", [0, 0, 16, 16]),
+            **{d: face("#firewood_bark", [0, 0, 16, 4]) for d in ("north", "south", "up", "down")}}}
+model("firewood_pile", FW, [log(0, 0, z) for z in (0, 4, 8, 12)] + [log(0, 4, z) for z in (2, 6, 10)] + [log(0, 8, z) for z in (4, 8)])
+w(f"assets/{NS}/blockstates/firewood_pile.json", {"variants": facing_variants("firewood_pile")})
+simple_item("firewood_pile")
+for c in ("red", "blue"):
+    model(f"rug_{c}", tx(f"rug_{c}"), [{"from": [0, 0, 0], "to": [16, 1, 16], "faces": {"up": face(f"#rug_{c}", [0, 0, 16, 16]), "down": face(f"#rug_{c}", [0, 0, 16, 16], "down"),
+          **{d: face(f"#rug_{c}", [0, 0, 16, 1]) for d in ("north", "south", "east", "west")}}}], DISPLAY_BIG)
+    w(f"assets/{NS}/blockstates/rug_{c}.json", {"variants": facing_variants(f"rug_{c}")})
+    simple_item(f"rug_{c}")
+HL = tx("hanging_lantern", "chain")
+def lantern_els(dy):
+    return [{"from": [5, 0 + dy, 5], "to": [11, 1 + dy, 11], "faces": {d: face("#hanging_lantern", [0, 8, 8, 10]) for d in ("north", "south", "east", "west", "down")}},
+            {"from": [5.5, 1 + dy, 5.5], "to": [10.5, 8 + dy, 10.5], "faces": {**{d: face("#hanging_lantern", [0, 0, 8, 8]) for d in ("north", "south", "east", "west")}}},
+            {"from": [5, 8 + dy, 5], "to": [11, 9 + dy, 11], "faces": {d: face("#hanging_lantern", [0, 8, 8, 10]) for d in ("north", "south", "east", "west", "up")}},
+            {"from": [6.5, 9 + dy, 6.5], "to": [9.5, 10.5 + dy, 9.5], "faces": {d: face("#hanging_lantern", [8, 8, 16, 10]) for d in ("north", "south", "east", "west", "up")}}]
+model("hanging_lantern", HL, lantern_els(0), DISPLAY_BIG)
+model("hanging_lantern_hanging", HL, lantern_els(1) + [{"from": [7.5, 11.5, 7.5], "to": [8.5, 16, 8.5], "faces": {d: face("#chain", [0, 0, 1, 5]) for d in ("north", "south", "east", "west")}}], DISPLAY_BIG)
+w(f"assets/{NS}/blockstates/hanging_lantern.json", {"variants": {"hanging=false": {"model": f"{NS}:block/hanging_lantern"}, "hanging=true": {"model": f"{NS}:block/hanging_lantern_hanging"}}})
+simple_item("hanging_lantern")
+
+# ---- loot tables
+for n in ("round_table", "long_table", "chair", "stool", "plate_bread", "plate_roast", "plate_fish", "candlestick", "wall_shelf", "hanging_herbs", "barrel_rack", "crate",
+          "firewood_pile", "rug_red", "rug_blue", "hanging_lantern"):
+    loot(n)
+for n in ("bottles", "mug", "candles"):
+    loot_counted(n, 3)
+
+# ---- food items
+FOODS = "fried_fish fish_pie smoked_fish fish_soup meat_stew sausage cheese_wedge berry_pie apple_pie meat_pie rye_loaf honey_bun porridge roast_vegetables ale mead cider herbal_tea".split()
+for f in FOODS:
+    gen_item(f)
+
+# ---- recipes: furniture
+P, S_ = "#minecraft:planks", "minecraft:stick"
+shaped("round_table", ["PPP", " S ", "SSS"], {"P": P, "S": S_})
+shaped("long_table", ["PPP", "S S"], {"P": P, "S": S_}, 2)
+shaped("chair", ["S  ", "PPP", "S S"], {"P": P, "S": S_})
+shaped("stool", ["PPP", "S S"], {"P": "#minecraft:wooden_slabs", "S": S_}, 2)
+shapeless("bottles", ["minecraft:glass_bottle", "minecraft:glass_bottle", "minecraft:glass_bottle"], 3)
+shaped("mug", ["P P", "PPP"], {"P": "#minecraft:planks"}, 3)
+shaped("plate_bread", ["B", "C"], {"B": "minecraft:bread", "C": "minecraft:clay_ball"})
+shaped("plate_roast", ["B", "C"], {"B": "minecraft:cooked_chicken", "C": "minecraft:clay_ball"})
+shaped("plate_fish", ["B", "C"], {"B": "minecraft:cooked_cod", "C": "minecraft:clay_ball"})
+shaped("candles", ["H", "S"], {"H": "minecraft:honeycomb", "S": "minecraft:string"}, 3)
+shaped("candlestick", ["H", "I"], {"H": "minecraft:honeycomb", "I": "minecraft:iron_nugget"})
+shaped("wall_shelf", ["PPP", "J J"], {"P": "#minecraft:wooden_slabs", "J": "minecraft:glass_bottle"})
+shaped("hanging_herbs", ["SSS", "FFF"], {"S": "minecraft:string", "F": "minecraft:fern"})
+shaped("barrel_rack", ["PBP", "PPP"], {"P": P, "B": "minecraft:barrel"})
+shaped("crate", ["PSP", "SPS", "PSP"], {"P": P, "S": S_})
+shaped("firewood_pile", ["LLL", " L "], {"L": "minecraft:oak_log"}, 2)
+shaped("rug_red", ["WW"], {"W": "minecraft:red_carpet"}, 2)
+shaped("rug_blue", ["WW"], {"W": "minecraft:blue_carpet"}, 2)
+shaped("hanging_lantern", ["I", "L"], {"I": "minecraft:chain", "L": "minecraft:lantern"})
+
+# ---- recipes: food (vanilla ingredients; categories for the recipe book)
+def sh_food(name, ingredients, count=1):
+    w(f"data/{NS}/recipe/{name}.json", {"type": "minecraft:crafting_shapeless", "category": "misc", "ingredients": ingredients, "result": {"count": count, "id": f"{NS}:{name}"}})
+sh_food("fried_fish", ["minecraft:cooked_salmon", "minecraft:wheat"], 2)
+sh_food("fish_pie", ["minecraft:cooked_cod", "minecraft:potato", "minecraft:wheat", "minecraft:wheat"])
+sh_food("fish_soup", ["minecraft:bowl", "minecraft:cooked_cod", "minecraft:carrot"])
+sh_food("meat_stew", ["minecraft:bowl", "minecraft:cooked_beef", "minecraft:carrot", "minecraft:potato"])
+sh_food("sausage", ["minecraft:porkchop", "minecraft:beef", "minecraft:string"], 3)
+sh_food("cheese_wedge", ["minecraft:milk_bucket", "minecraft:dried_kelp"], 4)
+sh_food("berry_pie", ["minecraft:sweet_berries", "minecraft:sweet_berries", "minecraft:sugar", "minecraft:egg"])
+sh_food("apple_pie", ["minecraft:apple", "minecraft:apple", "minecraft:sugar", "minecraft:egg"])
+sh_food("meat_pie", ["minecraft:cooked_beef", "minecraft:potato", "minecraft:wheat", "minecraft:egg"])
+sh_food("rye_loaf", ["minecraft:wheat", "minecraft:wheat", "minecraft:cocoa_beans"])
+sh_food("honey_bun", ["minecraft:wheat", "minecraft:wheat", "minecraft:honey_bottle"], 2)
+sh_food("porridge", ["minecraft:bowl", "minecraft:wheat", "minecraft:wheat", "minecraft:sugar"])
+sh_food("roast_vegetables", ["minecraft:baked_potato", "minecraft:carrot", "minecraft:beetroot"])
+sh_food("ale", ["minecraft:glass_bottle", "minecraft:wheat", "minecraft:wheat", "minecraft:sugar"])
+sh_food("mead", ["minecraft:glass_bottle", "minecraft:honey_bottle", "minecraft:wheat"])
+sh_food("cider", ["minecraft:glass_bottle", "minecraft:apple", "minecraft:apple", "minecraft:sugar"])
+sh_food("herbal_tea", ["minecraft:glass_bottle", "#minecraft:small_flowers", "minecraft:sweet_berries", "minecraft:fern"])
+w(f"data/{NS}/recipe/smoked_fish.json", {"type": "minecraft:smoking", "category": "food", "ingredient": "minecraft:tropical_fish", "result": {"id": f"{NS}:smoked_fish"}, "experience": 0.35, "cookingtime": 100})
+w(f"data/{NS}/recipe/smoked_fish_smelting.json", {"type": "minecraft:smelting", "category": "food", "ingredient": "minecraft:tropical_fish", "result": {"id": f"{NS}:smoked_fish"}, "experience": 0.35, "cookingtime": 200})
 print("assets written")

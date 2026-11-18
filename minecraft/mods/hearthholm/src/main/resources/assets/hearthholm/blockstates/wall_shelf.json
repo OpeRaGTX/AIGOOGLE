@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/wall_shelf"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/wall_shelf",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/wall_shelf",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/wall_shelf",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:milk_bucket",
+    "minecraft:dried_kelp"
+  ],
+  "result": {
+    "count": 4,
+    "id": "hearthholm:cheese_wedge"
+  }
+}

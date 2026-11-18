@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:bowl",
+    "minecraft:cooked_cod",
+    "minecraft:carrot"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:fish_soup"
+  }
+}

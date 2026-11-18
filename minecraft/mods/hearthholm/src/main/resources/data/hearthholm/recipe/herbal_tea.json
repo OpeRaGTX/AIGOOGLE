@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "#minecraft:small_flowers",
+    "minecraft:sweet_berries",
+    "minecraft:fern"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:herbal_tea"
+  }
+}

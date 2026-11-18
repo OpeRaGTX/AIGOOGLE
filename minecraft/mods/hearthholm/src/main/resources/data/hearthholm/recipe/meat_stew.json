@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:bowl",
+    "minecraft:cooked_beef",
+    "minecraft:carrot",
+    "minecraft:potato"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:meat_stew"
+  }
+}

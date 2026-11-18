@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/firewood_pile"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/firewood_pile",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/firewood_pile",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/firewood_pile",
+      "y": 270
+    }
+  }
+}

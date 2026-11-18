@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -47,6 +48,9 @@ public final class ModBlocks {
     public static WorkshopBlock TAVERN_KEG;
     public static Block LAMP_POST, SIGNPOST, BENCH, WELL, COUNTER, FLOWER_BOX, SETTLEMENT_BANNER, BULLETIN_BOARD, MARKET_STALL;
     public static final List<Block> SIGNS = new ArrayList<>();
+    /** Wave H1: coziness. */
+    public static Block WELL_PART, ROUND_TABLE, LONG_TABLE, CHAIR, STOOL, BOTTLES, MUG, PLATE_BREAD, PLATE_ROAST, PLATE_FISH, CANDLES, CANDLESTICK,
+            WALL_SHELF, HANGING_HERBS, BARREL_RACK, RUG_RED, RUG_BLUE, CRATE, FIREWOOD_PILE, HANGING_LANTERN;
     public static Block ALARM_BELL, PALISADE, PALISADE_GATE, RIFT_CORE, RIFT_LANTERN, CHIEFTAIN_BANNER;
 
     private ModBlocks() {}
@@ -118,8 +122,8 @@ public final class ModBlocks {
                 .mapColor(MapColor.METAL).strength(1.5f).sound(SoundType.LANTERN).lightLevel(st -> 15).noOcclusion());
         SIGNPOST = register("signpost", p -> new DecorBlock(p, Block.box(5, 0, 5, 11, 16, 11)), wood);
         BENCH = register("bench", p -> new DecorBlock(p, Block.box(1, 0, 3, 15, 9, 13)), wood);
-        WELL = register("well", p -> new DecorBlock(p, Block.box(0, 0, 0, 16, 14, 16)), BlockBehaviour.Properties.of()
-                .mapColor(MapColor.STONE).strength(2f).sound(SoundType.STONE).noOcclusion());
+        WELL = register("well", WellBlock::new, BlockBehaviour.Properties.of()
+                .mapColor(MapColor.STONE).strength(2f).sound(SoundType.STONE).noOcclusion().noLootTable());
         COUNTER = register("counter", p -> new DecorBlock(p, Block.box(0, 0, 0, 16, 14, 16)), wood);
         FLOWER_BOX = register("flower_box", p -> new DecorBlock(p, Block.box(0, 0, 3, 16, 10, 13)), wood);
         for (String kind : List.of("carpenter", "mason", "smith", "cook", "tavern")) {
@@ -131,5 +135,40 @@ public final class ModBlocks {
         BULLETIN_BOARD = register("bulletin_board", BulletinBoardBlock::new, wood);
         MARKET_STALL = register("market_stall", MarketStallBlock::new, BlockBehaviour.Properties.of()
                 .mapColor(MapColor.WOOD).strength(2f).sound(SoundType.WOOD).noOcclusion());
+        initCozy();
+    }
+
+    /** Wave H1: furniture and table things, the well parts. */
+    private static void initCozy() {
+        Identifier wpId = Hearthholm.id("well_part");
+        ResourceKey<Block> wpKey = ResourceKey.create(Registries.BLOCK, wpId);
+        WELL_PART = Registry.register(BuiltInRegistries.BLOCK, wpKey, new WellPartBlock(BlockBehaviour.Properties.of().setId(wpKey)
+                .mapColor(MapColor.STONE).strength(2f).sound(SoundType.STONE).noOcclusion().noLootTable()));
+        java.util.function.Supplier<BlockBehaviour.Properties> wood = () -> BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5f).sound(SoundType.WOOD).noOcclusion();
+        BlockBehaviour.Properties glass = BlockBehaviour.Properties.of().mapColor(MapColor.NONE).strength(0.3f).sound(SoundType.GLASS).noOcclusion().instabreak();
+        ROUND_TABLE = register("round_table", p -> new FacingShapeBlock(p, new double[]{0, 12, 0, 16, 14, 16}, new double[]{4, 0, 4, 12, 12, 12}), wood.get());
+        LONG_TABLE = register("long_table", LongTableBlock::new, wood.get());
+        CHAIR = register("chair", p -> new SeatBlock(p, 10, new double[]{3, 0, 3, 13, 10, 13}, new double[]{3, 10, 11, 13, 16, 13}), wood.get());
+        STOOL = register("stool", p -> new SeatBlock(p, 11, new double[]{3, 0, 3, 13, 11, 13}), wood.get());
+        BOTTLES = register("bottles", p -> new SmallStackBlock(p, 3, 11), glass);
+        MUG = register("mug", p -> new SmallStackBlock(p, 3, 6), wood.get().instabreak());
+        BlockBehaviour.Properties plate = BlockBehaviour.Properties.of().mapColor(MapColor.TERRACOTTA_WHITE).strength(0.3f).sound(SoundType.DECORATED_POT).noOcclusion().instabreak();
+        PLATE_BREAD = register("plate_bread", p -> new SmallStackBlock(p, 1, 4), plate);
+        PLATE_ROAST = register("plate_roast", p -> new SmallStackBlock(p, 1, 5), plate);
+        PLATE_FISH = register("plate_fish", p -> new SmallStackBlock(p, 1, 3), plate);
+        CANDLES = register("candles", p -> new SmallStackBlock(p, 3, 11), BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(0.1f).sound(SoundType.CANDLE)
+                .noOcclusion().instabreak().lightLevel(st -> 4 + 2 * st.getValue(SmallStackBlock.COUNT)));
+        CANDLESTICK = register("candlestick", p -> new SmallStackBlock(p, 1, 16), BlockBehaviour.Properties.of().mapColor(MapColor.GOLD).strength(0.3f)
+                .sound(SoundType.LANTERN).noOcclusion().instabreak().lightLevel(st -> 12));
+        WALL_SHELF = register("wall_shelf", p -> new WallDecorBlock(p, new double[]{0, 5, 10, 16, 14, 16}), wood.get());
+        HANGING_HERBS = register("hanging_herbs", p -> new WallDecorBlock(p, new double[]{0, 4, 5, 16, 16, 11}), wood.get().noCollision().instabreak());
+        BARREL_RACK = register("barrel_rack", p -> new FacingShapeBlock(p, new double[]{0, 0, 1, 16, 16, 15}), wood.get());
+        BlockBehaviour.Properties rug = BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).strength(0.2f).sound(SoundType.WOOL).noOcclusion();
+        RUG_RED = register("rug_red", p -> new FacingShapeBlock(p, new double[]{0, 0, 0, 16, 1, 16}), rug);
+        RUG_BLUE = register("rug_blue", p -> new FacingShapeBlock(p, new double[]{0, 0, 0, 16, 1, 16}), rug);
+        CRATE = register("crate", p -> new FacingShapeBlock(p, new double[]{0, 0, 0, 16, 16, 16}), BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5f).sound(SoundType.WOOD));
+        FIREWOOD_PILE = register("firewood_pile", p -> new FacingShapeBlock(p, new double[]{0, 0, 0, 16, 12, 16}), wood.get());
+        HANGING_LANTERN = register("hanging_lantern", LanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.5f)
+                .sound(SoundType.LANTERN).lightLevel(st -> 13).noOcclusion());
     }
 }

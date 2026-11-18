@@ -24,6 +24,7 @@ public final class HearthholmClient implements ClientModInitializer {
         net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(
                 io.github.operagtx.hearthholm.client.render.RiftWispModel.LAYER, io.github.operagtx.hearthholm.client.render.RiftWispModel::createLayer);
         EntityRendererRegistry.register(ModEntities.RIFT_WISP, io.github.operagtx.hearthholm.client.render.RiftWispRenderer::new);
+        EntityRendererRegistry.register(ModEntities.SEAT, io.github.operagtx.hearthholm.client.render.SeatRenderer::new);
         EntityRendererRegistry.register(ModEntities.TRADER, io.github.operagtx.hearthholm.client.render.TraderRenderer::new);
         ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenTrade.TYPE,
                 (p, ctx) -> ctx.client().execute(() -> io.github.operagtx.hearthholm.client.screen.TradeScreen.show(p.view())));

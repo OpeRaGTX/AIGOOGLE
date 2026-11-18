@@ -50,7 +50,11 @@ public final class Caravan {
             new Rate(Items.BIRCH_LOG, 8, 64), new Rate(Items.OAK_PLANKS, 12, 96), new Rate(Items.COAL, 4, 32),
             new Rate(Items.IRON_INGOT, 1, 32), new Rate(Items.WHEAT, 8, 48), new Rate(Items.CARROT, 8, 48),
             new Rate(Items.POTATO, 8, 48), new Rate(Items.BREAD, 4, 32), new Rate(Items.SAND, 16, 64),
-            new Rate(Items.COOKED_COD, 4, 24), new Rate(Items.STRING, 8, 16));
+            new Rate(Items.COOKED_COD, 4, 24), new Rate(Items.STRING, 8, 16),
+            // wave H1: the new dishes sell well
+            new Rate(ModItems.food("smoked_fish"), 3, 16), new Rate(ModItems.food("cheese_wedge"), 4, 16), new Rate(ModItems.food("sausage"), 3, 16),
+            new Rate(ModItems.food("rye_loaf"), 4, 16), new Rate(ModItems.food("meat_pie"), 2, 12), new Rate(ModItems.food("ale"), 2, 12),
+            new Rate(ModItems.food("mead"), 1, 12), new Rate(ModItems.food("cider"), 2, 12));
 
     public record Offer(String kind, ItemStack stack, int price, String ref) {}
 
