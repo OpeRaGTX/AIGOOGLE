@@ -32,6 +32,11 @@ public final class ZoneMapScreen extends HhScreen {
     private boolean confirmClear;
     private long confirmUntil;
     private long lastEdit = -1000, lastRefresh;
+    private boolean editDirty;
+    private boolean confirmEverything;
+    private Button clearAllButton;
+    private int sliderX, sliderY;
+    private boolean sliding;
     private Button clearButton;
     private final List<Button> toolButtons = new ArrayList<>();
     private final Button[] zoomButtons = new Button[3];
@@ -80,12 +85,16 @@ public final class ZoneMapScreen extends HhScreen {
 
     private void sendEdit(int op, List<Payloads.Rect> rects) {
         lastEdit = minecraft != null && minecraft.level != null ? minecraft.level.getGameTime() : 0;
-        ClientPlayNetworking.send(new Payloads.ZoneEdit(view.pos(), layerY, op, List.copyOf(rects)));
+        editDirty = true;
+        ClientPlayNetworking.send(new Payloads.ZoneEdit(view.pos(), map.layer(), op, List.copyOf(rects), spec.layered() ? map.height() : 0));
     }
 
     private void sendOption(String key, int value) {
+        editDirty = true;
         ClientPlayNetworking.send(new Payloads.WorkSiteAction(view.pos(), key, value));
     }
+
+    private int opt(String key, int def) { return view.values().getOrDefault(key, def); }
 
     @Override
     protected void init() {
@@ -95,6 +104,7 @@ public final class ZoneMapScreen extends HhScreen {
             pendingData = null;
         }
         toolButtons.clear();
+        if (spec.layered()) { initMiner(); return; }
         int x0 = left + RX, y = top + 16;
         ZoneMapWidget.Tool[] tools = {ZoneMapWidget.Tool.BRUSH, ZoneMapWidget.Tool.RECT, ZoneMapWidget.Tool.ERASER, ZoneMapWidget.Tool.ERASE_RECT};
         String[] keys = {"brush", "rect", "eraser", "erase_rect"};
@@ -143,22 +153,194 @@ public final class ZoneMapScreen extends HhScreen {
         }
     }
 
+    // ---- wave J3: the miner's layout ------------------------------------------------------------
+
+    private static final int HW = 86;   // half-width button
+
+    private void initMiner() {
+        int x0 = left + RX, y = top + 16;
+        boolean drawn = opt("plan", 0) == 1;
+        java.util.Arrays.fill(zoomButtons, null);
+        map.setEditable(drawn);
+        if (drawn) {
+            ZoneMapWidget.Tool[] tools = {ZoneMapWidget.Tool.BRUSH, ZoneMapWidget.Tool.RECT, ZoneMapWidget.Tool.ERASER, ZoneMapWidget.Tool.ERASE_RECT};
+            String[] keys = {"brush", "rect", "eraser", "erase_rect"};
+            for (int i = 0; i < 4; i++) {
+                ZoneMapWidget.Tool t = tools[i];
+                Button b = button(fitLabel(Component.translatable("gui.hearthholm.zone.tool." + keys[i]), HW - 8), x0 + (i % 2) * 90, y + (i / 2) * 18, HW, 16, bb -> map.setTool(t));
+                b.setTooltip(Tooltip.create(Component.translatable("gui.hearthholm.zone.tool." + keys[i] + ".tip")));
+                toolButtons.add(b);
+            }
+            y += 36;
+            Button cl = button(fitLabel(Component.translatable("gui.hearthholm.mine.clear_layer"), HW - 8), x0, y, HW, 16, b -> map.clearAll());
+            cl.setTooltip(Tooltip.create(Component.translatable("gui.hearthholm.mine.clear_layer.tip")));
+            clearAllButton = button(fitLabel(Component.translatable(confirmEverything ? "gui.hearthholm.mine.confirm" : "gui.hearthholm.mine.clear_all"), HW - 8), x0 + 90, y, HW, 16, b -> {
+                long now = minecraft.level == null ? 0 : minecraft.level.getGameTime();
+                if (confirmEverything && now <= confirmUntil) { map.clearEverything(); confirmEverything = false; }
+                else { confirmEverything = true; confirmUntil = now + 80; }
+                rebuildWidgets();
+            });
+            clearAllButton.setTooltip(Tooltip.create(Component.translatable("gui.hearthholm.mine.clear_all.tip")));
+            y += 18;
+            // brush size (cells) on the left, zoom on the right
+            button(Component.literal("-"), x0, y, 16, 16, b -> map.setBrush(map.brush() - 1));
+            button(Component.literal("+"), x0 + HW - 16, y, 16, 16, b -> map.setBrush(map.brush() + 1));
+            String[] zl = {"gui.hearthholm.zone.zoom_fit", "gui.hearthholm.zone.zoom_2", "gui.hearthholm.zone.zoom_4"};
+            for (int i = 0; i < 3; i++) {
+                int lv = i;
+                zoomButtons[i] = button(Component.translatable(zl[i]), x0 + 90 + i * 30, y, 28, 16, b -> map.setZoom(lv));
+                zoomButtons[i].setTooltip(Tooltip.create(Component.translatable("gui.hearthholm.zone.zoom.tip")));
+            }
+            y += 18;
+            // brush height on the left, torches on the right
+            button(Component.literal("-"), x0, y, 16, 16, b -> map.setHeight(map.height() - 1)).setTooltip(Tooltip.create(Component.translatable("gui.hearthholm.mine.height.tip")));
+            button(Component.literal("+"), x0 + HW - 16, y, 16, 16, b -> map.setHeight(map.height() + 1)).setTooltip(Tooltip.create(Component.translatable("gui.hearthholm.mine.height.tip")));
+            torchButton(x0 + 90, y);
+            y += 18;
+            // the layer: slider bar, then - label + and the jump to the marker's level
+            sliderX = x0;
+            sliderY = y;
+            y += 14;
+            button(Component.literal("-"), x0, y, 16, 16, b -> changeLayer(-1));
+            button(Component.literal("+"), x0 + HW - 16, y, 16, 16, b -> changeLayer(1));
+            Button jump = button(fitLabel(Component.translatable("gui.hearthholm.mine.jump"), HW - 8), x0 + 90, y, HW, 16, b -> setLayer(map.data().info().markerY()));
+            jump.setTooltip(Tooltip.create(Component.translatable("gui.hearthholm.mine.jump.tip")));
+            y += 20;
+        } else {
+            // automatic layout: the old options live here
+            for (SiteOption o : type.options()) {
+                if (o.key().equals("mode")) {
+                    int value = opt("mode", 0);
+                    Button b = button(fitLabel(Component.empty().append(o.label()).append(": ").append(o.valueLabel(value)), RW - 8), x0, y, RW, 16, bb -> sendOption("mode", o.next(value, 1)));
+                    b.setTooltip(Tooltip.create(Component.translatable("option.hearthholm.mode.tip")));
+                    y += 18;
+                } else if (o.key().equals("depth") || o.key().equals("length")) {
+                    int value = opt(o.key(), o.def());
+                    button(Component.literal("<"), x0, y, 16, 16, bb -> sendOption(o.key(), o.next(value, -1)));
+                    button(Component.literal(">"), x0 + RW - 16, y, 16, 16, bb -> sendOption(o.key(), o.next(value, 1)));
+                    y += 18;
+                }
+            }
+            SiteOption br = type.option("branches");
+            int bv = opt("branches", 1);
+            button(fitLabel(Component.empty().append(br.label()).append(": ").append(br.valueLabel(bv)), HW - 8), x0, y, HW, 16, bb -> sendOption("branches", br.next(bv, 1)));
+            torchButton(x0 + 90, y);
+            y += 18 + 40;
+        }
+        // the plan switch and what happens when the plan is done
+        planY = y;
+        button(fitLabel(Component.translatable(drawn ? "gui.hearthholm.mine.plan_drawn" : "gui.hearthholm.mine.plan_auto"), RW - 8), x0, y, RW, 16,
+                b -> sendOption("plan", drawn ? 0 : 1)).setTooltip(Tooltip.create(Component.translatable("gui.hearthholm.mine.plan.tip")));
+        y += 18;
+        if (drawn) {
+            boolean after = opt("after", 0) == 1;
+            button(fitLabel(Component.translatable(after ? "gui.hearthholm.mine.after_auto" : "gui.hearthholm.mine.after_idle"), RW - 8), x0, y, RW, 16,
+                    b -> sendOption("after", after ? 0 : 1)).setTooltip(Tooltip.create(Component.translatable("gui.hearthholm.mine.after.tip")));
+        }
+    }
+
+    private int planY;
+
+    private void torchButton(int x, int y) {
+        SiteOption o = type.option("torches");
+        int v = opt("torches", 1);
+        button(fitLabel(Component.empty().append(o.label()).append(": ").append(o.valueLabel(v)), HW - 8), x, y, HW, 16, b -> sendOption("torches", o.next(v, 1)));
+    }
+
+    private void setLayer(int y) {
+        Payloads.MineInfo info = map.data().info();
+        layerY = Math.max(info.minY(), Math.min(info.maxY(), y));
+        ClientPlayNetworking.send(new Payloads.ZoneMapRequest(view.pos(), layerY));
+        lastRefresh = minecraft != null && minecraft.level != null ? minecraft.level.getGameTime() : 0;
+    }
+
+    /** The layer slider bar: drag or click to choose the Y level. */
+    private boolean sliderHit(double mx, double my) {
+        return spec.layered() && opt("plan", 0) == 1 && mx >= sliderX && mx < sliderX + RW && my >= sliderY && my < sliderY + 12;
+    }
+
+    private void sliderTo(double mx) {
+        Payloads.MineInfo info = map.data().info();
+        double f = Math.max(0, Math.min(1, (mx - sliderX - 3) / (RW - 6)));
+        int y = info.minY() + (int) Math.round(f * (info.maxY() - info.minY()));
+        if (y != layerY) setLayer(y);
+    }
+
+    private String timeText(int seconds) {
+        if (seconds < 90) return Component.translatable("gui.hearthholm.mine.t_s", Math.max(1, seconds)).getString();
+        if (seconds < 5400) return Component.translatable("gui.hearthholm.mine.t_min", Math.round(seconds / 60f)).getString();
+        return Component.translatable("gui.hearthholm.mine.t_h", seconds / 3600, (seconds % 3600) / 60).getString();
+    }
+
+    private void contentMiner(GuiGraphicsExtractor g, int mx, int my) {
+        int x0 = left + RX;
+        boolean drawn = opt("plan", 0) == 1;
+        Payloads.MineInfo info = map.data().info();
+        if (drawn) {
+            int y = top + 16 + 36 + 18;
+            String bs = fit(Component.translatable("gui.hearthholm.mine.brush_size", map.brush() * 2), HW - 36);
+            g.text(font, bs, x0 + (HW - font.width(bs)) / 2, y + 4, TEXT, false);
+            y += 18;
+            String hs = fit(Component.translatable("gui.hearthholm.mine.height", map.height()), HW - 36);
+            g.text(font, hs, x0 + (HW - font.width(hs)) / 2, y + 4, TEXT, false);
+            y += 18;
+            // the slider
+            int sw = RW;
+            inset(g, sliderX, sliderY + 4, sw, 4);
+            double f = info.maxY() > info.minY() ? (layerY - info.minY()) / (double) (info.maxY() - info.minY()) : 0;
+            int tx = sliderX + 3 + (int) Math.round(f * (sw - 6));
+            double fm = info.maxY() > info.minY() ? (info.markerY() - info.minY()) / (double) (info.maxY() - info.minY()) : 0;
+            int mxk = sliderX + 3 + (int) Math.round(fm * (sw - 6));
+            g.fill(mxk, sliderY + 2, mxk + 1, sliderY + 10, 0xFFFFFFFF);   // the marker's level
+            g.fill(tx - 2, sliderY, tx + 3, sliderY + 12, 0xFF000000);
+            g.fill(tx - 1, sliderY + 1, tx + 2, sliderY + 11, sliding ? 0xFFFFE08A : TRIM);
+            String ls = fit(Component.translatable("gui.hearthholm.mine.layer", layerY), HW - 36);
+            g.text(font, ls, x0 + (HW - font.width(ls)) / 2, sliderY + 14 + 4, TITLE, false);
+        } else {
+            g.text(font, fit(Component.translatable("gui.hearthholm.mine.auto_note"), RW), x0, top + 16 + 18 * 5 + 2, DIM, false);
+            int oy = top + 16 + 18;
+            for (String k : new String[]{"depth", "length"}) {
+                String s = fit(Component.translatable("option.hearthholm." + k).append(": " + opt(k, 0)), RW - 40);
+                g.text(font, s, x0 + (RW - font.width(s)) / 2, oy + 4, TITLE, false);
+                oy += 18;
+            }
+        }
+        // summary of the drawn plan
+        int sy = top + panelH - 21 - 24;
+        g.text(font, fit(Component.translatable("gui.hearthholm.mine.sum_cells", info.cells(), info.blocks()), RW), x0, sy, TEXT, false);
+        g.text(font, fit(Component.translatable("gui.hearthholm.mine.sum_time", info.blocks() == 0 ? "-" : timeText(info.seconds())), RW), x0, sy + 10, TEXT, false);
+    }
+
+    private void legendMiner(GuiGraphicsExtractor g) {
+        int ly = map.y + ZoneMapWidget.VIEW + 3;
+        int[] rgb = {ZoneMapWidget.zoneRgb(), ZoneMapWidget.oreRgb(), ZoneMapWidget.blockedRgb(), 0xFF4C9CFF, 0xFFF09A3C};
+        String[] keys = {"plan", "ore", "locked", "above", "below"};
+        int x = map.x;
+        for (int i = 0; i < 5; i++) {
+            g.fill(x, ly, x + 6, ly + 6, 0xFF000000);
+            g.fill(x + 1, ly + 1, x + 5, ly + 5, rgb[i]);
+            String s = fit(Component.translatable("gui.hearthholm.mine.legend." + keys[i]), 32);
+            g.text(font, s, x + 8, ly - 1, DIM, false);
+            x += 8 + 32;
+        }
+    }
+
     private boolean language(String key) {
         return net.minecraft.locale.Language.getInstance().has(key);
     }
 
-    private void changeLayer(int d) {
-        layerY += d;
-        ClientPlayNetworking.send(new Payloads.ZoneMapRequest(view.pos(), layerY));
-    }
+    private void changeLayer(int d) { setLayer(layerY + d); }
 
     @Override
     public void tick() {
         super.tick();
         long now = minecraft == null || minecraft.level == null ? 0 : minecraft.level.getGameTime();
         if (confirmClear && now > confirmUntil) { confirmClear = false; rebuildWidgets(); }
-        if (map != null && !map.busy() && now - lastRefresh >= 200) {
+        if (confirmEverything && now > confirmUntil) { confirmEverything = false; rebuildWidgets(); }
+        boolean soon = editDirty && now - lastEdit >= 12 && now - lastRefresh >= 10;
+        if (map != null && !map.busy() && (now - lastRefresh >= 200 || soon)) {
             lastRefresh = now;
+            editDirty = false;
             ClientPlayNetworking.send(new Payloads.ZoneMapRequest(view.pos(), layerY));
         }
     }
@@ -171,24 +353,28 @@ public final class ZoneMapScreen extends HhScreen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent e, boolean dbl) {
+        if (map != null && e.button() == 0 && sliderHit(e.x(), e.y())) { sliding = true; sliderTo(e.x()); return true; }
         if (map != null && map.mouseClicked(e.x(), e.y(), e.button())) return true;
         return super.mouseClicked(e, dbl);
     }
 
     @Override
     public boolean mouseDragged(MouseButtonEvent e, double dx, double dy) {
+        if (sliding) { sliderTo(e.x()); return true; }
         if (map != null && map.mouseDragged(e.x(), e.y(), e.button(), dx, dy)) return true;
         return super.mouseDragged(e, dx, dy);
     }
 
     @Override
     public boolean mouseReleased(MouseButtonEvent e) {
+        if (sliding) { sliding = false; return true; }
         if (map != null && map.mouseReleased(e.x(), e.y(), e.button())) return true;
         return super.mouseReleased(e);
     }
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
+        if (map != null && sliderHit(mx, my) && sy != 0) { changeLayer(sy > 0 ? 1 : -1); return true; }
         if (map != null && map.mouseScrolled(mx, my, sy)) return true;
         return super.mouseScrolled(mx, my, sx, sy);
     }
@@ -215,6 +401,17 @@ public final class ZoneMapScreen extends HhScreen {
         String cs = fit(cells, 120);
         text(g, cs, left + panelW - 8 - font.width(cs), top + 5, DIM);
         map.render(g, mx, my);
+        if (spec.layered()) {
+            legendMiner(g);
+            contentMiner(g, mx, my);
+            fitText(g, Component.translatable("gui.hearthholm.worker").append(": ").append(view.worker()), x0, top + panelH - 21, RW, TEXT, mx, my);
+            String inf;
+            if (map.hoverX() >= 0 && map.hoverX() < zone.size() && map.hoverZ() >= 0 && map.hoverZ() < zone.size()) {
+                inf = Component.translatable("gui.hearthholm.zone.cursor", zone.blockX(map.hoverX()), zone.blockZ(map.hoverZ()), map.hoverX(), map.hoverZ()).getString();
+            } else inf = Component.translatable("gui.hearthholm.mine.hint").getString();
+            g.text(font, fit(inf, RW), x0, top + panelH - 11, DIM, false);
+            return;
+        }
         if (zone.cellCount(map.layer()) == 0) {
             int bx = map.x, by = map.y + ZoneMapWidget.VIEW - 12;
             g.fill(bx, by, bx + ZoneMapWidget.VIEW, by + 12, 0xCC120D09);

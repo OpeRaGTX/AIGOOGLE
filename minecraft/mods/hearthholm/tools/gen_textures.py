@@ -1263,6 +1263,8 @@ def main():
     gen_h3_skins.run(sys.modules[__name__])   # wave H3: long women's hair, faces, accent-only profession overlays
     import gen_j2_tex
     gen_j2_tex.run(sys.modules[__name__])   # wave J2: chopping block
+    import gen_j3_tex
+    gen_j3_tex.run(sys.modules[__name__])   # wave J3: miner's stone with a pickaxe
     print("textures written to", os.path.normpath(OUT))
 
 if __name__ == "__main__":

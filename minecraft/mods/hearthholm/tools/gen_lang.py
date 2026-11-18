@@ -720,6 +720,45 @@ T.update({
  "status.hearthholm.fetching_saplings": ("Getting saplings", "Берёт саженцы"),
 })
 
+# wave J3: the miner's stone with a pickaxe, the 3D dig plan on the map
+T.update({
+ "block.hearthholm.mine_marker": ("Miner's Stone", "Камень шахтёра"),
+ "option.hearthholm.plan": ("Plan", "План"),
+ "option.hearthholm.plan.auto": ("Automatic", "Авто"), "option.hearthholm.plan.drawn": ("Drawn on the map", "С карты"),
+ "option.hearthholm.after": ("When the plan is done", "Когда план выполнен"),
+ "option.hearthholm.mode.tip": ("Automatic layouts: a spiral stair, a ladder shaft or a tunnel into a hillside.", "Автоматические схемы: спираль, колодец с лестницей или тоннель в склон."),
+ "worksite.hearthholm.mine.hint": ("Right-click the stone to draw the dig plan: paint cells layer by layer (a cell is 2x2 blocks), the miner digs his own stair to them. A chest next to the stone is his chest.",
+                                   "ПКМ по камню открывает карту: рисуйте план раскопок по слоям (клетка 2x2 блока), шахтёр сам прорубит к ним лестницу. Сундук рядом с камнем его."),
+ "gui.hearthholm.mine.layer": ("Layer Y %s", "Слой Y %s"),
+ "gui.hearthholm.mine.jump": ("To marker", "К камню"),
+ "gui.hearthholm.mine.jump.tip": ("Back to the layer of the miner's stone.", "Вернуться на слой камня шахтёра."),
+ "gui.hearthholm.mine.height": ("Height: %s", "Высота: %s"),
+ "gui.hearthholm.mine.height.tip": ("How many blocks a painted cell digs upward from its layer: 1-4 (2 = a walkable tunnel). Only affects cells painted next.",
+                                    "Сколько блоков вверх от слоя копает закрашенная клетка: 1-4 (2 = проход в рост). Влияет на клетки, закрашенные дальше."),
+ "gui.hearthholm.mine.brush_size": ("Brush: %s blocks", "Кисть: %s бл."),
+ "gui.hearthholm.mine.clear_layer": ("Clear layer", "Слой пуст"),
+ "gui.hearthholm.mine.clear_layer.tip": ("Erases every painted cell of this layer only.", "Стирает все клетки только этого слоя."),
+ "gui.hearthholm.mine.clear_all": ("Clear all", "Всё пусто"),
+ "gui.hearthholm.mine.clear_all.tip": ("Erases the painted cells of every layer.", "Стирает клетки всех слоёв."),
+ "gui.hearthholm.mine.confirm": ("Sure?", "Точно?"),
+ "gui.hearthholm.mine.plan_drawn": ("Plan: drawn on the map", "План: с карты"),
+ "gui.hearthholm.mine.plan_auto": ("Plan: automatic layout", "План: авто-схема"),
+ "gui.hearthholm.mine.plan.tip": ("Drawn plan: the miner digs the painted cells and their stair. Automatic: spiral, ladder shaft or tunnel as before.",
+                                  "С карты: шахтёр копает закрашенные клетки и лестницу к ним. Авто: спираль, колодец или тоннель, как раньше."),
+ "gui.hearthholm.mine.after_idle": ("When done: rest", "Потом: отдых"),
+ "gui.hearthholm.mine.after_auto": ("When done: auto", "Потом: авто-схема"),
+ "gui.hearthholm.mine.after.tip": ("What the miner does once everything painted is dug: stand idle, or go on with the automatic layout.",
+                                   "Что делает шахтёр, когда всё закрашенное выкопано: отдыхает или продолжает по авто-схеме."),
+ "gui.hearthholm.mine.sum_cells": ("Cells: %s  Blocks: %s", "Клеток: %s  Блоков: %s"),
+ "gui.hearthholm.mine.sum_time": ("Time: %s", "Время: %s"),
+ "gui.hearthholm.mine.t_s": ("~%s s", "~%s с"), "gui.hearthholm.mine.t_min": ("~%s min", "~%s мин"), "gui.hearthholm.mine.t_h": ("~%s h %s min", "~%s ч %s мин"),
+ "gui.hearthholm.mine.legend.plan": ("Plan", "План"), "gui.hearthholm.mine.legend.ore": ("Ore", "Руда"), "gui.hearthholm.mine.legend.locked": ("Locked", "Запрет"),
+ "gui.hearthholm.mine.legend.above": ("Above", "Выше"), "gui.hearthholm.mine.legend.below": ("Below", "Ниже"),
+ "gui.hearthholm.mine.auto_note": ("Painting is off in automatic mode.", "В авто-режиме рисовать нельзя."),
+ "gui.hearthholm.mine.hint": ("Wheel: zoom. Right drag: pan.", "Колесо: масштаб. ПКМ: сдвиг."),
+ "status.hearthholm.mine_drawn_blocked": ("Skipping cells under the marker or a building", "Пропускает клетки под камнем или зданием"),
+})
+
 # speech bubbles
 import sys
 sys.path.insert(0, os.path.dirname(__file__))

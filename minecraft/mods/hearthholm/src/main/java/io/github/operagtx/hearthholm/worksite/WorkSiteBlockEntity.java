@@ -91,6 +91,7 @@ public class WorkSiteBlockEntity extends BlockEntity {
     /** Call after changing the zone: forgets an emptied zone and saves. */
     public void zoneChanged() {
         if (zone != null && zone.isEmpty()) zone = null;
+        progress = 0;   // wave J3: a changed drawn plan is rescanned from the start (finished steps are skipped)
         setChanged();
     }
 

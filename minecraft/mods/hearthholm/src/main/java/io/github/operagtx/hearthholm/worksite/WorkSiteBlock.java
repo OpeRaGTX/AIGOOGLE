@@ -41,7 +41,7 @@ public class WorkSiteBlock extends FacingEntityBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return typeId.equals(WorkSiteTypes.FOREST_ID) ? STUMP : POST;
+        return typeId.equals(WorkSiteTypes.FOREST_ID) || typeId.equals(WorkSiteTypes.MINE_ID) ? STUMP : POST;
     }
 
     /** Walk-through like a sign: the outline (getShape) stays so the marker can be clicked and broken. */

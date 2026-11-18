@@ -44,6 +44,11 @@ public final class MinerJob extends SiteJob {
             Items.COARSE_DIRT, Items.SANDSTONE, Items.CALCITE);
     private static final Set<Item> PRECIOUS = Set.of(Items.DIAMOND, Items.EMERALD, Items.ANCIENT_DEBRIS, Items.RAW_GOLD, Items.LAPIS_LAZULI);
     private long nextFetch;
+    // wave J3: protected places of a drawn plan (rebuilt every few seconds), whether the current step is a ladder shaft one
+    private io.github.operagtx.hearthholm.zone.MineGuard guard = io.github.operagtx.hearthholm.zone.MineGuard.none();
+    private long guardAt = -1000;
+    private boolean ladderPhase;
+    private long nextRecheck;
     private final java.util.ArrayDeque<BlockPos> vein = new java.util.ArrayDeque<>();
     private final java.util.Map<BlockPos, Integer> veinTries = new java.util.HashMap<>();
 
@@ -69,6 +74,7 @@ public final class MinerJob extends SiteJob {
                 BlockState nb = level.getBlockState(p.relative(d));
                 if (nb.getCollisionShape(level, p.relative(d)).isEmpty() && nb.getFluidState().isEmpty()) open = true;
             }
+            if (guard.blocked(p)) continue;   // wave J3: never mine under the marker, the hall, the warehouse or a house
             if (!open) { vein.addLast(p); continue; }
             if (veinTries.merge(p, 1, Integer::sum) > 3) continue;
             vein.addFirst(p);
@@ -121,6 +127,13 @@ public final class MinerJob extends SiteJob {
         WorkSiteBlockEntity w = claim();
         if (w == null) return new Wait(100);
         Plan plan = MinePlanner.plan(w);
+        ServerLevel lvl = (ServerLevel) s.level();
+        boolean drawn = MinePlanner.drawn(w);
+        if (drawn && lvl.getGameTime() - guardAt > 100) {
+            guardAt = lvl.getGameTime();
+            guard = io.github.operagtx.hearthholm.zone.MineGuard.of(lvl, w, s.settlement());
+        } else if (!drawn) guard = io.github.operagtx.hearthholm.zone.MineGuard.none();
+        ladderPhase = plan.ladderAt(w.progress());
         Task tool = toolTrip();
         if (tool != null) return surface(plan, tool, w);
         if (pocketsFull()) {
@@ -140,13 +153,22 @@ public final class MinerJob extends SiteJob {
             return wrap(plan, new BreakBlock(veinCell, drops -> { vein.remove(veinCell); onMined(drops); }), veinCell, w);
         }
         int i = w.progress();
-        for (int guard = 0; guard < 96 && i < plan.steps().size(); guard++) {
+        int skipMax = drawn ? 2500 : 96;
+        for (int skip = 0; skip < skipMax && i < plan.steps().size(); skip++) {
             Step st = plan.steps().get(i);
-            if (!done(level, st, w)) break;
+            if (!done(level, st, w, drawn && (plan.autoFrom() < 0 || i < plan.autoFrom()))) break;
             i++;
         }
         w.setProgress(i);
         if (i >= plan.steps().size()) {
+            // wave J3: a finished drawn plan is checked again now and then (sand and gravel that fell into a tunnel, blocks put back)
+            if (drawn && level.getGameTime() >= nextRecheck) {
+                nextRecheck = level.getGameTime() + 200;
+                for (int k = 0; k < plan.steps().size(); k++) {
+                    if (!done(level, plan.steps().get(k), w, plan.autoFrom() < 0 || k < plan.autoFrom())) { w.setProgress(k); break; }
+                }
+                if (w.progress() < plan.steps().size()) return new Wait(1);
+            }
             s.setStatus("mine_done");
             return new Wait(200);
         }
@@ -155,7 +177,10 @@ public final class MinerJob extends SiteJob {
         return switch (step.kind()) {
             case DIG -> {
                 if (!seal(level, plan, step.pos())) yield needFiller(plan, w);
-                yield wrap(plan, new BreakBlock(step.pos(), drops -> { onMined(drops); findVein(level, step.pos()); }), step.pos(), w);
+                Task dig = wrap(plan, new BreakBlock(step.pos(), drops -> { onMined(drops); findVein(level, step.pos()); }), step.pos(), w);
+                // wave J3: sand or gravel right above falls into the hole: give it a moment to land, it is dug again by the next check
+                if (drawn && level.getBlockState(step.pos().above()).getBlock() instanceof net.minecraft.world.level.block.Fallable) yield new Sequence(dig, new Wait(30));
+                yield dig;
             }
             case FLOOR -> {
                 ItemStack filler = firstFiller();
@@ -164,7 +189,12 @@ public final class MinerJob extends SiteJob {
                 yield wrap(plan, new PlaceBlock(step.pos(), state, filler.getItem(), null), step.pos(), w);
             }
             case TORCH -> {
-                BlockState torch = Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, step.dir());
+                Direction face = step.dir() == Direction.UP ? wallFacing(level, step.pos()) : step.dir();   // wave J3: drawn plans pick the wall at placement
+                if (face == null) {
+                    w.setProgress(i + 1);
+                    yield new Wait(1);
+                }
+                BlockState torch = Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, face);
                 if (!s.has(Items.TORCH)) {   // wave I1: torches come from storage
                     Task f = fetchLimited(st -> st.is(Items.TORCH), 24, "fetching_torches");
                     if (f != null) yield surface(plan, f, w);
@@ -192,13 +222,36 @@ public final class MinerJob extends SiteJob {
         };
     }
 
-    private boolean done(ServerLevel level, Step st, WorkSiteBlockEntity w) {
+    /** The wall direction a torch at {@code pos} can hang on (it faces away from the wall), or null when there is no wall. */
+    private static @Nullable Direction wallFacing(ServerLevel level, BlockPos pos) {
+        if (!level.getBlockState(pos).isAir()) return null;
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            BlockPos wall = pos.relative(d.getOpposite());
+            if (level.getBlockState(wall).isFaceSturdy(level, wall, d)) return d;
+        }
+        return null;
+    }
+
+    private boolean done(ServerLevel level, Step st, WorkSiteBlockEntity w, boolean drawnStep) {
         if (st.pos().getY() <= level.getMinY()) return true;
         BlockState state = level.getBlockState(st.pos());
+        if (drawnStep) {
+            // wave J3: protected places and unbreakable blocks are left alone; floors only where the hole is embedded in solid ground
+            if (guard.blocked(st.pos())) return true;
+            if (st.kind() == Kind.DIG && state.getDestroySpeed(level, st.pos()) < 0) return true;
+            if (st.kind() == Kind.FLOOR) {
+                boolean embedded = !level.getBlockState(st.pos().below()).getCollisionShape(level, st.pos().below()).isEmpty();
+                for (Direction d : Direction.Plane.HORIZONTAL) {
+                    BlockPos n = st.pos().relative(d);
+                    if (!level.getBlockState(n).getCollisionShape(level, n).isEmpty()) embedded = true;
+                }
+                if (!embedded || !state.getFluidState().isEmpty()) return true;
+            }
+        }
         return switch (st.kind()) {
             case DIG -> state.getCollisionShape(level, st.pos()).isEmpty() && state.getFluidState().isEmpty();
             case FLOOR -> state.isFaceSturdy(level, st.pos(), Direction.UP) || state.is(Blocks.LADDER);
-            case TORCH -> !w.flag("torches") || state.getBlock() instanceof WallTorchBlock;
+            case TORCH -> !w.flag("torches") || state.getBlock() instanceof WallTorchBlock || (st.dir() == Direction.UP && !state.isAir());
             case LADDER -> state.is(Blocks.LADDER);
         };
     }
@@ -258,7 +311,7 @@ public final class MinerJob extends SiteJob {
 
     /** In ladder mines, climbs the shaft before tasks that are at another depth. */
     private Task wrap(Plan plan, Task task, BlockPos target, WorkSiteBlockEntity w) {
-        if (plan.mode() != MinePlanner.LADDER) return task;
+        if (!ladderPhase) return task;
         boolean inColumn = target.getX() == plan.shaft().getX() && target.getZ() == plan.shaft().getZ();
         int standY = inColumn ? target.getY() + 1 : plan.bottomY();
         standY = Math.min(standY, plan.topY());
@@ -269,7 +322,7 @@ public final class MinerJob extends SiteJob {
 
     /** Wraps tasks that happen at the surface (chests). */
     private Task surface(Plan plan, Task task, WorkSiteBlockEntity w) {
-        if (plan.mode() == MinePlanner.LADDER && settler.getY() < plan.topY() - 1.5) {
+        if (ladderPhase && settler.getY() < plan.topY() - 1.5) {
             return new Sequence(new Climb(plan, plan.topY(), w), task);
         }
         return task;

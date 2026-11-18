@@ -62,6 +62,8 @@ public final class ZoneMapService {
         LAST_REQUEST.put(player.getUUID(), now);
         WorkZone.Spec spec = w.zoneSpec();
         if (!spec.layered()) layerY = WorkZone.SURFACE;
+        else if (layerY == WorkZone.SURFACE) layerY = w.getBlockPos().getY();   // the miner's map opens at the marker's level
+        else layerY = Math.max(level.getMinY(), Math.min(level.getMaxY(), layerY));
         ServerPlayNetworking.send(player, snapshot(level, w, s, layerY));
         served++;
         return true;
@@ -81,6 +83,7 @@ public final class ZoneMapService {
         int[] prevH = new int[n];
         java.util.Arrays.fill(prevH, Integer.MIN_VALUE);
         int minY = level.getMinY();
+        MineGuard guard = !surface ? MineGuard.of(level, w, s) : MineGuard.none();
         for (int iz = 0; iz < n; iz++) {
             for (int ix = 0; ix < n; ix++) {
                 int x = zone.blockX(ix) + zone.cell() / 2, z = zone.blockZ(iz) + zone.cell() / 2;
@@ -119,9 +122,21 @@ public final class ZoneMapService {
                     }
                     colors[i] = color.getPackedId(b);
                 } else {
-                    BlockState st = level.getBlockState(mp.set(x, layerY, z));
-                    MapColor color = st.isAir() ? MapColor.NONE : st.getMapColor(level, mp);
+                    // wave J3: the block at the layer; a cell is 2 x 2 blocks - ore anywhere in it is highlighted, the first solid block gives the colour
+                    int c = zone.cell();
+                    MapColor color = MapColor.NONE;
+                    boolean ore = false;
+                    int bx = zone.blockX(ix), bz = zone.blockZ(iz);
+                    for (int dx = 0; dx < c; dx++) for (int dz = 0; dz < c; dz++) {
+                        BlockState st = level.getBlockState(mp.set(bx + dx, layerY, bz + dz));
+                        if (st.isAir()) continue;
+                        if (io.github.operagtx.hearthholm.entity.ai.jobs.MinerJob.isOre(st)) { ore = true; color = st.getMapColor(level, mp); }
+                        else if (color == MapColor.NONE) color = st.getMapColor(level, mp);
+                    }
                     colors[i] = color == MapColor.NONE ? 0 : color.getPackedId(MapColor.Brightness.NORMAL);
+                    int flag = ore ? Payloads.ZoneMapData.ORE : 0;
+                    if (zone.get(layerY, ix, iz) && guard.blockedCell(bx, bz, c, layerY, zone.height(layerY, ix, iz))) flag = Payloads.ZoneMapData.BLOCKED;
+                    flags[i >> 2] |= (byte) (flag << ((i & 3) * 2));
                 }
             }
         }
@@ -137,8 +152,18 @@ public final class ZoneMapService {
                 if (zone.inGrid(ix, iz) && count++ < 6) markers.add(new Payloads.MapMarker(Payloads.MapMarker.WAREHOUSE, p.getX(), p.getZ()));
             }
         }
+        Payloads.MineInfo info = Payloads.MineInfo.NONE;
+        long[] up = new long[0], down = new long[0];
+        if (!surface) {
+            int blocks = 0;
+            if (w.hasZone()) blocks = io.github.operagtx.hearthholm.entity.ai.jobs.MinePlanner.drawnOnly(w, level).dug().size();
+            info = new Payloads.MineInfo(w.getBlockPos().getY(), level.getMinY(), level.getMaxY(), zone.cellCount(), blocks,
+                    blocks * io.github.operagtx.hearthholm.entity.ai.jobs.MinePlanner.EST_TICKS_PER_BLOCK / 20);
+            up = zone.bits(layerY + 1);
+            down = zone.bits(layerY - 1);
+        }
         return new Payloads.ZoneMapData(SettlementService.siteView(level, w, s), layerY, n, zone.cell(), zone.originX(), zone.originZ(),
-                colors, flags, zone.bits(layerY), markers);
+                colors, flags, zone.bits(layerY), markers, up, down, info);
     }
 
     /** The container next to the block (same rule as {@code BaseJob.chestsNear}), or null. */
@@ -163,14 +188,23 @@ public final class ZoneMapService {
         if (player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(e.pos())) > EDIT_REACH * EDIT_REACH) return reject("too far");
         WorkZone.Spec spec = w.zoneSpec();
         if (!spec.layered() && e.layerY() != WorkZone.SURFACE) return reject("layer");
-        if (e.op() < Payloads.ZoneEdit.SET || e.op() > Payloads.ZoneEdit.CLEAR_ALL) return reject("op");
+        if (spec.layered() && (e.layerY() < level.getMinY() || e.layerY() > level.getMaxY())) return reject("layer");
+        if (e.op() < Payloads.ZoneEdit.SET || e.op() > Payloads.ZoneEdit.CLEAR_EVERYTHING || (e.op() == Payloads.ZoneEdit.CLEAR_EVERYTHING && !spec.layered())) return reject("op");
+        if (e.height() < 0 || e.height() > WorkZone.MAX_HEIGHT) return reject("height");
         if (e.rects().size() > Payloads.ZoneEdit.MAX_RECTS) return reject("too many rects");
         WorkZone zone = w.zoneForEdit();
         for (Payloads.Rect r : e.rects()) {
             if (r.x0() > r.x1() || r.z0() > r.z1() || r.x0() < 0 || r.z0() < 0 || r.x1() >= zone.size() || r.z1() >= zone.size()) return reject("bounds");
         }
-        if (e.op() == Payloads.ZoneEdit.CLEAR_ALL) zone.clear(e.layerY());
-        else for (Payloads.Rect r : e.rects()) zone.setRect(e.layerY(), r.x0(), r.z0(), r.x1(), r.z1(), e.op() == Payloads.ZoneEdit.SET);
+        boolean wasEmpty = zone.isEmpty();
+        if (e.op() == Payloads.ZoneEdit.CLEAR_EVERYTHING) zone.clearAll();
+        else if (e.op() == Payloads.ZoneEdit.CLEAR_ALL) zone.clear(e.layerY());
+        else if (e.op() == Payloads.ZoneEdit.SET && spec.layered()) {
+            int h = e.height() == 0 ? WorkZone.DEFAULT_HEIGHT : e.height();
+            for (Payloads.Rect r : e.rects()) zone.paintRect(e.layerY(), r.x0(), r.z0(), r.x1(), r.z1(), h);
+        } else for (Payloads.Rect r : e.rects()) zone.setRect(e.layerY(), r.x0(), r.z0(), r.x1(), r.z1(), e.op() == Payloads.ZoneEdit.SET);
+        // the first cells painted on an empty miner map switch the miner to the drawn plan (the map's mode button switches back)
+        if (spec.layered() && wasEmpty && !zone.isEmpty() && w.type().option("plan") != null) w.setOption("plan", 1);
         w.zoneChanged();
         applied++;
         return true;

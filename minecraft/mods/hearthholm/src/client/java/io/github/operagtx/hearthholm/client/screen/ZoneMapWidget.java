@@ -29,18 +29,20 @@ public final class ZoneMapWidget {
 
     public static final int VIEW = 200;   // viewport edge in GUI pixels
     private static final AtomicInteger IDS = new AtomicInteger();
+    private static final int BLOCKED_RGB = 0xE03030, ORE_DOT = 0xFFE066;
     private static final int ZONE_RGB = 0xFFC832, TREE_TRUNK = 0xFF7A4B24, SITE = 0xFFFFFFFF, CHEST = 0xFFB5733A, WAREHOUSE = 0xFF4F9BE0;
 
     public final int x, y;
     private final Sink sink;
     private Payloads.ZoneMapData data;
     private WorkZone zone;
-    private final DynamicTexture mapTex, zoneTex;
-    private final Identifier mapId, zoneId;
+    private final DynamicTexture mapTex, zoneTex, ghostTex;
+    private final Identifier mapId, zoneId, ghostId;
     private final int n;
 
     private Tool tool = Tool.BRUSH;
     private int brush = 3;
+    private int height = WorkZone.DEFAULT_HEIGHT;   // wave J3: dig height of the cells painted next (1..4)
     private int zoomLevel;      // 0 fit, 1 = 2x, 2 = 4x
     private int viewX, viewZ;   // top-left visible cell
     private int hoverX = -1, hoverZ = -1;
@@ -59,6 +61,9 @@ public final class ZoneMapWidget {
         int id = IDS.incrementAndGet();
         this.mapTex = new DynamicTexture(() -> "hearthholm zone map", n, n, false);
         this.zoneTex = new DynamicTexture(() -> "hearthholm zone overlay", n, n, false);
+        this.ghostTex = new DynamicTexture(() -> "hearthholm zone ghost", n, n, false);
+        this.ghostId = Hearthholm.id("zone_map/ghost" + id);
+        Minecraft.getInstance().getTextureManager().register(ghostId, ghostTex);
         this.mapId = Hearthholm.id("zone_map/map" + id);
         this.zoneId = Hearthholm.id("zone_map/zone" + id);
         Minecraft.getInstance().getTextureManager().register(mapId, mapTex);
@@ -70,6 +75,7 @@ public final class ZoneMapWidget {
     public void close() {
         Minecraft.getInstance().getTextureManager().release(mapId);
         Minecraft.getInstance().getTextureManager().release(zoneId);
+        Minecraft.getInstance().getTextureManager().release(ghostId);
     }
 
     // ---- data -------------------------------------------------------------------------------
@@ -77,13 +83,21 @@ public final class ZoneMapWidget {
     /** Replaces the snapshot; {@code withZone} false keeps the local zone (an edit is still on its way to the server). */
     public void setData(Payloads.ZoneMapData d, boolean withZone) {
         this.data = d;
-        if (withZone || zone == null) {
+        boolean newLayer = this.data != null && layerShown != d.layerY();
+        if (withZone || zone == null || newLayer) {
             zone = new WorkZone(d.size(), d.cell(), d.originX(), d.originZ());
             zone.setBits(d.layerY(), d.zoneBits());
         }
+        layerShown = d.layerY();
         paintMap();
         paintZone();
+        paintGhost();
     }
+
+    private int layerShown = Integer.MIN_VALUE + 1;
+
+    /** Whether the snapshot is a layer view (the miner) and not the surface view. */
+    private boolean layered() { return data.layerY() != WorkZone.SURFACE; }
 
     public Payloads.ZoneMapData data() { return data; }
     public WorkZone zone() { return zone; }
@@ -100,11 +114,19 @@ public final class ZoneMapWidget {
             int b = data.colors()[i] & 0xFF;
             int c = b == 0 ? unknown : abgr(MapColor.getColorFromPackedId(b));   // the vanilla helper returns ARGB
             int flag = data.flag(i);
-            if (flag == Payloads.ZoneMapData.LEAF) c = darken(c, 0.82f);
+            if (layered()) {
+                if (flag == Payloads.ZoneMapData.ORE) c = lighten(c, 0.45f);
+            } else if (flag == Payloads.ZoneMapData.LEAF) c = darken(c, 0.82f);
             else if (flag == Payloads.ZoneMapData.LOG) c = abgr(0xFF000000 | TREE_TRUNK);
             img.setPixelABGR(i % n, i / n, c);
         }
         mapTex.upload();
+    }
+
+    private static int lighten(int abgr, float k) {
+        int r = (abgr & 0xFF), g = ((abgr >> 8) & 0xFF), b = ((abgr >> 16) & 0xFF);
+        r += (int) ((255 - r) * k); g += (int) ((255 - g) * k); b += (int) ((255 - b) * k);
+        return 0xFF000000 | (b << 16) | (g << 8) | r;
     }
 
     private static int darken(int abgr, float k) {
@@ -121,10 +143,28 @@ public final class ZoneMapWidget {
         zoneTex.upload();
     }
 
+    /** Wave J3: cells painted one layer above (blue) and below (orange) as a faint ghost; the current layer's cells cover them. */
+    private void paintGhost() {
+        NativeImage img = ghostTex.getPixels();
+        for (int z = 0; z < n; z++) for (int x = 0; x < n; x++) img.setPixelABGR(x, z, 0);
+        if (layered()) {
+            ghostBits(img, data.ghostDown(), 0x5AF09A3C);
+            ghostBits(img, data.ghostUp(), 0x5A4C9CFF);
+        }
+        ghostTex.upload();
+    }
+
+    private void ghostBits(NativeImage img, long[] bits, int argb) {
+        for (int i = 0; i < n * n && (i >> 6) < bits.length; i++) {
+            if ((bits[i >> 6] & (1L << (i & 63))) != 0) img.setPixelABGR(i % n, i / n, abgr(argb));
+        }
+    }
+
     /** Zone cells are tinted, the cells on its border more strongly so the outline reads at any zoom. */
     private int zoneColor(int ix, int iz) {
         int layer = data.layerY();
         boolean edge = !zone.get(layer, ix - 1, iz) || !zone.get(layer, ix + 1, iz) || !zone.get(layer, ix, iz - 1) || !zone.get(layer, ix, iz + 1);
+        if (layered() && data.flag(iz * n + ix) == Payloads.ZoneMapData.BLOCKED) return abgr((edge ? 0xD0000000 : 0xA0000000) | BLOCKED_RGB);   // red: the miner will not dig here
         return abgr((edge ? 0xB0000000 : 0x6A000000) | ZONE_RGB);
     }
 
@@ -148,6 +188,11 @@ public final class ZoneMapWidget {
     public Tool tool() { return tool; }
     public int brush() { return brush; }
     public void setBrush(int b) { brush = Math.max(1, Math.min(5, b)); }
+    public int height() { return height; }
+    private boolean editable = true;
+    /** Wave J3: the miner's map is view-only while the automatic layout is chosen. */
+    public void setEditable(boolean e) { editable = e; if (!e) { flush(); painting = false; } }
+    public void setHeight(int h) { flush(); height = Math.max(1, Math.min(WorkZone.MAX_HEIGHT, h)); }
 
     private void centreView() {
         viewX = n / 2 - visible() / 2;
@@ -198,7 +243,7 @@ public final class ZoneMapWidget {
         if (!contains(mx, my)) return false;
         int cx = cellAtX(mx), cz = cellAtZ(my);
         if (button == 1) { panning = true; panRemX = panRemZ = 0; return true; }
-        if (button != 0) return false;
+        if (button != 0 || !editable) return false;
         painting = true;
         startX = lastX = cx;
         startZ = lastZ = cz;
@@ -308,6 +353,14 @@ public final class ZoneMapWidget {
         sink.send(Payloads.ZoneEdit.CLEAR_ALL, List.of());
     }
 
+    /** Wave J3: empties every layer of the zone (the server drops all of them). */
+    public void clearEverything() {
+        flush();
+        zone.clearAll();
+        paintZone();
+        sink.send(Payloads.ZoneEdit.CLEAR_EVERYTHING, List.of());
+    }
+
     // ---- drawing ----------------------------------------------------------------------------
 
     public void render(GuiGraphicsExtractor g, int mx, int my) {
@@ -315,6 +368,7 @@ public final class ZoneMapWidget {
         int ppc = ppc(), vis = visible(), size = vis * ppc;
         g.fill(x - 1, y - 1, x + VIEW + 1, y + VIEW + 1, 0xFF0C0805);
         g.blit(RenderPipelines.GUI_TEXTURED, mapId, x, y, viewX, viewZ, size, size, vis, vis, n, n);
+        g.blit(RenderPipelines.GUI_TEXTURED, ghostId, x, y, viewX, viewZ, size, size, vis, vis, n, n);
         g.blit(RenderPipelines.GUI_TEXTURED, zoneId, x, y, viewX, viewZ, size, size, vis, vis, n, n);
         g.enableScissor(x, y, x + size, y + size);
         if (ppc >= 4) {
@@ -324,12 +378,23 @@ public final class ZoneMapWidget {
                 g.fill(x, y + i * ppc, x + size, y + i * ppc + 1, majorZ ? 0x66000000 : 0x2A000000);
             }
             int t = Math.max(2, ppc / 2), off = (ppc - t) / 2;
-            for (int cz = viewZ; cz < viewZ + vis; cz++) {
+            for (int cz = viewZ; cz < viewZ + vis && !layered(); cz++) {
                 for (int cx = viewX; cx < viewX + vis; cx++) {
                     if (data.flag(cz * n + cx) != Payloads.ZoneMapData.LOG) continue;
                     int px = x + (cx - viewX) * ppc + off, pz = y + (cz - viewZ) * ppc + off;
                     g.fill(px - 1, pz - 1, px + t + 1, pz + t + 1, 0xFF1A0F06);
                     g.fill(px, pz, px + t, pz + t, 0xFF000000 | TREE_TRUNK);
+                }
+            }
+        }
+        if (layered()) {   // ore cells get a bright dot so veins stand out at any zoom
+            int t = Math.max(2, ppc / 2), off = (ppc - t) / 2;
+            for (int cz = viewZ; cz < viewZ + vis; cz++) {
+                for (int cx = viewX; cx < viewX + vis; cx++) {
+                    if (data.flag(cz * n + cx) != Payloads.ZoneMapData.ORE) continue;
+                    int px = x + (cx - viewX) * ppc + off, pz = y + (cz - viewZ) * ppc + off;
+                    g.fill(px - 1, pz - 1, px + t + 1, pz + t + 1, 0xFF1A1206);
+                    g.fill(px, pz, px + t, pz + t, 0xFF000000 | ORE_DOT);
                 }
             }
         }
@@ -362,6 +427,10 @@ public final class ZoneMapWidget {
     }
 
     public static int zoneRgb() { return 0xFF000000 | ZONE_RGB; }
+
+    public static int blockedRgb() { return 0xFF000000 | BLOCKED_RGB; }
+
+    public static int oreRgb() { return 0xFF000000 | ORE_DOT; }
 
     public static int trunkRgb() { return 0xFF000000 | TREE_TRUNK; }
 }

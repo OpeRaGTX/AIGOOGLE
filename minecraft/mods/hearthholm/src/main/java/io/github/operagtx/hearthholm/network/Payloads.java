@@ -150,8 +150,11 @@ public final class Payloads {
      * ({@link #LOG}, {@link #LEAF}, packed four to a byte), the layer's zone bits, markers and the work-site view (options).
      */
     public record ZoneMapData(Views.WorkSite view, int layerY, int size, int cell, int originX, int originZ,
-                              byte[] colors, byte[] flags, long[] zoneBits, List<MapMarker> markers) implements CustomPacketPayload {
+                              byte[] colors, byte[] flags, long[] zoneBits, List<MapMarker> markers,
+                              long[] ghostUp, long[] ghostDown, MineInfo info) implements CustomPacketPayload {
         public static final int LOG = 1, LEAF = 2;
+        /** Layer-mode flags (wave J3), same two bits: an ore block at the layer; a painted cell the miner may not dig (red). */
+        public static final int ORE = 1, BLOCKED = 2;
         public static final Type<ZoneMapData> TYPE = new Type<>(Hearthholm.id("zone_map_data"));
         public static final StreamCodec<RegistryFriendlyByteBuf, ZoneMapData> CODEC = StreamCodec.of(ZoneMapData::write, ZoneMapData::read);
 
@@ -167,6 +170,10 @@ public final class Payloads {
             b.writeLongArray(d.zoneBits);
             b.writeVarInt(d.markers.size());
             for (MapMarker m : d.markers) { b.writeVarInt(m.kind); b.writeInt(m.x); b.writeInt(m.z); }
+            b.writeLongArray(d.ghostUp);
+            b.writeLongArray(d.ghostDown);
+            b.writeInt(d.info.markerY); b.writeInt(d.info.minY); b.writeInt(d.info.maxY);
+            b.writeVarInt(d.info.cells); b.writeVarInt(d.info.blocks); b.writeVarInt(d.info.seconds);
         }
 
         static ZoneMapData read(RegistryFriendlyByteBuf b) {
@@ -176,7 +183,9 @@ public final class Payloads {
             long[] bits = b.readLongArray();
             List<MapMarker> markers = new java.util.ArrayList<>();
             for (int i = b.readVarInt(); i > 0; i--) markers.add(new MapMarker(b.readVarInt(), b.readInt(), b.readInt()));
-            return new ZoneMapData(view, layer, size, cell, ox, oz, colors, flags, bits, markers);
+            long[] up = b.readLongArray(), down = b.readLongArray();
+            MineInfo info = new MineInfo(b.readInt(), b.readInt(), b.readInt(), b.readVarInt(), b.readVarInt(), b.readVarInt());
+            return new ZoneMapData(view, layer, size, cell, ox, oz, colors, flags, bits, markers, up, down, info);
         }
 
         /** The flag bits of cell {@code i}. */
@@ -185,12 +194,22 @@ public final class Payloads {
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 
-    /** A zone edit as a diff: {@link #SET} / {@link #CLEAR} the cell rectangles, or {@link #CLEAR_ALL} cells of the layer. */
-    public record ZoneEdit(BlockPos pos, int layerY, int op, List<Rect> rects) implements CustomPacketPayload {
-        public static final int SET = 0, CLEAR = 1, CLEAR_ALL = 2;
+    /** Wave J3: what the miner's map shows besides the layer: marker Y, world Y range and the plan summary (cells, blocks to dig, estimated seconds). */
+    public record MineInfo(int markerY, int minY, int maxY, int cells, int blocks, int seconds) {
+        public static final MineInfo NONE = new MineInfo(0, 0, 0, 0, 0, 0);
+    }
+
+    /**
+     * A zone edit as a diff: {@link #SET} / {@link #CLEAR} the cell rectangles, {@link #CLEAR_ALL} cells of the layer or
+     * {@link #CLEAR_EVERYTHING} (every layer, wave J3). {@code height} (1..4, 0 = default) is the dig height of painted cells.
+     */
+    public record ZoneEdit(BlockPos pos, int layerY, int op, List<Rect> rects, int height) implements CustomPacketPayload {
+        public static final int SET = 0, CLEAR = 1, CLEAR_ALL = 2, CLEAR_EVERYTHING = 3;
         public static final int MAX_RECTS = 512;
         public static final Type<ZoneEdit> TYPE = new Type<>(Hearthholm.id("zone_edit"));
         public static final StreamCodec<RegistryFriendlyByteBuf, ZoneEdit> CODEC = StreamCodec.of(ZoneEdit::write, ZoneEdit::read);
+
+        public ZoneEdit(BlockPos pos, int layerY, int op, List<Rect> rects) { this(pos, layerY, op, rects, 0); }
 
         static void write(RegistryFriendlyByteBuf b, ZoneEdit e) {
             b.writeBlockPos(e.pos);
@@ -198,6 +217,7 @@ public final class Payloads {
             b.writeVarInt(e.op);
             b.writeVarInt(e.rects.size());
             for (Rect r : e.rects) { b.writeVarInt(r.x0); b.writeVarInt(r.z0); b.writeVarInt(r.x1); b.writeVarInt(r.z1); }
+            b.writeVarInt(e.height);
         }
 
         static ZoneEdit read(RegistryFriendlyByteBuf b) {
@@ -206,7 +226,7 @@ public final class Payloads {
             int n = Math.min(b.readVarInt(), MAX_RECTS + 1);
             List<Rect> rects = new java.util.ArrayList<>();
             for (int i = 0; i < n; i++) rects.add(new Rect(b.readVarInt(), b.readVarInt(), b.readVarInt(), b.readVarInt()));
-            return new ZoneEdit(pos, layer, op, rects);
+            return new ZoneEdit(pos, layer, op, rects, b.readVarInt());
         }
 
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }

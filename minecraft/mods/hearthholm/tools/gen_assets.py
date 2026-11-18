@@ -696,4 +696,24 @@ w(f"assets/{NS}/models/block/forest_marker.json", {"parent": "block/block", "dis
         _rot({"from": [3, 7, 7.5], "to": [5, 14, 8.5], "faces": {d: face("#iron", [0, 1, 4, 14]) for d in ("north", "south", "east", "west", "up", "down")}}),
     ]})
 
+# ---- wave J3: the miner's work site is a rough boulder with an iron pickaxe stuck in it (same block id as the old marker)
+_tilt3 = {"origin": [8, 10, 8], "axis": "x", "angle": -22.5}
+def _rot3(el): el["rotation"] = _tilt3; return el
+def _rock(fr, to):
+    return {"from": fr, "to": to, "faces": {d: face("#rock", side_uv(fr, to, d)) for d in ("north", "south", "east", "west", "down")} | {"up": face("#top", [fr[0], fr[2], to[0], to[2]])}}
+w(f"assets/{NS}/models/block/mine_marker.json", {"parent": "block/block", "display": DISPLAY,
+    "textures": {"particle": f"{NS}:block/mine_rock", "rock": f"{NS}:block/mine_rock", "top": f"{NS}:block/mine_rock_top",
+                 "wood": f"{NS}:block/mine_pick_wood", "iron": f"{NS}:block/mine_pick_iron"},
+    "elements": [
+        _rock([1, 0, 2], [15, 5, 14]),
+        _rock([2, 5, 3], [14, 9, 13]),
+        _rock([4, 9, 4], [11, 11, 12]),
+        _rock([0, 0, 5], [3, 3, 10]),
+        _rock([12, 0, 1], [15, 4, 5]),
+        _rot3({"from": [7.5, 9, 7.5], "to": [8.5, 24, 8.5], "faces": {d: face("#wood", [0, 0, 1, 15]) for d in ("north", "south", "east", "west")} | {"up": face("#wood", [0, 0, 1, 1])}}),
+        _rot3({"from": [3, 21, 7], "to": [13, 23.5, 9], "faces": {d: face("#iron", [3, 6, 13, 9]) for d in ("north", "south", "east", "west", "up", "down")}}),
+        _rot3({"from": [1.5, 18.5, 7.5], "to": [3.5, 22, 8.5], "faces": {d: face("#iron", [0, 4, 2, 8]) for d in ("north", "south", "east", "west", "up", "down")}}),
+        _rot3({"from": [12.5, 18.5, 7.5], "to": [14.5, 22, 8.5], "faces": {d: face("#iron", [0, 4, 2, 8]) for d in ("north", "south", "east", "west", "up", "down")}}),
+    ]})
+
 print("assets written")

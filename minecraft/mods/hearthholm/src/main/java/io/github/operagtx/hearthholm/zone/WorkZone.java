@@ -28,6 +28,8 @@ public final class WorkZone {
     /** Size and cell size of the zone of one work-site type; {@code layered} zones draw one map per Y level. */
     public record Spec(int size, int cell, boolean layered) {
         public static final Spec LUMBERJACK = new Spec(DEFAULT_SIZE, 1, false);
+        /** Wave J3: the miner draws 50 x 50 cells of 2 x 2 blocks (100 x 100 blocks), one layer per Y level. */
+        public static final Spec MINER = new Spec(50, 2, true);
     }
 
     /** Zone grids by work-site type id; the profession module registers its own. */
@@ -43,6 +45,9 @@ public final class WorkZone {
                 Codec.LONG.listOf().fieldOf("bits").forGetter(LayerData::bits)).apply(i, LayerData::new));
     }
 
+    /** Wave J3: a painted cell digs {@code height} blocks up from its layer; default 2, range 1..4 (stored as two bit planes, 0 = default). */
+    public static final int DEFAULT_HEIGHT = 2, MAX_HEIGHT = 4;
+
     public static final Codec<WorkZone> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.INT.optionalFieldOf("size", DEFAULT_SIZE).forGetter(z -> z.size),
             Codec.INT.optionalFieldOf("cell", 1).forGetter(z -> z.cell),
@@ -56,15 +61,29 @@ public final class WorkZone {
                     out.add(new LayerData(y, l));
                 });
                 return out;
+            }),
+            LayerData.CODEC.listOf().optionalFieldOf("heights", List.of()).forGetter(z -> {
+                List<LayerData> out = new ArrayList<>();
+                z.heights.forEach((y, bits) -> {
+                    List<Long> l = new ArrayList<>(bits.length);
+                    for (long b : bits) l.add(b);
+                    out.add(new LayerData(y, l));
+                });
+                return out;
             })).apply(i, WorkZone::fromSaved));
 
-    private static WorkZone fromSaved(int size, int cell, int ox, int oz, List<LayerData> layers) {
+    private static WorkZone fromSaved(int size, int cell, int ox, int oz, List<LayerData> layers, List<LayerData> heights) {
         WorkZone z = new WorkZone(Math.max(1, Math.min(256, size)), Math.max(1, Math.min(16, cell)), ox, oz);
         int words = z.words();
         for (LayerData d : layers) {
             long[] bits = new long[words];
             for (int k = 0; k < Math.min(words, d.bits().size()); k++) bits[k] = d.bits().get(k);
             z.layers.put(d.y(), bits);
+        }
+        for (LayerData d : heights) {
+            long[] bits = new long[2 * words];
+            for (int k = 0; k < Math.min(bits.length, d.bits().size()); k++) bits[k] = d.bits().get(k);
+            z.heights.put(d.y(), bits);
         }
         z.dropEmptyLayers();
         return z;
@@ -73,6 +92,8 @@ public final class WorkZone {
     private final int size, cell;
     private final int originX, originZ;
     private final TreeMap<Integer, long[]> layers = new TreeMap<>();
+    /** Wave J3: per layer two bit planes of the cell height code (plane k starts at k * words); absent = every cell has the default height. */
+    private final TreeMap<Integer, long[]> heights = new TreeMap<>();
 
     /** A zone of {@code size} x {@code size} cells whose north-west corner block is ({@code originX}, {@code originZ}). */
     public WorkZone(int size, int cell, int originX, int originZ) {
@@ -91,6 +112,7 @@ public final class WorkZone {
     public WorkZone copy() {
         WorkZone z = new WorkZone(size, cell, originX, originZ);
         layers.forEach((y, b) -> z.layers.put(y, b.clone()));
+        heights.forEach((y, b) -> z.heights.put(y, b.clone()));
         return z;
     }
 
@@ -134,8 +156,60 @@ public final class WorkZone {
         boolean was = (b[i >>> 6] & m) != 0;
         if (was == on) return false;
         b[i >>> 6] ^= m;
+        if (!on) putHeight(layer, i, DEFAULT_HEIGHT);
         return true;
     }
+
+    // ---- wave J3: cell heights ----------------------------------------------------------------
+
+    private static int encodeHeight(int h) { return (Math.max(1, Math.min(MAX_HEIGHT, h)) - 2) & 3; }   // 2->0, 3->1, 4->2, 1->3
+    private static int decodeHeight(int code) { return ((code + 1) & 3) + 1; }
+
+    private void putHeight(int layer, int i, int h) {
+        int code = encodeHeight(h);
+        long[] p = heights.get(layer);
+        if (p == null) {
+            if (code == 0) return;
+            p = new long[2 * words()];
+            heights.put(layer, p);
+        }
+        int w = words();
+        long m = 1L << (i & 63);
+        for (int k = 0; k < 2; k++) {
+            if (((code >> k) & 1) != 0) p[k * w + (i >>> 6)] |= m; else p[k * w + (i >>> 6)] &= ~m;
+        }
+    }
+
+    /** The dig height (1..4) of a painted cell; 2 unless painted otherwise. */
+    public int height(int layer, int ix, int iz) {
+        long[] p = heights.get(layer);
+        if (p == null || !inGrid(ix, iz)) return DEFAULT_HEIGHT;
+        int i = iz * size + ix, w = words();
+        long m = 1L << (i & 63);
+        int code = ((p[i >>> 6] & m) != 0 ? 1 : 0) | ((p[w + (i >>> 6)] & m) != 0 ? 2 : 0);
+        return decodeHeight(code);
+    }
+
+    /** Paints the inclusive rectangle with the given dig height (cells already painted get the new height too); returns the cells newly painted. */
+    public int paintRect(int layer, int x0, int z0, int x1, int z1, int height) {
+        int ax = Math.max(0, Math.min(x0, x1)), bx = Math.min(size - 1, Math.max(x0, x1));
+        int az = Math.max(0, Math.min(z0, z1)), bz = Math.min(size - 1, Math.max(z0, z1));
+        int n = 0;
+        for (int z = az; z <= bz; z++) for (int x = ax; x <= bx; x++) {
+            if (set(layer, x, z, true)) n++;
+            putHeight(layer, z * size + x, height);
+        }
+        return n;
+    }
+
+    /** A hash of every painted cell and height: plans are cached by it. */
+    public int contentHash() {
+        int h = 17;
+        for (var e : layers.entrySet()) h = h * 31 + e.getKey() * 7 + java.util.Arrays.hashCode(e.getValue());
+        for (var e : heights.entrySet()) h = h * 31 + e.getKey() * 13 + java.util.Arrays.hashCode(e.getValue());
+        return h;
+    }
+
 
     /** Sets or clears the inclusive cell rectangle (corners in any order, clipped to the grid); returns the cells that changed. */
     public int setRect(int layer, int x0, int z0, int x1, int z1, boolean on) {
@@ -147,12 +221,17 @@ public final class WorkZone {
         return n;
     }
 
-    public void clear(int layer) { layers.remove(layer); }
+    public void clear(int layer) { layers.remove(layer); heights.remove(layer); }
 
-    public void clearAll() { layers.clear(); }
+    public void clearAll() { layers.clear(); heights.clear(); }
 
     private void dropEmptyLayers() {
         layers.values().removeIf(b -> {
+            for (long v : b) if (v != 0) return false;
+            return true;
+        });
+        heights.keySet().removeIf(y -> !layers.containsKey(y));
+        heights.values().removeIf(b -> {
             for (long v : b) if (v != 0) return false;
             return true;
         });

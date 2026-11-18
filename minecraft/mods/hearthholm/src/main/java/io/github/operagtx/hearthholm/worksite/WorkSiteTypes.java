@@ -44,7 +44,10 @@ public final class WorkSiteTypes {
                 SiteOption.range("depth", 4, 96, 4, 24),
                 SiteOption.range("length", 8, 96, 8, 32),
                 SiteOption.toggle("branches", true),
-                SiteOption.toggle("torches", true)), 0x9AA3AD, MinePlanner::previewBox));
+                SiteOption.toggle("torches", true),
+                SiteOption.choice("plan", 0, "auto", "drawn"),      // wave J3: automatic layout or the plan drawn on the map
+                SiteOption.toggle("after", false)), 0x9AA3AD, MinePlanner::previewBox));   // after: go back to the automatic layout when the drawn plan is done
+        io.github.operagtx.hearthholm.zone.WorkZone.register(MINE_ID, io.github.operagtx.hearthholm.zone.WorkZone.Spec.MINER);
         REGISTRY.register(FOREST_ID, new WorkSiteType(FOREST_ID, Hearthholm.id("lumberjack"), List.of(
                 SiteOption.range("radius", 6, 24, 2, 12),
                 SiteOption.toggle("replant", true),

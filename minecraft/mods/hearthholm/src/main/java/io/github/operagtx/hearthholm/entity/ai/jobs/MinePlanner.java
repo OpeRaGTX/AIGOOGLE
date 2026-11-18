@@ -3,7 +3,9 @@ package io.github.operagtx.hearthholm.entity.ai.jobs;
 import io.github.operagtx.hearthholm.core.Balance;
 import io.github.operagtx.hearthholm.worksite.WorkSiteBlockEntity;
 import net.minecraft.core.BlockPos;
+import io.github.operagtx.hearthholm.zone.WorkZone;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.AABB;
 
 import java.util.*;
@@ -23,9 +25,24 @@ public final class MinePlanner {
 
     public record Step(Kind kind, BlockPos pos, Direction dir) {}
 
-    public record Plan(List<Step> steps, Set<BlockPos> dug, int mode, BlockPos shaft, int topY, int bottomY) {}
+    /**
+     * {@code autoFrom} >= 0: wave J3, the steps from that index on are the automatic layout of {@code autoMode} (a drawn plan that
+     * goes back to auto when done); {@code mode} is then {@link #DRAWN}.
+     */
+    public record Plan(List<Step> steps, Set<BlockPos> dug, int mode, BlockPos shaft, int topY, int bottomY, int autoFrom, int autoMode) {
+        public Plan(List<Step> steps, Set<BlockPos> dug, int mode, BlockPos shaft, int topY, int bottomY) {
+            this(steps, dug, mode, shaft, topY, bottomY, -1, mode);
+        }
 
-    public static final int SPIRAL = 0, LADDER = 1, TUNNEL = 2;
+        /** Whether the step at {@code index} belongs to a ladder shaft (climbing needed). */
+        public boolean ladderAt(int index) {
+            return mode == LADDER || (autoFrom >= 0 && autoMode == LADDER && index >= autoFrom);
+        }
+    }
+
+    public static final int SPIRAL = 0, LADDER = 1, TUNNEL = 2, DRAWN = 3;
+    /** Rough ticks the miner needs per block (walking included), for the map's time estimate only. */
+    public static final int EST_TICKS_PER_BLOCK = 16;
     private static final int[][] RING = {{0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}};
     private static final int BRANCH_EVERY = 4, BRANCH_LENGTH = 6;
 
@@ -35,14 +52,47 @@ public final class MinePlanner {
 
     private MinePlanner() {}
 
+    /** Whether the site digs its drawn zone (plan option set and cells painted). */
+    public static boolean drawn(WorkSiteBlockEntity be) {
+        return be.flag("plan") && be.hasZone();
+    }
+
     public static Plan plan(WorkSiteBlockEntity be) {
         int depth = be.option("depth");
         if (be.getLevel() != null) {
             int floor = be.getLevel().getMinY() + 6;
             depth = Math.max(2, Math.min(depth, be.getBlockPos().getY() - 1 - floor));
         }
+        if (drawn(be) && be.getLevel() instanceof ServerLevel level) return drawnPlan(be, level, depth, be.flag("after"));
         return plan(be.getBlockPos(), be.facing(), be.option("mode"), depth, be.option("length"),
                 be.flag("branches"), be.flag("torches"));
+    }
+
+    /** The plan of the painted cells alone (what the map's summary counts), whatever the plan option says. */
+    public static Plan drawnOnly(WorkSiteBlockEntity be, ServerLevel level) {
+        return drawnPlan(be, level, be.option("depth"), false);
+    }
+
+    private static synchronized Plan drawnPlan(WorkSiteBlockEntity be, ServerLevel level, int depth, boolean after) {
+        WorkZone zone = be.zone();
+        String key = "D/" + be.getBlockPos().asLong() + "/" + be.facing() + "/" + zone.contentHash() + "/" + be.flag("torches") + "/" + after
+                + (after ? "/" + be.option("mode") + "/" + depth + "/" + be.option("length") + "/" + be.flag("branches") : "");
+        return CACHE.computeIfAbsent(key, k -> {
+            BlockPos.MutableBlockPos mp = new BlockPos.MutableBlockPos();
+            DrawnPlanner.Input in = new DrawnPlanner.Input(zone.copy(), be.getBlockPos(), be.facing(), be.flag("torches"),
+                    (x, z) -> level.hasChunkAt(mp.set(x, level.getMinY(), z)) ? level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x, z) - 1 : Integer.MAX_VALUE,
+                    level.getMinY(), level.getMaxY());
+            Set<BlockPos> dug = new HashSet<>();
+            List<Step> steps = new ArrayList<>(DrawnPlanner.build(in, dug));
+            int top = be.getBlockPos().getY(), bottom = top;
+            for (BlockPos p : dug) bottom = Math.min(bottom, p.getY());
+            if (!after) return new Plan(List.copyOf(steps), dug, DRAWN, be.getBlockPos(), top, bottom);
+            Plan auto = build(be.getBlockPos(), be.facing(), be.option("mode"), depth, be.option("length"), be.flag("branches"), be.flag("torches"));
+            int from = steps.size();
+            steps.addAll(auto.steps());
+            dug.addAll(auto.dug());
+            return new Plan(List.copyOf(steps), dug, DRAWN, auto.shaft(), auto.topY(), auto.bottomY(), from, be.option("mode"));
+        });
     }
 
     public static synchronized Plan plan(BlockPos marker, Direction facing, int mode, int depth, int length,
@@ -146,6 +196,12 @@ public final class MinePlanner {
     }
 
     public static AABB previewBox(WorkSiteBlockEntity be) {
+        if (drawn(be)) {   // the outline of the drawn zone (the plan itself needs the server world)
+            int lo = Integer.MAX_VALUE, hi = Integer.MIN_VALUE;
+            for (int y : be.zone().layerKeys()) { lo = Math.min(lo, y); hi = Math.max(hi, y + WorkZone.MAX_HEIGHT); }
+            AABB zb = be.zone().bounds(lo, hi);
+            if (zb != null) return zb;
+        }
         Plan plan = plan(be);
         int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
         int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
