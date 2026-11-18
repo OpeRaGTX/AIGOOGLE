@@ -131,6 +131,15 @@ final class WaveI1Test {
         Balance.BREAK_PACE_PERCENT = HearthholmClientTest.DEF_BREAK_PACE;
         AtomicLong placedStart = new AtomicLong();
 
+        // the earlier waves left the player far away: bring the town's chunks (and its residents) back first
+        sp.getServer().runOnServer(s -> {
+            ServerPlayer p = player(s);
+            p.teleportTo(s.overworld(), DESK.getX() + 0.5, DESK.getY() + 1, DESK.getZ() - 1.5, Set.of(), 0f, 10f, false);
+            p.getAbilities().mayfly = true; p.getAbilities().flying = true; p.onUpdateAbilities();
+        });
+        ctx.waitTicks(60);
+        sp.getConnection().waitForChunksRender();
+
         // ---- 1. setup of the I1 area, collision, mining speed, XP curve, plan shape
         sp.getServer().runOnServer(s -> {
             ServerLevel l = s.overworld();
