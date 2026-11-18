@@ -645,6 +645,22 @@ T.update({
  "item.hearthholm.herbal_tea": ("Herbal Tea", "Травяной чай"),
 })
 
+# --- wave I1 ---
+T.update({
+ "gui.hearthholm.health": ("Health", "Здоровье"),
+ "gui.hearthholm.any.bed": ("Any bed", "Любая кровать"),
+ "gui.hearthholm.any.carpet": ("Any carpet", "Любой ковёр"),
+ "gui.hearthholm.any.wool": ("Any wool", "Любая шерсть"),
+ "gui.hearthholm.or_wood": (" (or another wood type)", " (или другая древесина)"),
+ "tool.hearthholm.pickaxe": ("pickaxe", "кирка"),
+ "tool.hearthholm.axe": ("axe", "топор"),
+ "tool.hearthholm.hoe": ("hoe", "мотыга"),
+ "status.hearthholm.need_tool": ("Needs a %s", "Нужна: %s"),
+ "status.hearthholm.mining_vein": ("Mining out an ore vein (%s left)", "Выбирает жилу руды (осталось %s)"),
+ "thought.hearthholm.no_tool": ("No proper tool", "Нет подходящего инструмента"),
+ # I1_MARK
+})
+
 # speech bubbles
 import sys
 sys.path.insert(0, os.path.dirname(__file__))

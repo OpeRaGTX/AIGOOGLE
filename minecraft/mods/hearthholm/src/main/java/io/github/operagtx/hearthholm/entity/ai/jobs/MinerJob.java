@@ -1,5 +1,6 @@
 package io.github.operagtx.hearthholm.entity.ai.jobs;
 
+import io.github.operagtx.hearthholm.core.Balance;
 import io.github.operagtx.hearthholm.entity.SettlerEntity;
 import io.github.operagtx.hearthholm.entity.ai.Task;
 import io.github.operagtx.hearthholm.entity.ai.tasks.*;
@@ -43,6 +44,43 @@ public final class MinerJob extends SiteJob {
             Items.COARSE_DIRT, Items.SANDSTONE, Items.CALCITE);
     private static final Set<Item> PRECIOUS = Set.of(Items.DIAMOND, Items.EMERALD, Items.ANCIENT_DEBRIS, Items.RAW_GOLD, Items.LAPIS_LAZULI);
     private long nextFetch;
+    private final java.util.ArrayDeque<BlockPos> vein = new java.util.ArrayDeque<>();
+    private final java.util.Map<BlockPos, Integer> veinTries = new java.util.HashMap<>();
+
+    private static final java.util.List<net.minecraft.tags.TagKey<Block>> ORE_TAGS = java.util.stream.Stream.of(
+            "c:ores", "minecraft:coal_ores", "minecraft:iron_ores", "minecraft:copper_ores", "minecraft:gold_ores",
+            "minecraft:diamond_ores", "minecraft:emerald_ores", "minecraft:lapis_ores", "minecraft:redstone_ores")
+            .map(n -> net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.BLOCK, net.minecraft.resources.Identifier.parse(n)))
+            .toList();
+
+    /** Any ore: the common {@code c:ores} tag plus the vanilla ore tags. */
+    public static boolean isOre(BlockState st) {
+        for (var tag : ORE_TAGS) if (st.is(tag)) return true;
+        return st.is(Blocks.ANCIENT_DEBRIS);
+    }
+
+    /** After a cell was dug: ore touching it starts a flood fill over the connected ore (capped), queued nearest first. */
+    private void findVein(ServerLevel level, BlockPos origin) {
+        java.util.ArrayDeque<BlockPos> q = new java.util.ArrayDeque<>();
+        java.util.Set<BlockPos> seen = new java.util.HashSet<>(vein);
+        for (Direction d : Direction.values()) {
+            BlockPos n = origin.relative(d);
+            if (isOre(level.getBlockState(n)) && seen.add(n)) q.add(n);
+        }
+        int added = 0;
+        while (!q.isEmpty() && added < Balance.MINE_VEIN_CAP) {
+            BlockPos p = q.poll();
+            vein.add(p);
+            added++;
+            for (BlockPos n : BlockPos.betweenClosed(p.offset(-1, -1, -1), p.offset(1, 1, 1))) {
+                if (!seen.contains(n) && isOre(level.getBlockState(n))) {
+                    BlockPos im = n.immutable();
+                    seen.add(im);
+                    q.add(im);
+                }
+            }
+        }
+    }
 
     public MinerJob(SettlerEntity settler) {
         super(settler, WorkSiteTypes.MINE_ID);
@@ -51,6 +89,12 @@ public final class MinerJob extends SiteJob {
     public static boolean isFiller(ItemStack s) {
         return FILLER.contains(s.getItem());
     }
+
+    @Override
+    protected boolean requiresTool() { return true; }
+
+    @Override
+    protected String toolKey() { return "pickaxe"; }
 
     @Override
     public @Nullable Task next(SettlerEntity s) {
@@ -68,6 +112,18 @@ public final class MinerJob extends SiteJob {
         }
 
         ServerLevel level = (ServerLevel) s.level();
+        // wave I1: an ore was found, so mine the whole connected vein before going on with the plan
+        while (!vein.isEmpty() && !isOre(level.getBlockState(vein.peek()))) vein.poll();
+        if (!vein.isEmpty()) {
+            BlockPos p = vein.peek();
+            if (veinTries.merge(p, 1, Integer::sum) > 3) {
+                vein.poll();
+            } else {
+                if (!seal(level, plan, p)) return needFiller(plan, w);
+                s.setStatus("mining_vein", vein.size());
+                return wrap(plan, new BreakBlock(p, drops -> { vein.remove(p); onMined(drops); }), p, w);
+            }
+        }
         int i = w.progress();
         for (int guard = 0; guard < 96 && i < plan.steps().size(); guard++) {
             Step st = plan.steps().get(i);
@@ -84,7 +140,7 @@ public final class MinerJob extends SiteJob {
         return switch (step.kind()) {
             case DIG -> {
                 if (!seal(level, plan, step.pos())) yield needFiller(plan, w);
-                yield wrap(plan, new BreakBlock(step.pos(), drops -> onMined(drops)), step.pos(), w);
+                yield wrap(plan, new BreakBlock(step.pos(), drops -> { onMined(drops); findVein(level, step.pos()); }), step.pos(), w);
             }
             case FLOOR -> {
                 ItemStack filler = firstFiller();
@@ -94,6 +150,10 @@ public final class MinerJob extends SiteJob {
             }
             case TORCH -> {
                 BlockState torch = Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, step.dir());
+                if (!s.has(Items.TORCH)) {   // wave I1: torches come from storage
+                    Task f = fetchLimited(st -> st.is(Items.TORCH), 24, "fetching_torches");
+                    if (f != null) yield surface(plan, f, w);
+                }
                 if (!s.has(Items.TORCH) || !torch.canSurvive(level, step.pos())) {
                     w.setProgress(i + 1);
                     yield new Wait(1);

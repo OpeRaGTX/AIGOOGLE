@@ -38,6 +38,9 @@ public final class FarmerJob extends SiteJob {
     }
 
     @Override
+    protected String toolKey() { return "hoe"; }
+
+    @Override
     public @Nullable Task next(SettlerEntity s) {
         WorkSiteBlockEntity w = claim();
         if (w == null) return new Wait(100);
@@ -56,6 +59,7 @@ public final class FarmerJob extends SiteJob {
             Task f = fetch(st -> crop == 0 ? SEED_SET.contains(st.getItem()) : st.is(SEEDS.get(crop - 1)), 32, "fetching_seeds");
             if (f != null) return f;
         }
+        boolean hoe = s.profession().isTool(s.getMainHandItem());
         BlockPos center = w.getBlockPos();
         int r = w.option("radius");
         BlockPos bestPos = null;
@@ -63,13 +67,14 @@ public final class FarmerJob extends SiteJob {
         double bestDist = Double.MAX_VALUE;
         for (BlockPos ground : BlockPos.betweenClosed(center.offset(-r, -1, -r), center.offset(r, -1, r))) {
             if (ground.getX() == center.getX() && ground.getZ() == center.getZ()) continue;
-            Action a = actionFor(level, ground, seed != null, w.flag("till"));
+            Action a = actionFor(level, ground, seed != null, w.flag("till") && hoe);
             if (a == null) continue;
             double d = ground.distSqr(s.blockPosition()) + (a == Action.HARVEST ? 0 : 6);
             if (d < bestDist) { bestDist = d; bestPos = ground.immutable(); best = a; }
         }
         if (best == null) {
-            s.setStatus(seed == null ? "need_seeds" : "field_tended");
+            if (!hoe && w.flag("till")) complainNoTool();   // wave I1: nothing to do without a hoe (tilling): say so
+            else s.setStatus(seed == null ? "need_seeds" : "field_tended");
             return new Wait(160, Vec3.atCenterOf(center));
         }
         s.setStatus("farming");

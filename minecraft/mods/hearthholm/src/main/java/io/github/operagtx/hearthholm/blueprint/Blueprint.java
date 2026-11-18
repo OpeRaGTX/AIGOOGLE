@@ -5,6 +5,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.*;
@@ -70,7 +74,7 @@ public final class Blueprint {
 
     public BlockPos toWorld(BlockPos stake, Direction facing, int x, int y, int z) {
         Direction right = facing.getCounterClockWise();
-        return stake.relative(facing, z + 1).relative(right, x - width / 2).above(y - 1);
+        return stake.relative(facing, z + 2).relative(right, x - width / 2).above(y - 1);
     }
 
     public AABB worldBox(BlockPos stake, Direction facing) {
@@ -149,6 +153,91 @@ public final class Blueprint {
             if (s == null || s.isAir() || companionHalf(s)) continue;
             Item it = cost(s);
             if (it != null) out.merge(it, 1, Integer::sum);
+        }
+        return out;
+    }
+
+    // ---- wave I1: material groups (any bed colour, any wool, any wood type as a fallback) ----------------
+
+    /** Groups where the colour does not matter: shown as "any bed" and accepted without preference. */
+    public static @Nullable String anyKey(Item item) {
+        ItemStack st = new ItemStack(item);
+        if (st.is(ItemTags.BEDS)) return "bed";
+        if (st.is(ItemTags.WOOL_CARPETS)) return "carpet";
+        if (st.is(ItemTags.WOOL)) return "wool";
+        return null;
+    }
+
+    /** Wood families: the exact item is preferred, other wood types are a fallback. */
+    private static @Nullable TagKey<Item> woodGroup(Item item) {
+        ItemStack st = new ItemStack(item);
+        if (st.is(ItemTags.PLANKS)) return ItemTags.PLANKS;
+        if (st.is(ItemTags.WOODEN_STAIRS)) return ItemTags.WOODEN_STAIRS;
+        if (st.is(ItemTags.WOODEN_SLABS)) return ItemTags.WOODEN_SLABS;
+        if (st.is(ItemTags.LOGS_THAT_BURN)) return ItemTags.LOGS_THAT_BURN;
+        if (st.is(ItemTags.WOODEN_FENCES)) return ItemTags.WOODEN_FENCES;
+        if (st.is(ItemTags.WOODEN_DOORS)) return ItemTags.WOODEN_DOORS;
+        if (st.is(ItemTags.WOODEN_TRAPDOORS)) return ItemTags.WOODEN_TRAPDOORS;
+        return null;
+    }
+
+    public static boolean isWoodVariant(Item item) {
+        return woodGroup(item) != null;
+    }
+
+    private static @Nullable TagKey<Item> group(Item item) {
+        if (item == Items.AIR) return null;
+        ItemStack st = new ItemStack(item);
+        if (st.is(ItemTags.BEDS)) return ItemTags.BEDS;
+        if (st.is(ItemTags.WOOL_CARPETS)) return ItemTags.WOOL_CARPETS;
+        if (st.is(ItemTags.WOOL)) return ItemTags.WOOL;
+        return woodGroup(item);
+    }
+
+    /** Whether {@code have} may be used where the blueprint wants {@code need} (same item or same group). */
+    public static boolean accepts(Item need, ItemStack have) {
+        if (have.isEmpty()) return false;
+        if (have.is(need)) return true;
+        TagKey<Item> g = group(need);
+        return g != null && have.is(g);
+    }
+
+    /** Whether the block already standing in the world satisfies the blueprint's block (same block or same group). */
+    public static boolean sameKind(Block built, Block wanted) {
+        if (built == wanted) return true;
+        Item a = built.asItem(), b = wanted.asItem();
+        if (a == Items.AIR || b == Items.AIR) return false;
+        TagKey<Item> g = group(b);
+        return g != null && new ItemStack(a).is(g);
+    }
+
+    /** The blueprint state recreated with the block of {@code have}, keeping facing, half, shape, part and so on. */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static BlockState variant(BlockState target, Item have) {
+        Block b = Block.byItem(have);
+        if (b == Blocks.AIR || b == target.getBlock()) return target;
+        BlockState ns = b.defaultBlockState();
+        for (Property p : target.getProperties()) {
+            if (ns.hasProperty(p)) ns = ns.setValue(p, target.getValue(p));
+        }
+        return ns;
+    }
+
+    /** One line of the material list: grouped by "any colour" families. */
+    public record Material(Item icon, int count, @Nullable String anyKey) {}
+
+    public List<Material> materialList() {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        Map<String, Item> icons = new LinkedHashMap<>();
+        for (Map.Entry<Item, Integer> e : materials().entrySet()) {
+            String any = anyKey(e.getKey());
+            String key = any != null ? "any:" + any : "item:" + net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(e.getKey());
+            counts.merge(key, e.getValue(), Integer::sum);
+            icons.putIfAbsent(key, e.getKey());
+        }
+        List<Material> out = new ArrayList<>();
+        for (Map.Entry<String, Integer> e : counts.entrySet()) {
+            out.add(new Material(icons.get(e.getKey()), e.getValue(), e.getKey().startsWith("any:") ? e.getKey().substring(4) : null));
         }
         return out;
     }

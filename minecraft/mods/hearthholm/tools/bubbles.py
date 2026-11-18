@@ -169,6 +169,10 @@ B = {
  ],
 }
 
+B["need_pickaxe"] = [("I need a pickaxe!", "Мне нужна кирка!"), ("Can't mine without a pickaxe.", "Без кирки не покопаешь."), ("Somebody bring me a pickaxe.", "Принесите кто-нибудь кирку.")]
+B["need_axe"] = [("I need an axe!", "Мне нужен топор!"), ("Can't fell trees with my bare hands.", "Голыми руками дерево не свалишь."), ("Somebody bring me an axe.", "Принесите кто-нибудь топор.")]
+B["need_hoe"] = [("I need a hoe!", "Мне нужна мотыга!"), ("Can't till without a hoe.", "Без мотыги землю не вспашешь."), ("Somebody bring me a hoe.", "Принесите кто-нибудь мотыгу.")]
+
 # work lines per profession path
 W = {
  "miner": [("Another vein of iron!", "Ещё одна жила железа!"), ("Watch your head down here.", "Береги голову внизу."), ("Stone, stone and more stone.", "Камень, камень и ещё раз камень."), ("My pickaxe sings today.", "Кирка сегодня поёт.")],

@@ -64,7 +64,7 @@ public class SettlerEntity extends PathfinderMob {
     private static final EntityDataAccessor<Component> DATA_BUBBLE = SynchedEntityData.defineId(SettlerEntity.class, EntityDataSerializers.COMPONENT);
     private static final Codec<Map<String, Integer>> AFFINITY_CODEC = Codec.unboundedMap(Codec.STRING, Codec.INT);
     private static final Codec<Map<String, Integer>> XP_CODEC = Codec.unboundedMap(Codec.STRING, Codec.INT);
-    public static final int[] LEVEL_XP = {0, 60, 180, 400, 800};
+    public static final int[] LEVEL_XP = io.github.operagtx.hearthholm.core.Balance.LEVEL_XP;   // wave I1: one curve for all professions, tunable
     public static final float MAX_FOOD = 20f;
 
     private SettlerProfile profile = SettlerProfile.DEFAULT;
@@ -492,6 +492,8 @@ public class SettlerEntity extends PathfinderMob {
         r.status = status();
         r.lastPos = blockPosition();
         r.level = level(professionId());
+        r.hp = Math.round(getHealth());
+        r.maxHp = Math.round(getMaxHealth());
     }
 
     // ---- skills ---------------------------------------------------------------------------
@@ -506,7 +508,25 @@ public class SettlerEntity extends PathfinderMob {
         return lvl;
     }
 
+    private int xpFraction, workTicks;
+
+    /** Action XP (a block mined, a crop picked): only a small share counts, the main source is {@link #workTick()}. */
     public void gainXp(int amount) {
+        xpFraction += amount * io.github.operagtx.hearthholm.core.Balance.XP_ACTION_PERCENT;
+        int whole = xpFraction / 100;
+        xpFraction %= 100;
+        if (whole > 0) addXp(whole);
+    }
+
+    /** Called every tick the settler is busy with a job task: one XP point per {@code XP_WORK_TICKS} ticks. */
+    public void workTick() {
+        if (++workTicks >= io.github.operagtx.hearthholm.core.Balance.XP_WORK_TICKS) {
+            workTicks = 0;
+            addXp(1);
+        }
+    }
+
+    private void addXp(int amount) {
         Identifier p = professionId();
         int before = level(p);
         xp.merge(p.toString(), amount, Integer::sum);
@@ -548,12 +568,21 @@ public class SettlerEntity extends PathfinderMob {
         return profile.hasTrait(Hearthholm.id(path));
     }
 
+    /**
+     * Wave I1: the vanilla time a player without enchantments needs with the held tool (hardness x 30 / speed, x 100 / speed when the
+     * tool is wrong for a block that needs one), stretched by {@code BREAK_PACE_PERCENT} and shortened a little by level, traits and hunger.
+     */
     public int breakTicks(BlockState state, BlockPos pos) {
         float hardness = state.getDestroySpeed(level(), pos);
         ItemStack tool = getMainHandItem();
         float speed = tool.isEmpty() ? 1f : Math.max(1f, tool.getDestroySpeed(state));
-        if (state.requiresCorrectToolForDrops() && !tool.isCorrectToolForDrops(state)) speed /= 4f;
-        return Mth.clamp(Mth.ceil(hardness * 30f / (speed * workSpeed())), 4, 600);
+        boolean harvest = !state.requiresCorrectToolForDrops() || tool.isCorrectToolForDrops(state);
+        float vanilla = hardness * (harvest ? 30f : 100f) / speed;
+        float skill = 1f + io.github.operagtx.hearthholm.core.Balance.BREAK_SKILL_PERCENT_PER_LEVEL / 100f * (level(professionId()) - 1);
+        for (Trait t : profile.traitList()) skill *= t.workSpeed();
+        if (food <= 0) skill *= 0.6f;
+        float ticks = vanilla * io.github.operagtx.hearthholm.core.Balance.BREAK_PACE_PERCENT / 100f / Math.max(0.3f, skill);
+        return Mth.clamp(Mth.ceil(ticks), 4, 1200);
     }
 
     // ---- inventory ------------------------------------------------------------------------
@@ -606,8 +635,17 @@ public class SettlerEntity extends PathfinderMob {
     public boolean equipToolFrom(net.minecraft.world.Container c) {
         Profession p = profession();
         if (p.isTool(getMainHandItem())) return true;
-        ItemStack tool = Storage.take(List.of(c), p::isTool, 1);
-        if (tool.isEmpty()) return false;
+        int best = -1;
+        long bestScore = -1;
+        for (int i = 0; i < c.getContainerSize(); i++) {
+            ItemStack st = c.getItem(i);
+            if (!p.isTool(st)) continue;
+            long score = (long) st.getMaxDamage() * 10000L + (st.getMaxDamage() - st.getDamageValue());   // best material first, then least worn
+            if (score > bestScore) { bestScore = score; best = i; }
+        }
+        if (best < 0) return false;
+        ItemStack tool = c.removeItem(best, 1);
+        c.setChanged();
         ItemStack old = getMainHandItem();
         setItemSlot(EquipmentSlot.MAINHAND, tool);
         if (!old.isEmpty()) {
@@ -615,6 +653,21 @@ public class SettlerEntity extends PathfinderMob {
             if (!rest.isEmpty()) store(rest);
         }
         return true;
+    }
+
+    /** Moves a fitting tool from the pockets into the main hand; false when there is none. */
+    public boolean equipToolFromPockets() {
+        Profession p = profession();
+        if (p.isTool(getMainHandItem())) return true;
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack st = inventory.getItem(i);
+            if (!p.isTool(st)) continue;
+            ItemStack old = getMainHandItem();
+            setItemSlot(EquipmentSlot.MAINHAND, st.copy());
+            inventory.setItem(i, old);
+            return true;
+        }
+        return false;
     }
 
     public void swingArm(InteractionHand hand) {

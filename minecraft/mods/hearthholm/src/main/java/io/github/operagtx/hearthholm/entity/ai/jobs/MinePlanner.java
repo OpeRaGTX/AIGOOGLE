@@ -1,5 +1,6 @@
 package io.github.operagtx.hearthholm.entity.ai.jobs;
 
+import io.github.operagtx.hearthholm.core.Balance;
 import io.github.operagtx.hearthholm.worksite.WorkSiteBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,11 +11,11 @@ import java.util.*;
 /**
  * Turns mine-marker options into an ordered list of steps. Three layouts:
  * <ul>
- *   <li>spiral — a 3x3 spiral staircase around a stone pillar (walkable both ways), then a tunnel;</li>
- *   <li>ladder — a 1x1 shaft with ladders on the wall, then a tunnel;</li>
- *   <li>tunnel — a straight 1x2 tunnel from the marker into a hillside.</li>
+ *   <li>spiral — a two-lane spiral staircase around a stone pillar (walkable both ways), then a tunnel;</li>
+ *   <li>ladder — a 2x1 shaft (ladders in one column), then a tunnel;</li>
+ *   <li>tunnel — a straight 2-wide, 2-high tunnel from the marker into a hillside.</li>
  * </ul>
- * Tunnels get side branches every 4 blocks (strip mining) and wall torches when enabled.
+ * Wave I1: everything is two blocks wide. Tunnels get side branches every 4 blocks (strip mining) and wall torches when enabled.
  * The plan is deterministic, so progress is a single index saved in the marker.
  */
 public final class MinePlanner {
@@ -62,6 +63,7 @@ public final class MinePlanner {
             shaft = c;
             int i = 0;
             BlockPos cell;
+            int lastTorch = -100;
             while (true) {
                 int[] rf = RING[i % 8];
                 int feet = y0 - 1 - i;
@@ -70,9 +72,24 @@ public final class MinePlanner {
                 dig(steps, cell.above());
                 dig(steps, cell);
                 steps.add(new Step(Kind.FLOOR, cell.below(), Direction.UP));
-                if (torches && i % 16 == 8 && (rf[0] == 0 || rf[1] == 0)) {
+                // second lane: the cells just outside the ring at the same level
+                int sx = Integer.signum(rf[0]), sz = Integer.signum(rf[1]);
+                List<int[]> outer = new ArrayList<>();
+                if (sx != 0) outer.add(new int[]{rf[0] + sx, rf[1]});
+                if (sz != 0) outer.add(new int[]{rf[0], rf[1] + sz});
+                if (sx != 0 && sz != 0) outer.add(new int[]{rf[0] + sx, rf[1] + sz});
+                for (int[] o : outer) {
+                    BlockPos oc = c.relative(right, o[0]).relative(f, o[1]).atY(feet);
+                    dig(steps, oc.above(2));
+                    dig(steps, oc.above());
+                    dig(steps, oc);
+                    steps.add(new Step(Kind.FLOOR, oc.below(), Direction.UP));
+                }
+                boolean edge = rf[0] == 0 || rf[1] == 0;
+                if (torches && edge && i - lastTorch >= Balance.MINE_TORCH_EVERY_SPIRAL && i >= 2) {
                     Direction out = rf[0] == 0 ? (rf[1] > 0 ? f : f.getOpposite()) : (rf[0] > 0 ? right : right.getOpposite());
                     steps.add(new Step(Kind.TORCH, cell.above(), out));
+                    lastTorch = i;
                 }
                 if (feet <= y0 - depth && i % 8 == 4) break;
                 if (i > 400) break;
@@ -86,6 +103,7 @@ public final class MinePlanner {
             for (int d = 0; d < depth; d++) {
                 cell = shaft.atY(y0 - 1 - d);
                 dig(steps, cell);
+                dig(steps, cell.relative(right));
                 steps.add(new Step(Kind.LADDER, cell, f));
             }
             tunnelStart = cell;
@@ -98,17 +116,22 @@ public final class MinePlanner {
 
         for (int k = 1; k <= length; k++) {
             BlockPos p = tunnelStart.relative(f, k);
-            dig(steps, p.above());
-            dig(steps, p);
-            steps.add(new Step(Kind.FLOOR, p.below(), Direction.UP));
-            if (torches && k % 8 == 2) steps.add(new Step(Kind.TORCH, p.above(), right.getOpposite()));
+            for (BlockPos q : new BlockPos[]{p, p.relative(right)}) {
+                dig(steps, q.above());
+                dig(steps, q);
+                steps.add(new Step(Kind.FLOOR, q.below(), Direction.UP));
+            }
+            // torch on the wall of the right-hand lane
+            if (torches && k % Balance.MINE_TORCH_EVERY_TUNNEL == 2) steps.add(new Step(Kind.TORCH, p.relative(right).above(), right.getOpposite()));
             if (branches && k % BRANCH_EVERY == 0) {
                 for (Direction side : new Direction[]{right.getOpposite(), right}) {
-                    for (int j = 1; j <= BRANCH_LENGTH; j++) {
-                        BlockPos q = p.relative(side, j);
-                        dig(steps, q.above());
-                        dig(steps, q);
-                        steps.add(new Step(Kind.FLOOR, q.below(), Direction.UP));
+                    for (int j = (side == right ? 2 : 1); j <= BRANCH_LENGTH + (side == right ? 1 : 0); j++) {
+                        BlockPos q0 = p.relative(side, j);
+                        for (BlockPos q : new BlockPos[]{q0, q0.relative(f)}) {
+                            dig(steps, q.above());
+                            dig(steps, q);
+                            steps.add(new Step(Kind.FLOOR, q.below(), Direction.UP));
+                        }
                     }
                 }
             }

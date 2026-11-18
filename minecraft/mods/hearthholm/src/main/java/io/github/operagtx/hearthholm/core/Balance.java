@@ -93,4 +93,15 @@ public final class Balance {
     public static int MOOD_FESTIVAL = 12, MOOD_TASTY_MEAL = 8, MOOD_TAVERN_EVENING = 8, MOOD_TAVERN_MEAL = 6;
     public static int MOOD_STREET = 6, MOOD_FRIEND = 5, MOOD_QUARREL = -6, MOOD_KNIGHTED = 10, MOOD_PROUD = 6;
     public static int MOOD_COMRADES = 4, MOOD_PATCHED = 3, MOOD_HELD_LINE = 10, MOOD_RAID_LOSSES = -10;
+
+    // ---- wave I1: builder pace (ticks standing at a block before it is placed, minus a percent bonus per level above 1)
+    public static int BUILD_DELAY_TICKS = 18, BUILD_SKILL_PERCENT_PER_LEVEL = 8;
+
+    // ---- wave I1: mining (torch spacing in dug steps, vein size cap, break pace and skill bonus, work-time XP)
+    public static int MINE_TORCH_EVERY_SPIRAL = 6, MINE_TORCH_EVERY_TUNNEL = 8, MINE_VEIN_CAP = 32;
+    /** Settlers need this percent of a player's time per block (swings, repositioning), minus a bonus per level above 1. */
+    public static int BREAK_PACE_PERCENT = 150, BREAK_SKILL_PERCENT_PER_LEVEL = 4;
+    /** XP curve for every profession: cumulative XP for levels 1..5. One point per XP_WORK_TICKS ticks of active work. */
+    public static int[] LEVEL_XP = {0, 100, 300, 600, 950};
+    public static int XP_WORK_TICKS = 110, XP_ACTION_PERCENT = 10;
 }

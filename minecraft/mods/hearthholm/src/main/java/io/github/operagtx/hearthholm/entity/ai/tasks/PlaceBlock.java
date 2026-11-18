@@ -20,9 +20,15 @@ public final class PlaceBlock implements Task {
     private final @Nullable Item cost;
     private final @Nullable Consumer<SettlerEntity> after;
     private MoveTo approach;
-    private int delay = 6;
+    private int delay;
 
     public PlaceBlock(BlockPos pos, BlockState state, @Nullable Item cost, @Nullable Consumer<SettlerEntity> after) {
+        this(pos, state, cost, 6, after);
+    }
+
+    /** {@code delay}: ticks spent standing in reach before the block appears (the builder's pace). */
+    public PlaceBlock(BlockPos pos, BlockState state, @Nullable Item cost, int delay, @Nullable Consumer<SettlerEntity> after) {
+        this.delay = delay;
         this.pos = pos.immutable();
         this.state = state;
         this.cost = cost;

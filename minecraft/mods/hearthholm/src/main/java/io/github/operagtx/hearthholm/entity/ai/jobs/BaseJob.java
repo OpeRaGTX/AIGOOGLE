@@ -6,7 +6,9 @@ import io.github.operagtx.hearthholm.entity.ai.Task;
 import io.github.operagtx.hearthholm.entity.ai.tasks.ContainerTrip;
 import io.github.operagtx.hearthholm.settlement.Settlement;
 import io.github.operagtx.hearthholm.settlement.Storage;
+import io.github.operagtx.hearthholm.entity.ai.tasks.Wait;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +21,7 @@ import java.util.function.Predicate;
 /** Shared helpers for jobs: trips to chests and the warehouse, tools, deposits. */
 public abstract class BaseJob implements Job {
     protected final SettlerEntity settler;
-    private long nextToolTry;
+    private long nextToolTry, nextToolSay;
 
     protected BaseJob(SettlerEntity settler) {
         this.settler = settler;
@@ -88,16 +90,44 @@ public abstract class BaseJob implements Job {
         });
     }
 
-    /** Goes to fetch a fitting tool when the hands are empty (at most every 2 minutes). */
+    /** Wave I1: jobs that cannot work without their tool (miner, lumberjack) return true and name it via {@link #toolKey()}. */
+    protected boolean requiresTool() { return false; }
+
+    /** "pickaxe", "axe"...: suffix of the {@code tool.hearthholm.*} name and of the {@code need_*} speech bubble. */
+    protected String toolKey() { return "tool"; }
+
+    /**
+     * Makes sure a fitting tool is in the hand: takes one from the pockets, else walks to a chest next to the work site or the
+     * warehouse and takes the best one there. Returns null when the settler holds a tool (or the job does not need one); for jobs that
+     * require a tool and found none it shows a thought and a bubble and returns a waiting task.
+     */
     protected @Nullable Task toolTrip() {
         if (settler.profession().isTool(settler.getMainHandItem())) return null;
+        if (settler.equipToolFromPockets()) return null;
+        boolean req = requiresTool();
         long now = settler.level().getGameTime();
-        if (now < nextToolTry) return null;
-        nextToolTry = now + 2400;
+        if (now < nextToolTry) return req ? noTool() : null;
+        nextToolTry = now + (req ? 200 : 2400);
         BlockPos p = findWith(dropOffs(), settler.profession()::isTool);
-        if (p == null) return null;
+        if (p == null) return req ? noTool() : null;
         settler.setStatus("fetching_tool");
         return new ContainerTrip(p, (s, c) -> s.equipToolFrom(c));
+    }
+
+    private Task noTool() {
+        complainNoTool();
+        return new Wait(100);
+    }
+
+    /** Status, thought and (rarely) a speech bubble: "I need a pickaxe". */
+    protected void complainNoTool() {
+        settler.setStatus("need_tool", Component.translatable("tool.hearthholm." + toolKey()));
+        settler.addThought("no_tool", -4, 2400);
+        long now = settler.level().getGameTime();
+        if (now >= nextToolSay) {
+            nextToolSay = now + 1200;
+            io.github.operagtx.hearthholm.social.Social.say(settler, "need_" + toolKey(), 99);
+        }
     }
 
     protected @Nullable Task fetch(Predicate<ItemStack> filter, int count, String statusKey) {

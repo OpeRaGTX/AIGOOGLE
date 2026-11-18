@@ -179,7 +179,7 @@ public final class SettlementService {
         List<Container> storage = Storage.resolve(level, s.storagePositions());
         List<Views.Resident> people = new ArrayList<>();
         for (ResidentRecord r : s.residents) {
-            people.add(new Views.Resident(r.uuid, r.profile, r.profession, r.mood, r.food, r.status, r.bed != null, r.level));
+            people.add(new Views.Resident(r.uuid, r.profile, r.profession, r.mood, r.food, r.status, r.bed != null, r.level, r.hp, r.maxHp));
         }
         List<Views.Building> buildings = new ArrayList<>();
         for (BuildingRecord b : s.buildings) {
@@ -673,7 +673,8 @@ public final class SettlementService {
         Views.Settler v = new Views.Settler(e.getId(), e.profile(), prof, Math.round(e.food()), Math.round(e.mood()),
                 e.moodEntries(), e.status(), lvl, e.xp(prof), next, inv, equipment, e.bed() != null,
                 s == null ? Component.empty() : s.displayName(),
-                relationName(s, friend), friend == null ? 0 : friend.getValue(), relationName(s, rival), rival == null ? 0 : rival.getValue(), canPromote(e));
+                relationName(s, friend), friend == null ? 0 : friend.getValue(), relationName(s, rival), rival == null ? 0 : rival.getValue(), canPromote(e),
+                Math.round(e.getHealth()), Math.round(e.getMaxHealth()));
         ServerPlayNetworking.send(player, new Payloads.OpenSettler(v));
     }
 

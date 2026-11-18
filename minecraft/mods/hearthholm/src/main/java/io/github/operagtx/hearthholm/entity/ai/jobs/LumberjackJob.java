@@ -38,6 +38,12 @@ public final class LumberjackJob extends SiteJob {
     }
 
     @Override
+    protected boolean requiresTool() { return true; }
+
+    @Override
+    protected String toolKey() { return "axe"; }
+
+    @Override
     public @Nullable Task next(SettlerEntity s) {
         WorkSiteBlockEntity w = claim();
         if (w == null) return new Wait(100);
@@ -181,7 +187,7 @@ public final class LumberjackJob extends SiteJob {
                 level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
             }
             level.playSound(null, base, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 0.5f, 0.7f);
-            if (!tool.isEmpty() && tool.isDamageableItem()) tool.hurtAndBreak(Math.max(1, logs.size() / 4), s, EquipmentSlot.MAINHAND);
+            if (!tool.isEmpty() && tool.isDamageableItem()) tool.hurtAndBreak(Math.max(1, logs.size() / 2), s, EquipmentSlot.MAINHAND);
             if (replant && level.getBlockState(base).isAir() && level.getBlockState(base.below()).is(BlockTags.DIRT)) {
                 ItemStack sap = ItemStack.EMPTY;
                 for (ItemStack st : s.inventory().getItems()) {
