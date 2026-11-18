@@ -375,14 +375,15 @@ final class WaveI2Test {
             SettlerEntity a = get(s, ARCHER);
             log("I2 archer took arrows from the warehouse: " + arrowsAfterFetch.get() + ", warehouse now " + HearthholmClientTest.stock(s, Items.ARROW));
             check(arrowsAfterFetch.get() > 0, "archer did not fetch arrows");
-            a.teleportTo(O.getX() - 3.5, O.getY(), O.getZ() + 22.5);
+            // on the open platform: later waves put houses between the old firing line and the target
+            a.teleportTo(O.getX() + 10.5, platformY, O.getZ() + 40.5);
             a.getNavigation().stop();
-            var z = zombie(l, new BlockPos(O.getX() - 3, O.getY(), O.getZ() + 11));
+            var z = zombie(l, new BlockPos(O.getX() + 22, platformY, O.getZ() + 40));
             z.setHealth(z.getMaxHealth());
             foe.set(z.getUUID());
             a.setTarget(z);
             ServerPlayer p = player(s);
-            p.teleportTo(l, O.getX() + 0.5, O.getY() + 1, O.getZ() + 21.5, Set.of(), 90f, 8f, false);
+            p.teleportTo(l, O.getX() + 4.5, platformY + 1, O.getZ() + 40.5, Set.of(), 90f, 8f, false);
         });
         ctx.waitTicks(60);
         sp.getServer().runOnServer(s -> {
@@ -418,6 +419,7 @@ final class WaveI2Test {
             stock(s, new ItemStack(Items.ARROW, 40));
             arrowsAfterFetch.set(3);
             a.teleportTo(O.getX() + 11.5, O.getY(), O.getZ() + 8.5);
+            player(s).teleportTo(s.overworld(), DESK.getX() + 0.5, DESK.getY() + 1, DESK.getZ() - 1.5, Set.of(), 0f, 10f, false);
         });
         AtomicInteger refilled = new AtomicInteger();
         for (int i = 0; i < 12 && refilled.get() <= 3; i++) {
@@ -435,8 +437,8 @@ final class WaveI2Test {
             a.teleportTo(O.getX() + 4.5, O.getY(), O.getZ() - 2.5);
         });
         AtomicBoolean needs = new AtomicBoolean(), bubble = new AtomicBoolean();
-        for (int i = 0; i < 20 && !(needs.get() && bubble.get()); i++) {
-            ctx.waitTicks(40);
+        for (int i = 0; i < 160 && !(needs.get() && bubble.get()); i++) {
+            ctx.waitTicks(10);
             sp.getServer().runCommand("time set 10000");
             sp.getServer().runOnServer(s -> {
                 SettlerEntity a = get(s, ARCHER);

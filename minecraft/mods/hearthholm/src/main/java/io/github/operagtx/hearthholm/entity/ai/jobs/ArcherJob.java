@@ -41,7 +41,7 @@ public final class ArcherJob extends GuardJob {
             s.setStatus("needs_arrows");
             s.addThought("no_arrows", -3, 2400);
             if (now >= nextArrowSay) {
-                nextArrowSay = now + 1200;
+                nextArrowSay = now + 600;
                 Social.say(s, "need_arrows", 99);
             }
         }
