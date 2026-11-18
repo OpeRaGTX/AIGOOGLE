@@ -62,10 +62,10 @@ final class WaveDTest {
         order.add(p);
         order.addAll(List.of(spare));
         for (Profession q : order) {
-            for (SettlerEntity x : settlers(s)) if (x.professionId().equals(q.id()) && !USED.contains(x.getUUID())) { e = x; break; }
+            for (SettlerEntity x : settlers(s)) if (x.professionId().equals(q.id()) && !USED.contains(x.getUUID()) && x.isAlive() && !x.isLeaving()) { e = x; break; }
             if (e != null) break;
         }
-        if (e == null) for (SettlerEntity x : settlers(s)) if (!x.isCombatant() && !USED.contains(x.getUUID())) { e = x; break; }
+        if (e == null) for (SettlerEntity x : settlers(s)) if (!x.isCombatant() && !USED.contains(x.getUUID()) && x.isAlive() && !x.isLeaving()) { e = x; break; }
         if (e == null) for (SettlerEntity x : settlers(s)) if (!USED.contains(x.getUUID())) { e = x; break; }   // robust: casualties of earlier waves
         if (e == null) for (SettlerEntity x : settlers(s)) { e = x; break; }
         if (e == null) throw new AssertionError("no free settler for " + p.id());
@@ -134,7 +134,15 @@ final class WaveDTest {
             for (int attempt = 0; attempt < 3 && party.size() != 2; attempt++) {   // robust: a member that is not awake/near yet is fetched again
                 log("PARTY retry " + attempt + " size=" + party.size());
                 if (!party.isEmpty()) ModItems.WAR_HORN.use(l, p, InteractionHand.MAIN_HAND);   // second horn dismisses
-                for (UUID id : List.of(GUARD, WARRIOR)) if (l.getEntity(id) instanceof SettlerEntity m) {
+                for (UUID id : List.of(GUARD, WARRIOR)) {
+                    SettlerEntity m = l.getEntity(id) instanceof SettlerEntity x && x.isAlive() && !x.isLeaving() ? x : null;
+                    log("PARTY member " + id.toString().substring(0, 4) + " state=" + (l.getEntity(id) instanceof SettlerEntity y ? y.professionId().getPath() + " alive=" + y.isAlive() + " leaving=" + y.isLeaving() + " arrived=" + y.hasArrived() + " inParty=" + y.inParty() + " settlement=" + (y.settlement() != null) : "missing"));
+                    if (m == null && id.equals(WARRIOR)) {   // wave I2: slower defenders lose a fighter to the brute of wave C more often: replace him
+                        m = ensure(s, Professions.WARRIOR, Professions.BUILDER, Professions.HAULER);
+                        gear(m);
+                        WARRIOR = m.getUUID();
+                    }
+                    if (m == null) continue;
                     m.markArrived();
                     m.stopSleeping();
                     m.teleportTo(p.getX() + 1.5, p.getY(), p.getZ() + 1.5);
