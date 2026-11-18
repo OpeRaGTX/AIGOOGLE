@@ -510,7 +510,7 @@ final class WaveH3Test {
             if (capsFound.get() != 1) fail("cottage chimney cap blocks: " + capsFound.get());
             else {
                 BlockPos c = capAt[0];
-                look(player(s), c.getX() + 3.0, c.getY() + 1.3, c.getZ() - 3.2, c.getX() + 0.5, c.getY() + 1.0, c.getZ() + 0.5);
+                look(player(s), c.getX() + 2.2, c.getY() + 1.1, c.getZ() - 2.4, c.getX() + 0.5, c.getY() + 1.4, c.getZ() + 0.5);
             }
         });
         ctx.runOnClient(mc -> mc.particleEngine.clearParticles());
@@ -519,7 +519,7 @@ final class WaveH3Test {
         ctx.runOnClient(mc -> {
             String n = mc.particleEngine.countParticles();
             log("HHTEST H3 chimney smoke particles alive (engine was cleared, only the cap emits): " + n);
-            if (Integer.parseInt(n.trim()) < 1) fail("no smoke particles near the chimney cap");
+            if (!java.util.regex.Pattern.compile("[1-9]").matcher(n).find()) fail("no smoke particles near the chimney cap");
         });
         ctx.takeScreenshot("hh_h3_chimney");
 
