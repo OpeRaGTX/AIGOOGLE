@@ -20,7 +20,10 @@ public class SeatBlock extends FacingShapeBlock {
 
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (player.isSecondaryUseActive() || player.isPassenger()) return InteractionResult.PASS;
+        if (player.isSecondaryUseActive() || player.isPassenger()) {
+            io.github.operagtx.hearthholm.Hearthholm.LOG.info("seat: refused sneaking={} passenger={}", player.isSecondaryUseActive(), player.isPassenger());
+            return InteractionResult.PASS;
+        }
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         return SeatEntity.sit(level, pos, player, surface) ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }

@@ -612,7 +612,7 @@ shaped("crate", ["PSP", "SPS", "PSP"], {"P": P, "S": S_})
 shaped("firewood_pile", ["LLL", " L "], {"L": "minecraft:oak_log"}, 2)
 shaped("rug_red", ["WW"], {"W": "minecraft:red_carpet"}, 2)
 shaped("rug_blue", ["WW"], {"W": "minecraft:blue_carpet"}, 2)
-shaped("hanging_lantern", ["I", "L"], {"I": "minecraft:chain", "L": "minecraft:lantern"})
+shaped("hanging_lantern", ["I", "L"], {"I": "minecraft:iron_nugget", "L": "minecraft:lantern"})
 
 # ---- recipes: food (vanilla ingredients; categories for the recipe book)
 def sh_food(name, ingredients, count=1):

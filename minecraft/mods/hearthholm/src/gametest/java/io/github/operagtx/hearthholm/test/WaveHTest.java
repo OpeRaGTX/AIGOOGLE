@@ -103,7 +103,7 @@ final class WaveHTest {
         sp.getServer().runOnServer(s -> {
             ServerLevel l = s.overworld();
             for (int dx = -2; dx <= 30; dx++)
-                for (int dz = -2; dz <= 38; dz++) {
+                for (int dz = -2; dz <= 46; dz++) {
                     for (int dy = 0; dy <= 9; dy++) l.setBlock(H.offset(dx, dy, dz), Blocks.AIR.defaultBlockState(), 2);
                     l.setBlock(H.offset(dx, -1, dz), Blocks.GRASS_BLOCK.defaultBlockState(), 2);
                     for (int dy = 2; dy <= 4; dy++) l.setBlock(H.offset(dx, -dy, dz), Blocks.DIRT.defaultBlockState(), 2);
@@ -305,16 +305,16 @@ final class WaveHTest {
         ctx.waitTicks(10);
         sp.getServer().runOnServer(s -> {
             ServerPlayer p = player(s);
-            BlockPos g = H.offset(2, 0, 14);
-            look(p, g.getX() + 11, g.getY() + 5.5, g.getZ() - 5.5, g.getX() + 11, g.getY() + 0.5, g.getZ() + 3.5);
+            BlockPos g = H.offset(2, 0, 17);
+            look(p, g.getX() + 10.5, g.getY() + 4.2, g.getZ() - 3.6, g.getX() + 10.5, g.getY() + 0.4, g.getZ() + 3.0);
         });
         ctx.waitTicks(10);
         sp.getConnection().waitForChunksRender();
         ctx.takeScreenshot("hh_h3_new_blocks");
         sp.getServer().runOnServer(s -> {
             ServerPlayer p = player(s);
-            BlockPos g = H.offset(2, 0, 24);
-            look(p, g.getX() + 11, g.getY() + 5.5, g.getZ() - 5.5, g.getX() + 11, g.getY() + 0.5, g.getZ() + 3.5);
+            BlockPos g = H.offset(2, 0, 27);
+            look(p, g.getX() + 10.5, g.getY() + 4.2, g.getZ() - 3.6, g.getX() + 10.5, g.getY() + 0.4, g.getZ() + 3.0);
         });
         ctx.waitTicks(10);
         sp.getConnection().waitForChunksRender();
@@ -324,7 +324,7 @@ final class WaveHTest {
         ctx.waitTicks(10);
         sp.getServer().runOnServer(s -> {
             ServerPlayer p = player(s);
-            BlockPos g = H.offset(2, 0, 33);
+            BlockPos g = H.offset(2, 0, 38);
             look(p, g.getX() + 8.2, g.getY() + 3.2, g.getZ() - 6.5, g.getX() + 8.2, g.getY() + 2.8, g.getZ() + 1.0);
         });
         ctx.waitTicks(10);
@@ -394,7 +394,7 @@ final class WaveHTest {
     }
 
     private static void buildRows(ServerLevel l) {
-        BlockPos g = H.offset(2, 0, 14), g2 = H.offset(2, 0, 24);
+        BlockPos g = H.offset(2, 0, 17), g2 = H.offset(2, 0, 27);
         for (BlockPos o : new BlockPos[]{g, g2}) {
             fill(l, o, -1, -1, -1, 23, -1, 8, Blocks.SMOOTH_QUARTZ.defaultBlockState());
         }
@@ -428,7 +428,7 @@ final class WaveHTest {
 
     private static void buildGallery(net.minecraft.server.MinecraftServer s) {
         ServerLevel l = s.overworld();
-        BlockPos g = H.offset(2, 0, 33);
+        BlockPos g = H.offset(2, 0, 38);
         fill(l, g, -1, -1, -2, 18, -1, 4, Blocks.SMOOTH_QUARTZ.defaultBlockState());
         fill(l, g, -1, 0, 3, 18, 5, 3, Blocks.SMOOTH_STONE.defaultBlockState());
         List<String> ids = new ArrayList<>(ModItems.FOODS.keySet());

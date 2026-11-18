@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "I": "minecraft:chain",
+    "I": "minecraft:iron_nugget",
     "L": "minecraft:lantern"
   },
   "pattern": [

@@ -52,7 +52,7 @@ public final class ModEntities {
                 .sized(0.6f, 1.95f).eyeHeight(1.62f).clientTrackingRange(10));
         FabricDefaultAttributeRegistry.register(TRADER, io.github.operagtx.hearthholm.entity.trader.TraderEntity.createAttributes());
         SEAT = reg("seat", EntityType.Builder.<io.github.operagtx.hearthholm.entity.SeatEntity>of(io.github.operagtx.hearthholm.entity.SeatEntity::new, MobCategory.MISC)
-                .sized(0.1f, 0.1f).noSave().noSummon().clientTrackingRange(6));
+                .sized(0.1f, 0.1f).noSummon().clientTrackingRange(6));
         FabricDefaultAttributeRegistry.register(ASH_RAIDER, AshbornEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(ASH_ARSONIST, AshArsonistEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(ASH_ARCHER, AshArcherEntity.createAttributes());
