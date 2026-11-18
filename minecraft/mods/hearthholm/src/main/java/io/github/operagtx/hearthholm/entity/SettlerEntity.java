@@ -329,7 +329,7 @@ public class SettlerEntity extends PathfinderMob {
 
     /**
      * Wave I2: combat settlers move at the speed of a player: walking 4.3 b/s, chasing a target (or retreating) 5.6 b/s,
-     * whatever speed factor the task asked for (the trait factor still nudges it by up to 15 %). Mobs accelerate with speed squared, hence the square roots.
+     * whatever speed factor the task asked for (traits do not change it). Mobs accelerate with speed squared, hence the square roots.
      */
     @Override
     public void setSpeed(float v) {
@@ -337,7 +337,7 @@ public class SettlerEntity extends PathfinderMob {
             LivingEntity t = getTarget();
             boolean sprint = retreating || (t != null && t.isAlive());
             float walk = (float) Math.sqrt((double) io.github.operagtx.hearthholm.core.Balance.COMBAT_WALK_BPS_X10 / io.github.operagtx.hearthholm.core.Balance.COMBAT_SPRINT_BPS_X10);
-            v = (float) getAttributeValue(Attributes.MOVEMENT_SPEED) * (sprint ? 1f : walk) * Mth.clamp(moveFactor(), 0.85f, 1.15f);
+            v = (float) getAttributeValue(Attributes.MOVEMENT_SPEED) * (sprint ? 1f : walk);
         }
         super.setSpeed(v);
     }

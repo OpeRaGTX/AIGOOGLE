@@ -63,6 +63,25 @@ public abstract class BaseJob implements Job {
         return best;
     }
 
+    /** The container holding the best tool of the profession (best material, then least worn); the nearest one on a tie. */
+    protected @Nullable BlockPos findBestTool(List<BlockPos> positions) {
+        if (!(settler.level() instanceof ServerLevel sl)) return null;
+        BlockPos best = null;
+        long bestScore = -1;
+        double bestDist = Double.MAX_VALUE;
+        for (BlockPos p : positions) {
+            if (!(sl.getBlockEntity(p) instanceof Container c)) continue;
+            long score = -1;
+            for (int i = 0; i < c.getContainerSize(); i++) {
+                ItemStack st = c.getItem(i);
+                if (settler.profession().isTool(st)) score = Math.max(score, (long) st.getMaxDamage() * 10000L + (st.getMaxDamage() - st.getDamageValue()));
+            }
+            double d = p.distSqr(settler.blockPosition());
+            if (score >= 0 && (score > bestScore || (score == bestScore && d < bestDist))) { bestScore = score; bestDist = d; best = p; }
+        }
+        return best;
+    }
+
     protected @Nullable BlockPos findSpace(List<BlockPos> positions) {
         if (!(settler.level() instanceof ServerLevel sl)) return null;
         for (BlockPos p : positions) {
@@ -115,7 +134,7 @@ public abstract class BaseJob implements Job {
         long now = settler.level().getGameTime();
         if (now < nextToolTry) return req ? noTool() : null;
         nextToolTry = now + (req ? 200 : toolRetryTicks());
-        BlockPos p = findWith(dropOffs(), settler.profession()::isTool);
+        BlockPos p = findBestTool(dropOffs());
         if (p == null) return req ? noTool() : null;
         settler.setStatus("fetching_tool");
         return new ContainerTrip(p, (s, c) -> s.equipToolFrom(c));
