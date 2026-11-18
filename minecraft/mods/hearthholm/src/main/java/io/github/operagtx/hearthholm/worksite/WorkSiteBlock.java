@@ -22,6 +22,8 @@ import org.jetbrains.annotations.Nullable;
 /** One block class for every work-zone marker; behaviour comes from its {@link WorkSiteType}. */
 public class WorkSiteBlock extends FacingEntityBlock {
     private static final VoxelShape POST = box(5, 0, 5, 11, 15, 11);
+    /** Wave J2: the lumberjack's chopping block is a wide stump with an axe, so its outline is wider than the sign post. */
+    private static final VoxelShape STUMP = box(1, 0, 1, 15, 16, 15);
     private final Identifier typeId;
 
     public WorkSiteBlock(Properties properties, Identifier typeId) {
@@ -39,7 +41,7 @@ public class WorkSiteBlock extends FacingEntityBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return POST;
+        return typeId.equals(WorkSiteTypes.FOREST_ID) ? STUMP : POST;
     }
 
     /** Walk-through like a sign: the outline (getShape) stays so the marker can be clicked and broken. */

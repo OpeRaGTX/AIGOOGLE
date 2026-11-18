@@ -681,4 +681,19 @@ sh_food("cider", ["minecraft:glass_bottle", "minecraft:apple", "minecraft:apple"
 sh_food("herbal_tea", ["minecraft:glass_bottle", "#minecraft:small_flowers", "minecraft:sweet_berries", "minecraft:fern"])
 w(f"data/{NS}/recipe/smoked_fish.json", {"type": "minecraft:smoking", "category": "food", "ingredient": "minecraft:tropical_fish", "result": {"id": f"{NS}:smoked_fish"}, "experience": 0.35, "cookingtime": 100})
 w(f"data/{NS}/recipe/smoked_fish_smelting.json", {"type": "minecraft:smelting", "category": "food", "ingredient": "minecraft:tropical_fish", "result": {"id": f"{NS}:smoked_fish"}, "experience": 0.35, "cookingtime": 200})
+# ---- wave J2: the lumberjack's work site is a chopping block (short log stump) with an axe stuck in it
+_tilt = {"origin": [8, 9, 8], "axis": "z", "angle": 22.5}
+def _rot(el): el["rotation"] = _tilt; return el
+w(f"assets/{NS}/models/block/forest_marker.json", {"parent": "block/block", "display": DISPLAY,
+    "textures": {"particle": f"{NS}:block/chop_bark", "bark": f"{NS}:block/chop_bark", "rings": f"{NS}:block/chop_rings",
+                 "handle": f"{NS}:block/chop_handle", "iron": f"{NS}:block/chop_iron"},
+    "elements": [
+        {"from": [1, 0, 1], "to": [15, 3, 15], "faces": {d: face("#bark", side_uv([1, 0, 1], [15, 3, 15], d)) for d in ("north", "south", "east", "west", "up", "down")}},
+        {"from": [2, 3, 2], "to": [14, 10, 14], "faces": {d: face("#bark", side_uv([2, 3, 2], [14, 10, 14], d)) for d in ("north", "south", "east", "west")}
+            | {"up": face("#rings", [0, 0, 16, 16]), "down": face("#bark", [2, 2, 14, 14])}},
+        _rot({"from": [7.5, 8, 7.5], "to": [8.5, 23, 8.5], "faces": {d: face("#handle", [0, 0, 1, 15]) for d in ("north", "south", "east", "west")} | {"up": face("#handle", [0, 0, 1, 1])}}),
+        _rot({"from": [5, 9, 7], "to": [10, 13, 9], "faces": {d: face("#iron", [4, 4, 12, 12]) for d in ("north", "south", "east", "west", "up", "down")}}),
+        _rot({"from": [3, 7, 7.5], "to": [5, 14, 8.5], "faces": {d: face("#iron", [0, 1, 4, 14]) for d in ("north", "south", "east", "west", "up", "down")}}),
+    ]})
+
 print("assets written")

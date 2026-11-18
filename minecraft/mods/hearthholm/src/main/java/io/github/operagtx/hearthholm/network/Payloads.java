@@ -7,6 +7,8 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
+import java.util.List;
+
 /** All Hearthholm packets. Server → client open/refresh screens; client → server actions. */
 public final class Payloads {
     private Payloads() {}
@@ -120,6 +122,93 @@ public final class Payloads {
                 ByteBufCodecs.VAR_INT, BoardAction::action,
                 ByteBufCodecs.VAR_INT, BoardAction::quest,
                 BoardAction::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    // ---- wave J2: map zones (generic; the miner of J3 reuses them with a layer Y) ----------------------------
+
+    /** A rectangle of zone cells, inclusive corners. */
+    public record Rect(int x0, int z0, int x1, int z1) {}
+
+    /** Client asks for a fresh map snapshot of the zone of the work site at {@code pos} (throttled per player). */
+    public record ZoneMapRequest(BlockPos pos, int layerY) implements CustomPacketPayload {
+        public static final Type<ZoneMapRequest> TYPE = new Type<>(Hearthholm.id("zone_map_request"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, ZoneMapRequest> CODEC = StreamCodec.composite(
+                BlockPos.STREAM_CODEC, ZoneMapRequest::pos,
+                ByteBufCodecs.INT, ZoneMapRequest::layerY,
+                ZoneMapRequest::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** One marker on the map: kind {@link #SITE}, {@link #CHEST} or {@link #WAREHOUSE} at a block column. */
+    public record MapMarker(int kind, int x, int z) {
+        public static final int SITE = 0, CHEST = 1, WAREHOUSE = 2;
+    }
+
+    /**
+     * The map of a zone: one byte per cell (vanilla map colour id * 4 + brightness, 0 = unknown), two flag bits per cell
+     * ({@link #LOG}, {@link #LEAF}, packed four to a byte), the layer's zone bits, markers and the work-site view (options).
+     */
+    public record ZoneMapData(Views.WorkSite view, int layerY, int size, int cell, int originX, int originZ,
+                              byte[] colors, byte[] flags, long[] zoneBits, List<MapMarker> markers) implements CustomPacketPayload {
+        public static final int LOG = 1, LEAF = 2;
+        public static final Type<ZoneMapData> TYPE = new Type<>(Hearthholm.id("zone_map_data"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, ZoneMapData> CODEC = StreamCodec.of(ZoneMapData::write, ZoneMapData::read);
+
+        static void write(RegistryFriendlyByteBuf b, ZoneMapData d) {
+            Views.WorkSite.CODEC.encode(b, d.view);
+            b.writeInt(d.layerY);
+            b.writeVarInt(d.size);
+            b.writeVarInt(d.cell);
+            b.writeInt(d.originX);
+            b.writeInt(d.originZ);
+            b.writeByteArray(d.colors);
+            b.writeByteArray(d.flags);
+            b.writeLongArray(d.zoneBits);
+            b.writeVarInt(d.markers.size());
+            for (MapMarker m : d.markers) { b.writeVarInt(m.kind); b.writeInt(m.x); b.writeInt(m.z); }
+        }
+
+        static ZoneMapData read(RegistryFriendlyByteBuf b) {
+            Views.WorkSite view = Views.WorkSite.CODEC.decode(b);
+            int layer = b.readInt(), size = b.readVarInt(), cell = b.readVarInt(), ox = b.readInt(), oz = b.readInt();
+            byte[] colors = b.readByteArray(), flags = b.readByteArray();
+            long[] bits = b.readLongArray();
+            List<MapMarker> markers = new java.util.ArrayList<>();
+            for (int i = b.readVarInt(); i > 0; i--) markers.add(new MapMarker(b.readVarInt(), b.readInt(), b.readInt()));
+            return new ZoneMapData(view, layer, size, cell, ox, oz, colors, flags, bits, markers);
+        }
+
+        /** The flag bits of cell {@code i}. */
+        public int flag(int i) { return (flags[i >> 2] >> ((i & 3) * 2)) & 3; }
+
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** A zone edit as a diff: {@link #SET} / {@link #CLEAR} the cell rectangles, or {@link #CLEAR_ALL} cells of the layer. */
+    public record ZoneEdit(BlockPos pos, int layerY, int op, List<Rect> rects) implements CustomPacketPayload {
+        public static final int SET = 0, CLEAR = 1, CLEAR_ALL = 2;
+        public static final int MAX_RECTS = 512;
+        public static final Type<ZoneEdit> TYPE = new Type<>(Hearthholm.id("zone_edit"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, ZoneEdit> CODEC = StreamCodec.of(ZoneEdit::write, ZoneEdit::read);
+
+        static void write(RegistryFriendlyByteBuf b, ZoneEdit e) {
+            b.writeBlockPos(e.pos);
+            b.writeInt(e.layerY);
+            b.writeVarInt(e.op);
+            b.writeVarInt(e.rects.size());
+            for (Rect r : e.rects) { b.writeVarInt(r.x0); b.writeVarInt(r.z0); b.writeVarInt(r.x1); b.writeVarInt(r.z1); }
+        }
+
+        static ZoneEdit read(RegistryFriendlyByteBuf b) {
+            BlockPos pos = b.readBlockPos();
+            int layer = b.readInt(), op = b.readVarInt();
+            int n = Math.min(b.readVarInt(), MAX_RECTS + 1);
+            List<Rect> rects = new java.util.ArrayList<>();
+            for (int i = 0; i < n; i++) rects.add(new Rect(b.readVarInt(), b.readVarInt(), b.readVarInt(), b.readVarInt()));
+            return new ZoneEdit(pos, layer, op, rects);
+        }
+
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 }

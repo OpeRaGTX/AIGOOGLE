@@ -8,6 +8,8 @@ import io.github.operagtx.hearthholm.settlement.SettlementService;
 import io.github.operagtx.hearthholm.settlement.Storage;
 import io.github.operagtx.hearthholm.worksite.WorkSiteBlockEntity;
 import io.github.operagtx.hearthholm.worksite.WorkSiteTypes;
+import io.github.operagtx.hearthholm.zone.WorkZone;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -32,6 +34,9 @@ import java.util.*;
 /** Fells whole trees inside the forest zone, clears their leaves, collects drops and replants. */
 public final class LumberjackJob extends SiteJob {
     private final Set<BlockPos> ignored = new HashSet<>();
+    /** Wave J2: trees found in the drawn zone (base logs), rescanned every few seconds - the zone is too big to scan per task. */
+    private List<BlockPos> zoneTrees = List.of();
+    private long nextZoneScan;
 
     public LumberjackJob(SettlerEntity settler) {
         super(settler, WorkSiteTypes.FOREST_ID);
@@ -56,16 +61,18 @@ public final class LumberjackJob extends SiteJob {
         }
         int r = w.option("radius");
         BlockPos c = w.getBlockPos();
-        AABB zone = new AABB(c).inflate(r + 1, 6, r + 1);
-        List<ItemEntity> items = s.level().getEntitiesOfClass(ItemEntity.class, zone, e -> e.isAlive() && wanted(e.getItem()));
+        WorkZone mapZone = w.hasZone() ? w.zone() : null;   // wave J2: a drawn zone replaces the radius box
+        AABB zone = mapZone != null ? mapZone.bounds(c.getY() - 40, c.getY() + 60) : new AABB(c).inflate(r + 1, 6, r + 1);
+        List<ItemEntity> items = s.level().getEntitiesOfClass(ItemEntity.class, zone,
+                e -> e.isAlive() && wanted(e.getItem()) && (mapZone == null || mapZone.containsColumn(e.getBlockX(), e.getBlockZ())));
         if (!items.isEmpty()) {
             ItemEntity item = Collections.min(items, Comparator.comparingDouble(e -> e.distanceToSqr(s)));
             s.setStatus("collecting");
             return new Sequence(new MoveTo(item.position(), 1.3, 0.7), new Run(LumberjackJob::pickUpAround));
         }
-        BlockPos tree = findTree((ServerLevel) s.level(), c, r);
+        BlockPos tree = mapZone != null ? findZoneTree((ServerLevel) s.level(), mapZone) : findTree((ServerLevel) s.level(), c, r);
         if (tree == null) {
-            Task plant = plantSpare((ServerLevel) s.level(), w);
+            Task plant = mapZone != null ? plantInZone((ServerLevel) s.level(), w, mapZone) : plantSpare((ServerLevel) s.level(), w);
             if (plant != null) return plant;
             s.setStatus("no_trees");
             return new Wait(200, Vec3.atCenterOf(c));
@@ -100,6 +107,68 @@ public final class LumberjackJob extends SiteJob {
             if (d < bestDist) { bestDist = d; best = p.immutable(); }
         }
         return best;
+    }
+
+    /** Wave J2: the nearest tree whose base log is in a drawn cell; the zone is rescanned at most every 100 ticks. */
+    private @Nullable BlockPos findZoneTree(ServerLevel level, WorkZone zone) {
+        long now = level.getGameTime();
+        if (now >= nextZoneScan) {
+            nextZoneScan = now + 100;
+            zoneTrees = scanZoneTrees(level, zone);
+        }
+        BlockPos best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (BlockPos p : zoneTrees) {
+            if (ignored.contains(p) || !level.getBlockState(p).is(BlockTags.LOGS)) continue;
+            double d = p.distSqr(settler.blockPosition());
+            if (d < bestDist) { bestDist = d; best = p; }
+        }
+        return best;
+    }
+
+    /** Base logs (log on dirt with logs or leaves above) found through the heightmap, one lookup per block column of the zone. */
+    private List<BlockPos> scanZoneTrees(ServerLevel level, WorkZone zone) {
+        List<BlockPos> out = new ArrayList<>();
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        zone.forEachCell(WorkZone.SURFACE, (ix, iz) -> {
+            for (int dx = 0; dx < zone.cell(); dx++) {
+                for (int dz = 0; dz < zone.cell(); dz++) {
+                    int x = zone.blockX(ix) + dx, z = zone.blockZ(iz) + dz;
+                    if (!level.hasChunkAt(m.set(x, level.getMinY(), z))) continue;
+                    int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+                    if (!level.getBlockState(m.set(x, y, z)).is(BlockTags.LOGS)) continue;
+                    while (y > level.getMinY() && level.getBlockState(m.set(x, y - 1, z)).is(BlockTags.LOGS)) y--;
+                    if (!level.getBlockState(m.set(x, y - 1, z)).is(BlockTags.DIRT)) continue;
+                    BlockState up = level.getBlockState(m.set(x, y + 1, z));
+                    if (!up.is(BlockTags.LOGS) && !(up.getBlock() instanceof LeavesBlock)) continue;
+                    out.add(new BlockPos(x, y, z));
+                }
+            }
+        });
+        return out;
+    }
+
+    /** Wave J2: with the toggle on, plants a sapling (pocket, else the site chest or warehouse) on a free dirt cell of the zone. */
+    private @Nullable Task plantInZone(ServerLevel level, WorkSiteBlockEntity w, WorkZone zone) {
+        if (!w.flag("plant")) return null;
+        ItemStack sapling = ItemStack.EMPTY;
+        for (ItemStack st : settler.inventory().getItems()) if (st.is(ItemTags.SAPLINGS)) { sapling = st; break; }
+        if (sapling.isEmpty()) return fetch(st -> st.is(ItemTags.SAPLINGS), 8, "fetching_saplings");
+        if (!(sapling.getItem() instanceof BlockItem bi)) return null;
+        for (int tries = 0; tries < 40; tries++) {
+            BlockPos col = zone.randomColumn(WorkZone.SURFACE, settler.getRandom(), w.getBlockPos().getY());
+            if (col == null) return null;
+            if (!level.hasChunkAt(col)) continue;
+            int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, col.getX(), col.getZ());
+            BlockPos q = new BlockPos(col.getX(), y, col.getZ());
+            if (!level.getBlockState(q).isAir() || !level.getBlockState(q.below()).is(BlockTags.DIRT)) continue;
+            if (crowded(level, q)) continue;
+            BlockState state = bi.getBlock().defaultBlockState();
+            if (!state.canSurvive(level, q)) continue;
+            settler.setStatus("planting");
+            return new PlaceBlock(q, state, sapling.getItem(), null);
+        }
+        return null;
     }
 
     private @Nullable Task plantSpare(ServerLevel level, WorkSiteBlockEntity w) {

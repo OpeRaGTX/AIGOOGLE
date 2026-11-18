@@ -682,6 +682,44 @@ T.update({
  "option.hearthholm.shift.post": ("Post default", "По посту"),
 })
 
+# wave J2: map zones, the lumberjack's chopping block
+T.update({
+ "block.hearthholm.forest_marker": ("Chopping Block", "Колода дровосека"),
+ "worksite.hearthholm.forest.hint": ("Right-click the chopping block to draw the lumberjack's zone on a map. Put a chest next to the block for his logs and saplings. With no zone he works in a radius.",
+                                     "ПКМ по колоде открывает карту: нарисуйте зону дровосека. Сундук рядом с колодой его: туда идут брёвна и саженцы. Без зоны он работает в радиусе."),
+ "option.hearthholm.plant": ("Plant saplings in zone", "Сажать саженцы в зоне"),
+ "option.hearthholm.plant.tip": ("With a drawn zone the lumberjack plants saplings (from his pockets, the chest or the warehouse) on free dirt inside it.",
+                                 "Если зона нарисована, дровосек сажает в ней саженцы (из карманов, сундука или склада) на свободную землю."),
+ "option.hearthholm.replant.tip": ("Plant a sapling on the spot of every tree he fells.", "Сажать саженец на месте каждого срубленного дерева."),
+ "gui.hearthholm.zone.title": ("%s: zone map", "%s: карта зоны"),
+ "gui.hearthholm.zone.cells": ("Zone: %s cells", "Зона: %s кл."),
+ "gui.hearthholm.zone.empty": ("No zone drawn: working in a radius of %s", "Зона не нарисована: работа в радиусе %s"),
+ "gui.hearthholm.zone.brush_size": ("Brush: %s", "Кисть: %s"),
+ "gui.hearthholm.zone.radius": ("Auto radius: %s", "Авто-радиус: %s"),
+ "gui.hearthholm.zone.layer": ("Layer Y: %s", "Слой Y: %s"),
+ "gui.hearthholm.zone.tool.brush": ("Brush", "Кисть"),
+ "gui.hearthholm.zone.tool.brush.tip": ("Drag to paint cells into the zone. Brush size 1-5 with the - and + buttons.", "Тяните мышью, чтобы закрасить клетки зоны. Размер кисти 1-5 кнопками - и +."),
+ "gui.hearthholm.zone.tool.rect": ("Rectangle", "Область"),
+ "gui.hearthholm.zone.tool.rect.tip": ("Drag a rectangle to add it to the zone.", "Протяните прямоугольник, чтобы добавить его в зону."),
+ "gui.hearthholm.zone.tool.eraser": ("Eraser", "Ластик"),
+ "gui.hearthholm.zone.tool.eraser.tip": ("Drag to erase cells from the zone.", "Тяните мышью, чтобы стереть клетки зоны."),
+ "gui.hearthholm.zone.tool.erase_rect": ("Erase box", "Стереть рамкой"),
+ "gui.hearthholm.zone.tool.erase_rect.tip": ("Drag a rectangle: every zone cell inside is erased.", "Протяните прямоугольник: все клетки зоны внутри него будут стёрты."),
+ "gui.hearthholm.zone.clear": ("Clear all", "Очистить всё"),
+ "gui.hearthholm.zone.clear_confirm": ("Sure? Click again", "Точно? Ещё раз"),
+ "gui.hearthholm.zone.clear.tip": ("Erases the whole zone; the worker goes back to the radius.", "Стирает всю зону; работник вернётся к радиусу."),
+ "gui.hearthholm.zone.zoom_fit": ("Fit", "Вся"), "gui.hearthholm.zone.zoom_2": ("2x", "2x"), "gui.hearthholm.zone.zoom_4": ("4x", "4x"),
+ "gui.hearthholm.zone.zoom.tip": ("Zoom (also the mouse wheel). Pan the map by dragging with the right mouse button.", "Масштаб (и колёсико мыши). Карту двигают правой кнопкой мыши."),
+ "gui.hearthholm.zone.legend.zone": ("Work zone", "Зона работы"),
+ "gui.hearthholm.zone.legend.tree": ("Tree", "Дерево"),
+ "gui.hearthholm.zone.legend.site": ("Work site", "Колода"),
+ "gui.hearthholm.zone.legend.chest": ("Chest", "Сундук"),
+ "gui.hearthholm.zone.legend.warehouse": ("Warehouse", "Склад"),
+ "gui.hearthholm.zone.cursor": ("X %s Z %s  cell %s,%s", "X %s Z %s  клетка %s,%s"),
+ "gui.hearthholm.zone.hint": ("Wheel: zoom. Right drag: pan.", "Колесо: масштаб. ПКМ: сдвиг."),
+ "status.hearthholm.fetching_saplings": ("Getting saplings", "Берёт саженцы"),
+})
+
 # speech bubbles
 import sys
 sys.path.insert(0, os.path.dirname(__file__))

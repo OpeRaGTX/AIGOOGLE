@@ -549,7 +549,7 @@ public final class SettlementService {
         ServerPlayNetworking.send(player, new Payloads.OpenWorkSite(siteView(player.level(), w, s)));
     }
 
-    private static Views.WorkSite siteView(ServerLevel level, WorkSiteBlockEntity w, @Nullable Settlement s) {
+    public static Views.WorkSite siteView(ServerLevel level, WorkSiteBlockEntity w, @Nullable Settlement s) {
         Map<String, Integer> values = new LinkedHashMap<>();
         for (var o : w.type().options()) values.put(o.key(), w.option(o.key()));
         Component worker = Component.translatable("gui.hearthholm.nobody");

@@ -3,6 +3,7 @@ package io.github.operagtx.hearthholm.worksite;
 import com.mojang.serialization.Codec;
 import io.github.operagtx.hearthholm.registry.ModBlockEntities;
 import io.github.operagtx.hearthholm.settlement.SettlementService;
+import io.github.operagtx.hearthholm.zone.WorkZone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -34,6 +35,8 @@ public class WorkSiteBlockEntity extends BlockEntity {
     private @Nullable UUID settlementId;
     private @Nullable UUID workerId;
     private String status = "";
+    /** Wave J2: the hand-drawn map zone (null = none drawn, the old radius applies). Saved with the block, gone with it. */
+    private @Nullable WorkZone zone;
 
     public WorkSiteBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.WORK_SITE, pos, state);
@@ -66,6 +69,29 @@ public class WorkSiteBlockEntity extends BlockEntity {
         // Plans are recomputed from options; restarting the cursor is safe because jobs skip finished steps.
         progress = 0;
         sync();
+    }
+
+    /** The drawn zone, or null when nothing is drawn. */
+    public @Nullable WorkZone zone() { return zone; }
+
+    /** Whether a non-empty zone is drawn; jobs fall back to the radius otherwise. */
+    public boolean hasZone() { return zone != null && !zone.isEmpty(); }
+
+    /** The zone to edit: the existing one or a new empty one centred on the block (grid size from the type's {@link WorkZone.Spec}). */
+    public WorkZone zoneForEdit() {
+        if (zone == null) zone = WorkZone.centred(zoneSpec(), worldPosition);
+        return zone;
+    }
+
+    public WorkZone.Spec zoneSpec() {
+        WorkZone.Spec spec = WorkZone.specOf(type().id());
+        return spec == null ? new WorkZone.Spec(WorkZone.DEFAULT_SIZE, 1, false) : spec;
+    }
+
+    /** Call after changing the zone: forgets an emptied zone and saves. */
+    public void zoneChanged() {
+        if (zone != null && zone.isEmpty()) zone = null;
+        setChanged();
     }
 
     public int progress() { return progress; }
@@ -117,6 +143,7 @@ public class WorkSiteBlockEntity extends BlockEntity {
         out.storeNullable("Settlement", UUIDUtil.CODEC, settlementId);
         out.storeNullable("Worker", UUIDUtil.CODEC, workerId);
         out.putString("Status", status);
+        if (zone != null && !zone.isEmpty()) out.store("Zone", WorkZone.CODEC, zone);
     }
 
     @Override
@@ -128,6 +155,7 @@ public class WorkSiteBlockEntity extends BlockEntity {
         settlementId = in.read("Settlement", UUIDUtil.CODEC).orElse(null);
         workerId = in.read("Worker", UUIDUtil.CODEC).orElse(null);
         status = in.getStringOr("Status", "");
+        zone = in.read("Zone", WorkZone.CODEC).orElse(null);
     }
 
     @Override

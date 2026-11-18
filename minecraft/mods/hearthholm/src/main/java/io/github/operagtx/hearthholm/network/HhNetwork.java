@@ -21,6 +21,13 @@ public final class HhNetwork {
         PayloadTypeRegistry.serverboundPlay().register(Payloads.SettlerAction.TYPE, Payloads.SettlerAction.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(Payloads.WorkSiteAction.TYPE, Payloads.WorkSiteAction.CODEC);
 
+        PayloadTypeRegistry.clientboundPlay().register(Payloads.ZoneMapData.TYPE, Payloads.ZoneMapData.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(Payloads.ZoneMapRequest.TYPE, Payloads.ZoneMapRequest.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(Payloads.ZoneEdit.TYPE, Payloads.ZoneEdit.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(Payloads.ZoneMapRequest.TYPE,
+                (p, ctx) -> ctx.server().execute(() -> io.github.operagtx.hearthholm.zone.ZoneMapService.handleRequest(ctx.player(), p)));
+        ServerPlayNetworking.registerGlobalReceiver(Payloads.ZoneEdit.TYPE,
+                (p, ctx) -> ctx.server().execute(() -> io.github.operagtx.hearthholm.zone.ZoneMapService.handleEdit(ctx.player(), p)));
         ServerPlayNetworking.registerGlobalReceiver(Payloads.TownHallAction.TYPE,
                 (p, ctx) -> ctx.server().execute(() -> SettlementService.handleTownHall(ctx.player(), p)));
         ServerPlayNetworking.registerGlobalReceiver(Payloads.SettlerAction.TYPE,

@@ -30,6 +30,7 @@ public final class WorkSiteScreen extends HhScreen {
 
     public static void show(Views.WorkSite view) {
         Minecraft mc = Minecraft.getInstance();
+        if (ZoneMapScreen.updateView(view)) return;   // wave J2: option changes made on the map screen
         if (mc.gui.screen() instanceof WorkSiteScreen s && s.view.pos().equals(view.pos())) {
             s.view = view;
             s.rebuildWidgets();

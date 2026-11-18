@@ -47,7 +47,13 @@ public final class WorkSiteTypes {
                 SiteOption.toggle("torches", true)), 0x9AA3AD, MinePlanner::previewBox));
         REGISTRY.register(FOREST_ID, new WorkSiteType(FOREST_ID, Hearthholm.id("lumberjack"), List.of(
                 SiteOption.range("radius", 6, 24, 2, 12),
-                SiteOption.toggle("replant", true)), 0x5FA04E, be -> around(be.getBlockPos(), be.option("radius"), 1, 10)));
+                SiteOption.toggle("replant", true),
+                SiteOption.toggle("plant", true)), 0x5FA04E, be -> {
+            // wave J2: with a drawn zone the outline is the zone's bounding box
+            AABB zb = be.hasZone() ? be.zone().bounds(be.getBlockPos().getY() - 1, be.getBlockPos().getY() + 10) : null;
+            return zb != null ? zb : around(be.getBlockPos(), be.option("radius"), 1, 10);
+        }));
+        io.github.operagtx.hearthholm.zone.WorkZone.register(FOREST_ID, io.github.operagtx.hearthholm.zone.WorkZone.Spec.LUMBERJACK);
         REGISTRY.register(FARM_ID, new WorkSiteType(FARM_ID, Hearthholm.id("farmer"), List.of(
                 SiteOption.range("radius", 2, 8, 1, 4),
                 SiteOption.choice("crop", 0, "auto", "wheat", "carrot", "potato", "beetroot"),
