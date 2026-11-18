@@ -188,6 +188,14 @@ Job наследует `SiteJob`, то есть получает захват м
 - Межмерный переход: `Party.tick` ловит прыжок лидера и телепортирует всех загруженных бойцов в его измерение (`TeleportTransition`).
 - Старые сохранения: `SettlementService.openTownHall` вызывает `giveGuide` (флаг `guideGiven`).
 
-## 9. Дальше (идеи)
+## 9. Волна H1: уют
+
+- Ассеты: `tools/gen_h1_tex.py` (полировка старых текстур + новая графика, вызывается из `gen_textures.main`), модели и рецепты в конце `gen_assets.py`, строки в `gen_lang.py`.
+- Колодец: `block/WellBlock` (центр, id `well`, свойство `complete`), `WellPartBlock` (`part` + `facing`), `WellStructure` (раскладка 20 частей вокруг центра, `masterOf`, `collapse`). Ставится в `setPlacedBy`, `getStateForPlacement` возвращает null без места. Любая часть при удалении (`affectNeighborsAfterRemoval`) снимает остальные и выбрасывает один предмет (креатив - без предмета).
+- Сидение: `SeatBlock` + `entity/SeatEntity` (без сохранения, снимается когда нет пассажира или блока).
+- Мелочи на столах: `SmallStackBlock` (`count` 1-3, `on_table` при столешнице 14/16); `LongTableBlock` (оси и стыки `a`/`b`); `FacingShapeBlock` (хитбокс из боксов, повёрнутых по `facing`); `WallDecorBlock` (полка, травы - лицом от стены).
+- Еда: `ModItems.FOODS` (18 предметов), `Workshop.MEALS`/каталог повара и `Caravan.BUY` расширены данными.
+
+## 10. Дальше (идеи)
 
 События (ярмарки), семьи и дети, предпросмотр чертежа «призраком».

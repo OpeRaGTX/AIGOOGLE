@@ -164,15 +164,16 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 if (bread <= bread0) throw new AssertionError("cook made no bread");
                 log("CRAFT OK");
             });
-            boolean onlyF = System.getenv("HH_ONLY_F") != null, onlyE = System.getenv("HH_ONLY_E") != null, onlyD = System.getenv("HH_ONLY_D") != null, onlyG = System.getenv("HH_ONLY_G") != null;
-            if (!onlyD && !onlyE && !onlyF && !onlyG) {
+            boolean onlyF = System.getenv("HH_ONLY_F") != null, onlyE = System.getenv("HH_ONLY_E") != null, onlyD = System.getenv("HH_ONLY_D") != null, onlyG = System.getenv("HH_ONLY_G") != null, onlyH = System.getenv("HH_ONLY_H") != null;
+            if (!onlyD && !onlyE && !onlyF && !onlyG && !onlyH) {
                 waveB(ctx, sp);
                 waveC(ctx, sp);
             }
-            if (!onlyE && !onlyF && !onlyG) WaveDTest.run(ctx, sp);
-            if (!onlyF && !onlyG) WaveETest.run(ctx, sp);
-            if (!onlyG) WaveFTest.run(ctx, sp);
-            WaveGTest.run(ctx, sp);
+            if (!onlyE && !onlyF && !onlyG && !onlyH) WaveDTest.run(ctx, sp);
+            if (!onlyF && !onlyG && !onlyH) WaveETest.run(ctx, sp);
+            if (!onlyG && !onlyH) WaveFTest.run(ctx, sp);
+            if (!onlyH) WaveGTest.run(ctx, sp);
+            WaveHTest.run(ctx, sp);
             log("DONE");
         }
     }
