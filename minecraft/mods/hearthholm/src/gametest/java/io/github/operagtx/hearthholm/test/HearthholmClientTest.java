@@ -171,20 +171,21 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 log("CRAFT OK");
             });
             boolean onlyF = System.getenv("HH_ONLY_F") != null, onlyE = System.getenv("HH_ONLY_E") != null, onlyD = System.getenv("HH_ONLY_D") != null, onlyG = System.getenv("HH_ONLY_G") != null, onlyH = System.getenv("HH_ONLY_H") != null,
-                    onlyH2 = System.getenv("HH_ONLY_H2") != null, onlyH3 = System.getenv("HH_ONLY_H3") != null, onlyI1 = System.getenv("HH_ONLY_I1") != null, onlyI2 = System.getenv("HH_ONLY_I2") != null;
-            if (!onlyD && !onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2) {
+                    onlyH2 = System.getenv("HH_ONLY_H2") != null, onlyH3 = System.getenv("HH_ONLY_H3") != null, onlyI1 = System.getenv("HH_ONLY_I1") != null, onlyI2 = System.getenv("HH_ONLY_I2") != null, onlyJ1 = System.getenv("HH_ONLY_J1") != null;
+            if (!onlyD && !onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1) {
                 waveB(ctx, sp);
                 waveC(ctx, sp);
             }
-            if (!onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2) WaveDTest.run(ctx, sp);
-            if (!onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2) WaveETest.run(ctx, sp);
-            if (!onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2) WaveFTest.run(ctx, sp);
-            if (!onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2) WaveGTest.run(ctx, sp);
-            if (!onlyH2 && !onlyH3 && !onlyI1 && !onlyI2) WaveHTest.run(ctx, sp);
-            if (!onlyH3 && !onlyI1 && !onlyI2) WaveH2Test.run(ctx, sp);
-            if (!onlyH2 && !onlyI1 && !onlyI2) WaveH3Test.run(ctx, sp);
-            if (!onlyH2 && !onlyI2) WaveI1Test.run(ctx, sp);
-            if (!onlyH2 && !onlyI1) WaveI2Test.run(ctx, sp);
+            if (!onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1) WaveDTest.run(ctx, sp);
+            if (!onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1) WaveETest.run(ctx, sp);
+            if (!onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1) WaveFTest.run(ctx, sp);
+            if (!onlyH && !onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1) WaveGTest.run(ctx, sp);
+            if (!onlyH2 && !onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1) WaveHTest.run(ctx, sp);
+            if (!onlyH3 && !onlyI1 && !onlyI2 && !onlyJ1) WaveH2Test.run(ctx, sp);
+            if (!onlyH2 && !onlyI1 && !onlyI2 && !onlyJ1) WaveH3Test.run(ctx, sp);
+            if (!onlyH2 && !onlyI2 && !onlyJ1) WaveI1Test.run(ctx, sp);
+            if (!onlyH2 && !onlyI1 && !onlyJ1) WaveI2Test.run(ctx, sp);
+            if (!onlyH2 && !onlyI1 && !onlyI2) WaveJ1Test.run(ctx, sp);
             log("DONE");
         }
     }

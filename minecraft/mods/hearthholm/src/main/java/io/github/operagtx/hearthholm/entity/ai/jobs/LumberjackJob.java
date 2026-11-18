@@ -75,7 +75,7 @@ public final class LumberjackJob extends SiteJob {
     }
 
     /** Wave J1: the zone sweep only takes what a forest gives: wood, saplings, sticks and apples. */
-    static boolean wanted(ItemStack st) {
+    public static boolean wanted(ItemStack st) {
         return !st.isEmpty() && (st.is(ItemTags.LOGS) || st.is(ItemTags.PLANKS) || st.is(ItemTags.SAPLINGS) || st.is(net.minecraft.world.item.Items.STICK) || st.is(net.minecraft.world.item.Items.APPLE));
     }
 
