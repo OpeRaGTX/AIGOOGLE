@@ -275,8 +275,74 @@ def dump(name, g):
 
 OUT = {}
 
+CCW = {"north": "west", "west": "south", "south": "east", "east": "north"}   # Direction.getCounterClockWise
+OPPOSITE = {"north": "south", "south": "north", "east": "west", "west": "east"}
+
+
+def parse_state(s):
+    if "[" not in s:
+        return s, {}
+    base, rest = s.split("[", 1)
+    return base, dict(kv.split("=") for kv in rest.rstrip("]").split(","))
+
+
+def is_stairs(s):
+    return s != AIR and parse_state(s)[0].endswith("_stairs")
+
+
+def stair_shape(g, x, y, z):
+    """Port of StairBlock.getStairsShape: inner and outer corners from the neighbouring stairs (wave H3)."""
+    base, p = parse_state(g.get(x, y, z))
+    f, half = p["facing"], p["half"]
+
+    def at(face):
+        dx, dz = VEC[face]
+        nx, nz = x + dx, z + dz
+        if 0 <= nx < g.w and 0 <= nz < g.d:
+            return g.get(nx, y, nz)
+        return AIR
+
+    def can_take(face):
+        n = at(face)
+        if not is_stairs(n):
+            return True
+        np_ = parse_state(n)[1]
+        return np_["facing"] != f or np_["half"] != half
+
+    n1 = at(f)   # in front
+    if is_stairs(n1) and parse_state(n1)[1]["half"] == half:
+        d2 = parse_state(n1)[1]["facing"]
+        if d2 in (f, OPPOSITE[f]):
+            pass
+        elif can_take(OPPOSITE[d2]):
+            return "outer_left" if d2 == CCW[f] else "outer_right"
+    n2 = at(OPPOSITE[f])   # behind
+    if is_stairs(n2) and parse_state(n2)[1]["half"] == half:
+        d3 = parse_state(n2)[1]["facing"]
+        if d3 not in (f, OPPOSITE[f]) and can_take(d3):
+            return "inner_left" if d3 == CCW[f] else "inner_right"
+    return "straight"
+
+
+def fix_stairs(g):
+    """Gives every stair of the grid its real shape; returns {shape: count}."""
+    counts = {}
+    shapes = {}
+    for y in range(g.h):
+        for z in range(g.d):
+            for x in range(g.w):
+                if is_stairs(g.get(x, y, z)):
+                    shapes[(x, y, z)] = stair_shape(g, x, y, z)
+    for (x, y, z), sh in shapes.items():
+        base, p = parse_state(g.get(x, y, z))
+        p["shape"] = sh
+        g.set(x, y, z, base + "[" + ",".join(f"{k}={v}" for k, v in p.items()) + "]")
+        counts[sh] = counts.get(sh, 0) + 1
+    return counts
+
 
 def done(name, g, seed=None):
+    print(name, "stairs", fix_stairs(g))
     OUT[name] = g
     if seed:
         validate(name, g, seed)

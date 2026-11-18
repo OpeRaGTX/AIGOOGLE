@@ -600,6 +600,10 @@ public final class SettlementService {
         Settlement s = builder.settlement();
         BlockPos pos = w.getBlockPos();
         w.setWorkerId(null);
+        // wave H3: make sure every roof stair of the finished house has its corner shape
+        for (Blueprint.BuildOp op : bp.ops(pos, w.facing()))
+            if (!op.clear() && op.state().getBlock() instanceof net.minecraft.world.level.block.StairBlock)
+                io.github.operagtx.hearthholm.entity.ai.tasks.PlaceBlock.reshapeStairs(level, op.pos());
         level.removeBlock(pos, false);
         net.minecraft.world.level.block.Block.popResource(level, pos, new ItemStack(ModBlocks.CONSTRUCTION_STAKE));
         level.playSound(null, pos, SoundEvents.PLAYER_LEVELUP, SoundSource.BLOCKS, 0.8f, 0.9f);

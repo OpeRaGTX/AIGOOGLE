@@ -50,6 +50,7 @@ public final class PlaceBlock implements Task {
         }
         if (cost != null && !s.takeItem(cost, 1)) return Status.FAILED;
         level.setBlock(pos, state, 3);
+        reshapeStairs(level, pos);
         level.playSound(null, pos, state.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 0.8f, 1f);
         s.swingArm(InteractionHand.MAIN_HAND);
         if (after != null) after.accept(s);
@@ -59,5 +60,19 @@ public final class PlaceBlock implements Task {
     @Override
     public void stop(SettlerEntity s) {
         if (approach != null) approach.stop(s);
+    }
+
+    /**
+     * Wave H3: a placed stair keeps the shape stored in the blueprint (always straight); neighbours placed later fix themselves through the
+     * normal shape update, but the stair placed last would stay straight. Runs the neighbour shape update on the stair itself, so inner and
+     * outer corners come out right. Returns whether the shape changed.
+     */
+    public static boolean reshapeStairs(net.minecraft.world.level.LevelAccessor level, BlockPos pos) {
+        BlockState now = level.getBlockState(pos);
+        if (!net.minecraft.world.level.block.StairBlock.isStairs(now)) return false;
+        BlockState fixed = net.minecraft.world.level.block.Block.updateFromNeighbourShapes(now, level, pos);
+        if (fixed == now || !net.minecraft.world.level.block.StairBlock.isStairs(fixed)) return false;
+        level.setBlock(pos, fixed, 2);
+        return true;
     }
 }

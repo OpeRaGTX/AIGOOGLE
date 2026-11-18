@@ -1205,6 +1205,8 @@ def main():
     gen_h1_tex.run(sys.modules[__name__])   # wave H1: polish + new art
     import gen_h2_skins
     gen_h2_skins.run(sys.modules[__name__])   # wave H2: new hair, outfits, headwear
+    import gen_h3_skins
+    gen_h3_skins.run(sys.modules[__name__])   # wave H3: long women's hair, faces, accent-only profession overlays
     print("textures written to", os.path.normpath(OUT))
 
 if __name__ == "__main__":

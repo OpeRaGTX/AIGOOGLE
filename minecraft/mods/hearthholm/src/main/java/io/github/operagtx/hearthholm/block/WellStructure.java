@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
@@ -106,6 +107,8 @@ public final class WellStructure {
                         boolean mine = s.is(ModBlocks.WELL_PART) ? masterOf(s, p).equals(master) : (dy == 0 && dx == 0 && dz == 0 && s.is(ModBlocks.WELL));
                         if (mine) level.destroyBlock(p, false);
                     }
+            // destroying a waterlogged block leaves its water behind as a source block: remove that too
+            if (!level.getFluidState(master).isEmpty() && !level.getBlockState(master).is(ModBlocks.WELL)) level.setBlock(master, Blocks.AIR.defaultBlockState(), 3);
             if (!noDrop) Block.popResource(level, master, new ItemStack(ModBlocks.WELL));
         } finally {
             collapsing = false;

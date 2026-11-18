@@ -17,14 +17,14 @@ import net.minecraft.resources.Identifier;
  * Player-shaped settlers: the vanilla player mesh (with hat/jacket/sleeve/pants overlays as
  * child parts) driven as a humanoid, wide or slim arms, composed skin, armour and held tools.
  */
-public class SettlerRenderer extends HumanoidMobRenderer<SettlerEntity, SettlerRenderState, HumanoidModel<SettlerRenderState>> {
-    private final HumanoidModel<SettlerRenderState> wide;
-    private final HumanoidModel<SettlerRenderState> slim;
+public class SettlerRenderer extends HumanoidMobRenderer<SettlerEntity, SettlerRenderState, SettlerModel> {
+    private final SettlerModel wide;
+    private final SettlerModel slim;
 
     public SettlerRenderer(EntityRendererProvider.Context ctx) {
-        super(ctx, new HumanoidModel<>(ctx.bakeLayer(ModelLayers.PLAYER)), 0.5f);
+        super(ctx, new SettlerModel(ctx.bakeLayer(ModelLayers.PLAYER)), 0.5f);
         this.wide = this.model;
-        this.slim = new HumanoidModel<>(ctx.bakeLayer(ModelLayers.PLAYER_SLIM));
+        this.slim = new SettlerModel(ctx.bakeLayer(ModelLayers.PLAYER_SLIM));
         addLayer(new HumanoidArmorLayer<>(this,
                 ArmorModelSet.bake(ModelLayers.PLAYER_ARMOR, ctx.getModelSet(), HumanoidModel::new),
                 ctx.getEquipmentRenderer()));
@@ -39,7 +39,10 @@ public class SettlerRenderer extends HumanoidMobRenderer<SettlerEntity, SettlerR
     public void extractRenderState(SettlerEntity entity, SettlerRenderState state, float partialTick) {
         super.extractRenderState(entity, state, partialTick);
         int look = entity.lookBits();
-        state.slim = Appearance.unpack(look).female();
+        Appearance ap = Appearance.unpack(look);
+        state.slim = ap.female();
+        state.skirtFlare = ap.female() && ap.outfit() >= 1 && ap.outfit() <= 3 ? (ap.outfit() == 2 ? 1.3f : 1.4f) : ap.outfit() == 6 ? 1.2f : 1f;
+        state.hairVolume = ap.female() && ap.headwear() == 0 ? 1.1f : 1f;
         state.texture = SettlerTextures.get(look, entity.professionId());
         state.bubble = entity.hasBubble() ? entity.bubble() : null;
         if (entity.isUsingItem() && entity.getMainHandItem().is(net.minecraft.world.item.Items.BOW)) {

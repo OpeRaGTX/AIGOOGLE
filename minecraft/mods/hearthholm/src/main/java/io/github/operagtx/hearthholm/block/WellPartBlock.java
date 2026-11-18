@@ -28,7 +28,7 @@ public class WellPartBlock extends HorizontalBlock {
     }
 
     public static final EnumProperty<Part> PART = EnumProperty.create("part", Part.class);
-    private static final VoxelShape RING = Block.box(0, 0, 0, 16, 10, 16), POST = Block.box(5, 0, 5, 11, 16, 11), ROOF = Block.box(0, 6, 0, 16, 16, 16),
+    private static final VoxelShape RING = Block.box(0, 0, 0, 16, 16, 16), POST = Block.box(5, 0, 5, 11, 16, 11), ROOF = Block.box(0, 6, 0, 16, 16, 16),
             ROPE = Block.box(5, 0, 5, 11, 16, 11);
 
     public WellPartBlock(Properties properties) {

@@ -276,14 +276,23 @@ block_model("tavern_keg", {"particle": T("tavern_keg_side"), "top": T("tavern_ke
              box_el([7.5, 4, -1.5], [8.5, 5.5, -0.5], "#top"),                                                    # spigot
              box_el([7.5, 5.5, -1.5], [8.5, 6.5, 0.5], "#top"),                                                   # tap handle meets the plate
              box_el([6.5, 14, 6.5], [9.5, 14.8, 9.5], "#top")])                                                   # bung
+# wave H3: a slim wrought-iron street lamp, 1.75 blocks tall (model only; the block is one cell): thin 2 px post on a flared foot, a scrolled
+# arm with a brace towards the facing side, a small cap with a finial, and the lantern hanging from the arm on a short chain.
 block_model("lamp_post", {"particle": T("lamp_post_metal"), "metal": T("lamp_post_metal"), "glass": T("lamp_post_glass")},
-            [box_el([4, 0, 4], [12, 1, 12], "#metal"), box_el([5, 1, 5], [11, 3, 11], "#metal"),                  # flared foot
-             box_el([7, 3, 7], [9, 10, 9], "#metal"), box_el([6, 6, 6], [10, 7, 10], "#metal"),                   # pole with collar
-             box_el([4.5, 10, 4.5], [11.5, 11, 11.5], "#metal"),                                                  # lantern plate
-             box_el([5.5, 11, 5.5], [10.5, 14, 10.5], "#glass"),                                                  # glass
-             box_el([5, 11, 5], [6, 14, 6], "#metal"), box_el([10, 11, 5], [11, 14, 6], "#metal"),                # corner pillars: plate -> roof
-             box_el([5, 11, 10], [6, 14, 11], "#metal"), box_el([10, 11, 10], [11, 14, 11], "#metal"),
-             box_el([4, 14, 4], [12, 15, 12], "#metal"), box_el([6, 15, 6], [10, 16, 10], "#metal")])             # roof and finial
+            [box_el([5, 0, 5], [11, 2, 11], "#metal"), box_el([6, 2, 6], [10, 4, 10], "#metal"),                  # flared foot
+             box_el([7, 4, 7], [9, 25, 9], "#metal"),                                                             # post
+             box_el([6, 9, 6], [10, 10, 10], "#metal"), box_el([6, 20, 6], [10, 21, 10], "#metal"),               # collars
+             box_el([7, 22, 2], [9, 24, 9], "#metal"),                                                            # arm
+             box_el([7.5, 20, 6], [8.5, 22, 7.5], "#metal"), box_el([7.5, 21.5, 4.5], [8.5, 22.5, 6], "#metal"),  # brace under the arm
+             box_el([7.5, 24, 2], [8.5, 25.5, 3.5], "#metal"),                                                    # scroll tip
+             box_el([6, 25, 6], [10, 26, 10], "#metal"), box_el([7, 26, 7], [9, 27.5, 9], "#metal"),              # cap
+             box_el([7.5, 27.5, 7.5], [8.5, 29, 8.5], "#metal"),                                                  # finial
+             box_el([7.5, 20, 2.5], [8.5, 22, 3.5], "#metal"), box_el([7.25, 19, 2.75], [8.75, 20, 3.25], "#metal"),   # chain
+             box_el([5.5, 18, 0.5], [10.5, 19, 5.5], "#metal"), box_el([6.5, 19, 1.5], [9.5, 20, 4.5], "#metal"),      # lantern roof
+             box_el([6, 13.5, 1], [10, 18, 5], "#glass"),                                                              # glass
+             box_el([5.5, 12.5, 0.5], [10.5, 13.5, 5.5], "#metal"),                                                    # lantern base
+             box_el([5.5, 13.5, 0.5], [6.5, 18, 1.5], "#metal"), box_el([9.5, 13.5, 0.5], [10.5, 18, 1.5], "#metal"),
+             box_el([5.5, 13.5, 4.5], [6.5, 18, 5.5], "#metal"), box_el([9.5, 13.5, 4.5], [10.5, 18, 5.5], "#metal")])  # frame pillars
 block_model("signpost", {"particle": T("signpost_wood"), "wood": T("signpost_wood"), "board": T("signpost_board")},
             [box_el([7, 0, 7], [9, 16, 9], "#wood"),
              {"from": [1, 9, 8.5], "to": [15, 14, 9.5], "faces": {"north": face("#board", [1, 2, 15, 7]), "south": face("#board", [1, 2, 15, 7]),
@@ -417,12 +426,15 @@ model("well_single", w_tex, [box_el([0, 0, 0], [16, 7, 3], "#stone"), box_el([0,
     box_el([0, 0, 3], [3, 7, 13], "#stone"), box_el([13, 0, 3], [16, 7, 13], "#stone"), box_el([3, 0, 3], [13, 5, 13], "#water"),
     box_el([1, 7, 1], [3, 14, 3], "#post"), box_el([13, 7, 1], [15, 14, 3], "#post"), box_el([1, 7, 13], [3, 14, 15], "#post"), box_el([13, 7, 13], [15, 14, 15], "#post"),
     box_el([0, 14, 0], [16, 16, 16], "#roof"), box_el([7, 7, 7], [9, 14, 9], "#rope"), box_el([5, 6, 5], [11, 9, 11], "#bucket")])
-model("well_basin", w_tex, [box_el([0, 0, 0], [16, 1, 16], "#stone"), box_el([0, 1, 0], [16, 6, 16], "#water")])
-model("well_ring_edge", w_tex, [box_el([0, 0, 0], [16, 10, 5], "#stone"), box_el([0, 0, 5], [16, 1, 16], "#stone"), box_el([0, 1, 5], [16, 6, 16], "#water")])
-model("well_ring_corner", w_tex, [box_el([0, 0, 0], [16, 10, 5], "#stone"), box_el([0, 0, 5], [5, 10, 16], "#stone"),
-    box_el([5, 0, 5], [16, 1, 16], "#stone"), box_el([5, 1, 5], [16, 6, 16], "#water")])
-model("well_post", w_tex, [box_el([6, -6, 0.5], [10, 16, 4.5], "#post")])   # starts on the rim top (ring wall is 10 high)
-model("well_rope", w_tex, [box_el([7.5, 2, 7.5], [8.5, 16, 8.5], "#rope"), box_el([5, -4, 5], [11, 2, 11], "#bucket"), box_el([5.5, 2, 7.5], [10.5, 2.8, 8.5], "#post")])
+# wave H3: the water is real (the centre block is waterlogged), so the models carry no painted water: the basin is a stone floor under the
+# fluid and the eight ring blocks are solid stone with a raised outer lip. Water sits 2 px under the rim.
+model("well_basin", w_tex, [box_el([0, 0, 0], [16, 2, 16], "#stone")])
+model("well_ring_edge", w_tex, [box_el([0, 0, 0], [16, 15, 16], "#stone"), box_el([0, 15, 0], [16, 16, 4], "#stone"),
+    box_el([0, 15, 4], [2, 16, 16], "#stone"), box_el([14, 15, 4], [16, 16, 16], "#stone")])
+model("well_ring_corner", w_tex, [box_el([0, 0, 0], [16, 15, 16], "#stone"), box_el([0, 15, 0], [16, 16, 4], "#stone"),
+    box_el([0, 15, 4], [4, 16, 16], "#stone")])
+model("well_post", w_tex, [box_el([6, 0, 0.5], [10, 16, 4.5], "#post")])   # stands on the rim (ring is 16 high)
+model("well_rope", w_tex, [box_el([7.5, 3, 7.5], [8.5, 16, 8.5], "#rope"), box_el([5, -3, 5], [11, 3, 11], "#bucket"), box_el([5.5, 3, 7.5], [10.5, 3.8, 8.5], "#post")])
 model("well_roof_edge", w_tex, [box_el([0, 6, 0], [16, 8, 16], "#roof"), box_el([0, 8, 3], [16, 10, 16], "#roof"), box_el([0, 10, 8], [16, 12, 16], "#roof")])
 model("well_roof_post", w_tex, [box_el([6, 0, 0.5], [10, 6, 4.5], "#post"), box_el([6.5, 2, 4.5], [9.5, 4.5, 16], "#axle"),
     box_el([0, 6, 0], [16, 8, 16], "#roof"), box_el([0, 8, 3], [16, 10, 16], "#roof"), box_el([0, 10, 8], [16, 12, 16], "#roof")])

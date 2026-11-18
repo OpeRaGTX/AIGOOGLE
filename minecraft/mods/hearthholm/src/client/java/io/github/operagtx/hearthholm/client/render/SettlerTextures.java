@@ -50,7 +50,8 @@ public final class SettlerTextures {
         LAYERS.clear();
     }
 
-    private static NativeImage compose(Appearance a, Identifier profession) {
+    /** The composed 64x64 skin (also used by the tests to compare layers). */
+    public static NativeImage compose(Appearance a, Identifier profession) {
         String arms = a.female() ? "slim" : "wide";
         NativeImage out = new NativeImage(64, 64, true);
         layer(out, "skin_" + arms, SKIN[a.skin() % SKIN.length]);
@@ -66,9 +67,13 @@ public final class SettlerTextures {
         layer(out, "shoes", -1);
         int hair = HAIR[a.hairColor() % HAIR.length];
         layer(out, "brows", hair);
+        layer(out, a.female() ? "face_f" : "face_m", -1);   // wave H3: lashes, lips and blush / a squarer jaw
         if (a.elder()) layer(out, "elder", -1);
         if (!a.female() && a.beard() > 0) layer(out, "beard/b" + a.beard(), hair);
-        if (a.female()) layer(out, "hair/f" + a.hairStyle(), hair);
+        if (a.female()) {
+            layer(out, "hair/f" + a.hairStyle(), hair);
+            layer(out, "hair/f" + a.hairStyle() + "_acc", -1);   // ribbons and hair bands
+        }
         else if (a.hairStyle() > 0) layer(out, "hair/m" + a.hairStyle(), hair);
         if (a.headwear() > 0) layer(out, "head/h" + a.headwear(), SHIRT[(a.shirt() + 3) % SHIRT.length]);
         layer(out, "profession/" + profession.getPath() + "_" + arms, -1);

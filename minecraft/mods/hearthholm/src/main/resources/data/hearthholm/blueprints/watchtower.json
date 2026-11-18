@@ -13,12 +13,16 @@
   "b": "minecraft:glass_pane",
   "B": "minecraft:oak_planks",
   "l": "hearthholm:alarm_bell[facing=north]",
-  "p": "minecraft:spruce_stairs[facing=south,half=bottom,shape=straight]",
-  "M": "minecraft:spruce_stairs[facing=east,half=bottom,shape=straight]",
-  "f": "minecraft:spruce_planks",
-  "h": "minecraft:spruce_stairs[facing=west,half=bottom,shape=straight]",
-  "t": "minecraft:spruce_stairs[facing=north,half=bottom,shape=straight]",
-  "F": "minecraft:spruce_slab[type=bottom]"
+  "p": "minecraft:spruce_stairs[facing=south,half=bottom,shape=outer_left]",
+  "M": "minecraft:spruce_stairs[facing=south,half=bottom,shape=straight]",
+  "f": "minecraft:spruce_stairs[facing=south,half=bottom,shape=outer_right]",
+  "h": "minecraft:spruce_stairs[facing=east,half=bottom,shape=straight]",
+  "t": "minecraft:spruce_planks",
+  "F": "minecraft:spruce_stairs[facing=west,half=bottom,shape=straight]",
+  "g": "minecraft:spruce_stairs[facing=north,half=bottom,shape=outer_right]",
+  "S": "minecraft:spruce_stairs[facing=north,half=bottom,shape=straight]",
+  "s": "minecraft:spruce_stairs[facing=north,half=bottom,shape=outer_left]",
+  "W": "minecraft:spruce_slab[type=bottom]"
  },
  "layers": [
   [
@@ -103,29 +107,29 @@
    "d.....d"
   ],
   [
-   "ppppppp",
-   "Mfffffh",
-   "Mfffffh",
-   "Mfffffh",
-   "Mfffffh",
-   "Mfffffh",
-   "ttttttt"
+   "pMMMMMf",
+   "htttttF",
+   "htttttF",
+   "htttttF",
+   "htttttF",
+   "htttttF",
+   "gSSSSSs"
   ],
   [
    ".......",
-   ".ppppp.",
-   ".Mfffh.",
-   ".Mfffh.",
-   ".Mfffh.",
-   ".ttttt.",
+   ".pMMMf.",
+   ".htttF.",
+   ".htttF.",
+   ".htttF.",
+   ".gSSSs.",
    "......."
   ],
   [
    ".......",
    ".......",
-   "..ppp..",
-   "..Mfh..",
-   "..ttt..",
+   "..pMf..",
+   "..htF..",
+   "..gSs..",
    ".......",
    "......."
   ],
@@ -133,7 +137,7 @@
    ".......",
    ".......",
    ".......",
-   "...F...",
+   "...W...",
    ".......",
    ".......",
    "......."

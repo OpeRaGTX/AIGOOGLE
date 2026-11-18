@@ -66,13 +66,16 @@ public record Appearance(int skin, int hairStyle, int hairColor, int eyes, int b
             p(false, 1, 3, 4, 1, 5, 1, 5, 0, false),  // ginger, stubble, tunic
             p(false, 1, 6, 7, 2, 8, 4, 6, 0, true),   // receding grey elder with beard, robe
             p(false, 4, 2, 0, 3, 1, 3, 4, 0, false),  // dark, moustache, red vest
-            p(false, 0, 5, 5, 0, 2, 1, 5, 0, false),  // long blond hair, blue tunic
-            p(false, 3, 7, 0, 0, 6, 0, 4, 2, false),  // curly hair, flat cap
+            p(false, 0, 5, 5, 1, 2, 1, 5, 0, false),  // long blond hair, stubble, blue tunic
+            p(false, 3, 7, 0, 3, 6, 0, 4, 2, false),  // curly hair, moustache, flat cap
             p(false, 5, 4, 0, 2, 3, 2, 5, 0, false),  // short dark hair, beard, green tunic
             p(false, 2, 0, 7, 2, 4, 4, 6, 3, true),   // bald grey elder, woollen cap, robe
-            p(false, 1, 1, 2, 0, 9, 3, 4, 3, false),  // woollen cap, grey vest
+            p(false, 1, 1, 2, 1, 9, 3, 4, 3, false),  // woollen cap, stubble, grey vest
             p(false, 0, 3, 3, 1, 7, 0, 5, 2, false)   // auburn, stubble, flat cap, purple tunic
     );
+
+    /** Wave H3 women's styles with locks, braids or a tail that fall over the shoulders and back (the others are buns and a bob). */
+    public boolean longHair() { return female && (hairStyle == 0 || hairStyle == 1 || hairStyle == 2 || hairStyle == 4 || hairStyle == 5 || hairStyle == 6 || hairStyle == 9); }
 
     public static int presetCount() { return PRESETS.size(); }
 
