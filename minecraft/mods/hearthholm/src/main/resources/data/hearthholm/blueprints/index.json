@@ -11,6 +11,10 @@
   "tavern",
   "market_stall",
   "farmhouse",
-  "wall_section"
+  "wall_section",
+  "cottage",
+  "townhouse",
+  "fisher_hut",
+  "l_house"
  ]
 }

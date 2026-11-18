@@ -1,56 +1,131 @@
 {
  "palette": {
-  "c": "minecraft:cobblestone",
-  "L": "minecraft:oak_log[axis=y]",
-  "P": "minecraft:oak_planks",
-  "R": "minecraft:spruce_planks",
-  "D": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
-  "d": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
-  "G": "minecraft:glass_pane",
-  "T": "minecraft:wall_torch[facing=south]",
-  "B": "hearthholm:carpenter_bench[facing=north]",
-  "C": "minecraft:chest[facing=north]"
+  "L": "minecraft:oak_planks",
+  "P": "minecraft:cobblestone",
+  "R": "hearthholm:lamp_post[facing=north]",
+  "c": "hearthholm:flower_box[facing=north]",
+  "D": "minecraft:oak_fence",
+  "d": "minecraft:oak_log[axis=y]",
+  "G": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
+  "T": "hearthholm:firewood_pile[facing=west]",
+  "C": "hearthholm:crate",
+  "K": "minecraft:barrel[facing=up]",
+  "b": "hearthholm:flower_box[facing=west]",
+  "B": "hearthholm:stool[facing=east]",
+  "l": "hearthholm:round_table",
+  "p": "hearthholm:rug_red[facing=north]",
+  "M": "hearthholm:firewood_pile[facing=north]",
+  "f": "hearthholm:carpenter_bench[facing=north]",
+  "h": "minecraft:chest[facing=north]",
+  "t": "hearthholm:flower_box[facing=south]",
+  "F": "minecraft:oak_trapdoor[facing=north,half=bottom,open=true]",
+  "g": "minecraft:lantern[hanging=false]",
+  "S": "minecraft:glass_pane",
+  "s": "minecraft:spruce_log[axis=y]",
+  "W": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
+  "w": "minecraft:oak_trapdoor[facing=west,half=bottom,open=true]",
+  "X": "hearthholm:candlestick[facing=north,count=1,on_table=true]",
+  "x": "hearthholm:wall_shelf[facing=north]",
+  "Y": "minecraft:oak_trapdoor[facing=south,half=bottom,open=true]",
+  "y": "minecraft:stone_brick_stairs[facing=south,half=bottom,shape=straight]",
+  "Z": "minecraft:spruce_log[axis=x]",
+  "z": "minecraft:spruce_log[axis=z]",
+  "A": "minecraft:lantern[hanging=true]",
+  "a": "minecraft:stone_brick_stairs[facing=north,half=bottom,shape=straight]",
+  "E": "minecraft:stone_bricks",
+  "e": "minecraft:stone_brick_slab[type=bottom]",
+  "H": "minecraft:campfire[lit=true,signal_fire=false,facing=north]"
  },
  "layers": [
   [
-   "ccccccc",
-   "ccccccc",
-   "ccccccc",
-   "ccccccc",
-   "ccccccc",
-   "ccccccc"
+   "~~~LLL~~~",
+   "~PPPPPPP~",
+   "~PLLLLLP~",
+   "~PLLLLLP~",
+   "~PLLLLLP~",
+   "~PPPPPPP~",
+   "~~~~~~~~~"
   ],
   [
-   "LPPDPPL",
-   "P.....P",
-   "P.....P",
-   "P.....P",
-   "PCB...P",
-   "LPPPPPL"
+   "R.cD.Dc..",
+   ".dPPGPPd.",
+   "TPC...KP.",
+   "bPBlp..PP",
+   "CPM..fhP.",
+   ".dPPPPPd.",
+   "....t...."
   ],
   [
-   "LPPdPPL",
-   "P.....P",
-   "G.....G",
-   "P.....P",
-   "P.....P",
-   "LPGPGPL"
+   ".F.g.g.F.",
+   ".dSsWLSd.",
+   "wL.....L.",
+   ".S.X...LP",
+   "wL.x...L.",
+   ".dLsSLLd.",
+   "...Y.Y..."
   ],
   [
-   "LPPPPPL",
-   "P..T..P",
-   "P.....P",
-   "P.....P",
-   "P.....P",
-   "LPPPPPL"
+   "yyyyyyyyy",
+   ".dZZZZZd.",
+   ".z.....z.",
+   ".z....AzP",
+   ".z..A..z.",
+   ".dZZZZZd.",
+   "aaaaaaaaa"
   ],
   [
-   "RRRRRRR",
-   "RRRRRRR",
-   "RRRRRRR",
-   "RRRRRRR",
-   "RRRRRRR",
-   "RRRRRRR"
+   ".........",
+   "yyyyyyyyy",
+   ".LLLLLLL.",
+   ".LLLLLLLP",
+   ".LLLLLLL.",
+   "aaaaaaaaa",
+   "........."
+  ],
+  [
+   ".........",
+   ".........",
+   "yyyyyyyyy",
+   "EEEEEEEEE",
+   "aaaaaaaaa",
+   ".........",
+   "........."
+  ],
+  [
+   ".........",
+   ".........",
+   ".........",
+   "eeeeeeeeE",
+   ".........",
+   ".........",
+   "........."
+  ],
+  [
+   ".........",
+   ".........",
+   ".........",
+   "........H",
+   ".........",
+   ".........",
+   "........."
+  ],
+  [
+   ".........",
+   ".........",
+   ".........",
+   ".........",
+   ".........",
+   ".........",
+   "........."
+  ],
+  [
+   ".........",
+   ".........",
+   ".........",
+   ".........",
+   ".........",
+   ".........",
+   "........."
   ]
  ]
 }

@@ -203,9 +203,9 @@ final class WaveETest {
             Settlement st = town(s);
             BlockPos tavStake = O.offset(-11, 0, -12);
             Blueprint bp = place(l, "tavern", tavStake, Direction.SOUTH);
-            TAV_KEG = bp.toWorld(tavStake, Direction.SOUTH, 4, 1, 5);
-            TAV_CAM = bp.toWorld(tavStake, Direction.SOUTH, 1, 1, 3);      // wave G: camera spot inside, keg and counter in view
-            TAV_KEEPER = bp.toWorld(tavStake, Direction.SOUTH, 6, 1, 3);
+            TAV_KEG = bp.toWorld(tavStake, Direction.SOUTH, 6, 1, 8);
+            TAV_CAM = bp.toWorld(tavStake, Direction.SOUTH, 3, 1, 2);      // wave G: camera spot inside, keg and counter in view
+            TAV_KEEPER = bp.toWorld(tavStake, Direction.SOUTH, 6, 1, 7);
             log("TAVERN built, keg at " + TAV_KEG.toShortString() + " block=" + l.getBlockState(TAV_KEG).getBlock().getDescriptionId());
             SettlementService.onWorkshopPlaced(l, TAV_KEG, p);
             boolean found = false;

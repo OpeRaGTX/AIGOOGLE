@@ -1203,6 +1203,8 @@ def main():
     sys.path.insert(0, os.path.dirname(__file__))
     import gen_h1_tex
     gen_h1_tex.run(sys.modules[__name__])   # wave H1: polish + new art
+    import gen_h2_skins
+    gen_h2_skins.run(sys.modules[__name__])   # wave H2: new hair, outfits, headwear
     print("textures written to", os.path.normpath(OUT))
 
 if __name__ == "__main__":

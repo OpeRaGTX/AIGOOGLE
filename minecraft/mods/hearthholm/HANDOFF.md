@@ -61,6 +61,11 @@ No PR unless asked. Stop hook demands commit+push before ending a turn.
   force-load rescue of members in unloaded chunks, nether round trip tested, horn summons stragglers, GUI-less overview shot
   (GUI hidden via `ctx.getInput().pressKey(o -> o.keyToggleGui)`), tavern reshoot. Test: `WaveGTest` (`HH_ONLY_G=1`).
 
+- **H1 Coziness** (furniture, well 3x3, 18 foods, reworked textures) and **H2 Houses and people**: pitched-roof furnished blueprints
+  (generator `tools/gen_h2_blueprints.py`; small_house, farmhouse, workshop, tavern, market_stall, barracks, watchtower redesigned,
+  new cottage/townhouse/fisher_hut/l_house appended), 20 settler skin presets (`Appearance.PRESETS`, layers by `tools/gen_h2_skins.py`),
+  richer desk/keg/lamp post/lantern models, well posts grounded. Test `WaveH2Test` (`HH_ONLY_H2=1`).
+
 ## Remaining gaps / ideas
 - Balance is theory + headless test only: tune after real play (now via `config/hearthholm.json`).
 - End dimension untested for the party; raid casualties non-deterministic.

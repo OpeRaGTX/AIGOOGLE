@@ -1,87 +1,151 @@
 {
  "palette": {
-  "c": "minecraft:cobblestone",
-  "L": "minecraft:oak_log[axis=y]",
-  "P": "minecraft:oak_planks",
-  "R": "minecraft:spruce_planks",
-  "D": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
-  "d": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
-  "G": "minecraft:glass_pane",
-  "l": "minecraft:ladder[facing=north]",
-  "F": "minecraft:oak_fence",
-  "T": "minecraft:wall_torch[facing=south]",
-  "B": "hearthholm:alarm_bell[facing=north]"
+  "L": "minecraft:cobblestone",
+  "P": "hearthholm:lamp_post[facing=north]",
+  "R": "minecraft:oak_fence",
+  "c": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
+  "D": "minecraft:ladder[facing=north]",
+  "d": "minecraft:oak_log[axis=y]",
+  "G": "minecraft:lantern[hanging=false]",
+  "T": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
+  "C": "minecraft:wall_torch[facing=east]",
+  "K": "minecraft:stone_bricks",
+  "b": "minecraft:glass_pane",
+  "B": "minecraft:oak_planks",
+  "l": "hearthholm:alarm_bell[facing=north]",
+  "p": "minecraft:spruce_stairs[facing=south,half=bottom,shape=straight]",
+  "M": "minecraft:spruce_stairs[facing=east,half=bottom,shape=straight]",
+  "f": "minecraft:spruce_planks",
+  "h": "minecraft:spruce_stairs[facing=west,half=bottom,shape=straight]",
+  "t": "minecraft:spruce_stairs[facing=north,half=bottom,shape=straight]",
+  "F": "minecraft:spruce_slab[type=bottom]"
  },
  "layers": [
   [
-   "ccccc",
-   "ccccc",
-   "ccccc",
-   "ccccc",
-   "ccccc"
+   "LLLLLLL",
+   "LLLLLLL",
+   "LLLLLLL",
+   "LLLLLLL",
+   "LLLLLLL",
+   "LLLLLLL",
+   "LLLLLLL"
   ],
   [
-   "LPDPL",
-   "P...P",
-   "P...P",
-   "P.l.P",
-   "LPPPL"
+   "P.R.R..",
+   ".LLcLL.",
+   ".L...L.",
+   ".L...L.",
+   ".L.D.L.",
+   ".dLLLd.",
+   "......."
   ],
   [
-   "LPdPL",
-   "PT..P",
-   "G...G",
-   "P.l.P",
-   "LPPPL"
+   "..G.G..",
+   ".dLTLd.",
+   ".L...L.",
+   ".LC..L.",
+   ".L.D.L.",
+   ".dLLLd.",
+   "......."
   ],
   [
-   "LPPPL",
-   "P...P",
-   "P...P",
-   "P.l.P",
-   "LPPPL"
+   ".......",
+   ".dKKKd.",
+   ".K...K.",
+   ".b...b.",
+   ".K.D.K.",
+   ".dKKKd.",
+   "......."
   ],
   [
-   "LPGPL",
-   "P...P",
-   "G...G",
-   "P.l.P",
-   "LPGPL"
+   ".......",
+   ".dKKKd.",
+   ".K...K.",
+   ".K...K.",
+   ".K.D.K.",
+   ".dKKKd.",
+   "......."
   ],
   [
-   "LPPPL",
-   "P...P",
-   "P...P",
-   "P.l.P",
-   "LPPPL"
+   "BBBBBBB",
+   "BBBBBBB",
+   "BBBBBBB",
+   "BBBBBBB",
+   "BBBDBBB",
+   "BBBBBBB",
+   "BBBBBBB"
   ],
   [
-   "PPPPP",
-   "PPPPP",
-   "PPPPP",
-   "PPlPP",
-   "PPPPP"
+   "dRRRRRd",
+   "R.....R",
+   "R.....R",
+   "R..l..R",
+   "R..D..R",
+   "R.....R",
+   "dRRRRRd"
   ],
   [
-   "FFFFF",
-   "F...F",
-   "F.B.F",
-   "F...F",
-   "FFFFF"
+   "d.....d",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   "d.....d"
   ],
   [
-   "L...L",
-   ".....",
-   ".....",
-   ".....",
-   "L...L"
+   "d.....d",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   "d.....d"
   ],
   [
-   "RRRRR",
-   "RRRRR",
-   "RRRRR",
-   "RRRRR",
-   "RRRRR"
+   "ppppppp",
+   "Mfffffh",
+   "Mfffffh",
+   "Mfffffh",
+   "Mfffffh",
+   "Mfffffh",
+   "ttttttt"
+  ],
+  [
+   ".......",
+   ".ppppp.",
+   ".Mfffh.",
+   ".Mfffh.",
+   ".Mfffh.",
+   ".ttttt.",
+   "......."
+  ],
+  [
+   ".......",
+   ".......",
+   "..ppp..",
+   "..Mfh..",
+   "..ttt..",
+   ".......",
+   "......."
+  ],
+  [
+   ".......",
+   ".......",
+   ".......",
+   "...F...",
+   ".......",
+   ".......",
+   "......."
+  ],
+  [
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   "......."
   ]
  ]
 }

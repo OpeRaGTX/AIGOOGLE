@@ -1,63 +1,126 @@
 {
  "palette": {
-  "c": "minecraft:cobblestone",
-  "L": "minecraft:oak_log[axis=y]",
-  "P": "minecraft:oak_planks",
+  "L": "minecraft:oak_planks",
+  "P": "minecraft:cobblestone",
   "R": "minecraft:spruce_planks",
-  "D": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
-  "d": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
-  "G": "minecraft:glass_pane",
-  "T": "minecraft:wall_torch[facing=south]",
-  "C": "minecraft:chest[facing=north]",
-  "f": "minecraft:blue_bed[facing=south,part=foot]",
-  "h": "minecraft:blue_bed[facing=south,part=head]",
-  "r": "hearthholm:weapon_rack[facing=north]"
+  "c": "hearthholm:lamp_post[facing=north]",
+  "D": "hearthholm:flower_box[facing=north]",
+  "d": "minecraft:oak_fence",
+  "G": "minecraft:spruce_log[axis=y]",
+  "T": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
+  "C": "hearthholm:stool[facing=south]",
+  "K": "hearthholm:weapon_rack[facing=north]",
+  "b": "hearthholm:flower_box[facing=west]",
+  "B": "minecraft:blue_bed[facing=south,part=foot]",
+  "l": "hearthholm:rug_blue[facing=north]",
+  "p": "minecraft:blue_bed[facing=south,part=head]",
+  "M": "minecraft:chest[facing=north]",
+  "f": "hearthholm:flower_box[facing=south]",
+  "h": "minecraft:oak_trapdoor[facing=north,half=bottom,open=true]",
+  "t": "minecraft:lantern[hanging=false]",
+  "F": "minecraft:glass_pane",
+  "g": "minecraft:stone_bricks",
+  "S": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
+  "s": "minecraft:oak_trapdoor[facing=west,half=bottom,open=true]",
+  "W": "minecraft:oak_trapdoor[facing=south,half=bottom,open=true]",
+  "w": "minecraft:cobblestone_stairs[facing=south,half=bottom,shape=straight]",
+  "X": "minecraft:spruce_log[axis=x]",
+  "x": "minecraft:spruce_log[axis=z]",
+  "Y": "minecraft:lantern[hanging=true]",
+  "y": "minecraft:cobblestone_stairs[facing=north,half=bottom,shape=straight]",
+  "Z": "minecraft:cobblestone_slab[type=bottom]",
+  "z": "minecraft:campfire[lit=true,signal_fire=false,facing=north]"
  },
  "layers": [
   [
-   "ccccccccc",
-   "ccccccccc",
-   "ccccccccc",
-   "ccccccccc",
-   "ccccccccc",
-   "ccccccccc",
-   "ccccccccc"
+   "~~~~LLL~~~~",
+   "~PPPPPPPPP~",
+   "~PRRRRRRRP~",
+   "~PRRRRRRRP~",
+   "~PRRRRRRRP~",
+   "~PPPPPPPPP~",
+   "~~~~~~~~~~~"
   ],
   [
-   "LPPPDPPPL",
-   "P.......P",
-   "Pf.....fP",
-   "Ph.....hP",
-   "P.......P",
-   "PC.r.r.CP",
-   "LPPPPPPPL"
+   "c.D.d.d.D..",
+   ".GPPPTPPPG.",
+   ".PCK...KCP.",
+   "bPB.BlB.BPP",
+   ".PpMplpMpP.",
+   ".GPPPPPPPG.",
+   "...f...f..."
   ],
   [
-   "LPPPdPPPL",
-   "P.......P",
-   "G.......G",
-   "P.......P",
-   "G.......G",
-   "P.......P",
-   "LPPGPGPPL"
+   ".h.ht.th.h.",
+   ".GFggSggFG.",
+   "sg.......g.",
+   ".F.......gP",
+   "sg.......g.",
+   ".GgFgggFgG.",
+   "..W.W.W.W.."
   ],
   [
-   "LPPPPPPPL",
-   "P...T...P",
-   "P.......P",
-   "P.......P",
-   "P.......P",
-   "P.......P",
-   "LPPPPPPPL"
+   "wwwwwwwwwww",
+   ".GXXXXXXXG.",
+   ".x.......x.",
+   ".x.Y...Y.xP",
+   ".x.......x.",
+   ".GXXXXXXXG.",
+   "yyyyyyyyyyy"
   ],
   [
-   "RRRRRRRRR",
-   "RRRRRRRRR",
-   "RRRRRRRRR",
-   "RRRRRRRRR",
-   "RRRRRRRRR",
-   "RRRRRRRRR",
-   "RRRRRRRRR"
+   "...........",
+   "wwwwwwwwwww",
+   ".gRRRRRRRg.",
+   ".gRRRRRRRgP",
+   ".gRRRRRRRg.",
+   "yyyyyyyyyyy",
+   "..........."
+  ],
+  [
+   "...........",
+   "...........",
+   "wwwwwwwwwww",
+   "PPPPPPPPPPg",
+   "yyyyyyyyyyy",
+   "...........",
+   "..........."
+  ],
+  [
+   "...........",
+   "...........",
+   "...........",
+   "ZZZZZZZZZZg",
+   "...........",
+   "...........",
+   "..........."
+  ],
+  [
+   "...........",
+   "...........",
+   "...........",
+   "..........z",
+   "...........",
+   "...........",
+   "..........."
+  ],
+  [
+   "...........",
+   "...........",
+   "...........",
+   "...........",
+   "...........",
+   "...........",
+   "..........."
+  ],
+  [
+   "...........",
+   "...........",
+   "...........",
+   "...........",
+   "...........",
+   "...........",
+   "..........."
   ]
  ]
 }

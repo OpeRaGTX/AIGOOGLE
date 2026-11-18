@@ -38,18 +38,6 @@ def face(tex, uv=None, cull=None):
     if cull: f["cullface"] = cull
     return f
 
-# town hall desk
-w(f"assets/{NS}/models/block/town_hall_desk.json", {
-    "parent": "block/block", "display": DISPLAY,
-    "textures": {"particle": f"{NS}:block/town_hall_desk_side", "top": f"{NS}:block/town_hall_desk_top",
-                 "side": f"{NS}:block/town_hall_desk_side", "front": f"{NS}:block/town_hall_desk_front"},
-    "elements": [
-        {"from": [0, 11, 0], "to": [16, 14, 16], "faces": {"up": face("#top"), "down": face("#side"),
-            "north": face("#side", [0, 2, 16, 5]), "south": face("#side", [0, 2, 16, 5]), "east": face("#side", [0, 2, 16, 5]), "west": face("#side", [0, 2, 16, 5])}},
-        {"from": [1, 0, 1], "to": [15, 11, 15], "faces": {"down": face("#side", cull="down"),
-            "north": face("#front", [1, 5, 15, 16]), "south": face("#side", [1, 5, 15, 16]), "east": face("#side", [1, 5, 15, 16]), "west": face("#side", [1, 5, 15, 16])}}]})
-w(f"assets/{NS}/blockstates/town_hall_desk.json", facing_states(f"{NS}:block/town_hall_desk", OPP))
-
 # warehouse ledger
 w(f"assets/{NS}/models/block/warehouse_ledger.json", {
     "parent": "block/block", "display": DISPLAY,
@@ -259,15 +247,43 @@ _snd["town.caravan_horn"] = {"sounds": [f"{NS}:town/caravan_horn"], "subtitle": 
 _snd["town.quest_done"] = {"sounds": [f"{NS}:town/quest_done"], "subtitle": f"subtitles.{NS}.town.quest_done"}
 w(f"assets/{NS}/sounds.json", _snd)
 
+# town hall desk: plinth, corner posts, drawer body, top with a back ledge, book stack, open book, inkwell and quill
+w(f"assets/{NS}/models/block/town_hall_desk.json", {
+    "parent": "block/block", "display": DISPLAY,
+    "textures": {"particle": f"{NS}:block/town_hall_desk_side", "top": f"{NS}:block/town_hall_desk_top",
+                 "side": f"{NS}:block/town_hall_desk_side", "front": f"{NS}:block/town_hall_desk_front"},
+    "elements": [
+        box_el([0, 0, 0], [16, 2, 16], "#side"),
+        box_el([1, 2, 1], [15, 11, 15], {"north": "#front", "south": "#side", "east": "#side", "west": "#side", "up": "#side", "down": "#side"}),
+        box_el([0, 2, 0], [2, 11, 2], "#side"), box_el([14, 2, 0], [16, 11, 2], "#side"), box_el([0, 2, 14], [2, 11, 16], "#side"), box_el([14, 2, 14], [16, 11, 16], "#side"),
+        {"from": [0, 11, 0], "to": [16, 14, 16], "faces": {"up": face("#top"), "down": face("#side"),
+            "north": face("#side", [0, 2, 16, 5]), "south": face("#side", [0, 2, 16, 5]), "east": face("#side", [0, 2, 16, 5]), "west": face("#side", [0, 2, 16, 5])}},
+        box_el([0, 14, 14], [16, 16, 16], "#side"),                                                          # back ledge
+        box_el([1, 14, 11], [7, 15.5, 14], "#side"), box_el([2, 15.5, 11.5], [6, 17, 13.5], "#side"),      # book stack
+        {"from": [9, 14, 4], "to": [15, 14.6, 10], "faces": {"up": face("#top", [3, 2, 14, 11]), "down": face("#side"), "north": face("#side", [0, 0, 6, 1]), "south": face("#side", [0, 0, 6, 1]),
+            "east": face("#side", [0, 0, 6, 1]), "west": face("#side", [0, 0, 6, 1])}},                       # open book
+        box_el([3, 14, 5], [6, 16, 8], "#side"), box_el([4.3, 16, 6.3], [4.9, 21, 6.9], "#top")]})          # inkwell + quill
+w(f"assets/{NS}/blockstates/town_hall_desk.json", facing_states(f"{NS}:block/town_hall_desk", OPP))
+
 # ---- wave E: square and market
 T = lambda n: f"{NS}:block/{n}"
 ALLF = ("north", "south", "east", "west", "up", "down")
 block_model("tavern_keg", {"particle": T("tavern_keg_side"), "top": T("tavern_keg_top"), "side": T("tavern_keg_side"), "front": T("tavern_keg_front")},
-            [box_el([1, 0, 1], [15, 14, 15], {"up": "#top", "down": "#top", "north": "#front", "south": "#side", "east": "#side", "west": "#side"}),
-             box_el([6, 5, 0], [10, 8, 1], "#top")])
+            [box_el([1.5, 0, 1.5], [14.5, 2, 14.5], "#side"),                                                   # foot ring
+             box_el([0.5, 2, 0.5], [15.5, 12, 15.5], {"up": "#side", "down": "#side", "north": "#side", "south": "#side", "east": "#side", "west": "#side"}),   # belly
+             box_el([1.5, 12, 1.5], [14.5, 14, 14.5], {"up": "#top", "down": "#side", "north": "#side", "south": "#side", "east": "#side", "west": "#side"}),   # lid ring
+             box_el([6, 5, -0.5], [10, 8.5, 0.5], "#front"),                                                      # tap plate
+             box_el([7.5, 4, -1.5], [8.5, 5.5, -0.5], "#top"),                                                    # spigot
+             box_el([7.5, 5.5, -1.5], [8.5, 6.5, 0.5], "#top"),                                                   # tap handle meets the plate
+             box_el([6.5, 14, 6.5], [9.5, 14.8, 9.5], "#top")])                                                   # bung
 block_model("lamp_post", {"particle": T("lamp_post_metal"), "metal": T("lamp_post_metal"), "glass": T("lamp_post_glass")},
-            [box_el([5, 0, 5], [11, 2, 11], "#metal"), box_el([7, 2, 7], [9, 11, 9], "#metal"), box_el([4, 11, 4], [12, 12, 12], "#metal"),
-             box_el([5, 12, 5], [11, 15, 11], "#glass"), box_el([4, 15, 4], [12, 16, 12], "#metal")])
+            [box_el([4, 0, 4], [12, 1, 12], "#metal"), box_el([5, 1, 5], [11, 3, 11], "#metal"),                  # flared foot
+             box_el([7, 3, 7], [9, 10, 9], "#metal"), box_el([6, 6, 6], [10, 7, 10], "#metal"),                   # pole with collar
+             box_el([4.5, 10, 4.5], [11.5, 11, 11.5], "#metal"),                                                  # lantern plate
+             box_el([5.5, 11, 5.5], [10.5, 14, 10.5], "#glass"),                                                  # glass
+             box_el([5, 11, 5], [6, 14, 6], "#metal"), box_el([10, 11, 5], [11, 14, 6], "#metal"),                # corner pillars: plate -> roof
+             box_el([5, 11, 10], [6, 14, 11], "#metal"), box_el([10, 11, 10], [11, 14, 11], "#metal"),
+             box_el([4, 14, 4], [12, 15, 12], "#metal"), box_el([6, 15, 6], [10, 16, 10], "#metal")])             # roof and finial
 block_model("signpost", {"particle": T("signpost_wood"), "wood": T("signpost_wood"), "board": T("signpost_board")},
             [box_el([7, 0, 7], [9, 16, 9], "#wood"),
              {"from": [1, 9, 8.5], "to": [15, 14, 9.5], "faces": {"north": face("#board", [1, 2, 15, 7]), "south": face("#board", [1, 2, 15, 7]),

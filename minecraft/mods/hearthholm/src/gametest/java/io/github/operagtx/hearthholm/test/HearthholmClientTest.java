@@ -164,16 +164,18 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 if (bread <= bread0) throw new AssertionError("cook made no bread");
                 log("CRAFT OK");
             });
-            boolean onlyF = System.getenv("HH_ONLY_F") != null, onlyE = System.getenv("HH_ONLY_E") != null, onlyD = System.getenv("HH_ONLY_D") != null, onlyG = System.getenv("HH_ONLY_G") != null, onlyH = System.getenv("HH_ONLY_H") != null;
-            if (!onlyD && !onlyE && !onlyF && !onlyG && !onlyH) {
+            boolean onlyF = System.getenv("HH_ONLY_F") != null, onlyE = System.getenv("HH_ONLY_E") != null, onlyD = System.getenv("HH_ONLY_D") != null, onlyG = System.getenv("HH_ONLY_G") != null, onlyH = System.getenv("HH_ONLY_H") != null,
+                    onlyH2 = System.getenv("HH_ONLY_H2") != null;
+            if (!onlyD && !onlyE && !onlyF && !onlyG && !onlyH && !onlyH2) {
                 waveB(ctx, sp);
                 waveC(ctx, sp);
             }
-            if (!onlyE && !onlyF && !onlyG && !onlyH) WaveDTest.run(ctx, sp);
-            if (!onlyF && !onlyG && !onlyH) WaveETest.run(ctx, sp);
-            if (!onlyG && !onlyH) WaveFTest.run(ctx, sp);
-            if (!onlyH) WaveGTest.run(ctx, sp);
-            WaveHTest.run(ctx, sp);
+            if (!onlyE && !onlyF && !onlyG && !onlyH && !onlyH2) WaveDTest.run(ctx, sp);
+            if (!onlyF && !onlyG && !onlyH && !onlyH2) WaveETest.run(ctx, sp);
+            if (!onlyG && !onlyH && !onlyH2) WaveFTest.run(ctx, sp);
+            if (!onlyH && !onlyH2) WaveGTest.run(ctx, sp);
+            if (!onlyH2) WaveHTest.run(ctx, sp);
+            WaveH2Test.run(ctx, sp);
             log("DONE");
         }
     }
@@ -698,6 +700,21 @@ public final class HearthholmClientTest implements FabricClientGameTest {
         if (l.getBlockEntity(p) instanceof Container c) for (int i = 0; i < items.length; i++) c.setItem(i, items[i]);
     }
 
+    /** Puts the blueprint's materials (split into stacks) into the free slots of the given chests. */
+    static void stockBlueprint(ServerLevel l, io.github.operagtx.hearthholm.blueprint.Blueprint bp, BlockPos... chests) {
+        java.util.List<ItemStack> stacks = new java.util.ArrayList<>();
+        for (var e : bp.materials().entrySet()) {
+            int left = e.getValue() + 4;
+            while (left > 0) { int n = Math.min(left, e.getKey().getDefaultMaxStackSize()); stacks.add(new ItemStack(e.getKey(), n)); left -= n; }
+        }
+        int i = 0;
+        for (BlockPos p : chests) {
+            if (!(l.getBlockEntity(p) instanceof Container c)) continue;
+            for (int slot = 0; slot < c.getContainerSize() && i < stacks.size(); slot++) if (c.getItem(slot).isEmpty()) c.setItem(slot, stacks.get(i++));
+        }
+        if (i < stacks.size()) throw new AssertionError("no room for " + (stacks.size() - i) + " material stacks of " + bp.id());
+    }
+
     private static BlockState marker(WorkSiteBlock b, Direction facing) {
         return b.defaultBlockState().setValue(WorkSiteBlock.FACING, facing);
     }
@@ -738,6 +755,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
         fillChest(l, O.offset(15, 0, 2), new ItemStack(Items.COBBLESTONE, 64), new ItemStack(Items.COBBLESTONE, 64), new ItemStack(Items.OAK_PLANKS, 64), new ItemStack(Items.SPRUCE_PLANKS, 64));
         fillChest(l, O.offset(15, 0, 4), new ItemStack(Items.OAK_LOG, 64), new ItemStack(Items.OAK_LOG, 64), new ItemStack(Items.WHEAT, 64),
                 new ItemStack(Items.WHEAT, 64), new ItemStack(Items.IRON_INGOT, 32), new ItemStack(Items.BOWL, 4), new ItemStack(Items.IRON_INGOT, 8));
+        stockBlueprint(l, io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.byIndex(0), O.offset(15, 0, 2), O.offset(15, 0, 4), O.offset(11, 0, 4));   // wave H2: the real builder gets what the new small house needs
         SettlementService.onLedgerPlaced(l, ledger, p);
         // carpentry (with the order board and two beds) and kitchen north of the hall
         BlockState spruce = Blocks.SPRUCE_PLANKS.defaultBlockState();

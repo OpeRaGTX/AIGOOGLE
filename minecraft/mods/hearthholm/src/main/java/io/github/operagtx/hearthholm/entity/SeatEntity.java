@@ -48,7 +48,6 @@ public class SeatEntity extends Entity {
         if (st.hasProperty(HorizontalBlock.FACING)) rider.setYRot(st.getValue(HorizontalBlock.FACING).toYRot());
         level.addFreshEntity(seat);
         boolean ok = rider.startRiding(seat, true, true);
-        io.github.operagtx.hearthholm.Hearthholm.LOG.info("seat: startRiding={} removed={} passenger={}", ok, seat.isRemoved(), rider.isPassenger());
         if (!ok) {
             seat.discard();
             return false;

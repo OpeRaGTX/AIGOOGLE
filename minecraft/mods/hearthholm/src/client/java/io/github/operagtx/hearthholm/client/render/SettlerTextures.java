@@ -58,12 +58,19 @@ public final class SettlerTextures {
         layer(out, "eyes_iris", EYES[a.eyes() % EYES.length]);
         layer(out, "pants", PANTS[a.pants() % PANTS.length]);
         layer(out, "shirt_" + arms, SHIRT[a.shirt() % SHIRT.length]);
+        if (a.outfit() > 0) {   // wave H2: dresses, skirts, pinafores, vests, tunics, robes (men's vests are tinted like trousers)
+            int tint = a.outfit() == 4 ? PANTS[a.pants() % PANTS.length] : SHIRT[a.shirt() % SHIRT.length];
+            layer(out, "outfit/o" + a.outfit(), tint);
+            layer(out, "outfit/o" + a.outfit() + "_acc", -1);
+        }
         layer(out, "shoes", -1);
         int hair = HAIR[a.hairColor() % HAIR.length];
         layer(out, "brows", hair);
+        if (a.elder()) layer(out, "elder", -1);
         if (!a.female() && a.beard() > 0) layer(out, "beard/b" + a.beard(), hair);
         if (a.female()) layer(out, "hair/f" + a.hairStyle(), hair);
         else if (a.hairStyle() > 0) layer(out, "hair/m" + a.hairStyle(), hair);
+        if (a.headwear() > 0) layer(out, "head/h" + a.headwear(), SHIRT[(a.shirt() + 3) % SHIRT.length]);
         layer(out, "profession/" + profession.getPath() + "_" + arms, -1);
         return out;
     }
