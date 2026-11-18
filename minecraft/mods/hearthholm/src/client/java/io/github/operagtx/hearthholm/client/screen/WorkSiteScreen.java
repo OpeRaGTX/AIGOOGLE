@@ -66,7 +66,7 @@ public final class WorkSiteScreen extends HhScreen {
         for (SiteOption o : type.options()) {
             int value = view.values().getOrDefault(o.key(), o.def());
             if (o.kind() == SiteOption.Kind.TOGGLE) {
-                button(Component.literal(fit(o.valueLabel(value), 154)), left + 170, y, 162, 16, b -> send(o.key(), o.next(value, 1)));
+                button(fitLabel(o.valueLabel(value), 154), left + 170, y, 162, 16, b -> send(o.key(), o.next(value, 1)));
             } else {
                 button(Component.literal("<"), left + 170, y, 16, 16, b -> send(o.key(), o.next(value, -1)));
                 button(Component.literal(">"), left + 316, y, 16, 16, b -> send(o.key(), o.next(value, 1)));

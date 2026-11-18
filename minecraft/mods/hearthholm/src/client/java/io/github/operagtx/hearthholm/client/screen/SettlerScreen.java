@@ -50,13 +50,13 @@ public final class SettlerScreen extends HhScreen {
         int x0 = left + 8, y0 = top + panelH - 24 - rows * 15;
         for (int i = 0; i < list.size(); i++) {
             Profession p = list.get(i);
-            Component label = Component.literal(fit(p.label(), 63));
+            Component label = fitLabel(p.label(), 63);
             Button b = button(label, x0 + (i % cols) * 73, y0 + (i / cols) * 15, 71, 14, x -> send(Payloads.SettlerAction.SET_PROFESSION, p.id().toString()));
             b.active = !p.id().equals(view.profession());
             if (p != Professions.UNEMPLOYED) b.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
                     p.label().copy().append(": ").append(Component.translatable("gui.hearthholm.aptitude", stars(p.aptitude(view.profile()))))));
         }
-        button(Component.literal(fit(Component.translatable(confirmDismiss ? "gui.hearthholm.dismiss_confirm" : "gui.hearthholm.dismiss"), 94)),
+        button(fitLabel(Component.translatable(confirmDismiss ? "gui.hearthholm.dismiss_confirm" : "gui.hearthholm.dismiss"), 94),
                 left + panelW - 110, top + panelH - 22, 102, 16, b -> {
                     if (confirmDismiss) {
                         send(Payloads.SettlerAction.DISMISS, "");
@@ -66,9 +66,9 @@ public final class SettlerScreen extends HhScreen {
                         rebuildWidgets();
                     }
                 });
-        button(Component.literal(fit(Component.translatable("gui.hearthholm.refresh"), 72)), left + 8, top + panelH - 22, 80, 16, b -> send(Payloads.SettlerAction.REFRESH, ""));
+        button(fitLabel(Component.translatable("gui.hearthholm.refresh"), 72), left + 8, top + panelH - 22, 80, 16, b -> send(Payloads.SettlerAction.REFRESH, ""));
         if (view.promotable()) {
-            Button promote = button(Component.literal(fit(Component.translatable("gui.hearthholm.promote"), 126)), left + 92, top + panelH - 22, 134, 16, b -> send(Payloads.SettlerAction.PROMOTE, ""));
+            Button promote = button(fitLabel(Component.translatable("gui.hearthholm.promote"), 126), left + 92, top + panelH - 22, 134, 16, b -> send(Payloads.SettlerAction.PROMOTE, ""));
             promote.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.promote_tip")));
         }
     }

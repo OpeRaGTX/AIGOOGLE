@@ -77,6 +77,11 @@ public abstract class HhScreen extends Screen {
         return font.plainSubstrByWidth(s, Math.max(0, maxW - font.width("…"))) + "…";
     }
 
+    /** The component itself when it fits (keeps its translation key), else a cut copy with an ellipsis. */
+    protected Component fitLabel(Component c, int maxW) {
+        return font.width(c.getString()) <= maxW ? c : Component.literal(fit(c.getString(), maxW));
+    }
+
     protected String fit(Component c, int maxW) {
         return fit(c.getString(), maxW);
     }
