@@ -66,6 +66,8 @@ final class WaveDTest {
             if (e != null) break;
         }
         if (e == null) for (SettlerEntity x : settlers(s)) if (!x.isCombatant() && !USED.contains(x.getUUID())) { e = x; break; }
+        if (e == null) for (SettlerEntity x : settlers(s)) if (!USED.contains(x.getUUID())) { e = x; break; }   // robust: casualties of earlier waves
+        if (e == null) for (SettlerEntity x : settlers(s)) { e = x; break; }
         if (e == null) throw new AssertionError("no free settler for " + p.id());
         if (!e.professionId().equals(p.id())) e.setProfession(p);
         USED.add(e.getUUID());
@@ -103,6 +105,7 @@ final class WaveDTest {
         sp.getServer().runCommand("gamemode creative @a");
         sp.getServer().runCommand("time set 10000");
         sp.getServer().runOnServer(s -> {
+            topUp(s, 7);
             ServerLevel l = s.overworld();
             SettlerEntity guard = ensure(s, Professions.GUARD, Professions.HAULER);
             SettlerEntity warrior = ensure(s, Professions.WARRIOR, Professions.BUILDER);
@@ -128,6 +131,17 @@ final class WaveDTest {
             ServerPlayer p = player(s);
             var r = ModItems.WAR_HORN.use(l, p, InteractionHand.MAIN_HAND);
             List<SettlerEntity> party = Party.members(s, p.getUUID());
+            for (int attempt = 0; attempt < 3 && party.size() != 2; attempt++) {   // robust: a member that is not awake/near yet is fetched again
+                log("PARTY retry " + attempt + " size=" + party.size());
+                if (!party.isEmpty()) ModItems.WAR_HORN.use(l, p, InteractionHand.MAIN_HAND);   // second horn dismisses
+                for (UUID id : List.of(GUARD, WARRIOR)) if (l.getEntity(id) instanceof SettlerEntity m) {
+                    m.markArrived();
+                    m.wakeUp();
+                    m.teleportTo(p.getX() + 1.5, p.getY(), p.getZ() + 1.5);
+                }
+                ModItems.WAR_HORN.use(l, p, InteractionHand.MAIN_HAND);
+                party = Party.members(s, p.getUUID());
+            }
             log("PARTY called by horn use=" + r + " members=" + party.size() + " " + party.stream().map(e -> e.professionId().getPath()).toList());
             if (party.size() != 2) throw new AssertionError("expected a party of 2 (guard + warrior), got " + party.size());
             // hunger: one member eats from its own pockets

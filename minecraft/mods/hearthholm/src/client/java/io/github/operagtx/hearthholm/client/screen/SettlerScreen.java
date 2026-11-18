@@ -46,12 +46,12 @@ public final class SettlerScreen extends HhScreen {
         super.init();
         List<Profession> list = new ArrayList<>(Professions.REGISTRY.values());
         list.removeIf(Profession::promotionOnly);
-        int cols = 6, rows = (list.size() + cols - 1) / cols;
+        int cols = 5, rows = (list.size() + cols - 1) / cols;
         int x0 = left + 8, y0 = top + panelH - 24 - rows * 15;
         for (int i = 0; i < list.size(); i++) {
             Profession p = list.get(i);
-            Component label = Component.literal(fit(p.label(), 52));
-            Button b = button(label, x0 + (i % cols) * 61, y0 + (i / cols) * 15, 59, 14, x -> send(Payloads.SettlerAction.SET_PROFESSION, p.id().toString()));
+            Component label = Component.literal(fit(p.label(), 63));
+            Button b = button(label, x0 + (i % cols) * 73, y0 + (i / cols) * 15, 71, 14, x -> send(Payloads.SettlerAction.SET_PROFESSION, p.id().toString()));
             b.active = !p.id().equals(view.profession());
             if (p != Professions.UNEMPLOYED) b.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
                     p.label().copy().append(": ").append(Component.translatable("gui.hearthholm.aptitude", stars(p.aptitude(view.profile()))))));
@@ -126,14 +126,14 @@ public final class SettlerScreen extends HhScreen {
             bar(g, x + 74, sy + 1, 56, 6, view.profile().stat(st) / 10f, 0xFF8BB0D8);
             text(g, String.valueOf(view.profile().stat(st)), x + 134, sy, TEXT);
         }
-        // traits flow in rows below the stats
-        sy += 14;
-        int tx = x, rowsUsed = 0;
+        // traits: one row below the stats (the rest is cut with an ellipsis and listed in the tooltips)
+        sy += 13;
+        int tx = x;
         for (Trait t : view.profile().traitList()) {
-            String name = fit(t.label(), colW);
+            int troom = x + colW - tx;
+            if (troom < 20) { text(g, "…", x + colW - 6, sy, WARN); break; }
+            String name = fit(t.label(), troom);
             int w = font.width(name);
-            if (tx > x && tx + w > x + colW) { tx = x; sy += 10; rowsUsed++; }
-            if (rowsUsed >= 2) break;
             text(g, name, tx, sy, WARN);
             if (inside(mx, my, tx, sy - 1, w, 10)) g.setTooltipForNextFrame(font, t.description(), mx, my);
             tx += w + 8;
@@ -145,16 +145,16 @@ public final class SettlerScreen extends HhScreen {
         text(g, fit(Component.translatable("gui.hearthholm.food"), lw), nx, ny, DIM);
         bar(g, bx, ny + 1, bw, 6, view.food() / 20f, 0xFFD08A3A);
         text(g, view.food() + "/20", vx, ny, TEXT);
-        ny += 11;
+        ny += 10;
         text(g, fit(Component.translatable("gui.hearthholm.health"), lw), nx, ny, DIM);
         bar(g, bx, ny + 1, bw, 6, view.maxHp() <= 0 ? 0 : view.hp() / (float) view.maxHp(), 0xFFD4504A);
         text(g, "HP " + view.hp() + "/" + view.maxHp(), vx, ny, view.hp() * 3 < view.maxHp() ? BAD : TEXT);
-        ny += 11;
+        ny += 10;
         text(g, fit(Component.translatable("gui.hearthholm.mood"), lw), nx, ny, DIM);
         bar(g, bx, ny + 1, bw, 6, (view.mood() + 100) / 200f, moodColor(view.mood()));
         text(g, moodFace(view.mood()) + " " + view.mood(), vx, ny, moodColor(view.mood()));
         ny += 12;
-        int listBottom = top + panelH - 94;
+        int listBottom = top + panelH - 106;
         int valX = rightEdge - 22;
         if (!view.bed()) { fitText(g, Component.translatable("gui.hearthholm.no_bed"), nx, ny, rightEdge - nx, BAD, mx, my); ny += 10; }
         for (MoodEntry m : view.moods().stream().sorted(java.util.Comparator.comparingInt((MoodEntry e) -> -Math.abs(e.value()))).toList()) {
@@ -166,7 +166,7 @@ public final class SettlerScreen extends HhScreen {
         }
 
         // equipment + inventory
-        int ix = left + 8, iy = top + panelH - 89;
+        int ix = left + 8, iy = top + panelH - 103;
         int i = 0;
         for (ItemStack st : view.equipment()) drawItem(g, st, ix + (i++) * 18, iy, mx, my);
         i = 0;

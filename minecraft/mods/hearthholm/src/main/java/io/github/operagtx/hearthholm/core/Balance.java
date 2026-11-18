@@ -95,7 +95,7 @@ public final class Balance {
     public static int MOOD_COMRADES = 4, MOOD_PATCHED = 3, MOOD_HELD_LINE = 10, MOOD_RAID_LOSSES = -10;
 
     // ---- wave I1: builder pace (ticks standing at a block before it is placed, minus a percent bonus per level above 1)
-    public static int BUILD_DELAY_TICKS = 18, BUILD_SKILL_PERCENT_PER_LEVEL = 8;
+    public static int BUILD_DELAY_TICKS = 26, BUILD_SKILL_PERCENT_PER_LEVEL = 8;
 
     // ---- wave I1: mining (torch spacing in dug steps, vein size cap, break pace and skill bonus, work-time XP)
     public static int MINE_TORCH_EVERY_SPIRAL = 6, MINE_TORCH_EVERY_TUNNEL = 8, MINE_VEIN_CAP = 32;

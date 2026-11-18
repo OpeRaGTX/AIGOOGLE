@@ -37,6 +37,8 @@ import java.util.List;
 public final class HearthholmClientTest implements FabricClientGameTest {
     static BlockPos O, DESK, MINE, FARM, STAKE, FOREST, BENCH, STOVE, BOARD;
     private static int planks0, bread0;
+    /** Wave I1: the real builder/miner pace; the earlier waves run accelerated (they test other things), wave I1 restores these. */
+    static final int DEF_BUILD_DELAY = io.github.operagtx.hearthholm.core.Balance.BUILD_DELAY_TICKS, DEF_BREAK_PACE = io.github.operagtx.hearthholm.core.Balance.BREAK_PACE_PERCENT;
 
     static void log(String s) {
         System.out.println("HHTEST " + s);
@@ -46,6 +48,8 @@ public final class HearthholmClientTest implements FabricClientGameTest {
     public void runTest(ClientGameTestContext ctx) {
         try (TestSingleplayerContext sp = ctx.worldBuilder().create()) {
             sp.getConnection().waitForChunksRender();
+            io.github.operagtx.hearthholm.core.Balance.BUILD_DELAY_TICKS = 4;      // test-only acceleration, see DEF_*
+            io.github.operagtx.hearthholm.core.Balance.BREAK_PACE_PERCENT = 50;
             sp.getServer().runCommand("time set 1000");
             sp.getServer().runCommand("gamerule doDaylightCycle false");
             sp.getServer().runOnServer(HearthholmClientTest::build);
@@ -165,18 +169,19 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 log("CRAFT OK");
             });
             boolean onlyF = System.getenv("HH_ONLY_F") != null, onlyE = System.getenv("HH_ONLY_E") != null, onlyD = System.getenv("HH_ONLY_D") != null, onlyG = System.getenv("HH_ONLY_G") != null, onlyH = System.getenv("HH_ONLY_H") != null,
-                    onlyH2 = System.getenv("HH_ONLY_H2") != null, onlyH3 = System.getenv("HH_ONLY_H3") != null;
-            if (!onlyD && !onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3) {
+                    onlyH2 = System.getenv("HH_ONLY_H2") != null, onlyH3 = System.getenv("HH_ONLY_H3") != null, onlyI1 = System.getenv("HH_ONLY_I1") != null;
+            if (!onlyD && !onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1) {
                 waveB(ctx, sp);
                 waveC(ctx, sp);
             }
-            if (!onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3) WaveDTest.run(ctx, sp);
-            if (!onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3) WaveETest.run(ctx, sp);
-            if (!onlyG && !onlyH && !onlyH2 && !onlyH3) WaveFTest.run(ctx, sp);
-            if (!onlyH && !onlyH2 && !onlyH3) WaveGTest.run(ctx, sp);
-            if (!onlyH2 && !onlyH3) WaveHTest.run(ctx, sp);
-            if (!onlyH3) WaveH2Test.run(ctx, sp);
-            if (!onlyH2) WaveH3Test.run(ctx, sp);
+            if (!onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1) WaveDTest.run(ctx, sp);
+            if (!onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1) WaveETest.run(ctx, sp);
+            if (!onlyG && !onlyH && !onlyH2 && !onlyH3 && !onlyI1) WaveFTest.run(ctx, sp);
+            if (!onlyH && !onlyH2 && !onlyH3 && !onlyI1) WaveGTest.run(ctx, sp);
+            if (!onlyH2 && !onlyH3 && !onlyI1) WaveHTest.run(ctx, sp);
+            if (!onlyH3 && !onlyI1) WaveH2Test.run(ctx, sp);
+            if (!onlyH2 && !onlyI1) WaveH3Test.run(ctx, sp);
+            if (!onlyH2) WaveI1Test.run(ctx, sp);
             log("DONE");
         }
     }
@@ -804,6 +809,23 @@ public final class HearthholmClientTest implements FabricClientGameTest {
         fillChest(l, STAKE.north(), new ItemStack(Items.DIRT, 20));
         if (l.getBlockEntity(STAKE) instanceof WorkSiteBlockEntity w) w.setOption("build", 1);
         p.teleportTo(l, DESK.getX() + 0.5, DESK.getY(), DESK.getZ() - 1.5, java.util.Set.of(), 0f, 10f, false);
+    }
+
+    /** Test robustness: raid casualties and random hiring leave a varying number of settlers, so later waves top the town up first. */
+    static void topUp(MinecraftServer s, int want) {
+        ServerLevel l = s.overworld();
+        ServerPlayer p = player(s);
+        Settlement st = town(s);
+        st.rescan(l);
+        for (int i = 0; i < 6 && settlers(s).size() < want; i++) {
+            if (st.candidates.isEmpty()) SettlementService.handleTownHall(p, new Payloads.TownHallAction(DESK, Payloads.TownHallAction.REROLL, 0, ""));
+            SettlementService.handleTownHall(p, new Payloads.TownHallAction(DESK, Payloads.TownHallAction.HIRE, 0, ""));
+        }
+        for (SettlerEntity e : settlers(s)) {
+            e.markArrived();
+            e.setHealth(e.getMaxHealth());
+        }
+        log("topUp settlers=" + settlers(s).size() + " residents=" + st.residents.size());
     }
 
     private static void hire(MinecraftServer s) {

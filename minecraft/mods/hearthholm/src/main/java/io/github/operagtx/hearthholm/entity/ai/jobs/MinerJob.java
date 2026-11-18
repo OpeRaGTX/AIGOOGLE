@@ -59,6 +59,26 @@ public final class MinerJob extends SiteJob {
         return st.is(Blocks.ANCIENT_DEBRIS);
     }
 
+    /** The next ore of the vein the miner can get at (an open face or within arm's reach), or null when none is left. */
+    private @Nullable BlockPos nextVeinCell(ServerLevel level) {
+        for (int n = vein.size(); n > 0; n--) {
+            BlockPos p = vein.poll();
+            if (!isOre(level.getBlockState(p))) continue;
+            boolean open = settler.canReach(p);
+            for (Direction d : Direction.values()) {
+                BlockState nb = level.getBlockState(p.relative(d));
+                if (nb.getCollisionShape(level, p.relative(d)).isEmpty() && nb.getFluidState().isEmpty()) open = true;
+            }
+            if (!open) { vein.addLast(p); continue; }
+            if (veinTries.merge(p, 1, Integer::sum) > 3) continue;
+            vein.addFirst(p);
+            return p;
+        }
+        vein.clear();   // what is left is buried behind rock: leave it
+        veinTries.clear();
+        return null;
+    }
+
     /** After a cell was dug: ore touching it starts a flood fill over the connected ore (capped), queued nearest first. */
     private void findVein(ServerLevel level, BlockPos origin) {
         java.util.ArrayDeque<BlockPos> q = new java.util.ArrayDeque<>();
@@ -113,16 +133,11 @@ public final class MinerJob extends SiteJob {
 
         ServerLevel level = (ServerLevel) s.level();
         // wave I1: an ore was found, so mine the whole connected vein before going on with the plan
-        while (!vein.isEmpty() && !isOre(level.getBlockState(vein.peek()))) vein.poll();
-        if (!vein.isEmpty()) {
-            BlockPos p = vein.peek();
-            if (veinTries.merge(p, 1, Integer::sum) > 3) {
-                vein.poll();
-            } else {
-                if (!seal(level, plan, p)) return needFiller(plan, w);
-                s.setStatus("mining_vein", vein.size());
-                return wrap(plan, new BreakBlock(p, drops -> { vein.remove(p); onMined(drops); }), p, w);
-            }
+        BlockPos veinCell = nextVeinCell(level);
+        if (veinCell != null) {
+            if (!seal(level, plan, veinCell)) return needFiller(plan, w);
+            s.setStatus("mining_vein", vein.size());
+            return wrap(plan, new BreakBlock(veinCell, drops -> { vein.remove(veinCell); onMined(drops); }), veinCell, w);
         }
         int i = w.progress();
         for (int guard = 0; guard < 96 && i < plan.steps().size(); guard++) {

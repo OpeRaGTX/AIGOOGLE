@@ -72,6 +72,11 @@ No PR unless asked. Stop hook demands commit+push before ending a turn.
   overlays are accents only (filter in `gen_h3_skins.py`); stair corner shapes (`PlaceBlock.reshapeStairs`, `gen_h2_blueprints.fix_stairs`); `BuilderJob` no longer
   loops "unloading" when pockets are full of needed materials. Test `WaveH3Test` (`HH_ONLY_H3=1`) also re-arms the base builder and checks it finishes `small_house`.
 
+- **I1 Playability: workers** (owner playtest feedback): GUI overlaps fixed (settler + stake screens, ellipsis, HP bar/line also in the town hall list), walk-through markers,
+  builder 3x slower with `Balance.BUILD_DELAY_TICKS`, origin +1 block from the stake, any bed/carpet/wool colour and wood fallback (`Blueprint.accepts/variant`), miner 2-wide
+  with torches/vein mining/vanilla pickaxe speed, tools wear and are re-fetched (`BaseJob.toolTrip`, bubbles `need_pickaxe|axe|hoe`), XP time-based (`workTick`, curve `Balance.LEVEL_XP`).
+  Test `WaveI1Test` (`HH_ONLY_I1=1`); earlier waves run with an accelerated builder/miner (`Balance` overridden in `HearthholmClientTest`). Next: **I2** guard/archer combat, shifts, loot pickup.
+
 ## Remaining gaps / ideas
 - Balance is theory + headless test only: tune after real play (now via `config/hearthholm.json`).
 - End dimension untested for the party; raid casualties non-deterministic.
