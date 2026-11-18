@@ -360,7 +360,7 @@ final class WaveDTest {
         sp.getServer().runOnServer(s -> {
             ServerLevel l = s.overworld();
             SettlerEntity w = get(s, WARRIOR);
-            w.setXp(Professions.WARRIOR.id(), 800);
+            w.setXp(Professions.WARRIOR.id(), io.github.operagtx.hearthholm.core.Balance.LEVEL_XP[4]);
             w.teleportTo(O.getX() + 6.5, O.getY(), O.getZ() + 11.5);
             w.setHealth(w.getMaxHealth());
             stockUp(s, new ItemStack(ModItems.HEARTH_MARK, 20), new ItemStack(Items.IRON_HELMET), new ItemStack(Items.IRON_CHESTPLATE),
