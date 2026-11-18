@@ -136,7 +136,7 @@ final class WaveDTest {
                 if (!party.isEmpty()) ModItems.WAR_HORN.use(l, p, InteractionHand.MAIN_HAND);   // second horn dismisses
                 for (UUID id : List.of(GUARD, WARRIOR)) if (l.getEntity(id) instanceof SettlerEntity m) {
                     m.markArrived();
-                    m.wakeUp();
+                    m.stopSleeping();
                     m.teleportTo(p.getX() + 1.5, p.getY(), p.getZ() + 1.5);
                 }
                 ModItems.WAR_HORN.use(l, p, InteractionHand.MAIN_HAND);
