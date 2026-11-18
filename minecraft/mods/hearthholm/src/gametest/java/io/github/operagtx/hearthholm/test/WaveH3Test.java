@@ -221,7 +221,11 @@ final class WaveH3Test {
             if (!finished.get() || ok < n * 0.97) fail("builder did not finish the house: finished=" + finished.get() + " ok=" + ok + "/" + n + " progress=" + lastProgress.get());
         });
         ctx.getInput().pressKey(o -> o.keyToggleGui);
-        sp.getServer().runOnServer(s -> look(player(s), STAKE.getX() + 3.5, STAKE.getY() + 3.0, STAKE.getZ() - 9.0, STAKE.getX() + 3.5, STAKE.getY() + 3.0, STAKE.getZ() + 4.0));
+        sp.getServer().runOnServer(s -> {
+            Blueprint bp = BlueprintLibrary.get(Hearthholm.id("small_house"));
+            BlockPos c = bp.toWorld(STAKE, Direction.SOUTH, bp.width() / 2, 2, bp.depth() / 2);
+            look(player(s), c.getX() + 15.0, c.getY() + 3.0, c.getZ() + 0.5, c.getX() + 0.5, c.getY() + 1.5, c.getZ() + 0.5);
+        });
         ctx.waitTicks(15);
         sp.getConnection().waitForChunksRender();
         ctx.takeScreenshot("hh_h3_builder_house");
@@ -264,16 +268,14 @@ final class WaveH3Test {
             // old saves: a complete well saved without the waterlogged property gets its water; the single-block well has none
             // an old save has only {complete, facing}: take the stored form of the current state and drop the waterlogged property
             CompoundTag tag = NbtUtils.writeBlockState(m);
-            CompoundTag props = tag.getCompoundOrEmpty("Properties"), oldProps = new CompoundTag();
+            CompoundTag props = tag.getCompoundOrEmpty("properties"), oldProps = new CompoundTag();   // 26.x writes the key in lower case
             for (String k : props.keySet()) if (!k.equals("waterlogged")) oldProps.putString(k, props.getStringOr(k, ""));
-            tag.put("Properties", oldProps);
+            tag.put("properties", oldProps);
             BlockState old = NbtUtils.readBlockState(l.registryAccess().lookupOrThrow(Registries.BLOCK), tag);
-            oldProps.putString("complete", "false");
-            tag.put("Properties", oldProps);
             BlockState single = ModBlocks.WELL.defaultBlockState();   // the single-block well of the oldest saves: complete=false is the default state
             log("HHTEST H3 well single-block state: complete=" + single.getValue(WellBlock.COMPLETE) + " waterlogged=" + single.getValue(WellBlock.WATERLOGGED) + " fluid=" + single.getFluidState());
             log("HHTEST H3 well old save: completeNoWaterloggedProp -> complete=" + old.getValue(WellBlock.COMPLETE) + " fluid=" + old.getFluidState().is(Fluids.WATER)
-                    + " | singleBlockWell complete=" + single.getValue(WellBlock.COMPLETE) + " fluidEmpty=" + single.getFluidState().isEmpty() + " tag=" + tag + " | decorBlock=" + (ModBlocks.WELL instanceof io.github.operagtx.hearthholm.block.DecorBlock));
+                    + " | storedWithoutWaterloggedProperty=" + !oldProps.keySet().contains("waterlogged") + " | singleBlockWell complete=" + single.getValue(WellBlock.COMPLETE) + " fluidEmpty=" + single.getFluidState().isEmpty() + " | decorBlock=" + (ModBlocks.WELL instanceof io.github.operagtx.hearthholm.block.DecorBlock));
             if (!old.getFluidState().is(Fluids.WATER) || !single.getFluidState().isEmpty() || !(ModBlocks.WELL instanceof io.github.operagtx.hearthholm.block.DecorBlock)) fail("well old save / decor");
         });
         ctx.waitTicks(100);   // a fluid tick would have let the water run by now

@@ -66,6 +66,12 @@ No PR unless asked. Stop hook demands commit+push before ending a turn.
   new cottage/townhouse/fisher_hut/l_house appended), 20 settler skin presets (`Appearance.PRESETS`, layers by `tools/gen_h2_skins.py`),
   richer desk/keg/lamp post/lantern models, well posts grounded. Test `WaveH2Test` (`HH_ONLY_H2=1`).
 
+- **H3 Visual polish**: the well holds real water (centre + 8 ring blocks `waterlogged`, `WellBlock`/`WellPartBlock implements SimpleWaterloggedBlock`,
+  bucket fills without emptying it, no flow, `collapse` removes the water; old `complete` wells get water by the property default); slim wrought-iron lamp post
+  model; women: long hair/braids/tails on outer layers + faces (`tools/gen_h3_skins.py`), skirt flare + hair volume via `client/render/SettlerModel`; profession
+  overlays are accents only (filter in `gen_h3_skins.py`); stair corner shapes (`PlaceBlock.reshapeStairs`, `gen_h2_blueprints.fix_stairs`); `BuilderJob` no longer
+  loops "unloading" when pockets are full of needed materials. Test `WaveH3Test` (`HH_ONLY_H3=1`) also re-arms the base builder and checks it finishes `small_house`.
+
 ## Remaining gaps / ideas
 - Balance is theory + headless test only: tune after real play (now via `config/hearthholm.json`).
 - End dimension untested for the party; raid casualties non-deterministic.
