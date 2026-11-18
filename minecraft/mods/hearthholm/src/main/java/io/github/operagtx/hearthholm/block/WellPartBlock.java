@@ -8,7 +8,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
@@ -17,7 +25,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /** One of the outer blocks of the well multiblock; breaking any of them removes the whole well. */
-public class WellPartBlock extends HorizontalBlock {
+public class WellPartBlock extends HorizontalBlock implements SimpleWaterloggedBlock {
     public enum Part implements StringRepresentable {
         RING_EDGE, RING_CORNER, POST, ROPE, ROOF_CORNER, ROOF_EDGE, ROOF_POST, ROOF_CENTER;
 
@@ -28,18 +36,46 @@ public class WellPartBlock extends HorizontalBlock {
     }
 
     public static final EnumProperty<Part> PART = EnumProperty.create("part", Part.class);
+    /** Wave H3: the ring blocks hold the real water of the well (default true so ring blocks of old saves get their water). */
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     private static final VoxelShape RING = Block.box(0, 0, 0, 16, 16, 16), POST = Block.box(5, 0, 5, 11, 16, 11), ROOF = Block.box(0, 6, 0, 16, 16, 16),
             ROPE = Block.box(5, 0, 5, 11, 16, 11);
 
     public WellPartBlock(Properties properties) {
         super(properties, RING);
-        registerDefaultState(defaultBlockState().setValue(PART, Part.RING_EDGE));
+        registerDefaultState(defaultBlockState().setValue(PART, Part.RING_EDGE).setValue(WATERLOGGED, true));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(PART);
+        builder.add(PART, WATERLOGGED);
+    }
+
+    private static boolean holdsWater(BlockState state) {
+        Part p = state.getValue(PART);
+        return (p == Part.RING_EDGE || p == Part.RING_CORNER) && state.getValue(WATERLOGGED);
+    }
+
+    @Override
+    protected FluidState getFluidState(BlockState state) {
+        return holdsWater(state) ? Fluids.WATER.getSource(false) : Fluids.EMPTY.defaultFluidState();
+    }
+
+    @Override
+    public boolean canPlaceLiquid(LivingEntity placer, BlockGetter level, BlockPos pos, BlockState state, net.minecraft.world.level.material.Fluid fluid) {
+        return false;
+    }
+
+    @Override
+    public boolean placeLiquid(LevelAccessor level, BlockPos pos, BlockState state, FluidState fluid) {
+        return false;
+    }
+
+    /** A bucket used on the water or the rim takes water; the well stays full. */
+    @Override
+    public ItemStack pickupBlock(LivingEntity picker, LevelAccessor level, BlockPos pos, BlockState state) {
+        return holdsWater(state) ? new ItemStack(Items.WATER_BUCKET) : ItemStack.EMPTY;
     }
 
     @Override

@@ -203,6 +203,14 @@ Job наследует `SiteJob`, то есть получает захват м
 - Внешность: `Appearance` получил поля `outfit` (биты 25-27), `headwear` (28-30), `elder` (31); у старых сохранений они 0. 20 заготовок `Appearance.PRESETS` (80% новых поселенцев берут одну из них), слои `textures/entity/settler/{outfit,head,hair,elder}` рисует `tools/gen_h2_skins.py`, `SettlerTextures.compose` накладывает их.
 - Тест: `WaveH2Test` (`HH_ONLY_H2=1`): строит все чертежи так же, как билдер (с обновлением соседей), проверяет, что каждый блок на месте, что дома распознаны комнатами, что материалы доступны, и снимает кадры.
 
-## 11. Дальше (идеи)
+## 11. Волна H3: полировка
+
+- Колодец: `WellBlock implements SimpleWaterloggedBlock` (стандартное `BlockStateProperties.WATERLOGGED`, по умолчанию true, поэтому старые полные колодцы получают воду). `getFluidState` отдаёт источник воды только при `complete`, `pickupBlock` выдаёт ведро воды и не меняет состояние (колодец остаётся полным), `canPlaceLiquid` и `placeLiquid` всегда false. Тик жидкости не планируется (нет `updateShape` с тиком), поэтому вода не течёт; кольцо (8 блоков высотой 16 px) окружает её. `WellStructure.collapse` после удаления центра убирает оставшийся блок воды (разрушение залитого блока оставляет источник).
+- Фонарь-столб: только модель в `gen_assets.py` (элементы до 29 px по высоте, коллизия прежняя 16 px).
+- Внешность: `tools/gen_h3_skins.py` (вызывается из `gen_textures.main` после H2): причёски `hair/f0-f9` (+ `_acc` для лент), лица `face_f`/`face_m`, акценты платьев, профессии как фильтр поверх `outfit()` (шапки целиком, тело и конечности по правилам `keep_fn`). `client/render/SettlerModel` растягивает слои `left_pants`/`right_pants` и `hat` (`SettlerRenderState.skirtFlare`, `hairVolume`) в `setupAnim`. `Appearance.longHair()` для статистики; руки slim у всех женщин (рендерер уже так делал).
+- Ступени: `PlaceBlock.reshapeStairs` (через `Block.updateFromNeighbourShapes`) после установки; `SettlementService.finishConstruction` проходит по ступеням чертежа. Генератор `gen_h2_blueprints.py` считает те же формы (`fix_stairs`) и пишет их в JSON.
+- Тест: `WaveH3Test` (`HH_ONLY_H3=1`): стройка дома, вода в колодце (источник, нет течения, ведро, разрушение части и центра, старый формат), модель столба, формы ступеней, доля сохранённой одежды под профессиями, кадры.
+
+## 12. Дальше (идеи)
 
 События (ярмарки), семьи и дети, предпросмотр чертежа «призраком».

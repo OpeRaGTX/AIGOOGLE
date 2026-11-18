@@ -165,17 +165,18 @@ public final class HearthholmClientTest implements FabricClientGameTest {
                 log("CRAFT OK");
             });
             boolean onlyF = System.getenv("HH_ONLY_F") != null, onlyE = System.getenv("HH_ONLY_E") != null, onlyD = System.getenv("HH_ONLY_D") != null, onlyG = System.getenv("HH_ONLY_G") != null, onlyH = System.getenv("HH_ONLY_H") != null,
-                    onlyH2 = System.getenv("HH_ONLY_H2") != null;
-            if (!onlyD && !onlyE && !onlyF && !onlyG && !onlyH && !onlyH2) {
+                    onlyH2 = System.getenv("HH_ONLY_H2") != null, onlyH3 = System.getenv("HH_ONLY_H3") != null;
+            if (!onlyD && !onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3) {
                 waveB(ctx, sp);
                 waveC(ctx, sp);
             }
-            if (!onlyE && !onlyF && !onlyG && !onlyH && !onlyH2) WaveDTest.run(ctx, sp);
-            if (!onlyF && !onlyG && !onlyH && !onlyH2) WaveETest.run(ctx, sp);
-            if (!onlyG && !onlyH && !onlyH2) WaveFTest.run(ctx, sp);
-            if (!onlyH && !onlyH2) WaveGTest.run(ctx, sp);
-            if (!onlyH2) WaveHTest.run(ctx, sp);
-            WaveH2Test.run(ctx, sp);
+            if (!onlyE && !onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3) WaveDTest.run(ctx, sp);
+            if (!onlyF && !onlyG && !onlyH && !onlyH2 && !onlyH3) WaveETest.run(ctx, sp);
+            if (!onlyG && !onlyH && !onlyH2 && !onlyH3) WaveFTest.run(ctx, sp);
+            if (!onlyH && !onlyH2 && !onlyH3) WaveGTest.run(ctx, sp);
+            if (!onlyH2 && !onlyH3) WaveHTest.run(ctx, sp);
+            if (!onlyH3) WaveH2Test.run(ctx, sp);
+            if (!onlyH2) WaveH3Test.run(ctx, sp);
             log("DONE");
         }
     }

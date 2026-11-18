@@ -65,9 +65,13 @@ public final class BuilderJob extends SiteJob {
             return new Wait(40);
         }
         if (pocketsFull()) {
+            // wave H3: only unload when there is something to unload; pockets full of materials for the next ops mean "keep building"
+            // (before, such a builder walked to the chest and back forever without placing a block)
             Set<Item> needed = needed(ops, i).keySet();
-            Task dep = depositTrip(st -> needed.contains(st.getItem()) || Storage.isFood(st));
-            if (dep != null) return dep;
+            if (settler.count(st -> !needed.contains(st.getItem()) && !Storage.isFood(st)) > 0) {
+                Task dep = depositTrip(st -> needed.contains(st.getItem()) || Storage.isFood(st));
+                if (dep != null) return dep;
+            }
         }
         BuildOp op = ops.get(i);
         int percent = i * 100 / ops.size();
@@ -88,6 +92,11 @@ public final class BuilderJob extends SiteJob {
         }
         Item cost = Blueprint.cost(op.state());
         if (cost != null && !s.has(cost)) {
+            if (s.freeSlots() <= 1) {   // no room to fetch the next material: unload what is not needed within the next few blocks
+                Set<Item> soon = upcoming(level, ops, i, 24).keySet();
+                Task dep = depositTrip(st -> soon.contains(st.getItem()) || Storage.isFood(st));
+                if (dep != null) return dep;
+            }
             Task fetch = fetchMaterials(ops, i);
             if (fetch != null) return fetch;
             ItemStack shown = new ItemStack(cost);
@@ -123,8 +132,12 @@ public final class BuilderJob extends SiteJob {
 
     /** Materials for the next steps of a construction (also used by haulers to stock the site chest). */
     public static Map<Item, Integer> upcoming(net.minecraft.world.level.Level level, List<BuildOp> ops, int from) {
+        return upcoming(level, ops, from, LOOKAHEAD);
+    }
+
+    public static Map<Item, Integer> upcoming(net.minecraft.world.level.Level level, List<BuildOp> ops, int from, int lookahead) {
         Map<Item, Integer> need = new LinkedHashMap<>();
-        for (int i = from; i < ops.size() && i < from + LOOKAHEAD; i++) {
+        for (int i = from; i < ops.size() && i < from + lookahead; i++) {
             BuildOp op = ops.get(i);
             if (op.clear()) continue;
             Item it = Blueprint.cost(op.state());

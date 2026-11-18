@@ -426,13 +426,12 @@ model("well_single", w_tex, [box_el([0, 0, 0], [16, 7, 3], "#stone"), box_el([0,
     box_el([0, 0, 3], [3, 7, 13], "#stone"), box_el([13, 0, 3], [16, 7, 13], "#stone"), box_el([3, 0, 3], [13, 5, 13], "#water"),
     box_el([1, 7, 1], [3, 14, 3], "#post"), box_el([13, 7, 1], [15, 14, 3], "#post"), box_el([1, 7, 13], [3, 14, 15], "#post"), box_el([13, 7, 13], [15, 14, 15], "#post"),
     box_el([0, 14, 0], [16, 16, 16], "#roof"), box_el([7, 7, 7], [9, 14, 9], "#rope"), box_el([5, 6, 5], [11, 9, 11], "#bucket")])
-# wave H3: the water is real (the centre block is waterlogged), so the models carry no painted water: the basin is a stone floor under the
-# fluid and the eight ring blocks are solid stone with a raised outer lip. Water sits 2 px under the rim.
+# wave H3: the water is real (the centre and the eight ring blocks are waterlogged), so the models carry no painted water: only the stone walls
+# round the pool (4 px outer walls, 16 px high) and a floor under the fluid; the fluid itself stands 2 px under the rim.
 model("well_basin", w_tex, [box_el([0, 0, 0], [16, 2, 16], "#stone")])
-model("well_ring_edge", w_tex, [box_el([0, 0, 0], [16, 15, 16], "#stone"), box_el([0, 15, 0], [16, 16, 4], "#stone"),
-    box_el([0, 15, 4], [2, 16, 16], "#stone"), box_el([14, 15, 4], [16, 16, 16], "#stone")])
-model("well_ring_corner", w_tex, [box_el([0, 0, 0], [16, 15, 16], "#stone"), box_el([0, 15, 0], [16, 16, 4], "#stone"),
-    box_el([0, 15, 4], [4, 16, 16], "#stone")])
+model("well_ring_edge", w_tex, [box_el([0, 0, 0], [16, 16, 4], "#stone"), box_el([0, 0, 4], [16, 2, 16], "#stone"), box_el([0, 0, 4], [16, 5, 6], "#stone")])
+model("well_ring_corner", w_tex, [box_el([0, 0, 0], [16, 16, 4], "#stone"), box_el([0, 0, 4], [4, 16, 16], "#stone"),
+    box_el([4, 0, 4], [16, 2, 16], "#stone"), box_el([4, 0, 4], [16, 5, 6], "#stone"), box_el([4, 0, 6], [6, 5, 16], "#stone")])
 model("well_post", w_tex, [box_el([6, 0, 0.5], [10, 16, 4.5], "#post")])   # stands on the rim (ring is 16 high)
 model("well_rope", w_tex, [box_el([7.5, 3, 7.5], [8.5, 16, 8.5], "#rope"), box_el([5, -3, 5], [11, 3, 11], "#bucket"), box_el([5.5, 3, 7.5], [10.5, 3.8, 8.5], "#post")])
 model("well_roof_edge", w_tex, [box_el([0, 6, 0], [16, 8, 16], "#roof"), box_el([0, 8, 3], [16, 10, 16], "#roof"), box_el([0, 10, 8], [16, 12, 16], "#roof")])

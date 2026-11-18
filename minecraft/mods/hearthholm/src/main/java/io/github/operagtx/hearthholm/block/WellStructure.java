@@ -74,7 +74,9 @@ public final class WellStructure {
     /** Places every part around an already placed master and marks the master complete. */
     public static void build(Level level, BlockPos master, Direction facing) {
         for (Entry e : parts(master, facing)) {
-            level.setBlock(e.pos(), ModBlocks.WELL_PART.defaultBlockState().setValue(WellPartBlock.PART, e.part()).setValue(HorizontalBlock.FACING, e.facing()), 3);
+            boolean ring = e.part() == WellPartBlock.Part.RING_EDGE || e.part() == WellPartBlock.Part.RING_CORNER;
+            level.setBlock(e.pos(), ModBlocks.WELL_PART.defaultBlockState().setValue(WellPartBlock.PART, e.part()).setValue(HorizontalBlock.FACING, e.facing())
+                    .setValue(WellPartBlock.WATERLOGGED, ring), 3);
         }
         BlockState m = level.getBlockState(master);
         if (m.is(ModBlocks.WELL)) level.setBlock(master, m.setValue(WellBlock.COMPLETE, true), 3);
@@ -107,8 +109,12 @@ public final class WellStructure {
                         boolean mine = s.is(ModBlocks.WELL_PART) ? masterOf(s, p).equals(master) : (dy == 0 && dx == 0 && dz == 0 && s.is(ModBlocks.WELL));
                         if (mine) level.destroyBlock(p, false);
                     }
-            // destroying a waterlogged block leaves its water behind as a source block: remove that too
-            if (!level.getFluidState(master).isEmpty() && !level.getBlockState(master).is(ModBlocks.WELL)) level.setBlock(master, Blocks.AIR.defaultBlockState(), 3);
+            // destroying a waterlogged block leaves its water behind as a source block: remove that too (the whole 3x3 floor of the well held water)
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dz = -1; dz <= 1; dz++) {
+                    BlockPos p = master.offset(dx, 0, dz);
+                    if (level.getBlockState(p).is(Blocks.WATER)) level.setBlock(p, Blocks.AIR.defaultBlockState(), 3);
+                }
             if (!noDrop) Block.popResource(level, master, new ItemStack(ModBlocks.WELL));
         } finally {
             collapsing = false;
