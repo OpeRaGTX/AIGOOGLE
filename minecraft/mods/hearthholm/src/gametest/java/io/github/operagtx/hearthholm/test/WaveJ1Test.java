@@ -309,7 +309,7 @@ final class WaveJ1Test {
             ServerLevel l = s.overworld();
             ServerPlayer p = player(s);
             p.teleportTo(l, O.getX() + 6.5, O.getY() + 1, O.getZ() + 10.5, Set.of(), 0f, 10f, false);
-            sp.getServer().runCommand("gamemode creative @a");
+            p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
             SettlerEntity a = get(s, ARCHER);
             a.setProfession(Professions.ARCHER);
             a.markArrived();
