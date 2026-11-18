@@ -122,9 +122,9 @@ public final class SettlerScreen extends HhScreen {
         text(g, Component.translatable("gui.hearthholm.stats"), x, sy, TITLE);
         for (Stat st : Stat.values()) {
             sy += 10;
-            text(g, fit(st.label(), 70), x, sy, DIM);
-            bar(g, x + 74, sy + 1, 56, 6, view.profile().stat(st) / 10f, 0xFF8BB0D8);
-            text(g, String.valueOf(view.profile().stat(st)), x + 134, sy, TEXT);
+            text(g, fit(st.label(), 78), x, sy, DIM);
+            bar(g, x + 82, sy + 1, 50, 6, view.profile().stat(st) / 10f, 0xFF8BB0D8);
+            text(g, String.valueOf(view.profile().stat(st)), x + 136, sy, TEXT);
         }
         // traits: one row below the stats (the rest is cut with an ellipsis and listed in the tooltips)
         sy += 13;
@@ -141,7 +141,7 @@ public final class SettlerScreen extends HhScreen {
 
         // needs + mood breakdown (right column)
         int nx = x + colW + 14, ny = top + 54;
-        int lw = 56, bx = nx + lw + 4, bw = 84, vx = bx + bw + 4;
+        int lw = 66, bx = nx + lw + 4, bw = 76, vx = bx + bw + 4;
         text(g, fit(Component.translatable("gui.hearthholm.food"), lw), nx, ny, DIM);
         bar(g, bx, ny + 1, bw, 6, view.food() / 20f, 0xFFD08A3A);
         text(g, view.food() + "/20", vx, ny, TEXT);
