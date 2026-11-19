@@ -95,7 +95,7 @@ the repo (public). It is in `~/.config/hearthholm/telegram_bot_token` (lost on c
 save it there again, chmod 600). Read only new messages:
 `curl -s "https://api.telegram.org/bot$(cat ~/.config/hearthholm/telegram_bot_token)/getUpdates?offset=<last_update_id+1>"`;
 photos: `getFile?file_id=` → `https://api.telegram.org/file/bot<token>/<file_path>` into the scratchpad. Last read
-update_id = **331527544**. Ignore the old .mp4/.mp3 documents (another project).
+update_id = **331527548**. Ignore the old .mp4/.mp3 documents (another project).
 
 ## L0 DONE (2026-11-19 evening): lumberjack + levels + config
 - Lumberjack: `LumberjackJob.Fell` (walk, chop from up to 6.2 blocks when the approach fails, give an unreachable tree a 1200-tick rest instead of retrying it forever); levels
@@ -107,6 +107,69 @@ update_id = **331527544**. Ignore the old .mp4/.mp3 documents (another project).
 - Other test flakes fixed on the way: wave E fuel check (coal count vs concurrent deliveries), I2 loot (archer frozen), C chieftain minions (sampled), D healer hours.
   Still flaky and unrelated: wave C `brute did not break through the palisade` (the brute wanders off 34 blocks), seen once in about eight runs.
 - NEXT: L1 combat roles, L2 zones, L3 visuals (see the owner request below).
+
+## NIGHT PLAN 2026-11-19 -> 20 (owner asleep: work through it without questions, report to Telegram after every wave)
+Owner decisions (answered 2026-11-19 late): **order = bugs and small things first**; miner directions = **one choice on the stone** (forward / right / left / back / all);
+food kept at the end of a shift = **miner 8, everybody else 2**; torches, ladders, pickaxes and tools are never handed in by miner and builder; reporting = **Telegram report + zip after every wave**.
+
+**Telegram reporting** (owner's own bot chat): token in `~/.config/hearthholm/telegram_bot_token`, chat id in `~/.config/hearthholm/telegram_chat_id` (both chmod 600, NOT in the repo; if a
+file is missing: ask the owner for the token once, the chat id is `message.chat.id` in `getUpdates`). After each finished wave:
+`curl -s -X POST "https://api.telegram.org/bot$TOK/sendMessage" --data-urlencode chat_id=$CHAT --data-urlencode text="..."` and
+`curl -s -X POST "https://api.telegram.org/bot$TOK/sendDocument" -F chat_id=$CHAT -F document=@minecraft/dist/hearthholm-0.1.0-mc26.3.zip -F caption="..."`
+(zip is ~3 MB, limit 50 MB). Keep reports short: what changed, test evidence, what to look at in the game, known gaps. Last read update_id = 331527548.
+
+**Order of work** (each wave: implement, own test `HH_ONLY_<W>=1`, docs `docs/waves|design/<W>.md` + TOC lines, zip, commit, push to `claude/lucid-hypatia-ri79og`, Telegram report;
+one full run at the very end; unrelated known flaky tests are NOT worth more than one rerun):
+1. **M1 bugs and small things** (all from messages 162-165):
+   a. Blueprint names show the raw key `blueprint.hearthholm.c...` (photo 162): 4 of 16 blueprints have no names in `tools/gen_lang.py`: `cottage`, `townhouse`, `fisher_hut`, `l_house`
+      (EN + RU). Also add a fallback label (humanized id) when a key is missing, and a test that every id in `blueprints/index.json` has both translations.
+   b. The carpenter's workshop message "В комнате нет печи: плавки не будет" (`gui.hearthholm.heat_no`, photo 164): show the furnace hint only for workshops that
+      smelt (find which: furnace recipes via `Recipes.usable(level, item, kind, true)` / `CraftPlanner`), never for the carpenter.
+   c. **Owners vs guards:** a player who is an owner or co-owner (`Settlement.owner`, `Civic.coOwners`) who hits a guard must NOT be attacked or killed by guards (find the
+      retaliation target logic of settlers/guards; the hit may still hurt, no retaliation, no "hostile" memory). Strangers keep the old behaviour.
+   d. **Co-owners get the village chat notifications** the founder gets (raids, tier-ups, deaths, hunger...): every message sent to the owner also goes to every online co-owner.
+   e. **Food use x2.5:** `SettlerEntity.tickNeeds` hunger rate `1/1800` per tick x2.5 (new `Balance.HUNGER_RATE_PERCENT = 250`; the settlement ate too little, food piled up).
+   f. **End-of-shift unload keeps work supplies** (my K2 `BaseJob.keptGear/unloadInto`): add a per-job hook (`Job`/`BaseJob.keepsAtShiftEnd(ItemStack)`): the miner keeps torches,
+      ladders, filler blocks he needs, his pickaxes, and up to **8** food (`SHIFT_END_KEEP_FOOD_MINER`; everybody else 2); the builder keeps shovel and pickaxes.
+   g. **Builder fetches pickaxes** (like the shovel): `BuilderJob` tool handling takes a pickaxe from chests/warehouse when he has none or it broke, and digs stone/ores with it
+      (equip the best tool for the block being cleared); today he clears stone by hand/shovel (x100 slower).
+2. **M2 stake and miner QoL:**
+   a. **Stake screen: checkmark / cross** per material (warehouse has enough / not) next to the icons (photo 162: "Материалы (9x7, высота 10)"), needs the stock counts from the server
+      (extend the site payload); plus a button **"Добавить недостающее в заказ"**: orders for the missing items go to the workshops present in the settlement
+      (`SettlementService.setOrder`), only items some present workshop can craft, the rest stay crosses with a chat hint; pressing twice must not duplicate orders.
+   b. **Miner tunnels:** longer branches (`MinePlanner`/`DrawnPlanner`, new Balance key for the branch length, he under-digs the sides now) and a **direction option** on the stone:
+      forward (the way the marker/sign faces) / right / left / back / all. He goes down the EXISTING access stair and digs the branch in the chosen direction, never re-digging the
+      shaft; test: a plan per direction, the stair is shared.
+3. **L1 combat roles** (spec in the next section; cavalryman LAST inside L1, highest risk: an NPC rider has to steer a horse; the vanilla `WOODEN/IRON/NETHERITE_SPEAR` items exist in 26.3).
+4. **L2 work zones** (farmer 30x30 + fertilizer barrel, fisher 10x10 + fish bucket, warrior 50x50 + stone-with-sword marker), reuse `WorkZone`/`ZoneMapService`.
+5. **L3 visuals** (custom particles, ghost blueprint preview ~30%).
+Verbatim of the new Telegram messages (Russian):
+
+```
+[message 163]
+Исправить баг с выводом названий чертежей, на множестве есть такая ошибка + добавить фичу, что галочкой отмечено то что есть на складе, а то чего нет крестиком.
+
+[message 164 (photo caption)]
+Какие функции сейчас исполняет плотник? В комнате нет печи - плавки не будет, что это за сообщение и если там обязательна печь и какая именно, то почему она не входит в чертеж дома
+
+[message 165]
+С плотником разобрался но сообщение с печью не особо актуально для дома плотника.
+
+Дополнительно хочу добавить им такую логику:
+На колышке строителя будет как я ранее сказал галочка и крестик, и рядом будет кнопка «добавить недостающее в заказ» чтобы автоматически то чего не хватает перешло в заказы к мастерам которые присутствуют в поселении.
+
+Увеличить расход еды в 2.5 раза у поселения, т.к сейчас слишком быстро еда копиться
+
+Также шахтеру в его тоннели добавить дальность самих веток, т.к сейчас он мало обкапывает по сторонам, и добавить направление «вперед к табличке, вправо, влево, назад» чтобы он мог копать в противоположных направлениях к таблице, но чтобы не перекапывал свой спуск вниз из-за этого, а спускался по уже имеющемуся и копал в другом направлении.
+
+Также шахтер сейчас выкладывает факелы и еду в сундук по окончанию дня, что неудобно, нужно сделать чтобы они не выкладывали нужные инструменты для работы
+
+И еще хочу чтобы строитель тоже автоматически в инструменты брал себе кирки для работы, т.к руками ему долго обкапывать если кирка сломалась и ты этого не заметил.
+
+Также когда игрок которого добавили в владельцы деревни случайно бьет стражника, стражники нападают на него и убивают, этого не нужно делать, и плюс новому владельцу деревни не приходят уведомления о деревне в чат, он их не видит
+
+пока на этом остановимся
+```
 
 ## OWNER REQUEST 2026-11-19 evening (Telegram message 161, final edited text) - THE NEXT WORK, start after K1/K2 are packaged
 Owner: "for now these changes; after my test we go on with everything else. Write the code architecturally, so functions can later be changed or
