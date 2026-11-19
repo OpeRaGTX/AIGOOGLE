@@ -308,7 +308,8 @@ final class WaveI2Test {
             Settlement st = town(s);
             emeralds0.set(HearthholmClientTest.stock(s, Items.EMERALD));
             SettlerEntity ar = get(s, ARCHER);   // the archer patrols the same post and loots as well
-            for (int i = 0; i < 15; i++) { g.inventory().setItem(i, new ItemStack(Items.DIRT)); ar.inventory().setItem(i, new ItemStack(Items.DIRT)); }   // pockets nearly full
+            for (int i = 0; i < 15; i++) g.inventory().setItem(i, new ItemStack(Items.DIRT));
+            for (int i = 0; i < 18; i++) ar.inventory().setItem(i, new ItemStack(Items.DIRT));   // the archer cannot take the loot: the guard carries it home (no race)   // pockets nearly full
             BlockPos at = POST.offset(2, 0, -1).atY(l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, POST.getX() + 2, POST.getZ() - 1));
             var z = zombie(l, at);
             ItemEntity drop = new ItemEntity(l, at.getX() + 0.5, at.getY() + 0.2, at.getZ() + 0.5, new ItemStack(Items.EMERALD, 3));
