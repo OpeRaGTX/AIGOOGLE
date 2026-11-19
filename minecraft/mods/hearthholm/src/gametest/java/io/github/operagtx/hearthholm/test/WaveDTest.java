@@ -312,6 +312,7 @@ final class WaveDTest {
         });
 
         // ---- 4. healer: herbalist hut, heals the wounded and brews salves from warehouse herbs
+        sp.getServer().runCommand("time set 2000");   // K2: civilians work 0..9000, the night-shift guards are awake outside 3000..9000: 2000 suits both
         sp.getServer().runOnServer(s -> {
             ServerLevel l = s.overworld();
             ServerPlayer p = player(s);
@@ -369,6 +370,7 @@ final class WaveDTest {
             if (st.stats.getOrDefault("brewed", 0) < 1) throw new AssertionError("healer brewed nothing");
         });
 
+        sp.getServer().runCommand("time set 10000");
         // ---- 5. promotion: a level 5 warrior becomes a knight through the settler screen
         sp.getServer().runOnServer(s -> {
             ServerLevel l = s.overworld();

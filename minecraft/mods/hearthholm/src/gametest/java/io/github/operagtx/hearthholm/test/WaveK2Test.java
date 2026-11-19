@@ -97,6 +97,8 @@ final class WaveK2Test {
         check(workState(sp, 2000, Professions.GUARD, SettlerEntity.SHIFT_ALWAYS) == 1, "guard (always) must work at 2000");
         check(workState(sp, 5000, Professions.GUARD, SettlerEntity.SHIFT_ALWAYS) == 2, "guard (always) sleeps at 5000");
         check(workState(sp, 10000, Professions.GUARD, SettlerEntity.SHIFT_DAY) == 1, "a day-shift guard must still work at 10000 (until 11800)");
+        check(workState(sp, 10000, Professions.WARRIOR, SettlerEntity.SHIFT_POST) == 1, "a warrior keeps the old hours: works at 10000");
+        check(workState(sp, 11900, Professions.WARRIOR, SettlerEntity.SHIFT_POST) == 0, "a warrior is off duty at 11900");
         check(workState(sp, 11900, Professions.GUARD, SettlerEntity.SHIFT_DAY) == 0, "a day-shift guard is off duty at 11900");
         log("K2 workday checked: civilians 0..8999 work, 9000.. leisure, 15000 sleep; guards unchanged");
         sp.getServer().runOnServer(s -> ((SettlerEntity) s.overworld().getEntity(LUMBER)).setProfession(Professions.LUMBERJACK));

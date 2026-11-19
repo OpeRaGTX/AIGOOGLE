@@ -599,13 +599,22 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             player(s).teleportTo(l, O.getX() - 9.5, O.getY() + 4, O.getZ() + 19.5, java.util.Set.of(), 160f, 25f, false);
             log("chieftain phase after 50% = " + p2);
         });
-        ctx.waitTicks(50);
+        // the minions summoned at phase 3 can be cut down by the settlers within the 50 ticks: sample every 10 ticks and keep the maximum (a single count was a race)
+        int[] minionsSeen = {0};
+        for (int i = 0; i < 5; i++) {
+            ctx.waitTicks(10);
+            sp.getServer().runOnServer(s -> {
+                ServerLevel l = s.overworld();
+                var c = (io.github.operagtx.hearthholm.entity.ashborn.AshChieftainEntity) l.getEntity(CHIEF);
+                minionsSeen[0] = Math.max(minionsSeen[0], l.getEntitiesOfClass(io.github.operagtx.hearthholm.entity.ashborn.AshbornEntity.class, c.getBoundingBox().inflate(12), e -> e != c).size());
+            });
+        }
         ctx.takeScreenshot("hh_36_chieftain_fire_ring");
         sp.getServer().runOnServer(s -> {
             ServerLevel l = s.overworld();
             var c = (io.github.operagtx.hearthholm.entity.ashborn.AshChieftainEntity) l.getEntity(CHIEF);
-            int minions = l.getEntitiesOfClass(io.github.operagtx.hearthholm.entity.ashborn.AshbornEntity.class, c.getBoundingBox().inflate(12), e -> e != c).size();
-            log("CHIEFTAIN phase=" + c.phase() + " rings=" + c.rings().size() + " minions=" + minions + " bossbarPlayers=" + c.bossEvent().getPlayers().size());
+            int minions = minionsSeen[0];
+            log("CHIEFTAIN phase=" + c.phase() + " rings=" + c.rings().size() + " minions(max seen)=" + minions + " bossbarPlayers=" + c.bossEvent().getPlayers().size());
             if (c.phase() != 3 || minions == 0) throw new AssertionError("chieftain phases");
             BlockPos at = c.blockPosition();
             c.kill(l);

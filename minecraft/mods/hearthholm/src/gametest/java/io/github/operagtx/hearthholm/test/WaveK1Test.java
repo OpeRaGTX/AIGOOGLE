@@ -129,7 +129,9 @@ final class WaveK1Test {
             ServerLevel l = s.overworld();
             ServerPlayer p = player(s);
             for (int dx = -9; dx <= 9; dx++) for (int dz = -4; dz <= 12; dz++) {
-                for (int dy = -3; dy <= 6; dy++) l.setBlock(K.offset(dx, dy, dz), dy < 0 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), 2);
+                // the top layer (where the blueprint's floor goes) is dirt, not stone: the builder clears it with a shovel in a few ticks. With stone
+                // under the shovel (wrong tool, x100) 20 blocks took 76..195 ticks each depending on the settler's traits, which overran the phase A budget
+                for (int dy = -3; dy <= 6; dy++) l.setBlock(K.offset(dx, dy, dz), dy == -1 ? Blocks.DIRT.defaultBlockState() : dy < 0 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), 2);
             }
             if (l.getBlockEntity(STAKE) instanceof WorkSiteBlockEntity base) { base.setOption("build", 0); base.setWorkerId(null); }
             // every construction stake left over by earlier waves is switched off: a builder that still holds a claim on one of them

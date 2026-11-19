@@ -87,6 +87,8 @@ No PR unless asked. Stop hook demands commit+push before ending a turn.
 
 - **K1 Builder, recipes, co-owners**: builder reshapes neighbours (panes/bars/fences/walls/double chests/stairs), attachables only on an existing support (`Blueprint.needsSupport`, `PlaceBlock.hasSupport`), missing material = skip and return (cursor stays on the first unfinished op), stake option `stake` keep/carry (never dropped), all mod recipes unlocked on login, Chronicle chapter 10 with recipe pictures (`recipe_book.json`), co-owners (town hall tab "Owners", `Civic.coOwners`, founder-only removal and hall break). Test `WaveK1Test` (`HH_ONLY_K1=1`) incl. recipe collision check against all vanilla recipes. Docs split into docs/waves + docs/design; K1 full client test passed; zip rebuilt. Next: **K2**.
 
+- **K2 Workday, shift-end unload, miner pace**: civilians work from sunrise (tick 0 = 06:00) for 75% of daylight (0..9000, ~15:00), then leisure (idle/chat/tavern), sleep at night; the military (guard, archer, warrior, knight) keep their old hours and explicit shifts (`Balance.inWorkday`, `SettlerEntity.workAt`). `ShiftEndActivity` + `Job.endOfShift`/`BaseJob.unloadInto`: once per workday everything except tool/weapon, armour, shield (archer: arrows) and 2 food items goes to the chest by the work site, else the warehouse. Lumberjack sweeps every drop again (J1 filter reverted, `LumberjackJob.wanted`). Miner: `breakTicks` x2.0 at level 1 falling to x1.0 at level 5 (`SettlerEntity.minerSlowdown`, only the miner; this slows the digging time only, not walking/placing). Config keys in `config/hearthholm.json`: `WORKDAY_START_TICK`, `WORKDAY_DAYLIGHT_PERCENT`, `SHIFT_END_KEEP_FOOD`, `MINER_SLOW_PERCENT_AT_LEVEL1`, `MINER_FULL_PACE_LEVEL`. Test `WaveK2Test` (`HH_ONLY_K2=1`). Docs `docs/waves/K2.md`, `docs/design/K2.md`.
+
 ## Owner feedback channel (Telegram bot)
 The owner playtests in real survival and sends fixes + screenshots to a Telegram bot made for us. The token is NOT in
 the repo (public). It is in `~/.config/hearthholm/telegram_bot_token` (lost on container restart → ask the owner once and
@@ -96,17 +98,22 @@ photos: `getFile?file_id=` → `https://api.telegram.org/file/bot<token>/<file_p
 update_id = **331527542**. Ignore the old .mp4/.mp3 documents (another project).
 
 ## RESUME HERE (2026-11-19)
-- **K1 is finished**: code, docs split (README/DESIGN short + `docs/waves`, `docs/design`), zip rebuilt, pushed.
-  `HH_ONLY_K1=1` run twice: `K1 RESULT: OK` + `HHTEST DONE` (skip-missing, panes/chests/fences connected, stake keep/carry,
-  75 recipes no collisions, recipe book 77/77, chronicle pages, co-owners). The 2 failures seen in the earlier full run
-  (`skip failed`, `panes missing`) did NOT reproduce alone; a stale builder job is the likely cause (`setProfession` is a no-op for
-  the same profession, so a settler that already was a builder keeps its old claimed stake and walks away from the sky
-  platform). Test set-up now resets the builder (UNEMPLOYED -> BUILDER) and switches off every other construction stake.
-  Not proven in a full run, because a full run in this container never reached K1 (see below).
-- Full client test is flaky in a 4-vCPU container: run 1 failed in wave D (`warehouse full`, `WaveDTest.stockUp`, now prints
-  positions/loaded containers/empty slots), run 2 (`HH_ONLY_D=1`) passed D-H3, I1.., then failed J2 (`the tree inside the zone was not
-  chopped`, 120 s). Neither touches K1 code. First thing next session: one full run; if D/J2 fail again, fix those fixtures (J2 was
-  already "under investigation"). Note `HH_ONLY_<W>=1` means "that wave and every later one except K1" (K1 runs only with `HH_ONLY_K1`
+- **Owner plan (2026-11-19):** the owner is play-testing the next professions one by one and will give direction on 2026-11-20; the project then
+  goes profession by profession, each polished "to ideal". There is NO "K3" in any plan: after K2 only the idea list at the bottom exists.
+  Do not start a new wave before the owner's message; first make sure K2 is green and packaged.
+- **K2 status:** implemented, `HH_ONLY_K2=1` passes alone (workday, leisure, unload to the work-site chest and to the warehouse, once per workday, exact miner
+  pace vs the old formula). Full-run findings fixed on the way: wave D healer test needs the civilians' workday (`time set 2000` for that phase);
+  warriors/knights keep the old hours (D/I2 tests rely on them at 10000); wave C chieftain minion count is sampled every 10 ticks (one count after
+  50 ticks was a race. The three minions DO spawn (max seen = 3); who removes them within 50 ticks is not established: the settlers or the test's noon sun, unverified).
+- **K1 is finished.** `HH_ONLY_K1=1`: `K1 RESULT: OK` + `HHTEST DONE` (skip-missing, panes/chests/fences connected, stake keep/carry, 75 recipes without
+  collisions, recipe book 77/77, chronicle pages, co-owners). **Root cause of the two old full-run failures** (`skip failed`, `panes missing`): NOT the builder
+  logic but the test platform. The blueprint floor was cleared out of a STONE layer with an iron SHOVEL (wrong tool, x100): 76..195 ticks per block depending on
+  the settler's random traits, 20 blocks overran the 2400-tick phase A budget, so nothing else was built yet (panes still air). Seen in a real full run
+  (progress 11 -> 23 in 2400 ticks). Fix: the top layer of the test platform is DIRT (phase A now ends after ~240 ticks). The "stale builder job" theory
+  was wrong; the test still resets the builder (UNEMPLOYED -> BUILDER) and switches off other stakes, harmless.
+- Full client test in this 4-vCPU container: early runs failed at random places (wave D `warehouse full` once, J2 `tree not chopped` once, wave C
+  chieftain minions once); the last full run passed C, D, E, F, G, H, H2, H3, I1, I2, J1, J2, J3 and failed only at K1 (fixed above). If D/J2 fail again, they are
+  fixture timing (D `stockUp` now prints positions/loaded containers/empty slots). Note `HH_ONLY_<W>=1` means "that wave and every later one except K1" (K1 runs only with `HH_ONLY_K1`
   or with no flag), so `HH_ONLY_D` is ~20 min.
 - New container checklist (this one had none of it): `apt-get install openjdk-25-jdk-headless libegl1 libegl-mesa0 libgles2 libgbm1`
   and `ln -s /usr/lib/jvm/java-25-openjdk-amd64 /opt/jdk-25`. Without EGL the client opens no window, Gradle still says
@@ -120,7 +127,7 @@ update_id = **331527542**. Ignore the old .mp4/.mp3 documents (another project).
 - Default branch is the old `claude/msayib-roblox-dev-skill-setup-xhh2j6`; it has 4 video commits (Aatrox vs
   Mordekaiser, calibration) not yet in `OpeRaGTX/video-studio`; move them there BEFORE merging PR #1.
 
-## Next: waves K1 and K2 (owner decisions are final, start without questions)
+## Waves K1 and K2 (both implemented, kept as the reference of the owner decisions)
 **Retest note:** owner reported "drawing on the zone map does nothing" (J2 build); J3 could not reproduce it with real
 simulated mouse input, raised edit reach to 16 and now shows the rejection reason in chat. Ask the owner to retest J3.
 

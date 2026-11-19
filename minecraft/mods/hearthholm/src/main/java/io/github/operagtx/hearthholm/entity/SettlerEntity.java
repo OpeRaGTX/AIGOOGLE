@@ -872,7 +872,8 @@ public class SettlerEntity extends PathfinderMob {
         return switch (effectiveShift()) {
             case SHIFT_NIGHT -> t >= 11800 || t < 3000;
             case SHIFT_DAY -> t < 11800 || t >= 23400;
-            default -> profession().nightShift() || io.github.operagtx.hearthholm.core.Balance.inWorkday(t);   // K2: sunrise until ~15:00, then leisure
+            // K2: civilians work from sunrise until ~15:00, then leisure; the military (guards, archers, warriors, knights) keep their own hours
+            default -> profession().nightShift() || (isCombatant() ? (t < 11800 || t >= 23400) : io.github.operagtx.hearthholm.core.Balance.inWorkday(t));
         };
     }
 
