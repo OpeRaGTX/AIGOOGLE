@@ -215,6 +215,7 @@ final class WaveH3Test {
                 if (op.clear() || op.state().isAir()) continue;
                 n++;
                 if (l.getBlockState(op.pos()).getBlock() == op.state().getBlock()) ok++;
+                else log("H3 mismatch at " + op.pos().toShortString() + " want " + op.state().getBlock() + " got " + l.getBlockState(op.pos()).getBlock());
             }
             Settlement st = town(s);
             log("HHTEST H3 builder finished a house: finished=" + finished.get() + " progress=" + lastProgress.get() + "/" + total.get() + " blocksOk=" + ok + "/" + n

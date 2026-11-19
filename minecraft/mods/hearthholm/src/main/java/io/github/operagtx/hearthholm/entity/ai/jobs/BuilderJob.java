@@ -98,13 +98,18 @@ public final class BuilderJob extends SiteJob {
         // the first unfinished block, so the skipped ones are revisited as soon as materials arrive or the support stands
         int firstMissing = -1;
         int sel = -1;
+        Map<Item, Boolean> exactInStock = new HashMap<>();
         for (int j = i; j < ops.size() && j < i + SCAN; j++) {
             BuildOp c = ops.get(j);
             if (c.clear() || done(level, c)) continue;
             if (c.desk()) { sel = j; break; }
             if (!supported(level, c)) continue;
             Item cc = Blueprint.cost(c.state());
-            if (cc != null && pick(cc) == null) { if (firstMissing < 0) firstMissing = j; continue; }
+            if (cc != null && (pick(cc) == null || (!settler.has(cc) && exactInStock.computeIfAbsent(cc, it -> findWith(dropOffs(), st -> st.is(it)) != null)))) {
+                // nothing to place, or only another variant while the exact one waits in a chest: fetch first
+                if (firstMissing < 0) firstMissing = j;
+                continue;
+            }
             sel = j;
             break;
         }
@@ -200,7 +205,8 @@ public final class BuilderJob extends SiteJob {
     /** One warehouse trip that grabs as many of the upcoming materials as one chest offers. */
     private @Nullable Task fetchMaterials(List<BuildOp> ops, int from) {
         Map<Item, Integer> need = needed(ops, from);
-        need.replaceAll((item, n) -> Math.max(0, n - settler.count(st -> Blueprint.accepts(item, st))));
+        // carried variants count, unless the exact item waits in a chest (K1: the builder prefers the blueprint's own wood/colour)
+        need.replaceAll((item, n) -> Math.max(0, n - settler.count(st -> findWith(dropOffs(), x -> x.is(item)) != null ? st.is(item) : Blueprint.accepts(item, st))));
         need.values().removeIf(n -> n <= 0);
         if (need.isEmpty()) return null;
         for (Item first : need.keySet()) {
