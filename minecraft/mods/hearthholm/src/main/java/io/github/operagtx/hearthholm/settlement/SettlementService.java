@@ -61,7 +61,51 @@ public final class SettlementService {
     }
 
     public static boolean canManage(ServerPlayer p, Settlement s) {
-        return p.getUUID().equals(s.owner) || p.isCreative();
+        return p.getUUID().equals(s.owner) || p.isCreative() || isCoOwner(s, p.getUUID());
+    }
+
+    /** Wave K1: co-owners may do everything the founder does except remove co-owners and break the town hall. */
+    public static boolean isCoOwner(Settlement s, UUID id) {
+        for (Civic.CoOwner c : s.civic.coOwners) if (c.id().equals(id)) return true;
+        return false;
+    }
+
+    public static boolean isFounder(ServerPlayer p, Settlement s) {
+        return p.getUUID().equals(s.owner);
+    }
+
+    public static Payloads.OwnersView ownersView(ServerPlayer viewer, Settlement s, BlockPos desk) {
+        List<Payloads.OwnerEntry> co = new ArrayList<>();
+        for (Civic.CoOwner c : s.civic.coOwners) co.add(new Payloads.OwnerEntry(c.id(), c.name()));
+        List<Payloads.OwnerEntry> online = new ArrayList<>();
+        for (ServerPlayer p : viewer.level().getServer().getPlayerList().getPlayers())
+            if (!p.getUUID().equals(s.owner) && !isCoOwner(s, p.getUUID()) && online.size() < 60)
+                online.add(new Payloads.OwnerEntry(p.getUUID(), p.getGameProfile().name()));
+        return new Payloads.OwnersView(desk, isFounder(viewer, s), s.ownerName, co, online);
+    }
+
+    /** Wave K1: server-validated co-owner changes. Adding: any manager, target must be online. Removing: the founder only. */
+    private static void handleOwners(ServerPlayer player, ServerLevel level, Settlement s, Payloads.TownHallAction a) {
+        UUID target = null;
+        try { target = UUID.fromString(a.text()); } catch (IllegalArgumentException ignored) {}
+        if (a.action() == Payloads.TownHallAction.ADD_OWNER && target != null) {
+            ServerPlayer tp = level.getServer().getPlayerList().getPlayer(target);
+            if (tp == null || target.equals(s.owner) || isCoOwner(s, target) || s.civic.coOwners.size() >= 32) return;
+            s.civic.coOwners.add(new Civic.CoOwner(target, tp.getGameProfile().name()));
+            manager(level).setDirty();
+            say(player, "owner_added", tp.getGameProfile().name());
+            say(tp, "owner_you_added", s.displayName());
+        } else if (a.action() == Payloads.TownHallAction.REMOVE_OWNER && target != null) {
+            if (!isFounder(player, s)) { say(player, "owner_founder_only"); return; }
+            UUID rm = target;
+            if (s.civic.coOwners.removeIf(c -> c.id().equals(rm))) {
+                manager(level).setDirty();
+                say(player, "owner_removed");
+                ServerPlayer tp = level.getServer().getPlayerList().getPlayer(rm);
+                if (tp != null) say(tp, "owner_you_removed", s.displayName());
+            }
+        }
+        ServerPlayNetworking.send(player, ownersView(player, s, a.desk()));
     }
 
     public static void markDirty(SettlerEntity s) {
@@ -254,6 +298,7 @@ public final class SettlementService {
         if (player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(a.desk())) > 100) return;
         Settlement s = deskSettlement(level, a.desk());
         if (s == null || !canManage(player, s)) return;
+        if (a.action() >= Payloads.TownHallAction.OWNERS) { handleOwners(player, level, s, a); return; }
         switch (a.action()) {
             case Payloads.TownHallAction.HIRE -> hire(player, level, s, a.arg());
             case Payloads.TownHallAction.REROLL -> {
@@ -619,8 +664,18 @@ public final class SettlementService {
         for (Blueprint.BuildOp op : bp.ops(pos, w.facing()))
             if (!op.clear() && op.state().getBlock() instanceof net.minecraft.world.level.block.StairBlock)
                 io.github.operagtx.hearthholm.entity.ai.tasks.PlaceBlock.reshapeStairs(level, op.pos());
-        level.removeBlock(pos, false);
-        net.minecraft.world.level.block.Block.popResource(level, pos, new ItemStack(ModBlocks.CONSTRUCTION_STAKE));
+        // wave K1: panes, bars, fences and walls of the finished house are connected
+        for (Blueprint.BuildOp op : bp.ops(pos, w.facing()))
+            if (!op.clear()) io.github.operagtx.hearthholm.entity.ai.tasks.PlaceBlock.reshape(level, op.pos());
+        if (w.option("stake") == 1) {   // the builder carries the stake to the warehouse chest (never dropped as an item)
+            level.removeBlock(pos, false);
+            ItemStack stake = new ItemStack(ModBlocks.CONSTRUCTION_STAKE);
+            builder.store(stake);
+            if (!stake.isEmpty()) net.minecraft.world.level.block.Block.popResource(level, pos, stake);
+        } else {   // the stake stays where it stands, ready for the next blueprint
+            w.setOption("build", 0);
+            w.setProgress(0);
+        }
         level.playSound(null, pos, SoundEvents.PLAYER_LEVELUP, SoundSource.BLOCKS, 0.8f, 0.9f);
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, 25, 2, 1, 2, 0.1);
         if (s != null) {

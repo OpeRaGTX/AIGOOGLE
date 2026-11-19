@@ -35,7 +35,8 @@ public final class WorkSiteTypes {
     public static void bootstrap() {
         REGISTRY.register(CONSTRUCTION_ID, new WorkSiteType(CONSTRUCTION_ID, Hearthholm.id("builder"), List.of(
                 SiteOption.dynamic("blueprint", BlueprintLibrary::labelKeys),
-                SiteOption.toggle("build", false)), 0xF2B33D, be -> {
+                SiteOption.toggle("build", false),
+                SiteOption.choice("stake", 0, "keep", "carry")), 0xF2B33D, be -> {
             Blueprint bp = BlueprintLibrary.byIndex(be.option("blueprint"));
             return bp == null ? null : bp.worldBox(be.getBlockPos(), be.facing());
         }));

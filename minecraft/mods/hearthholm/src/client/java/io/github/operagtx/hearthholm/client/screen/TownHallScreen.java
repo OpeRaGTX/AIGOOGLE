@@ -21,12 +21,13 @@ import java.util.List;
 
 /** The town hall: overview with next steps, residents, hiring and buildings. */
 public final class TownHallScreen extends HhScreen {
-    private static final int OVERVIEW = 0, PEOPLE = 1, HIRE = 2, BUILDINGS = 3, DEFENSE = 4;
+    private static final int OVERVIEW = 0, PEOPLE = 1, HIRE = 2, BUILDINGS = 3, DEFENSE = 4, OWNERS = 5;
     private static int lastTab = OVERVIEW;
     private Views.Settlement view;
     private int tab = lastTab;
     private int scroll;
     private EditBox nameBox;
+    private Payloads.OwnersView owners;   // wave K1: last "Owners" answer of the server
 
     public TownHallScreen(Views.Settlement view) {
         super(Component.translatable("gui.hearthholm.town_hall"), 340, 228);
@@ -43,6 +44,14 @@ public final class TownHallScreen extends HhScreen {
         }
     }
 
+    /** Wave K1: the server answered the Owners tab (or a change of it). */
+    public static void showOwners(Payloads.OwnersView v) {
+        if (Minecraft.getInstance().gui.screen() instanceof TownHallScreen s && s.view.desk().equals(v.desk())) {
+            s.owners = v;
+            s.rebuildWidgets();
+        }
+    }
+
     private void send(int action, int arg, String text) {
         ClientPlayNetworking.send(new Payloads.TownHallAction(view.desk(), action, arg, text));
     }
@@ -50,13 +59,14 @@ public final class TownHallScreen extends HhScreen {
     @Override
     protected void init() {
         super.init();
-        String[] tabs = {"overview", "people", "hire", "buildings", "defense"};
+        String[] tabs = {"overview", "people", "hire", "buildings", "defense", "owners"};
         for (int i = 0; i < tabs.length; i++) {
             int t = i;
-            Button b = button(Component.translatable("gui.hearthholm.tab." + tabs[i]), left + 8 + i * 65, top + 30, 63, 16, x -> {
+            Button b = button(fitLabel(Component.translatable("gui.hearthholm.tab." + tabs[i]), 50), left + 8 + i * 54, top + 30, 53, 16, x -> {
                 tab = t;
                 lastTab = t;
                 scroll = 0;
+                if (t == OWNERS) send(Payloads.TownHallAction.OWNERS, 0, "");
                 rebuildWidgets();
             });
             b.active = tab != i;
@@ -105,8 +115,42 @@ public final class TownHallScreen extends HhScreen {
                 button(Component.translatable("gui.hearthholm.reroll"), left + panelW - 112, top + 50, 104, 16,
                         b -> send(Payloads.TownHallAction.REROLL, 0, ""));
             }
+            case OWNERS -> {
+                if (owners == null) {
+                    send(Payloads.TownHallAction.OWNERS, 0, "");
+                    break;
+                }
+                int y = top + 76;
+                for (int i = 0; i < owners.coOwners().size() && i < 3; i++, y += 16) {
+                    Payloads.OwnerEntry e = owners.coOwners().get(i);
+                    Button rm = button(Component.translatable("gui.hearthholm.owners.remove"), left + panelW - 78, y - 2, 68, 14,
+                            b -> send(Payloads.TownHallAction.REMOVE_OWNER, 0, e.id().toString()));
+                    rm.active = owners.founder();
+                }
+                y = top + 142;
+                for (int i = 0; i < owners.online().size() && i < 3; i++, y += 16) {
+                    Payloads.OwnerEntry e = owners.online().get(i);
+                    button(Component.translatable("gui.hearthholm.owners.add"), left + panelW - 78, y - 2, 68, 14,
+                            b -> send(Payloads.TownHallAction.ADD_OWNER, 0, e.id().toString()));
+                }
+            }
             default -> {}
         }
+    }
+
+    private void owners(GuiGraphicsExtractor g, int mx, int my) {
+        if (owners == null) return;
+        int x = left + 10;
+        text(g, Component.translatable("gui.hearthholm.owners.founder", owners.founderName()), x, top + 50, GOOD);
+        text(g, Component.translatable("gui.hearthholm.owners.co"), x, top + 62, TITLE);
+        int y = top + 76;
+        if (owners.coOwners().isEmpty()) text(g, Component.translatable("gui.hearthholm.owners.none"), x, y + 2, DIM);
+        for (int i = 0; i < owners.coOwners().size() && i < 3; i++, y += 16) text(g, owners.coOwners().get(i).name(), x + 4, y + 2, TEXT);
+        text(g, Component.translatable("gui.hearthholm.owners.online"), x, top + 128, TITLE);
+        y = top + 142;
+        if (owners.online().isEmpty()) text(g, Component.translatable("gui.hearthholm.owners.no_online"), x, y + 2, DIM);
+        for (int i = 0; i < owners.online().size() && i < 3; i++, y += 16) text(g, owners.online().get(i).name(), x + 4, y + 2, TEXT);
+        g.textWithWordWrap(font, Component.translatable("gui.hearthholm.owners.tip"), x, top + panelH - 28, panelW - 20, DIM);
     }
 
     @Override
@@ -131,6 +175,7 @@ public final class TownHallScreen extends HhScreen {
             case HIRE -> hire(g, mx, my);
             case BUILDINGS -> buildings(g);
             case DEFENSE -> defense(g);
+            case OWNERS -> owners(g, mx, my);
             default -> {}
         }
     }

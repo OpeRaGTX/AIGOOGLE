@@ -36,7 +36,8 @@ public final class Payloads {
 
     /** Town hall actions; see constants. */
     public record TownHallAction(BlockPos desk, int action, int arg, String text) implements CustomPacketPayload {
-        public static final int REFRESH = 0, HIRE = 1, REROLL = 2, RESCAN = 3, RENAME = 4, OPEN_RESIDENT = 5, MINT = 6, FESTIVAL = 7, ALARM = 8;
+        public static final int REFRESH = 0, HIRE = 1, REROLL = 2, RESCAN = 3, RENAME = 4, OPEN_RESIDENT = 5, MINT = 6, FESTIVAL = 7, ALARM = 8,
+                OWNERS = 9, ADD_OWNER = 10, REMOVE_OWNER = 11;   // wave K1: co-owners (text = player uuid)
         public static final Type<TownHallAction> TYPE = new Type<>(Hearthholm.id("town_hall_action"));
         public static final StreamCodec<RegistryFriendlyByteBuf, TownHallAction> CODEC = StreamCodec.composite(
                 BlockPos.STREAM_CODEC, TownHallAction::desk,
@@ -44,6 +45,26 @@ public final class Payloads {
                 ByteBufCodecs.VAR_INT, TownHallAction::arg,
                 ByteBufCodecs.stringUtf8(256), TownHallAction::text,
                 TownHallAction::new);
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** Wave K1: the "Owners" tab of the town hall: the founder, co-owners and the online players that can be added. */
+    public record OwnerEntry(java.util.UUID id, String name) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, OwnerEntry> CODEC = StreamCodec.composite(
+                net.minecraft.core.UUIDUtil.STREAM_CODEC, OwnerEntry::id,
+                ByteBufCodecs.stringUtf8(64), OwnerEntry::name,
+                OwnerEntry::new);
+    }
+
+    public record OwnersView(BlockPos desk, boolean founder, String founderName, List<OwnerEntry> coOwners, List<OwnerEntry> online) implements CustomPacketPayload {
+        public static final Type<OwnersView> TYPE = new Type<>(Hearthholm.id("owners_view"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, OwnersView> CODEC = StreamCodec.composite(
+                BlockPos.STREAM_CODEC, OwnersView::desk,
+                ByteBufCodecs.BOOL, OwnersView::founder,
+                ByteBufCodecs.stringUtf8(64), OwnersView::founderName,
+                OwnerEntry.CODEC.apply(ByteBufCodecs.list(64)), OwnersView::coOwners,
+                OwnerEntry.CODEC.apply(ByteBufCodecs.list(64)), OwnersView::online,
+                OwnersView::new);
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
 

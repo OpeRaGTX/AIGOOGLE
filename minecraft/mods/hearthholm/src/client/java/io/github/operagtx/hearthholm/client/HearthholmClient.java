@@ -34,6 +34,8 @@ public final class HearthholmClient implements ClientModInitializer {
                 (p, ctx) -> ctx.client().execute(() -> io.github.operagtx.hearthholm.client.screen.BoardScreen.show(p.view())));
         ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenTownHall.TYPE,
                 (p, ctx) -> ctx.client().execute(() -> TownHallScreen.show(p.view())));
+        ClientPlayNetworking.registerGlobalReceiver(Payloads.OwnersView.TYPE,
+                (p, ctx) -> ctx.client().execute(() -> TownHallScreen.showOwners(p)));
         ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenSettler.TYPE,
                 (p, ctx) -> ctx.client().execute(() -> SettlerScreen.show(p.view())));
         ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenWorkSite.TYPE,

@@ -84,6 +84,9 @@ public final class Blueprint {
                 Math.max(a.getX(), b.getX()) + 1, Math.max(a.getY(), b.getY()) + 1, Math.max(a.getZ(), b.getZ()) + 1);
     }
 
+    /** Wave K1: whether the block hangs on another block and must not be placed into the air. */
+    public static boolean needsSupport(BlockState s) { return attached(s) && !(s.getBlock() instanceof BedBlock) && !(s.getBlock() instanceof TownHallDeskBlock); }
+
     private static boolean attached(BlockState s) {
         Block b = s.getBlock();
         return b instanceof TorchBlock || b instanceof LanternBlock || b instanceof DoorBlock || b instanceof BedBlock

@@ -21,6 +21,17 @@ public final class SettlementEvents {
 
     public static void init() {
         ServerTickEvents.END_SERVER_TICK.register(SettlementEvents::tick);
+        // wave K1: every mod recipe is in the recipe book from the first login
+        net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> unlockRecipes(handler.getPlayer()));
+        // wave K1: only the founder breaks the town hall
+        net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, be) -> {
+            if (!(state.getBlock() instanceof io.github.operagtx.hearthholm.block.TownHallDeskBlock) || !(level instanceof ServerLevel sl)
+                    || !(player instanceof net.minecraft.server.level.ServerPlayer sp)) return true;
+            Settlement st = SettlementService.deskSettlement(sl, pos);
+            if (st == null || SettlementService.isFounder(sp, st) || sp.isCreative()) return true;
+            SettlementService.say(sp, "hall_founder_only", st.ownerName);
+            return false;
+        });
         ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
             // wave G: a party member whose chunk unloads leaves its last position on the roster
             if (entity instanceof SettlerEntity se && se.partyOwner() != null && se.getRemovalReason() != null && se.getRemovalReason().shouldSave())
@@ -32,6 +43,14 @@ public final class SettlementEvents {
                 ((MobAccessor) mob).hearthholm$targetSelector().addGoal(3, new NearestAttackableTargetGoal<>(mob, SettlerEntity.class, true));
             }
         });
+    }
+
+    /** Wave K1: awards all recipes of this mod (not only the ones found through advancements). */
+    public static int unlockRecipes(net.minecraft.server.level.ServerPlayer player) {
+        java.util.List<net.minecraft.world.item.crafting.RecipeHolder<?>> mine = new java.util.ArrayList<>();
+        for (net.minecraft.world.item.crafting.RecipeHolder<?> h : player.level().getServer().getRecipeManager().getRecipes())
+            if (h.id().identifier().getNamespace().equals(io.github.operagtx.hearthholm.Hearthholm.MOD_ID)) mine.add(h);
+        return player.awardRecipes(mine);
     }
 
     private static void tick(MinecraftServer server) {

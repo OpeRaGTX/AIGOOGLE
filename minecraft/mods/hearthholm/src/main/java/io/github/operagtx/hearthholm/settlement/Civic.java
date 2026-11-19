@@ -59,6 +59,16 @@ public final class Civic {
     /** Wave F: the guide book was already handed to the founder. */
     public boolean guideGiven;
 
+    /** Wave K1: co-owners the founder added in the town hall; they manage everything except removing co-owners and breaking the hall. */
+    public record CoOwner(UUID id, String name) {
+        public static final Codec<CoOwner> CODEC = RecordCodecBuilder.create(i -> i.group(
+                UUIDUtil.CODEC.fieldOf("id").forGetter(CoOwner::id),
+                Codec.STRING.optionalFieldOf("name", "").forGetter(CoOwner::name)
+        ).apply(i, CoOwner::new));
+    }
+
+    public final List<CoOwner> coOwners = new ArrayList<>();
+
     public boolean caravanHere(long gameTime) { return caravanEnd > gameTime; }
 
     public static final Codec<Civic> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -76,8 +86,9 @@ public final class Civic {
             Codec.INT.optionalFieldOf("caravan_seed", 0).forGetter(c -> c.caravanSeed),
             Codec.INT.listOf().optionalFieldOf("sold_out", List.of()).forGetter(c -> c.soldOut),
             Codec.STRING.listOf().optionalFieldOf("unlocked", List.of()).forGetter(c -> c.unlocked),
-            Codec.BOOL.optionalFieldOf("guide_given", false).forGetter(c -> c.guideGiven)
-    ).apply(i, (q, nq, qd, d, m, b, f, lc, ce, tr, ll, seed, so, un, gg) -> {
+            Codec.BOOL.optionalFieldOf("guide_given", false).forGetter(c -> c.guideGiven),
+            CoOwner.CODEC.listOf().optionalFieldOf("co_owners", List.of()).forGetter(c -> c.coOwners)
+    ).apply(i, (q, nq, qd, d, m, b, f, lc, ce, tr, ll, seed, so, un, gg, co) -> {
         Civic c = new Civic();
         c.quests.addAll(q);
         c.nextQuestId = nq;
@@ -94,6 +105,7 @@ public final class Civic {
         c.soldOut.addAll(so);
         c.unlocked.addAll(un);
         c.guideGiven = gg;
+        c.coOwners.addAll(co);
         return c;
     }));
 }

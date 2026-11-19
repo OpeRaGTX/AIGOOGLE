@@ -30,6 +30,7 @@ import java.util.*;
  */
 public final class BuilderJob extends SiteJob {
     private static final int LOOKAHEAD = 160;
+    private static final int SCAN = 600;   // how far ahead the builder looks for a block it can place now
 
     public BuilderJob(SettlerEntity settler) {
         super(settler, WorkSiteTypes.CONSTRUCTION_ID);
@@ -44,7 +45,15 @@ public final class BuilderJob extends SiteJob {
     @Override
     public @Nullable Task next(SettlerEntity s) {
         WorkSiteBlockEntity w = claim();
-        if (w == null) return new Wait(100);
+        if (w == null) {
+            // wave K1: the stake carried away after a finished build goes to the warehouse chest
+            Item stake = io.github.operagtx.hearthholm.registry.ModBlocks.CONSTRUCTION_STAKE.asItem();
+            if (s.has(stake)) {
+                Task dep = depositTrip(st -> !st.is(stake));
+                if (dep != null) return dep;
+            }
+            return new Wait(100);
+        }
         Blueprint bp = BlueprintLibrary.byIndex(w.option("blueprint"));
         if (!w.flag("build") || bp == null) {
             s.setStatus("waiting_start");
@@ -85,36 +94,58 @@ public final class BuilderJob extends SiteJob {
             }
             return new BreakBlock(op.pos(), null);
         }
+        // wave K1: skip what cannot be placed right now (no material, no support yet) and build the rest; the progress cursor stays on
+        // the first unfinished block, so the skipped ones are revisited as soon as materials arrive or the support stands
+        int firstMissing = -1;
+        int sel = -1;
+        for (int j = i; j < ops.size() && j < i + SCAN; j++) {
+            BuildOp c = ops.get(j);
+            if (c.clear() || done(level, c)) continue;
+            if (c.desk()) { sel = j; break; }
+            if (!supported(level, c)) continue;
+            Item cc = Blueprint.cost(c.state());
+            if (cc != null && pick(cc) == null) { if (firstMissing < 0) firstMissing = j; continue; }
+            sel = j;
+            break;
+        }
+        if (sel < 0) {
+            // nothing placeable: fetch the missing materials, else wait (and say what is missing)
+            if (firstMissing >= 0) {
+                Item cost = Blueprint.cost(ops.get(firstMissing).state());
+                if (s.freeSlots() <= 1) {
+                    Set<Item> soon = upcoming(level, ops, i, 24).keySet();
+                    Task dep = depositTrip(st -> soon.stream().anyMatch(it -> Blueprint.accepts(it, st)) || Storage.isFood(st));
+                    if (dep != null) return dep;
+                }
+                Task fetch = fetchMaterials(ops, i);
+                if (fetch != null) return fetch;
+                ItemStack shown = new ItemStack(cost);
+                int count = needed(ops, i).getOrDefault(cost, 1);
+                Component name = Blueprint.anyKey(cost) != null ? Component.translatable("gui.hearthholm.any." + Blueprint.anyKey(cost)) : shown.getHoverName();
+                s.setStatus("need_material", count, name);
+            } else {
+                s.setStatus("waiting_support");
+            }
+            return new Wait(200);
+        }
+        op = ops.get(sel);
         BlockState current = level.getBlockState(op.pos());
         if (!current.isAir() && !current.canBeReplaced()) return new BreakBlock(op.pos(), null);
         if (op.desk()) {
             SettlementService.relocateDesk(level, s, op.pos(), op.state());
-            w.setProgress(i + 1);
+            if (sel == i) w.setProgress(i + 1);
             return new Wait(5);
         }
         Item cost = Blueprint.cost(op.state());
         Item use = cost == null ? null : pick(cost);
-        if (cost != null && use == null) {
-            if (s.freeSlots() <= 1) {   // no room to fetch the next material: unload what is not needed within the next few blocks
-                Set<Item> soon = upcoming(level, ops, i, 24).keySet();
-                Task dep = depositTrip(st -> soon.stream().anyMatch(it -> Blueprint.accepts(it, st)) || Storage.isFood(st));
-                if (dep != null) return dep;
-            }
-            Task fetch = fetchMaterials(ops, i);
-            if (fetch != null) return fetch;
-            ItemStack shown = new ItemStack(cost);
-            int count = needed(ops, i).getOrDefault(cost, 1);
-            Component name = Blueprint.anyKey(cost) != null ? Component.translatable("gui.hearthholm.any." + Blueprint.anyKey(cost)) : shown.getHoverName();
-            s.setStatus("need_material", count, name);
-            return new Wait(200);
-        }
         s.setStatus("building", percent);
         // the variant the settler actually carries (another bed colour, another wood) keeps facing/half/shape of the blueprint
         BlockState placed = use == null ? op.state() : Blueprint.variant(op.state(), use);
         BlockState companion = op.companionState() == null || use == null ? op.companionState() : Blueprint.variant(op.companionState(), use);
         int delay = Math.max(2, Balance.BUILD_DELAY_TICKS * 100 / (100 + Balance.BUILD_SKILL_PERCENT_PER_LEVEL * (s.level(s.professionId()) - 1)));
+        final BuildOp placing = op;
         return new PlaceBlock(op.pos(), placed, use, delay, st -> {
-            if (op.companionPos() != null) level.setBlock(op.companionPos(), companion, 3);
+            if (placing.companionPos() != null) level.setBlock(placing.companionPos(), companion, 3);
             st.gainXp(1);
             Settlement set = st.settlement();
             if (set != null) {
@@ -130,6 +161,11 @@ public final class BuilderJob extends SiteJob {
         if (settler.has(cost)) return cost;
         for (ItemStack st : settler.inventory().getItems()) if (Blueprint.accepts(cost, st)) return st.getItem();
         return null;
+    }
+
+    /** Wave K1: attachables (torch, ladder, door, button, sign, trapdoor...) need their support block first; never placed into air. */
+    private static boolean supported(ServerLevel level, BuildOp op) {
+        return !Blueprint.needsSupport(op.state()) || PlaceBlock.hasSupport(level, op.pos(), op.state());
     }
 
     private static boolean done(ServerLevel level, BuildOp op) {

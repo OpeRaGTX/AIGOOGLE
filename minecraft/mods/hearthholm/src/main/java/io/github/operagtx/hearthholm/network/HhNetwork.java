@@ -9,6 +9,7 @@ public final class HhNetwork {
 
     public static void init() {
         PayloadTypeRegistry.clientboundPlay().register(Payloads.OpenTownHall.TYPE, Payloads.OpenTownHall.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(Payloads.OwnersView.TYPE, Payloads.OwnersView.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(Payloads.OpenSettler.TYPE, Payloads.OpenSettler.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(Payloads.OpenWorkSite.TYPE, Payloads.OpenWorkSite.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(Payloads.OpenOrders.TYPE, Payloads.OpenOrders.CODEC);

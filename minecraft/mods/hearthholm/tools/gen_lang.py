@@ -682,6 +682,28 @@ T.update({
  "option.hearthholm.shift.post": ("Post default", "По посту"),
 })
 
+# wave K1: builder, recipes, co-owners
+T.update({
+ "option.hearthholm.stake": ("Stake when done", "Колышек после стройки"),
+ "option.hearthholm.stake.keep": ("Stays in place", "Остаётся на месте"),
+ "option.hearthholm.stake.carry": ("Builder takes it to the warehouse", "Строитель несёт на склад"),
+ "gui.hearthholm.tab.owners": ("Owners", "Владельцы"),
+ "gui.hearthholm.owners.founder": ("Founder: %s", "Основатель: %s"),
+ "gui.hearthholm.owners.co": ("Co-owners", "Совладельцы"),
+ "gui.hearthholm.owners.online": ("Players online", "Игроки онлайн"),
+ "gui.hearthholm.owners.none": ("No co-owners yet.", "Совладельцев пока нет."),
+ "gui.hearthholm.owners.no_online": ("Nobody else is online.", "Больше никого нет онлайн."),
+ "gui.hearthholm.owners.add": ("Add", "Добавить"), "gui.hearthholm.owners.remove": ("Remove", "Убрать"),
+ "gui.hearthholm.owners.tip": ("Co-owners manage everything the founder does (screens, zones, stakes, settlers, inventory). Only the founder removes co-owners or breaks the town hall.",
+                               "Совладельцы управляют всем, как основатель (экраны, зоны, колышки, поселенцы, инвентарь). Убрать совладельцев и сломать ратушу может только основатель."),
+ "message.hearthholm.owner_added": ("%s is now a co-owner of the settlement.", "%s теперь совладелец поселения."),
+ "message.hearthholm.owner_you_added": ("You are now a co-owner of %s.", "Вы стали совладельцем поселения %s."),
+ "message.hearthholm.owner_removed": ("Co-owner removed.", "Совладелец удалён."),
+ "message.hearthholm.owner_you_removed": ("You are no longer a co-owner of %s.", "Вы больше не совладелец поселения %s."),
+ "message.hearthholm.owner_founder_only": ("Only the founder can remove co-owners.", "Убирать совладельцев может только основатель."),
+ "message.hearthholm.hall_founder_only": ("Only the founder (%s) can break the town hall.", "Ратушу может сломать только основатель (%s)."),
+ "status.hearthholm.waiting_support": ("Waiting for a support block", "Ждёт опорный блок"),
+})
 # wave J2: map zones, the lumberjack's chopping block
 T.update({
  "block.hearthholm.forest_marker": ("Chopping Block", "Колода дровосека"),
