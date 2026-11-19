@@ -159,7 +159,7 @@ final class WaveK1Test {
             log("K1 set-up: builder " + builder.getName().getString() + " stake " + K.toShortString() + " torch " + torchPos.toShortString()
                     + " materials " + house.materials());
         });
-        sp.getServer().runCommand("gamemode survival @a");
+        // (the player stays in creative and flies above the platform: a falling player would unload the chunks of the builder)
 
         // ---- 2. phase A: the builder builds everything except the planks and the torch (no planks anywhere): skip, never into air
         AtomicBoolean torchInAir = new AtomicBoolean();

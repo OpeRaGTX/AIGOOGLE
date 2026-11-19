@@ -670,8 +670,9 @@ public final class SettlementService {
         if (w.option("stake") == 1) {   // the builder carries the stake to the warehouse chest (never dropped as an item)
             level.removeBlock(pos, false);
             ItemStack stake = new ItemStack(ModBlocks.CONSTRUCTION_STAKE);
-            builder.store(stake);
-            if (!stake.isEmpty()) net.minecraft.world.level.block.Block.popResource(level, pos, stake);
+            int had = builder.count(st -> st.is(ModBlocks.CONSTRUCTION_STAKE.asItem()));
+            builder.store(stake.copy());
+            if (builder.count(st -> st.is(ModBlocks.CONSTRUCTION_STAKE.asItem())) <= had) net.minecraft.world.level.block.Block.popResource(level, pos, stake);   // pockets full
         } else {   // the stake stays where it stands, ready for the next blueprint
             w.setOption("build", 0);
             w.setProgress(0);

@@ -56,7 +56,17 @@ public final class PlaceBlock implements Task {
         }
         if (io.github.operagtx.hearthholm.blueprint.Blueprint.needsSupport(state) && !hasSupport(level, pos, state)) return Status.FAILED;   // K1: never into the air
         if (cost != null && !s.takeItem(cost, 1)) return Status.FAILED;
-        level.setBlock(pos, joinChest(level, pos, state), 3);
+        BlockState toPlace = joinChest(level, pos, state);
+        level.setBlock(pos, toPlace, 3);
+        if (toPlace.getBlock() instanceof net.minecraft.world.level.block.ChestBlock) {   // the other half becomes the opposite half
+            net.minecraft.world.level.block.state.properties.ChestType t = toPlace.getValue(net.minecraft.world.level.block.ChestBlock.TYPE);
+            if (t != net.minecraft.world.level.block.state.properties.ChestType.SINGLE) {
+                net.minecraft.core.Direction f = toPlace.getValue(net.minecraft.world.level.block.ChestBlock.FACING);
+                BlockPos other = pos.relative(t == net.minecraft.world.level.block.state.properties.ChestType.RIGHT ? f.getClockWise() : f.getCounterClockWise());
+                BlockState o = level.getBlockState(other);
+                if (o.is(toPlace.getBlock())) level.setBlock(other, o.setValue(net.minecraft.world.level.block.ChestBlock.TYPE, t.getOpposite()), 3);
+            }
+        }
         reshapeAround(level, pos);
         level.playSound(null, pos, state.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 0.8f, 1f);
         s.swingArm(InteractionHand.MAIN_HAND);

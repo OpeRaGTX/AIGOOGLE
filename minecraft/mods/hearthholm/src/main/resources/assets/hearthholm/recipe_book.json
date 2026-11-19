@@ -73,11 +73,14 @@
     "count": 1,
     "kind": "shaped",
     "w": 3,
-    "h": 2,
+    "h": 3,
     "grid": [
       "#minecraft:planks",
       "#minecraft:planks",
       "#minecraft:planks",
+      "minecraft:stick",
+      null,
+      "minecraft:stick",
       "minecraft:stick",
       null,
       "minecraft:stick"
@@ -708,12 +711,12 @@
     "w": 3,
     "h": 2,
     "grid": [
-      "#minecraft:planks",
+      "minecraft:brick",
       null,
-      "#minecraft:planks",
-      "#minecraft:planks",
-      "#minecraft:planks",
-      "#minecraft:planks"
+      "minecraft:brick",
+      "minecraft:brick",
+      "minecraft:brick",
+      "minecraft:brick"
     ]
   },
   {
@@ -1061,7 +1064,7 @@
       "#minecraft:planks",
       "#minecraft:planks",
       null,
-      "minecraft:stick",
+      "minecraft:iron_nugget",
       null,
       null,
       "minecraft:stick",

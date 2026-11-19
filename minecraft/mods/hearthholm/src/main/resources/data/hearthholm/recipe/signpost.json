@@ -3,11 +3,12 @@
   "category": "misc",
   "key": {
     "P": "#minecraft:planks",
+    "N": "minecraft:iron_nugget",
     "S": "minecraft:stick"
   },
   "pattern": [
     "PPP",
-    " S ",
+    " N ",
     " S "
   ],
   "result": {

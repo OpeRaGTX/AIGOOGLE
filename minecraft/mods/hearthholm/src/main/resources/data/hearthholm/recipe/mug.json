@@ -2,11 +2,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "P": "#minecraft:planks"
+    "B": "minecraft:brick"
   },
   "pattern": [
-    "P P",
-    "PPP"
+    "B B",
+    "BBB"
   ],
   "result": {
     "count": 3,
