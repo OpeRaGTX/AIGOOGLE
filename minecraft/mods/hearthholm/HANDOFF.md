@@ -95,6 +95,16 @@ save it there again, chmod 600). Read only new messages:
 photos: `getFile?file_id=` → `https://api.telegram.org/file/bot<token>/<file_path>` into the scratchpad. Last read
 update_id = **331527542**. Ignore the old .mp4/.mp3 documents (another project).
 
+## RESUME HERE (2026-11-19)
+- K1 code is pushed. Full client test (30 min, run by plain bash, no agent): waves A-J3 PASS; **K1 FAILS 2 checks**:
+  `the builder did not place the other blocks while the planks were missing (skip failed)` and `panes missing`.
+- Left for K1: (1) fix the builder skip-missing logic + panes, rerun `HH_ONLY_K1=1` only; (2) split README.md and
+  DESIGN.md by waves (short top files + `docs/waves/<W>.md`, `docs/design/<W>.md`); (3) `package-mod.sh` -> zip; commit, push.
+- Token economy: run long tests with plain background bash (`run-client-test.sh ... > file; tail`), not inside an agent.
+  Gemini CLI is unusable (Google ended personal-subscription access, June 2026). Then K2.
+- Default branch is the old `claude/msayib-roblox-dev-skill-setup-xhh2j6`; it has 4 video commits (Aatrox vs
+  Mordekaiser, calibration) not yet in `OpeRaGTX/video-studio`; move them there BEFORE merging PR #1.
+
 ## Next: waves K1 and K2 (owner decisions are final, start without questions)
 **Retest note:** owner reported "drawing on the zone map does nothing" (J2 build); J3 could not reproduce it with real
 simulated mouse input, raised edit reach to 16 and now shows the rejection reason in chat. Ask the owner to retest J3.
