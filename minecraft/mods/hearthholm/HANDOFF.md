@@ -9,7 +9,7 @@ background Sonnet agent (`Agent`, model sonnet, `run_in_background`), verifies, 
 - Mod: `minecraft/mods/hearthholm/` (package `io.github.operagtx.hearthholm`).
   - `AGENTS_BRIEF.md` — rules every coding agent must follow (token budget, toolchain, javap lookup, conventions,
     finish steps). Always tell agents to read it first.
-  - `DESIGN.md` architecture (RU), `README.md` player guide (RU, one section per wave), `CONCEPTS.md` waves A–F.
+  - `DESIGN.md` + `README.md` = short TOCs; per-wave files `docs/design/<WAVE>.md` (architecture, RU; `core.md` = sections 1-6) and `docs/waves/<WAVE>.md` (player guide, RU), `CONCEPTS.md` waves A–F.
   - Main code `src/main/java/.../`: `core` (professions, traits, stats), `worksite`, `settlement` (SavedData, rooms,
     storage), `entity` (SettlerEntity, `ai/` brain, activities, jobs, tasks; `ashborn/` enemies), `crafting`, `social`,
     `threat`, `party`, `blueprint`, `network`, `block`, `item`, `registry`, `api` (extension point), `mixin`.
@@ -85,7 +85,7 @@ No PR unless asked. Stop hook demands commit+push before ending a turn.
 
 - **J3 Miner's stone + 3D dig plan**: `zone/MinerModule`, `WorkZone` heights 1-4 + `Spec.MINER` (50x50 cells of 2), `entity/ai/jobs/DrawnPlanner` (access stair 1:1, flood by layer, islands, open-to-sky = no stair), `zone/MineGuard` (protected places), options `plan`/`after`, map screen `ZoneMapScreen.initMiner` (slider, height, ghosts, ore, red cells, summary), block `mine_marker` = boulder with pickaxe (`tools/gen_j3_tex.py`). Zone edits: reach 16, rejection told to the owner (`message.zone_rejected`). Test `WaveJ3Test` (`HH_ONLY_J3=1`) incl. REAL simulated mouse painting on both maps. I2/D tests made robust (loot race, chase speed by game time, barracks wait). DESIGN section 16.
 
-- **K1 Builder, recipes, co-owners**: builder reshapes neighbours (panes/bars/fences/walls/double chests/stairs), attachables only on an existing support (`Blueprint.needsSupport`, `PlaceBlock.hasSupport`), missing material = skip and return (cursor stays on the first unfinished op), stake option `stake` keep/carry (never dropped), all mod recipes unlocked on login, Chronicle chapter 10 with recipe pictures (`recipe_book.json`), co-owners (town hall tab "Owners", `Civic.coOwners`, founder-only removal and hall break). Test `WaveK1Test` (`HH_ONLY_K1=1`) incl. recipe collision check against all vanilla recipes. Next: **K2**.
+- **K1 Builder, recipes, co-owners**: builder reshapes neighbours (panes/bars/fences/walls/double chests/stairs), attachables only on an existing support (`Blueprint.needsSupport`, `PlaceBlock.hasSupport`), missing material = skip and return (cursor stays on the first unfinished op), stake option `stake` keep/carry (never dropped), all mod recipes unlocked on login, Chronicle chapter 10 with recipe pictures (`recipe_book.json`), co-owners (town hall tab "Owners", `Civic.coOwners`, founder-only removal and hall break). Test `WaveK1Test` (`HH_ONLY_K1=1`) incl. recipe collision check against all vanilla recipes. Docs split into docs/waves + docs/design; K1 full client test passed; zip rebuilt. Next: **K2**.
 
 ## Owner feedback channel (Telegram bot)
 The owner playtests in real survival and sends fixes + screenshots to a Telegram bot made for us. The token is NOT in
