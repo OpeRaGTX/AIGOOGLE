@@ -833,11 +833,15 @@ public class SettlerEntity extends PathfinderMob {
 
     /** Moves a fitting tool from the pockets into the main hand; false when there is none. */
     public boolean equipToolFromPockets() {
-        Profession p = profession();
-        if (p.isTool(getMainHandItem())) return true;
+        return equipFromPockets(profession()::isTool);
+    }
+
+    /** Wave M1: swaps the first pocket item matching {@code want} into the main hand (the old hand item goes into that pocket); true if the hand holds a match afterwards. */
+    public boolean equipFromPockets(java.util.function.Predicate<ItemStack> want) {
+        if (want.test(getMainHandItem())) return true;
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack st = inventory.getItem(i);
-            if (!p.isTool(st)) continue;
+            if (!want.test(st)) continue;
             ItemStack old = getMainHandItem();
             setItemSlot(EquipmentSlot.MAINHAND, st.copy());
             inventory.setItem(i, old);
@@ -917,7 +921,7 @@ public class SettlerEntity extends PathfinderMob {
     }
 
     private void tickNeeds() {
-        float rate = 1f / 1800f;
+        float rate = io.github.operagtx.hearthholm.core.Balance.HUNGER_RATE_PERCENT / 100f / 1800f;   // wave M1: x2.5 (Balance.HUNGER_RATE_PERCENT)
         for (Trait t : profile.traitList()) rate *= t.hungerRate();
         if (isSleeping()) rate *= 0.5f;
         food = Math.max(0f, food - rate);
@@ -1054,6 +1058,10 @@ public class SettlerEntity extends PathfinderMob {
             }
         }
         boolean hurt = super.hurtServer(level, source, amount);
+        if (hurt && isProtectedOwner(source.getEntity())) {   // wave M1: an owner's stray blow hurts but never starts a fight
+            setLastHurtByMob(null);
+            if (getTarget() == source.getEntity()) setTarget(null);
+        }
         if (hurt) {
             lastHurt = level.getGameTime();
             if (source.getEntity() instanceof LivingEntity attacker && !(attacker instanceof Player)) {
@@ -1061,6 +1069,25 @@ public class SettlerEntity extends PathfinderMob {
             }
         }
         return hurt;
+    }
+
+    // ---- wave M1: owners are never fought by their own settlers -----------------------------------
+    /** True for the founder or a co-owner of this settler's settlement. The single gate used by canAttack/setTarget/hurtServer. */
+    public boolean isProtectedOwner(@Nullable Entity e) {
+        if (!(e instanceof Player p)) return false;
+        Settlement st = settlement();
+        return st != null && SettlementService.isOwnerOrCoOwner(st, p.getUUID());
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        return !isProtectedOwner(target) && super.canAttack(target);
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        if (isProtectedOwner(target)) target = null;
+        super.setTarget(target);
     }
 
     @Override

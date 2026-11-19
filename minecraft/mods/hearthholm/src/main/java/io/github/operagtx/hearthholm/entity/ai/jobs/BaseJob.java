@@ -122,49 +122,62 @@ public abstract class BaseJob implements Job {
 
     @Override
     public @Nullable Task endOfShift(SettlerEntity s) {
-        if (!hasUnloadable(s)) return null;
+        if (!hasUnloadable(s, this)) return null;
         BlockPos target = findSpace(dropOffs());   // the chest by the work site first, then the warehouse
         if (target == null) {
             s.setStatus("storage_full");
             return null;
         }
         s.setStatus("depositing");
-        return new ContainerTrip(target, BaseJob::unloadInto);
+        return new ContainerTrip(target, (st, c) -> unloadInto(st, this, c));
     }
 
-    /** What a settler keeps for the night: tools of the profession, weapons, armour, the shield and (archers) arrows. */
+    /** What a settler always keeps for the night: tools of the profession, weapons, armour, the shield and (archers) arrows. */
     static boolean keptGear(SettlerEntity s, ItemStack st) {
         return s.profession().isTool(st) || SettlerMenu.isToolOrWeapon(st) || SettlerMenu.armorSlot(st) != null || st.is(Items.SHIELD)
                 || (s.professionId().equals(Professions.ARCHER.id()) && st.is(ItemTags.ARROWS));
     }
 
-    /** Whether any pocket holds something the shift-end unload would hand over. */
-    static boolean hasUnloadable(SettlerEntity s) {
-        int food = Balance.SHIFT_END_KEEP_FOOD;
-        for (ItemStack st : s.inventory().getItems()) {
-            if (st.isEmpty() || keptGear(s, st)) continue;
-            if (!Storage.isFood(st)) return true;
-            if (st.getCount() > food) return true;
-            food -= st.getCount();
+    /**
+     * Wave M1: single source of truth for the shift-end unload. For every pocket slot, how many items stay with the settler: gear in full, the
+     * job's food budget ({@link Job#shiftEndFood}), plus the job's own supplies ({@link Job#shiftEndKeep}, e.g. the miner's torches and ladders).
+     * {@link #hasUnloadable} and {@link #unloadInto} both read this plan, so they can never disagree.
+     */
+    static int[] keepPlan(SettlerEntity s, Job job) {
+        int n = s.inventory().getContainerSize();
+        int[] keep = new int[n];
+        int food = job.shiftEndFood();
+        java.util.Map<net.minecraft.world.item.Item, Integer> keptByItem = new java.util.HashMap<>();
+        for (int i = 0; i < n; i++) {
+            ItemStack st = s.inventory().getItem(i);
+            if (st.isEmpty()) continue;
+            int k = 0;
+            if (keptGear(s, st)) k = st.getCount();
+            else if (Storage.isFood(st)) { k = Math.min(food, st.getCount()); food -= k; }
+            int supply = job.shiftEndKeep(s, st, keptByItem.getOrDefault(st.getItem(), 0));
+            k = Math.max(k, Math.min(st.getCount(), Math.max(0, supply)));
+            keep[i] = k;
+            keptByItem.merge(st.getItem(), k, Integer::sum);
         }
+        return keep;
+    }
+
+    /** Whether any pocket holds something the shift-end unload would hand over. */
+    static boolean hasUnloadable(SettlerEntity s, Job job) {
+        int[] keep = keepPlan(s, job);
+        for (int i = 0; i < keep.length; i++) if (s.inventory().getItem(i).getCount() > keep[i]) return true;
         return false;
     }
 
-    /** Moves everything except {@link #keptGear} and {@code SHIFT_END_KEEP_FOOD} food items into {@code c}; what does not fit stays in the pockets. */
-    static void unloadInto(SettlerEntity s, Container c) {
-        int food = Balance.SHIFT_END_KEEP_FOOD;
-        for (int i = 0; i < s.inventory().getContainerSize(); i++) {
+    /** Moves everything the {@link #keepPlan} does not keep into {@code c}; what does not fit stays in the pockets. */
+    static void unloadInto(SettlerEntity s, Job job, Container c) {
+        int[] keep = keepPlan(s, job);
+        for (int i = 0; i < keep.length; i++) {
             ItemStack st = s.inventory().getItem(i);
-            if (st.isEmpty() || keptGear(s, st)) continue;
-            if (Storage.isFood(st)) {
-                int keep = Math.min(food, st.getCount());
-                food -= keep;
-                if (keep == st.getCount()) continue;
-                ItemStack rest = Storage.insert(c, st.copyWithCount(st.getCount() - keep));
-                st.setCount(keep + rest.getCount());
-                continue;
-            }
-            s.inventory().setItem(i, Storage.insert(c, st));
+            if (st.isEmpty() || st.getCount() <= keep[i]) continue;
+            if (keep[i] == 0) { s.inventory().setItem(i, Storage.insert(c, st)); continue; }
+            ItemStack rest = Storage.insert(c, st.copyWithCount(st.getCount() - keep[i]));
+            st.setCount(keep[i] + rest.getCount());
         }
         s.inventory().setChanged();
     }

@@ -117,11 +117,30 @@ public final class SettlementService {
         if (st != null && s.level() instanceof ServerLevel sl) notify(sl, st, msg);
     }
 
+    /** Wave M1: every message meant for the founder also reaches each co-owner who is online. */
     public static void notify(ServerLevel level, Settlement st, Component msg) {
-        ServerPlayer p = level.getServer().getPlayerList().getPlayer(st.owner);
-        if (p != null) p.sendSystemMessage(Component.empty().append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY))
+        Component line = Component.empty().append(Component.literal("[").withStyle(ChatFormatting.DARK_GRAY))
                 .append(st.displayName().copy().withStyle(ChatFormatting.GOLD))
-                .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY)).append(msg));
+                .append(Component.literal("] ").withStyle(ChatFormatting.DARK_GRAY)).append(msg);
+        for (ServerPlayer p : onlineManagers(level, st)) p.sendSystemMessage(line);
+    }
+
+    /** Wave M1: the founder and all co-owners that are currently online (the audience of village notifications). */
+    public static List<ServerPlayer> onlineManagers(ServerLevel level, Settlement st) {
+        List<ServerPlayer> out = new ArrayList<>(2);
+        var players = level.getServer().getPlayerList();
+        ServerPlayer founder = players.getPlayer(st.owner);
+        if (founder != null) out.add(founder);
+        for (Civic.CoOwner c : st.civic.coOwners) {
+            ServerPlayer p = players.getPlayer(c.id());
+            if (p != null && !out.contains(p)) out.add(p);
+        }
+        return out;
+    }
+
+    /** Wave M1: founder or co-owner by id only (no creative-mode bypass, unlike {@link #canManage}); these players are never fought by settlers. */
+    public static boolean isOwnerOrCoOwner(Settlement s, UUID id) {
+        return id.equals(s.owner) || isCoOwner(s, id);
     }
 
     // ---- town hall desk -------------------------------------------------------------------
@@ -462,6 +481,10 @@ public final class SettlementService {
         }
         Component worker = Component.translatable("gui.hearthholm.nobody");
         for (ResidentRecord r : s.residents) if (r.profession.equals(kind.profession())) { worker = r.profile.name(); break; }
+        if (!kind.smelts()) {   // wave M1: the furnace hint is only meaningful for workshops that smelt/cook
+            player.sendSystemMessage(Component.translatable("message.hearthholm.workshop_ok_plain", kind.label(), worker).withStyle(ChatFormatting.GREEN));
+            return;
+        }
         boolean heat = CraftPlanner.heat(kind, b);
         player.sendSystemMessage(Component.translatable("message.hearthholm.workshop_ok", kind.label(), worker,
                 Component.translatable(heat ? "gui.hearthholm.heat_yes" : "gui.hearthholm.heat_no")).withStyle(ChatFormatting.GREEN));

@@ -56,7 +56,7 @@ public final class Blueprint {
     }
 
     public Component label() {
-        return Component.translatable(labelKey());
+        return io.github.operagtx.hearthholm.util.Labels.orHumanized(labelKey());
     }
 
     public @Nullable BlockState at(int x, int y, int z) {

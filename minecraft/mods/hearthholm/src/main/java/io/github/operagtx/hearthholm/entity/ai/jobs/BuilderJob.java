@@ -42,6 +42,34 @@ public final class BuilderJob extends SiteJob {
         return w.flag("build") && bp != null && BlueprintLibrary.isUnlocked(bp.id(), st.tier().index(), st.civic.unlocked) && super.available(st, w);
     }
 
+    // ---- wave M1: the right tool for the block being cleared ----------------------------------------
+    private final long[] nextToolTryByKind = new long[ToolKit.Kind.values().length];
+
+    /**
+     * Makes sure the main hand holds the tool that suits {@code state}: a matching one from the pockets, else a trip to a chest or the warehouse
+     * for the best one (kept in the pockets, so the shovel and the pickaxe both stay with him). Never blocks the work: when no such tool exists
+     * anywhere he digs with what he holds (slowly), and asks again after {@code BUILDER_TOOL_RETRY_TICKS}. Returns the trip, or null.
+     */
+    private @Nullable Task toolFor(BlockState state) {
+        ToolKit.Kind kind = ToolKit.kindFor(state);
+        if (kind == null || settler.equipFromPockets(kind.asPredicate())) return null;
+        long now = settler.level().getGameTime();
+        if (now < nextToolTryByKind[kind.ordinal()]) return null;
+        nextToolTryByKind[kind.ordinal()] = now + Balance.BUILDER_TOOL_RETRY_TICKS;
+        BlockPos p = findWith(dropOffs(), kind.asPredicate());
+        if (p == null) return null;
+        settler.setStatus("fetching_tool");
+        return new ContainerTrip(p, (s, c) -> {
+            if (ToolKit.takeBest(s, c, kind.asPredicate())) s.equipFromPockets(kind.asPredicate());
+        });
+    }
+
+    /** Wave M1: shovel and pickaxes stay with him at shift end (see {@code BaseJob.keepPlan}); they are also gear, so this is belt and braces. */
+    @Override
+    public int shiftEndKeep(SettlerEntity s, ItemStack st, int keptSoFar) {
+        return ToolKit.Kind.PICKAXE.matches(st) || ToolKit.Kind.SHOVEL.matches(st) ? st.getCount() : 0;
+    }
+
     @Override
     public @Nullable Task next(SettlerEntity s) {
         WorkSiteBlockEntity w = claim();
@@ -60,8 +88,6 @@ public final class BuilderJob extends SiteJob {
             release(s);
             return new Wait(100);
         }
-        Task tool = toolTrip();
-        if (tool != null) return tool;
         List<BuildOp> ops = bp.ops(w.getBlockPos(), w.facing());
         ServerLevel level = (ServerLevel) s.level();
 
@@ -92,6 +118,8 @@ public final class BuilderJob extends SiteJob {
                 w.setProgress(i + 1);
                 return new Wait(1);
             }
+            Task tool = toolFor(level.getBlockState(op.pos()));   // wave M1: pickaxe for stone/ores, shovel for soil
+            if (tool != null) return tool;
             return new BreakBlock(op.pos(), null);
         }
         // wave K1: skip what cannot be placed right now (no material, no support yet) and build the rest; the progress cursor stays on

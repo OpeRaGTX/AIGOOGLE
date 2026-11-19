@@ -118,8 +118,15 @@ public final class Balance {
     public static int WORKDAY_START_TICK = 0, WORKDAY_DAYLIGHT_PERCENT = 75;
     /** At the end of the shift a settler keeps this many food items (plus tools, weapons and armour) and deposits everything else. */
     public static int SHIFT_END_KEEP_FOOD = 2;
+    /** Wave M1: the miner stays underground for hours, so he keeps more food at shift end; and how many filler stacks' worth of blocks (items) he keeps. */
+    public static int SHIFT_END_KEEP_FOOD_MINER = 8, SHIFT_END_KEEP_FILLER_MINER = 64;
     /** The miner needs this percent of the usual time per block at level 1 and reaches the usual pace at {@code MINER_FULL_PACE_LEVEL}. */
     public static int MINER_SLOW_PERCENT_AT_LEVEL1 = 200, MINER_FULL_PACE_LEVEL = 5;
+
+    // ---- wave M1: how fast settlers get hungry, percent of the old rate (100 = the pre-M1 1/1800 food per tick; 250 = the settlement eats 2.5x more)
+    public static int HUNGER_RATE_PERCENT = 250;
+    /** Wave M1: the builder looks for a pickaxe/shovel in chests at most this often (ticks) per tool kind when he holds none. */
+    public static int BUILDER_TOOL_RETRY_TICKS = 600;
 
     // ---- wave L0: the lumberjack's chopping reach (tenths of a block, eye to the trunk base), how long he walks before chopping from where he stands,
     // and how long a tree he could not reach is left alone

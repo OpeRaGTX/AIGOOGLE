@@ -26,6 +26,16 @@ public interface Job {
      */
     default @Nullable Task endOfShift(SettlerEntity settler) { return null; }
 
+    /**
+     * Wave M1: how many items of {@code stack} this job's settler carries through the night instead of handing them in at shift end
+     * (work supplies: torches, ladders, filler blocks). {@code keptSoFar} = items of the same kind already kept in this unload, so a job can cap a supply.
+     * Tools, weapons, armour, shield, arrows and food are handled by {@code BaseJob.keepPlan} and need not be listed here.
+     */
+    default int shiftEndKeep(SettlerEntity settler, net.minecraft.world.item.ItemStack stack, int keptSoFar) { return 0; }
+
+    /** Wave M1: how many food items this job's settler keeps at shift end (everybody 2, the miner 8). */
+    default int shiftEndFood() { return io.github.operagtx.hearthholm.core.Balance.SHIFT_END_KEEP_FOOD; }
+
     /** Settler changes profession or leaves: release claims. */
     default void release(SettlerEntity settler) {}
 }

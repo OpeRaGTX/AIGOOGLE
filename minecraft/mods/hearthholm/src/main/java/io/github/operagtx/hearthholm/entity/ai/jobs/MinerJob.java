@@ -119,6 +119,18 @@ public final class MinerJob extends SiteJob {
     @Override
     protected boolean requiresTool() { return true; }
 
+    /** Wave M1: his work supplies stay in his pockets through the night: torches, ladders and a stack of filler blocks (pickaxes are gear, kept anyway). */
+    @Override
+    public int shiftEndKeep(SettlerEntity s, ItemStack st, int keptSoFar) {
+        if (st.is(Items.TORCH) || st.is(Items.LADDER)) return st.getCount();
+        if (isFiller(st)) return Math.max(0, Balance.SHIFT_END_KEEP_FILLER_MINER - keptSoFar);
+        return 0;
+    }
+
+    /** Wave M1: he keeps 8 food (everybody else 2). */
+    @Override
+    public int shiftEndFood() { return Balance.SHIFT_END_KEEP_FOOD_MINER; }
+
     @Override
     protected String toolKey() { return "pickaxe"; }
 

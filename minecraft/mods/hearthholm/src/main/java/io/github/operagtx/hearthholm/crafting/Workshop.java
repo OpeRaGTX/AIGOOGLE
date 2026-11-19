@@ -94,6 +94,15 @@ public enum Workshop {
     /** Whether cooking-type recipes work here without a furnace in the room. */
     public boolean ownHeat() { return ownHeat; }
 
+    /**
+     * Wave M1: whether this workshop uses cooking-type recipes (smelting, blasting, smoking...) at all. Only those can be blocked by a missing
+     * furnace, so only those workshops get the "furnace in the room" hint; the carpenter (crafting only) never does.
+     */
+    public boolean smelts() {
+        for (RecipeType<?> t : types) if (cooking(t)) return true;
+        return false;
+    }
+
     /** Whether orders can be placed for this kind (it has a catalogue). */
     public boolean hasCatalog() { return this != HERBALISM && this != BARRACKS && this != TAVERN; }
 

@@ -65,7 +65,7 @@ public record SiteOption(String key, Kind kind, int min, int max, int step, int 
             case CHOICE -> {
                 List<String> c = choices();
                 yield c.isEmpty() ? Component.literal("-")
-                        : Component.translatable(dynamicChoices != null ? c.get(clamp(value)) : "option.hearthholm." + key + "." + c.get(clamp(value)));
+                        : io.github.operagtx.hearthholm.util.Labels.orHumanized(dynamicChoices != null ? c.get(clamp(value)) : "option.hearthholm." + key + "." + c.get(clamp(value)));
             }
         };
     }

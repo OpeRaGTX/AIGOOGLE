@@ -245,6 +245,7 @@ T = {
  "order.hearthholm.queued": ("⌛ queued, materials ready", "⌛ в очереди, сырьё есть"),
  "message.hearthholm.workshop_problem": ("%s does not work: %s", "%s не работает: %s"),
  "message.hearthholm.workshop_ok": ("%s works. Worker: %s. %s", "%s работает. Работник: %s. %s"),
+ "message.hearthholm.workshop_ok_plain": ("%s works. Worker: %s.", "%s работает. Работник: %s."),
  "message.hearthholm.minted": ("Minted %s Hearth marks from %s.", "Отчеканено очаговых марок: %s (из: %s)."),
  "message.hearthholm.mint_nothing": ("Nothing to mint: not enough surplus in the warehouse (see the button tooltip).", "Нечего чеканить: на складе мало излишков (см. подсказку кнопки)."),
  "message.hearthholm.mint_no_warehouse": ("The mint needs a working warehouse.", "Для чеканки нужен работающий склад."),
@@ -491,6 +492,10 @@ T.update({
  "blueprint.hearthholm.market_stall": ("Market Stall", "Рыночная лавка"),
  "blueprint.hearthholm.farmhouse": ("Farmhouse (2 beds)", "Фермерский дом (2 кровати)"),
  "blueprint.hearthholm.wall_section": ("Stone Wall Section", "Участок каменной стены"),
+ "blueprint.hearthholm.cottage": ("Cottage (1 bed)", "Коттедж (1 кровать)"),
+ "blueprint.hearthholm.townhouse": ("Townhouse (1 bed)", "Городской дом (1 кровать)"),
+ "blueprint.hearthholm.fisher_hut": ("Fisher's Hut (1 bed)", "Хижина рыбака (1 кровать)"),
+ "blueprint.hearthholm.l_house": ("L-shaped House (2 beds)", "Г-образный дом (2 кровати)"),
  "status.hearthholm.going_tavern": ("Heading to the tavern", "Идёт в таверну"),
  "status.hearthholm.at_tavern": ("Evening at the tavern", "Вечер в таверне"),
  "status.hearthholm.tavern_serving": ("Pouring at the tavern", "Разливает в таверне"),
@@ -791,6 +796,11 @@ POOLS = bubbles.all_pools()
 for sit, lines in POOLS.items():
     for n, (en, ru) in enumerate(lines):
         T[f"bubble.hearthholm.{sit}.{n}"] = (en, ru)
+
+# Wave M1 guard: every blueprint in index.json needs a name (EN+RU come from the same tuple), otherwise the stake list shows the raw key.
+_bp = json.load(open(os.path.join(os.path.dirname(__file__), "..", "src", "main", "resources", "data", "hearthholm", "blueprints", "index.json")))["blueprints"]
+_missing = [b for b in _bp if f"blueprint.hearthholm.{b if isinstance(b, str) else b['id']}" not in T]
+assert not _missing, f"blueprints without a name in gen_lang.py: {_missing}"
 
 def write(lang, idx):
     data = {k: v[idx] for k, v in T.items()}
