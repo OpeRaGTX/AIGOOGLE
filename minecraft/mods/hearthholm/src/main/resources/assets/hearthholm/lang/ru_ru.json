@@ -716,6 +716,7 @@
  "option.hearthholm.plan.drawn": "С карты",
  "option.hearthholm.after": "Когда план выполнен",
  "option.hearthholm.mode.tip": "Автоматические схемы: спираль, колодец с лестницей или тоннель в склон.",
+ "message.hearthholm.zone_rejected": "Правка зоны отклонена (%s)",
  "gui.hearthholm.mine.layer": "Слой Y %s",
  "gui.hearthholm.mine.jump": "К камню",
  "gui.hearthholm.mine.jump.tip": "Вернуться на слой камня шахтёра.",

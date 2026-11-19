@@ -729,6 +729,7 @@ T.update({
  "option.hearthholm.mode.tip": ("Automatic layouts: a spiral stair, a ladder shaft or a tunnel into a hillside.", "Автоматические схемы: спираль, колодец с лестницей или тоннель в склон."),
  "worksite.hearthholm.mine.hint": ("Right-click the stone to draw the dig plan: paint cells layer by layer (a cell is 2x2 blocks), the miner digs his own stair to them. A chest next to the stone is his chest.",
                                    "ПКМ по камню открывает карту: рисуйте план раскопок по слоям (клетка 2x2 блока), шахтёр сам прорубит к ним лестницу. Сундук рядом с камнем его."),
+ "message.hearthholm.zone_rejected": ("Zone edit refused (%s)", "Правка зоны отклонена (%s)"),
  "gui.hearthholm.mine.layer": ("Layer Y %s", "Слой Y %s"),
  "gui.hearthholm.mine.jump": ("To marker", "К камню"),
  "gui.hearthholm.mine.jump.tip": ("Back to the layer of the miner's stone.", "Вернуться на слой камня шахтёра."),

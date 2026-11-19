@@ -716,6 +716,7 @@
  "option.hearthholm.plan.drawn": "Drawn on the map",
  "option.hearthholm.after": "When the plan is done",
  "option.hearthholm.mode.tip": "Automatic layouts: a spiral stair, a ladder shaft or a tunnel into a hillside.",
+ "message.hearthholm.zone_rejected": "Zone edit refused (%s)",
  "gui.hearthholm.mine.layer": "Layer Y %s",
  "gui.hearthholm.mine.jump": "To marker",
  "gui.hearthholm.mine.jump.tip": "Back to the layer of the miner's stone.",

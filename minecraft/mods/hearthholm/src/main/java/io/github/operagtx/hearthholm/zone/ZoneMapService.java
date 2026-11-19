@@ -30,7 +30,7 @@ public final class ZoneMapService {
     /** A player may ask for a snapshot at most every this many ticks. */
     public static final int REQUEST_GAP_TICKS = 10;
     /** How far from the block a player may edit its zone (blocks). */
-    public static final double EDIT_REACH = 12.0;
+    public static final double EDIT_REACH = 16.0;
 
     private static final Map<UUID, Long> LAST_REQUEST = new HashMap<>();
     /** Counters for tests and the log. */
@@ -179,22 +179,22 @@ public final class ZoneMapService {
     /** Applies a zone edit after checking owner, distance, layer and bounds; returns whether it was applied. */
     public static boolean handleEdit(ServerPlayer player, Payloads.ZoneEdit e) {
         ServerLevel level = player.level();
-        if (!(level.getBlockEntity(e.pos()) instanceof WorkSiteBlockEntity w) || WorkZone.specOf(w.type().id()) == null) return reject("no zone site");
+        if (!(level.getBlockEntity(e.pos()) instanceof WorkSiteBlockEntity w) || WorkZone.specOf(w.type().id()) == null) return reject(player, "no zone site");
         Settlement s = SettlementService.manager(level).byId(w.settlementId());
         if (s != null && !SettlementService.canManage(player, s)) {
             SettlementService.say(player, "not_owner", s.ownerName);
-            return reject("not the owner");
+            return reject(player, "not the owner");
         }
-        if (player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(e.pos())) > EDIT_REACH * EDIT_REACH) return reject("too far");
+        if (player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(e.pos())) > EDIT_REACH * EDIT_REACH) return reject(player, "too far");
         WorkZone.Spec spec = w.zoneSpec();
-        if (!spec.layered() && e.layerY() != WorkZone.SURFACE) return reject("layer");
-        if (spec.layered() && (e.layerY() < level.getMinY() || e.layerY() > level.getMaxY())) return reject("layer");
-        if (e.op() < Payloads.ZoneEdit.SET || e.op() > Payloads.ZoneEdit.CLEAR_EVERYTHING || (e.op() == Payloads.ZoneEdit.CLEAR_EVERYTHING && !spec.layered())) return reject("op");
-        if (e.height() < 0 || e.height() > WorkZone.MAX_HEIGHT) return reject("height");
-        if (e.rects().size() > Payloads.ZoneEdit.MAX_RECTS) return reject("too many rects");
+        if (!spec.layered() && e.layerY() != WorkZone.SURFACE) return reject(player, "layer");
+        if (spec.layered() && (e.layerY() < level.getMinY() || e.layerY() > level.getMaxY())) return reject(player, "layer");
+        if (e.op() < Payloads.ZoneEdit.SET || e.op() > Payloads.ZoneEdit.CLEAR_EVERYTHING || (e.op() == Payloads.ZoneEdit.CLEAR_EVERYTHING && !spec.layered())) return reject(player, "op");
+        if (e.height() < 0 || e.height() > WorkZone.MAX_HEIGHT) return reject(player, "height");
+        if (e.rects().size() > Payloads.ZoneEdit.MAX_RECTS) return reject(player, "too many rects");
         WorkZone zone = w.zoneForEdit();
         for (Payloads.Rect r : e.rects()) {
-            if (r.x0() > r.x1() || r.z0() > r.z1() || r.x0() < 0 || r.z0() < 0 || r.x1() >= zone.size() || r.z1() >= zone.size()) return reject("bounds");
+            if (r.x0() > r.x1() || r.z0() > r.z1() || r.x0() < 0 || r.z0() < 0 || r.x1() >= zone.size() || r.z1() >= zone.size()) return reject(player, "bounds");
         }
         boolean wasEmpty = zone.isEmpty();
         if (e.op() == Payloads.ZoneEdit.CLEAR_EVERYTHING) zone.clearAll();
@@ -207,11 +207,13 @@ public final class ZoneMapService {
         if (spec.layered() && wasEmpty && !zone.isEmpty() && w.type().option("plan") != null) w.setOption("plan", 1);
         w.zoneChanged();
         applied++;
+        LAST_REQUEST.remove(player.getUUID());   // the next snapshot request is answered at once: the screen shows what the server really holds
         return true;
     }
 
-    private static boolean reject(String why) {
+    private static boolean reject(ServerPlayer player, String why) {
         rejected++;
+        if (player != null && !why.equals("not the owner")) SettlementService.say(player, "zone_rejected", why);   // the owner sees why a stroke did not stick
         io.github.operagtx.hearthholm.Hearthholm.LOG.debug("zone edit rejected: {}", why);
         return false;
     }

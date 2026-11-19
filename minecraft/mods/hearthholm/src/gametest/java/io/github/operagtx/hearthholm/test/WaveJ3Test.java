@@ -128,6 +128,50 @@ final class WaveJ3Test {
         return new int[]{plan.dug().size(), air, prot, protSolid, unprot};
     }
 
+
+    /** Paints with REAL simulated mouse input (cursor moves, button held and released) over the open map screen; returns the server's cell count of the site. */
+    private static int realPaint(ClientGameTestContext ctx, TestSingleplayerContext sp, BlockPos site, String shot) {
+        ctx.waitTicks(14);
+        sp.getServer().runOnServer(s -> SettlementService.openWorkSite(player(s), site));
+        ctx.waitForScreen(ZoneMapScreen.class);
+        ctx.waitTicks(10);
+        double[] g = ctx.computeOnClient(mc -> {
+            ZoneMapWidget wd = ((ZoneMapScreen) mc.gui.screen()).widget();
+            return new double[]{wd.x, wd.y, wd.ppc(), mc.getWindow().getGuiScale()};
+        });
+        double sc = g[3], ppc = g[2];
+        var in = ctx.getInput();
+        // 1. rectangle tool: drag a 6 x 4 cell rectangle
+        ctx.runOnClient(mc -> ((ZoneMapScreen) mc.gui.screen()).widget().setTool(ZoneMapWidget.Tool.RECT));
+        in.setCursorPos((g[0] + 8 * ppc + 1) * sc, (g[1] + 8 * ppc + 1) * sc);
+        ctx.waitTicks(3);
+        in.holdMouse(0);
+        ctx.waitTicks(3);
+        for (int i = 0; i < 5; i++) { in.moveCursor(ppc * sc * 1.2, ppc * sc * 0.8); ctx.waitTicks(2); }
+        in.releaseMouse(0);
+        ctx.waitTicks(12);
+        AtomicInteger afterRect = new AtomicInteger();
+        sp.getServer().runOnServer(s -> afterRect.set(((WorkSiteBlockEntity) s.overworld().getBlockEntity(site)).zone() == null ? 0 : ((WorkSiteBlockEntity) s.overworld().getBlockEntity(site)).zone().cellCount()));
+        // 2. brush stroke
+        ctx.runOnClient(mc -> { var w = ((ZoneMapScreen) mc.gui.screen()).widget(); w.setTool(ZoneMapWidget.Tool.BRUSH); w.setBrush(3); });
+        in.setCursorPos((g[0] + 20 * ppc + 1) * sc, (g[1] + 20 * ppc + 1) * sc);
+        ctx.waitTicks(3);
+        in.holdMouse(0);
+        ctx.waitTicks(3);
+        for (int i = 0; i < 8; i++) { in.moveCursor(ppc * sc * 1.5, ppc * sc * 0.5); ctx.waitTicks(2); }
+        in.releaseMouse(0);
+        ctx.waitTicks(12);
+        AtomicInteger afterBrush = new AtomicInteger();
+        sp.getServer().runOnServer(s -> afterBrush.set(((WorkSiteBlockEntity) s.overworld().getBlockEntity(site)).zone() == null ? 0 : ((WorkSiteBlockEntity) s.overworld().getBlockEntity(site)).zone().cellCount()));
+        log("J3 real mouse painting at " + site.toShortString() + ": scale=" + sc + " ppc=" + ppc + " server cells after rectangle=" + afterRect.get() + " after brush=" + afterBrush.get());
+        check(afterRect.get() > 0, "real mouse: the rectangle drag painted nothing on the server (" + site.toShortString() + ")");
+        check(afterBrush.get() > afterRect.get(), "real mouse: the brush stroke painted nothing more on the server (" + site.toShortString() + ")");
+        if (shot != null) ctx.takeScreenshot(shot);
+        ctx.setScreen(() -> null);
+        ctx.waitTicks(6);
+        return afterBrush.get();
+    }
+
     static void run(ClientGameTestContext ctx, TestSingleplayerContext sp) {
         sp.getServer().runCommand("gamemode creative @a");
         sp.getServer().runCommand("time set 5000");
@@ -528,6 +572,25 @@ final class WaveJ3Test {
         log("J3 widget paint over the network: cells " + before.get() + " -> " + after.get() + ", height of a new cell " + hgt.get());
         check(after.get() == before.get() + 8 && hgt.get() == 3, "client widget paint did not reach the server with its height: " + before.get() + " -> " + after.get() + " h=" + hgt.get());
         ctx.setScreen(() -> null);
+
+        // ---- 7b. REAL simulated mouse input on both maps (the lumberjack's chopping block and the miner's stone)
+        BlockPos forest = M.offset(-20, 0, 14);
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            ServerPlayer p = player(s);
+            l.setBlock(forest, ModBlocks.FOREST_MARKER.defaultBlockState().setValue(WorkSiteBlock.FACING, Direction.SOUTH), 3);
+            SettlementService.onWorkSitePlaced(l, forest, p);
+            p.teleportTo(l, forest.getX() + 0.5, forest.getY(), forest.getZ() - 3.5, Set.of(), 0f, 10f, false);
+        });
+        realPaint(ctx, sp, forest, "hh_j3_real_mouse_lumberjack");
+        sp.getServer().runOnServer(s -> {
+            ServerLevel l = s.overworld();
+            ServerPlayer p = player(s);
+            site(s).zoneForEdit().clearAll();
+            site(s).zoneChanged();
+            p.teleportTo(l, M.getX() + 0.5, M.getY(), M.getZ() - 3.5, Set.of(), 0f, 10f, false);
+        });
+        realPaint(ctx, sp, M, null);
 
         // ---- 8. the stone in the world, then the dug L tunnel from inside
         sp.getServer().runOnServer(s -> {
