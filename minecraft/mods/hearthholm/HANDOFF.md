@@ -96,12 +96,27 @@ photos: `getFile?file_id=` → `https://api.telegram.org/file/bot<token>/<file_p
 update_id = **331527542**. Ignore the old .mp4/.mp3 documents (another project).
 
 ## RESUME HERE (2026-11-19)
-- K1 code is pushed. Full client test (30 min, run by plain bash, no agent): waves A-J3 PASS; **K1 FAILS 2 checks**:
-  `the builder did not place the other blocks while the planks were missing (skip failed)` and `panes missing`.
-- Left for K1: (1) fix the builder skip-missing logic + panes, rerun `HH_ONLY_K1=1` only; (2) split README.md and
-  DESIGN.md by waves (short top files + `docs/waves/<W>.md`, `docs/design/<W>.md`); (3) `package-mod.sh` -> zip; commit, push.
+- **K1 is finished**: code, docs split (README/DESIGN short + `docs/waves`, `docs/design`), zip rebuilt, pushed.
+  `HH_ONLY_K1=1` run twice: `K1 RESULT: OK` + `HHTEST DONE` (skip-missing, panes/chests/fences connected, stake keep/carry,
+  75 recipes no collisions, recipe book 77/77, chronicle pages, co-owners). The 2 failures seen in the earlier full run
+  (`skip failed`, `panes missing`) did NOT reproduce alone; a stale builder job is the likely cause (`setProfession` is a no-op for
+  the same profession, so a settler that already was a builder keeps its old claimed stake and walks away from the sky
+  platform). Test set-up now resets the builder (UNEMPLOYED -> BUILDER) and switches off every other construction stake.
+  Not proven in a full run, because a full run in this container never reached K1 (see below).
+- Full client test is flaky in a 4-vCPU container: run 1 failed in wave D (`warehouse full`, `WaveDTest.stockUp`, now prints
+  positions/loaded containers/empty slots), run 2 (`HH_ONLY_D=1`) passed D-H3, I1.., then failed J2 (`the tree inside the zone was not
+  chopped`, 120 s). Neither touches K1 code. First thing next session: one full run; if D/J2 fail again, fix those fixtures (J2 was
+  already "under investigation"). Note `HH_ONLY_<W>=1` means "that wave and every later one except K1" (K1 runs only with `HH_ONLY_K1`
+  or with no flag), so `HH_ONLY_D` is ~20 min.
+- New container checklist (this one had none of it): `apt-get install openjdk-25-jdk-headless libegl1 libegl-mesa0 libgles2 libgbm1`
+  and `ln -s /usr/lib/jvm/java-25-openjdk-amd64 /opt/jdk-25`. Without EGL the client opens no window, Gradle still says
+  BUILD SUCCESSFUL and `run-client-test.sh` prints `exit=0` with ZERO `HHTEST` lines: always check for `HHTEST DONE`.
+  Allowed hosts needed: maven.fabricmc.net, meta.fabricmc.net, piston-meta/piston-data.mojang.com, libraries.minecraft.net,
+  resources.download.minecraft.net, launcher.mojang.com. api.modrinth.com / cdn.modrinth.com are NOT allowed there, so
+  `package-mod.sh` cannot run; the K1 zip was assembled by hand (fresh jar + the Fabric API jar and УСТАНОВКА.txt from the previous zip,
+  same versions). Maven Central may answer 429 once: just rerun the build.
 - Token economy: run long tests with plain background bash (`run-client-test.sh ... > file; tail`), not inside an agent.
-  Gemini CLI is unusable (Google ended personal-subscription access, June 2026). Then K2.
+  Gemini CLI is unusable (Google ended personal-subscription access, June 2026). Next: **K2**.
 - Default branch is the old `claude/msayib-roblox-dev-skill-setup-xhh2j6`; it has 4 video commits (Aatrox vs
   Mordekaiser, calibration) not yet in `OpeRaGTX/video-studio`; move them there BEFORE merging PR #1.
 

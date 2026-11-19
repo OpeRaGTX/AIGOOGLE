@@ -132,9 +132,15 @@ final class WaveK1Test {
                 for (int dy = -3; dy <= 6; dy++) l.setBlock(K.offset(dx, dy, dz), dy < 0 ? Blocks.STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), 2);
             }
             if (l.getBlockEntity(STAKE) instanceof WorkSiteBlockEntity base) { base.setOption("build", 0); base.setWorkerId(null); }
+            // every construction stake left over by earlier waves is switched off: a builder that still holds a claim on one of them
+            // (setProfession is a no-op for the same profession, so its job keeps the old site) would walk away from the platform
+            for (Settlement.SiteRecord rec : town(s).sitesOf(io.github.operagtx.hearthholm.worksite.WorkSiteTypes.CONSTRUCTION_ID)) {
+                if (l.getBlockEntity(rec.pos()) instanceof WorkSiteBlockEntity other) { other.setOption("build", 0); other.setWorkerId(null); }
+            }
             List<SettlerEntity> all = settlers(s);
             SettlerEntity builder = all.get(0);
             for (SettlerEntity e : all) if (e != builder) e.setProfession(Professions.UNEMPLOYED);
+            builder.setProfession(Professions.UNEMPLOYED);   // drops a stale job (claimed site, running task) kept by a settler that already was a builder
             builder.setProfession(Professions.BUILDER);
             builder.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
             builder.inventory().clearContent();

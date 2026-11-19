@@ -88,8 +88,13 @@ final class WaveDTest {
         ServerLevel l = s.overworld();
         Settlement st = town(s);
         for (ItemStack stack : stacks) {
-            ItemStack rest = Storage.insert(Storage.resolve(l, st.storagePositions()), stack);
-            if (!rest.isEmpty()) throw new AssertionError("warehouse full");
+            java.util.List<Container> boxes = Storage.resolve(l, st.storagePositions());
+            ItemStack rest = Storage.insert(boxes, stack);
+            if (!rest.isEmpty()) {
+                int free = 0;
+                for (Container c : boxes) for (int i = 0; i < c.getContainerSize(); i++) if (c.getItem(i).isEmpty()) free++;
+                throw new AssertionError("warehouse full for " + stack + ": positions=" + st.storagePositions().size() + " loaded containers=" + boxes.size() + " empty slots=" + free);
+            }
         }
     }
 
