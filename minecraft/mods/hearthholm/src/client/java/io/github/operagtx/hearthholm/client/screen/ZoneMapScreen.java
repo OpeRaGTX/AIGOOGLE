@@ -1,5 +1,6 @@
 package io.github.operagtx.hearthholm.client.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import io.github.operagtx.hearthholm.network.Payloads;
 import io.github.operagtx.hearthholm.network.Views;
 import io.github.operagtx.hearthholm.worksite.SiteOption;
@@ -360,7 +361,7 @@ public final class ZoneMapScreen extends HhScreen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent e, boolean dbl) {
-        if (map != null && e.button() == 0 && sliderHit(e.x(), e.y())) { sliding = true; sliderTo(e.x()); return true; }
+        if (map != null && e.button() == InputConstants.MOUSE_BUTTON_LEFT && sliderHit(e.x(), e.y())) { sliding = true; sliderTo(e.x()); return true; }
         if (map != null && map.mouseClicked(e.x(), e.y(), e.button())) return true;
         return super.mouseClicked(e, dbl);
     }

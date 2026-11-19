@@ -1,5 +1,6 @@
 package io.github.operagtx.hearthholm.client.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.NativeImage;
 import io.github.operagtx.hearthholm.Hearthholm;
 import io.github.operagtx.hearthholm.network.Payloads;
@@ -242,8 +243,8 @@ public final class ZoneMapWidget {
     public boolean mouseClicked(double mx, double my, int button) {
         if (!contains(mx, my)) return false;
         int cx = cellAtX(mx), cz = cellAtZ(my);
-        if (button == 1) { panning = true; panRemX = panRemZ = 0; return true; }
-        if (button != 0 || !editable) return false;
+        if (button == InputConstants.MOUSE_BUTTON_RIGHT) { panning = true; panRemX = panRemZ = 0; return true; }
+        if (button != InputConstants.MOUSE_BUTTON_LEFT || !editable) return false;
         painting = true;
         startX = lastX = cx;
         startZ = lastZ = cz;
@@ -253,7 +254,7 @@ public final class ZoneMapWidget {
 
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
         hoverX = cellAtX(mx); hoverZ = cellAtZ(my);
-        if (panning && button == 1) {
+        if (panning && button == InputConstants.MOUSE_BUTTON_RIGHT) {
             panRemX -= dx / ppc(); panRemZ -= dy / ppc();
             int sx = (int) panRemX, sz = (int) panRemZ;
             if (sx != 0 || sz != 0) {
@@ -263,7 +264,7 @@ public final class ZoneMapWidget {
             }
             return true;
         }
-        if (painting && button == 0) {
+        if (painting && button == InputConstants.MOUSE_BUTTON_LEFT) {
             if (tool == Tool.BRUSH || tool == Tool.ERASER) {
                 int cx = Math.max(0, Math.min(n - 1, cellAtX(mx))), cz = Math.max(0, Math.min(n - 1, cellAtZ(my)));
                 boolean on = tool == Tool.BRUSH;
@@ -281,8 +282,8 @@ public final class ZoneMapWidget {
     }
 
     public boolean mouseReleased(double mx, double my, int button) {
-        if (button == 1 && panning) { panning = false; return true; }
-        if (button != 0 || !painting) return false;
+        if (button == InputConstants.MOUSE_BUTTON_RIGHT && panning) { panning = false; return true; }
+        if (button != InputConstants.MOUSE_BUTTON_LEFT || !painting) return false;
         painting = false;
         if (tool == Tool.RECT || tool == Tool.ERASE_RECT) {
             int x0 = Math.max(0, Math.min(n - 1, startX)), z0 = Math.max(0, Math.min(n - 1, startZ));

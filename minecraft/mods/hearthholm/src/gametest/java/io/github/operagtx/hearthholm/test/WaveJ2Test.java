@@ -409,15 +409,15 @@ final class WaveJ2Test {
             int ppc = wd.ppc();
             wd.setTool(ZoneMapWidget.Tool.RECT);
             double x0 = wd.x + 20 * ppc + 1, z0 = wd.y + 20 * ppc + 1;
-            wd.mouseClicked(x0, z0, 0);
+            wd.mouseClicked(x0, z0, com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
             wd.mouseDragged(x0 + 4 * ppc, z0 + 4 * ppc, 0, 4 * ppc, 4 * ppc);
-            wd.mouseReleased(x0 + 4 * ppc, z0 + 4 * ppc, 0);   // 5 x 5 = 25 new cells
+            wd.mouseReleased(x0 + 4 * ppc, z0 + 4 * ppc, com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);   // 5 x 5 = 25 new cells
             wd.setTool(ZoneMapWidget.Tool.BRUSH);
             wd.setBrush(3);
             double bx = wd.x + 10 * ppc + 1, bz = wd.y + 10 * ppc + 1;
-            wd.mouseClicked(bx, bz, 0);
-            wd.mouseDragged(bx + 6 * ppc, bz, 0, 6 * ppc, 0);   // a stroke of 3 high, 9 wide = 27 cells
-            wd.mouseReleased(bx + 6 * ppc, bz, 0);
+            wd.mouseClicked(bx, bz, com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
+            wd.mouseDragged(bx + 6 * ppc, bz, com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT, 6 * ppc, 0);   // a stroke of 3 high, 9 wide = 27 cells
+            wd.mouseReleased(bx + 6 * ppc, bz, com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
         });
         ctx.waitTicks(10);
         AtomicInteger after = new AtomicInteger(), sent = new AtomicInteger();
@@ -432,13 +432,13 @@ final class WaveJ2Test {
             int ppc = wd.ppc();
             wd.setTool(ZoneMapWidget.Tool.ERASE_RECT);
             double x0 = wd.x + 20 * ppc + 1, z0 = wd.y + 20 * ppc + 1;
-            wd.mouseClicked(x0, z0, 0);
+            wd.mouseClicked(x0, z0, com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
             wd.mouseDragged(x0 + 4 * ppc, z0 + 4 * ppc, 0, 4 * ppc, 4 * ppc);
-            wd.mouseReleased(x0 + 4 * ppc, z0 + 4 * ppc, 0);   // the rectangle comes out again
+            wd.mouseReleased(x0 + 4 * ppc, z0 + 4 * ppc, com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);   // the rectangle comes out again
             wd.setTool(ZoneMapWidget.Tool.ERASER);
             wd.setBrush(1);
-            wd.mouseClicked(wd.x + 10 * ppc + 1, wd.y + 10 * ppc + 1, 0);   // one cell of the stroke
-            wd.mouseReleased(wd.x + 10 * ppc + 1, wd.y + 10 * ppc + 1, 0);
+            wd.mouseClicked(wd.x + 10 * ppc + 1, wd.y + 10 * ppc + 1, com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);   // one cell of the stroke
+            wd.mouseReleased(wd.x + 10 * ppc + 1, wd.y + 10 * ppc + 1, com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
             wd.setZoom(2);
         });
         ctx.waitTicks(10);

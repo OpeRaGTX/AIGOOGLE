@@ -145,7 +145,7 @@ final class WaveJ3Test {
         ctx.runOnClient(mc -> ((ZoneMapScreen) mc.gui.screen()).widget().setTool(ZoneMapWidget.Tool.RECT));
         in.setCursorPos((g[0] + 8 * ppc + 1) * sc, (g[1] + 8 * ppc + 1) * sc);
         ctx.waitTicks(3);
-        in.holdMouse(0);
+        in.holdMouse(com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
         ctx.waitTicks(3);
         for (int i = 0; i < 5; i++) { in.moveCursor(ppc * sc * 1.2, ppc * sc * 0.8); ctx.waitTicks(2); }
         in.releaseMouse(0);
@@ -156,7 +156,7 @@ final class WaveJ3Test {
         ctx.runOnClient(mc -> { var w = ((ZoneMapScreen) mc.gui.screen()).widget(); w.setTool(ZoneMapWidget.Tool.BRUSH); w.setBrush(3); });
         in.setCursorPos((g[0] + 20 * ppc + 1) * sc, (g[1] + 20 * ppc + 1) * sc);
         ctx.waitTicks(3);
-        in.holdMouse(0);
+        in.holdMouse(com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
         ctx.waitTicks(3);
         for (int i = 0; i < 8; i++) { in.moveCursor(ppc * sc * 1.5, ppc * sc * 0.5); ctx.waitTicks(2); }
         in.releaseMouse(0);
@@ -559,9 +559,9 @@ final class WaveJ3Test {
             wd.setTool(ZoneMapWidget.Tool.RECT);
             int ppc = wd.ppc();
             double x0 = wd.x + 5 * ppc + 1, z0 = wd.y + 5 * ppc + 1;
-            wd.mouseClicked(x0, z0, 0);
+            wd.mouseClicked(x0, z0, com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
             wd.mouseDragged(x0 + 3 * ppc, z0 + 1 * ppc, 0, 3 * ppc, ppc);
-            wd.mouseReleased(x0 + 3 * ppc, z0 + 1 * ppc, 0);   // 4 x 2 cells at the layer shown
+            wd.mouseReleased(x0 + 3 * ppc, z0 + 1 * ppc, com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);   // 4 x 2 cells at the layer shown
         });
         ctx.waitTicks(12);
         AtomicInteger after = new AtomicInteger(), hgt = new AtomicInteger();
