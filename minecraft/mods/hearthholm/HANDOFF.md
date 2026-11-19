@@ -95,7 +95,51 @@ the repo (public). It is in `~/.config/hearthholm/telegram_bot_token` (lost on c
 save it there again, chmod 600). Read only new messages:
 `curl -s "https://api.telegram.org/bot$(cat ~/.config/hearthholm/telegram_bot_token)/getUpdates?offset=<last_update_id+1>"`;
 photos: `getFile?file_id=` → `https://api.telegram.org/file/bot<token>/<file_path>` into the scratchpad. Last read
-update_id = **331527542**. Ignore the old .mp4/.mp3 documents (another project).
+update_id = **331527544**. Ignore the old .mp4/.mp3 documents (another project).
+
+## OWNER REQUEST 2026-11-19 evening (Telegram message 161, final edited text) - THE NEXT WORK, start after K1/K2 are packaged
+Owner: "for now these changes; after my test we go on with everything else. Write the code architecturally, so functions can later be changed or
+reworked without breakage." Verbatim (Russian):
+
+```
+Разница между воином и стражником должна быть более видимой:
+Стражник должен получать сигнал о том, что кто то из жителей атакован, и бежать туда , где его атаковали, и убивать враждебного моба, также стражник должен быть больше по здоровью на 10% чем воин, и медленнее на 20% бегать.
+Воин должен патрулировать территорию, без знака территорию поселения, со знаком территорию отмеченную игроком.
+Также у него должно быть на 10% меньше здоровья чем у стражника, но он должен быть быстрее чем стражник.
+При этом каждому из них можно выдать щит, которым он сможет блокировать удары врагов. 
+Лучник должен быть меньше чем воин по здоровью на 10%, и стрелять во врагов по логике скелета, то есть ходить в бок или взад при прицеливании, чтобы по нему было сложнее попасть или догнать. Также лучнику можно выдать арбалет, если он достиг 5го уровня, и ему был повышен ранг до арбалетчика за 25 марок (столько же стоит повышение стражника до рыцаря, а воина можно повысить до Кавалериста, с этого момента, если на территории поселения есть лошадь, и в сундуках, либо на лошади, либо у него, есть седло, Кавалерист может сесть на седло а ему можно выдать копье, которым он будет таранить врагов, бежать дальше, разворачиватся и снова таранить врагов.)
+
+Также понизить скорость повышения уровней жителей уменьшено еще в 1.5х раз для баланса.
+
+Для фермера, и рыбака, воина, мы делаем логику как у шахтера и лесоруба.
+
+У фермера будет бочка с удобрениями, по нажатию правой кнопкой мыши теперь можно дополнительно выбрать на карте где он будет работать, зона 30х30 нарисована.
+
+У рыбака ведро с рыбой (рыбу можно взять текстуру с самого майнкрафта), и можно настроить 10х10 блоков на карте где он будет рыбачить
+
+У воина можно на марке выбрать зону 50х50, по которой он будет патрулировать и обходить. Марка теперь не таблица, а аккуратная модель камня в который воткнут железный меч.
+
+Также подтверждаю концепт по поводу своих частиц, и подтверждаю концепт призрачных принтов зданий для строителя. Это тоже хочу чтобы было реализовано, прозрачность примерно 30%, но можешь определить на глаз, если не понравится мой вариант.
+
+Также нужно исправить баг с лесорубом, т.к. если листва мешает ему добраться до дерева он стоит и смотрит на него вечно. Нужно чтобы он либо прокапывал листву либо все равно добывал это дерево с немного большего расстояния, это реализуй так как это будет проще и меньше шансов что сломает оптимизацию.
+
+Пока такие нововведения,делаем, после моего теста пойдем по всему дальше. Также не забывай писать архитектурно код, чтобы потом можно было без поломок поменять какие либо функции, и переработать их если что-то изменится не в лучшую сторону.
+```
+
+**Planned split (one wave at a time, test + docs + zip + push after each; defaults chosen where the text is ambiguous):**
+- **L0 quick fixes:** (a) lumberjack stuck looking at a tree behind leaves: dig the leaves OR chop from a slightly larger distance, whichever is simpler and cheaper
+  for performance; (b) level-up speed 1.5x slower again (`Balance.LEVEL_XP` x1.5, for every profession).
+- **L1 combat roles:** guard = warrior HP x1.1 and 20% slower; warrior = guard HP x0.9 (the text says "10% less than the guard") and faster than the guard; archer = warrior HP
+  x0.9. Guard gets a distress signal when ANY resident is attacked: runs to the place and kills the hostile mob. Shields for guard and warrior (offhand, real blocking: today only
+  the knight blocks, see `SettlerEntity` knight shield code). Archer strafes like a skeleton while aiming (sideways/back). Crossbow for the archer at level 5 via promotion
+  "crossbowman" for 25 marks; knight promotion (from guard) also costs 25 marks (now 10); warrior -> "cavalryman" for 25 marks: needs a horse in the settlement and a saddle (in the
+  chests, on the horse or on him), mounts it, holds a spear (check the vanilla spear item of 26.3) and charges: ram, ride on, turn, ram again.
+  Warrior without a territory marker patrols the settlement, with a marker the player's marked territory.
+- **L2 work zones (the miner/lumberjack WorkZone + ZoneMapService framework, J2/J3):** farmer: barrel with fertilizer, right click opens the map, 30x30 zone; fisher: bucket with a
+  fish (vanilla fish texture), 10x10 zone; warrior: the marker block becomes a neat model "stone with an iron sword stuck in it" (not a table), 50x50 patrol zone.
+- **L3 visuals:** own particle types (concept confirmed) and ghost blueprint preview for the builder (concept confirmed, ~30% opacity, judge by eye).
+Defaults to remember: ask nothing, record assumptions in the wave docs; keep every new number in `Balance`/config; keep new behaviour in separate small classes/activities
+(like `ShiftEndActivity`) so it can be swapped.
 
 ## RESUME HERE (2026-11-19)
 - **Owner plan (2026-11-19):** the owner is play-testing the next professions one by one and will give direction on 2026-11-20; the project then
