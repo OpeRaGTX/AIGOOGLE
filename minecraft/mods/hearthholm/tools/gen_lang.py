@@ -687,6 +687,7 @@ T.update({
  "option.hearthholm.stake": ("Stake when done", "Колышек после стройки"),
  "option.hearthholm.stake.keep": ("Stays in place", "Остаётся на месте"),
  "option.hearthholm.stake.carry": ("Builder takes it to the warehouse", "Строитель несёт на склад"),
+ "guide.hearthholm.ch10.title": ("Recipes", "Рецепты"),
  "gui.hearthholm.tab.owners": ("Owners", "Владельцы"),
  "gui.hearthholm.owners.founder": ("Founder: %s", "Основатель: %s"),
  "gui.hearthholm.owners.co": ("Co-owners", "Совладельцы"),

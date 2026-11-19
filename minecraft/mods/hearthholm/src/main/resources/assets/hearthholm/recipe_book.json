@@ -1,0 +1,1252 @@
+[
+  {
+    "id": "alarm_bell",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:stick",
+      "minecraft:stick",
+      "minecraft:stick",
+      "minecraft:stick",
+      "minecraft:gold_ingot",
+      "minecraft:stick",
+      "minecraft:stick",
+      null,
+      "minecraft:stick"
+    ]
+  },
+  {
+    "id": "ale",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:glass_bottle",
+      "minecraft:wheat",
+      "minecraft:wheat",
+      "minecraft:sugar",
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "apple_pie",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:apple",
+      "minecraft:apple",
+      "minecraft:sugar",
+      "minecraft:egg",
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "barrel_rack",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "#minecraft:planks",
+      "minecraft:barrel",
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks"
+    ]
+  },
+  {
+    "id": "bench",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "minecraft:stick",
+      null,
+      "minecraft:stick"
+    ]
+  },
+  {
+    "id": "berry_pie",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:sweet_berries",
+      "minecraft:sweet_berries",
+      "minecraft:sugar",
+      "minecraft:egg",
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "bottles",
+    "count": 3,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:glass_bottle",
+      "minecraft:glass_bottle",
+      "minecraft:glass_bottle",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "bulletin_board",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "#minecraft:planks",
+      "minecraft:paper",
+      "minecraft:paper",
+      "minecraft:stick",
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "candles",
+    "count": 3,
+    "kind": "shaped",
+    "w": 1,
+    "h": 2,
+    "grid": [
+      "minecraft:honeycomb",
+      "minecraft:string"
+    ]
+  },
+  {
+    "id": "candlestick",
+    "count": 1,
+    "kind": "shaped",
+    "w": 1,
+    "h": 2,
+    "grid": [
+      "minecraft:honeycomb",
+      "minecraft:iron_nugget"
+    ]
+  },
+  {
+    "id": "carpenter_bench",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:crafting_table",
+      "#minecraft:logs",
+      "minecraft:stick",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "chair",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:stick",
+      null,
+      null,
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "minecraft:stick",
+      null,
+      "minecraft:stick"
+    ]
+  },
+  {
+    "id": "cheese_wedge",
+    "count": 4,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:milk_bucket",
+      "minecraft:dried_kelp",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "chimney_cap",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "minecraft:stone_slab",
+      null,
+      "minecraft:stone_slab",
+      "minecraft:stone_bricks",
+      "minecraft:stone_bricks",
+      "minecraft:stone_bricks"
+    ]
+  },
+  {
+    "id": "cider",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:glass_bottle",
+      "minecraft:apple",
+      "minecraft:apple",
+      "minecraft:sugar",
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "construction_stake",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:stick",
+      "minecraft:stick",
+      "minecraft:paper",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "cook_stove",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:furnace",
+      "minecraft:bowl",
+      "minecraft:cobblestone",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "counter",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "#minecraft:wooden_slabs",
+      "#minecraft:wooden_slabs",
+      "#minecraft:wooden_slabs",
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks"
+    ]
+  },
+  {
+    "id": "crate",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "#minecraft:planks",
+      "minecraft:stick",
+      "#minecraft:planks",
+      "minecraft:stick",
+      "#minecraft:planks",
+      "minecraft:stick",
+      "#minecraft:planks",
+      "minecraft:stick",
+      "#minecraft:planks"
+    ]
+  },
+  {
+    "id": "farm_marker",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:stick",
+      "minecraft:stick",
+      "minecraft:wheat_seeds",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "firewood_pile",
+    "count": 2,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "minecraft:oak_log",
+      "minecraft:oak_log",
+      "minecraft:oak_log",
+      null,
+      "minecraft:oak_log",
+      null
+    ]
+  },
+  {
+    "id": "fish_pie",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:cooked_cod",
+      "minecraft:potato",
+      "minecraft:wheat",
+      "minecraft:wheat",
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "fish_soup",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:bowl",
+      "minecraft:cooked_cod",
+      "minecraft:carrot",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "fishing_marker",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:stick",
+      "minecraft:stick",
+      "minecraft:string",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "flower_box",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "#minecraft:small_flowers",
+      "#minecraft:small_flowers",
+      "#minecraft:small_flowers",
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks"
+    ]
+  },
+  {
+    "id": "forest_marker",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:stick",
+      "minecraft:stick",
+      "#minecraft:saplings",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "founders_chronicle",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:book",
+      "hearthholm:hearth_mark",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "fried_fish",
+    "count": 2,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:cooked_salmon",
+      "minecraft:wheat",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "hanging_herbs",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "minecraft:string",
+      "minecraft:string",
+      "minecraft:string",
+      "minecraft:fern",
+      "minecraft:fern",
+      "minecraft:fern"
+    ]
+  },
+  {
+    "id": "hanging_lantern",
+    "count": 1,
+    "kind": "shaped",
+    "w": 1,
+    "h": 2,
+    "grid": [
+      "minecraft:iron_nugget",
+      "minecraft:lantern"
+    ]
+  },
+  {
+    "id": "healing_salve",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:glass_bottle",
+      "minecraft:sweet_berries",
+      "minecraft:sweet_berries",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "herbal_tea",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:glass_bottle",
+      "#minecraft:small_flowers",
+      "minecraft:sweet_berries",
+      "minecraft:fern",
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "herbalist_table",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:crafting_table",
+      "minecraft:sweet_berries",
+      "minecraft:glass_bottle",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "honey_bun",
+    "count": 2,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:wheat",
+      "minecraft:wheat",
+      "minecraft:honey_bottle",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "lamp_post",
+    "count": 1,
+    "kind": "shaped",
+    "w": 1,
+    "h": 3,
+    "grid": [
+      "minecraft:lantern",
+      "minecraft:iron_ingot",
+      "minecraft:iron_ingot"
+    ]
+  },
+  {
+    "id": "long_table",
+    "count": 2,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "minecraft:stick",
+      null,
+      "minecraft:stick"
+    ]
+  },
+  {
+    "id": "market_stall",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "#minecraft:wool",
+      "#minecraft:wool",
+      "#minecraft:wool",
+      "#minecraft:planks",
+      null,
+      "#minecraft:planks"
+    ]
+  },
+  {
+    "id": "mason_table",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:crafting_table",
+      "minecraft:cobblestone",
+      "minecraft:cobblestone",
+      "minecraft:stone",
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "mead",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:glass_bottle",
+      "minecraft:honey_bottle",
+      "minecraft:wheat",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "meat_pie",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:cooked_beef",
+      "minecraft:potato",
+      "minecraft:wheat",
+      "minecraft:egg",
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "meat_stew",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:bowl",
+      "minecraft:cooked_beef",
+      "minecraft:carrot",
+      "minecraft:potato",
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "mine_marker",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:stick",
+      "minecraft:stick",
+      "minecraft:cobblestone",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "mug",
+    "count": 3,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "#minecraft:planks",
+      null,
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks"
+    ]
+  },
+  {
+    "id": "order_board",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "minecraft:paper",
+      "minecraft:paper",
+      "minecraft:stick",
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "palisade",
+    "count": 6,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "#minecraft:logs",
+      "minecraft:stick",
+      "#minecraft:logs",
+      "#minecraft:logs",
+      "minecraft:stick",
+      "#minecraft:logs"
+    ]
+  },
+  {
+    "id": "palisade_gate",
+    "count": 1,
+    "kind": "shaped",
+    "w": 2,
+    "h": 3,
+    "grid": [
+      "hearthholm:palisade",
+      "hearthholm:palisade",
+      "hearthholm:palisade",
+      "minecraft:iron_ingot",
+      "hearthholm:palisade",
+      "hearthholm:palisade"
+    ]
+  },
+  {
+    "id": "patrol_post",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:stick",
+      "minecraft:stick",
+      "minecraft:iron_ingot",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "plate_bread",
+    "count": 1,
+    "kind": "shaped",
+    "w": 1,
+    "h": 2,
+    "grid": [
+      "minecraft:bread",
+      "minecraft:clay_ball"
+    ]
+  },
+  {
+    "id": "plate_fish",
+    "count": 1,
+    "kind": "shaped",
+    "w": 1,
+    "h": 2,
+    "grid": [
+      "minecraft:cooked_cod",
+      "minecraft:clay_ball"
+    ]
+  },
+  {
+    "id": "plate_roast",
+    "count": 1,
+    "kind": "shaped",
+    "w": 1,
+    "h": 2,
+    "grid": [
+      "minecraft:cooked_chicken",
+      "minecraft:clay_ball"
+    ]
+  },
+  {
+    "id": "porridge",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:bowl",
+      "minecraft:wheat",
+      "minecraft:wheat",
+      "minecraft:sugar",
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "rift_lantern",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      null,
+      "hearthholm:rift_shard",
+      null,
+      "hearthholm:rift_shard",
+      "minecraft:lantern",
+      "hearthholm:rift_shard",
+      null,
+      "hearthholm:rift_shard",
+      null
+    ]
+  },
+  {
+    "id": "roast_vegetables",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:baked_potato",
+      "minecraft:carrot",
+      "minecraft:beetroot",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "round_table",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks",
+      null,
+      "minecraft:stick",
+      null,
+      "minecraft:stick",
+      "minecraft:stick",
+      "minecraft:stick"
+    ]
+  },
+  {
+    "id": "rug_blue",
+    "count": 2,
+    "kind": "shaped",
+    "w": 2,
+    "h": 1,
+    "grid": [
+      "minecraft:blue_carpet",
+      "minecraft:blue_carpet"
+    ]
+  },
+  {
+    "id": "rug_red",
+    "count": 2,
+    "kind": "shaped",
+    "w": 2,
+    "h": 1,
+    "grid": [
+      "minecraft:red_carpet",
+      "minecraft:red_carpet"
+    ]
+  },
+  {
+    "id": "rye_loaf",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:wheat",
+      "minecraft:wheat",
+      "minecraft:cocoa_beans",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "sausage",
+    "count": 3,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:porkchop",
+      "minecraft:beef",
+      "minecraft:string",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "settlement_banner",
+    "count": 1,
+    "kind": "shaped",
+    "w": 2,
+    "h": 3,
+    "grid": [
+      "#minecraft:wool",
+      "#minecraft:wool",
+      "#minecraft:wool",
+      "#minecraft:wool",
+      null,
+      "minecraft:stick"
+    ]
+  },
+  {
+    "id": "sign_carpenter",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "#minecraft:planks",
+      "minecraft:stick",
+      "minecraft:crafting_table",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "sign_cook",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "#minecraft:planks",
+      "minecraft:stick",
+      "minecraft:furnace",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "sign_mason",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "#minecraft:planks",
+      "minecraft:stick",
+      "minecraft:stonecutter",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "sign_smith",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "#minecraft:planks",
+      "minecraft:stick",
+      "minecraft:iron_ingot",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "sign_tavern",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "#minecraft:planks",
+      "minecraft:stick",
+      "minecraft:barrel",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "signpost",
+    "count": 2,
+    "kind": "shaped",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks",
+      null,
+      "minecraft:stick",
+      null,
+      null,
+      "minecraft:stick",
+      null
+    ]
+  },
+  {
+    "id": "smith_anvil",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:iron_ingot",
+      "minecraft:iron_ingot",
+      "minecraft:iron_ingot",
+      null,
+      "minecraft:cobblestone",
+      null,
+      "minecraft:cobblestone",
+      "minecraft:cobblestone",
+      "minecraft:cobblestone"
+    ]
+  },
+  {
+    "id": "smoked_fish",
+    "count": 1,
+    "kind": "smoking",
+    "w": 1,
+    "h": 1,
+    "grid": [
+      "minecraft:tropical_fish"
+    ]
+  },
+  {
+    "id": "stool",
+    "count": 2,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "#minecraft:wooden_slabs",
+      "#minecraft:wooden_slabs",
+      "#minecraft:wooden_slabs",
+      "minecraft:stick",
+      null,
+      "minecraft:stick"
+    ]
+  },
+  {
+    "id": "tavern_keg",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:barrel",
+      "minecraft:bowl",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "territory_banner",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:stick",
+      "minecraft:stick",
+      "#minecraft:wool",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "town_hall_desk",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "#minecraft:planks",
+      "minecraft:paper",
+      "#minecraft:planks",
+      "#minecraft:logs",
+      "minecraft:crafting_table",
+      "#minecraft:logs",
+      "#minecraft:logs",
+      null,
+      "#minecraft:logs"
+    ]
+  },
+  {
+    "id": "wall_shelf",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "#minecraft:wooden_slabs",
+      "#minecraft:wooden_slabs",
+      "#minecraft:wooden_slabs",
+      "minecraft:glass_bottle",
+      null,
+      "minecraft:glass_bottle"
+    ]
+  },
+  {
+    "id": "war_horn",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:iron_ingot",
+      "minecraft:iron_ingot",
+      null,
+      "minecraft:iron_ingot",
+      "minecraft:gold_ingot",
+      "minecraft:iron_ingot",
+      null,
+      "minecraft:iron_ingot",
+      "minecraft:leather"
+    ]
+  },
+  {
+    "id": "warehouse_ledger",
+    "count": 1,
+    "kind": "shapeless",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:chest",
+      "minecraft:paper",
+      "minecraft:stick",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "id": "weapon_rack",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 2,
+    "grid": [
+      "minecraft:stick",
+      "minecraft:iron_ingot",
+      "minecraft:stick",
+      "#minecraft:planks",
+      "#minecraft:planks",
+      "#minecraft:planks"
+    ]
+  },
+  {
+    "id": "well",
+    "count": 1,
+    "kind": "shaped",
+    "w": 3,
+    "h": 3,
+    "grid": [
+      "minecraft:cobblestone",
+      null,
+      "minecraft:cobblestone",
+      "minecraft:cobblestone",
+      "minecraft:water_bucket",
+      "minecraft:cobblestone",
+      "minecraft:cobblestone",
+      "minecraft:cobblestone",
+      "minecraft:cobblestone"
+    ]
+  }
+]

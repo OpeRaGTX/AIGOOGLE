@@ -264,6 +264,12 @@ Job наследует `SiteJob`, то есть получает захват м
 - **Правки зоны** (обе карты): радиус правки 16 блоков, отклонённая правка сообщается игроку (`message.hearthholm.zone_rejected`), после принятой правки следующий запрос снимка не троттлится. Тест рисует настоящим симулированным мышом (`WaveJ3Test.realPaint`) на карте дровосека и шахтёра.
 - **Модуль**: `zone/MinerModule` регистрирует `ProfessionModule` с `ZoneData.Kind.MAP` и `ZoneMapService::open` (карта открывается на слое камня).
 
-## 17. Дальше (идеи)
+## 17. Волна K1: стройка, рецепты, совладельцы
+- `PlaceBlock`: `joinChest` (двойной сундук), `reshapeAround` (панели, решётки, заборы, стены, лестницы), `hasSupport` (навесное только на опору). `BuilderJob` ищет первую размещаемую операцию (до 600 вперёд): без материала или опоры блок пропускается, курсор `progress` остаётся на первом недостроенном, поэтому возврат без доп. состояния.
+- Опция колышка `stake` (keep/carry): `SettlementService.finishConstruction`; carry кладёт колышек в карманы строителя, `BuilderJob` без площадки относит его в склад.
+- `SettlementEvents.unlockRecipes` на JOIN; `assets/hearthholm/recipe_book.json` (генерируется `gen_assets.py` из data-рецептов) рисует главу 10 Хроники (`ChronicleScreen.recipes()`).
+- Совладельцы: `Civic.coOwners` (Codec с дефолтом), `SettlementService.canManage/isFounder/handleOwners`, пакеты `TownHallAction.OWNERS/ADD_OWNER/REMOVE_OWNER` + `OwnersView`; ратуша защищена от поломки не основателем (`PlayerBlockBreakEvents.BEFORE`).
+
+## 18. Дальше (идеи)
 
 События (ярмарки), семьи и дети, предпросмотр чертежа «призраком».

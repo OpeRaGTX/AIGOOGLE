@@ -716,4 +716,22 @@ w(f"assets/{NS}/models/block/mine_marker.json", {"parent": "block/block", "displ
         _rot3({"from": [12.5, 18.5, 7.5], "to": [14.5, 22, 8.5], "faces": {d: face("#iron", [0, 4, 2, 8]) for d in ("north", "south", "east", "west", "up", "down")}}),
     ]})
 
+# ---- wave K1: picture list of all crafting recipes for the Founder's Chronicle (client asset; the server data stays the source)
+_book = []
+_rdir = os.path.join(R, "data", NS, "recipe")
+for _f in sorted(os.listdir(_rdir)):
+    _r = json.load(open(os.path.join(_rdir, _f), encoding="utf-8"))
+    _res = _r["result"]
+    _e = {"id": _res["id"].split(":")[1], "count": _res.get("count", 1)}
+    if _r["type"] == "minecraft:crafting_shaped":
+        _e.update(kind="shaped", w=max(len(x) for x in _r["pattern"]), h=len(_r["pattern"]),
+                  grid=[_r["key"].get(c) if c != " " else None for row in _r["pattern"] for c in row.ljust(max(len(x) for x in _r["pattern"]))])
+    elif _r["type"] == "minecraft:crafting_shapeless":
+        _e.update(kind="shapeless", w=3, h=3, grid=_r["ingredients"] + [None] * (9 - len(_r["ingredients"])))
+    elif _r["type"] in ("minecraft:smoking",):
+        _e.update(kind="smoking", w=1, h=1, grid=[_r["ingredient"]])
+    else:
+        continue
+    _book.append(_e)
+w(f"assets/{NS}/recipe_book.json", _book)
 print("assets written")
