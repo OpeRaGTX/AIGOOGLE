@@ -91,6 +91,9 @@ final class WaveJ2Test {
     }
 
     private static void tree(ServerLevel l, BlockPos base) {
+        // dirt under the trunk, like worldgen: on a grass block (not in the dirt tag the lumberjack looks for) the tree only became choppable when the grass
+        // randomly turned into dirt, which made this wave fail now and then ("tree not chopped" after 120 s)
+        l.setBlock(base.below(), Blocks.DIRT.defaultBlockState(), 3);
         for (int dx = -2; dx <= 2; dx++)
             for (int dz = -2; dz <= 2; dz++)
                 for (int dy = 3; dy <= 5; dy++)
@@ -330,6 +333,11 @@ final class WaveJ2Test {
         int tB = await(ctx, sp, 2400, s -> !logAt(s, treeB));
         int tOut = await(ctx, sp, 1200, s -> s.overworld().getEntity(DROP_OUT) == null);
         log("J2 empty zone: tree outside the old zone felled after " + tB + " ticks; old radius also took the outside drop after " + tOut);
+        if (tB < 0) sp.getServer().runOnServer(s -> {
+            SettlerEntity j = jack(s);
+            log("J2 diag empty zone: lumberjack at " + j.blockPosition().toShortString() + " activity=" + j.brain().currentActivity() + " status='" + j.status().getString()
+                    + "' free slots=" + j.freeSlots() + " tree B base " + treeB.toShortString() + " dist=" + Math.round(Math.sqrt(j.blockPosition().distSqr(treeB))) + " claimed? marker worker=" + site(s).workerId());
+        });
         check(tB >= 0, "with an empty zone the radius behaviour no longer chops");
         check(tOut >= 0, "with an empty zone the radius sweep no longer picks up drops");
 

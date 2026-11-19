@@ -327,6 +327,7 @@ final class WaveI2Test {
             for (int i = 0; i < 15; i++) ar.inventory().setItem(i, new ItemStack(Items.DIRT));   // pockets nearly full
             BlockPos at = POST.offset(2, 0, -1).atY(l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, POST.getX() + 2, POST.getZ() - 1));
             ar.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 40.5);   // the archer is far away, the guard stands at the drop: no race for the loot
+            ar.setNoAi(true);   // ... and frozen there: left free it walks back along its patrol and sometimes takes the drop before the guard (seen in a full run)
             g.getNavigation().stop();
             g.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
             var z = zombie(l, at);
@@ -367,6 +368,7 @@ final class WaveI2Test {
             log("I2 loot picked up=" + picked.get() + " delivered to the warehouse=" + delivered.get() + " (emeralds " + emeralds0.get() + " -> " + HearthholmClientTest.stock(s, Items.EMERALD) + ")");
             check(picked.get() || delivered.get(), "guard did not pick up the loot");
             check(delivered.get(), "loot was not delivered to the warehouse");
+            get(s, ARCHER).setNoAi(false);
         });
 
         if (until("loot")) return;

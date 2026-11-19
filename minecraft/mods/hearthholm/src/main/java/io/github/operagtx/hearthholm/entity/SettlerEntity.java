@@ -997,8 +997,13 @@ public class SettlerEntity extends PathfinderMob {
     // ---- movement helpers -----------------------------------------------------------------
 
     public boolean canReach(BlockPos pos) {
-        return getEyePosition().distanceToSqr(Vec3.atCenterOf(pos)) <= 4.6 * 4.6
-                && Math.abs(pos.getY() + 0.5 - getY()) <= 3.2;
+        return canReach(pos, 4.6, 3.2);
+    }
+
+    /** Wave L0: reach with explicit limits (eye distance, vertical offset of the block's centre from the feet), e.g. the lumberjack's longer chopping reach. */
+    public boolean canReach(BlockPos pos, double eyeDistance, double maxDy) {
+        return getEyePosition().distanceToSqr(Vec3.atCenterOf(pos)) <= eyeDistance * eyeDistance
+                && Math.abs(pos.getY() + 0.5 - getY()) <= maxDy;
     }
 
     /** Short "unstuck" hop to a free standing spot near the target. */

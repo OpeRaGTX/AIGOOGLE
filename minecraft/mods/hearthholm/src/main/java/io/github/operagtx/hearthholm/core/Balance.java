@@ -13,7 +13,14 @@ public final class Balance {
         try {
             if (java.nio.file.Files.exists(file)) {
                 var parsed = com.google.gson.JsonParser.parseString(java.nio.file.Files.readString(file, java.nio.charset.StandardCharsets.UTF_8));
-                if (parsed.isJsonObject()) apply(parsed.getAsJsonObject());
+                if (parsed.isJsonObject()) {
+                    var o = parsed.getAsJsonObject();
+                    int ver = o.has("CONFIG_VERSION") ? o.get("CONFIG_VERSION").getAsInt() : 1;
+                    if (ver < CONFIG_VERSION) {
+                        java.nio.file.Files.move(file, file.resolveSibling("hearthholm.json.v" + ver + ".bak"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                        io.github.operagtx.hearthholm.Hearthholm.LOG.info("hearthholm.json is from an older version ({}): kept as a .bak file, the new defaults are used", ver);
+                    } else apply(o);
+                }
             }
             java.nio.file.Files.createDirectories(file.getParent());
             java.nio.file.Files.writeString(file, new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(toJson()), java.nio.charset.StandardCharsets.UTF_8);
@@ -25,6 +32,7 @@ public final class Balance {
     /** Current values of every tunable (int or int[] field), keyed by field name. */
     public static com.google.gson.JsonObject toJson() {
         com.google.gson.JsonObject o = new com.google.gson.JsonObject();
+        o.addProperty("CONFIG_VERSION", CONFIG_VERSION);
         try {
             for (java.lang.reflect.Field f : Balance.class.getDeclaredFields()) {
                 if (!java.lang.reflect.Modifier.isStatic(f.getModifiers()) || !java.lang.reflect.Modifier.isPublic(f.getModifiers())) continue;
@@ -102,7 +110,7 @@ public final class Balance {
     /** Settlers need this percent of a player's time per block (swings, repositioning), minus a bonus per level above 1. */
     public static int BREAK_PACE_PERCENT = 150, BREAK_SKILL_PERCENT_PER_LEVEL = 4;
     /** XP curve for every profession: cumulative XP for levels 1..5. One point per XP_WORK_TICKS ticks of active work. */
-    public static int[] LEVEL_XP = {0, 100, 300, 600, 950};
+    public static int[] LEVEL_XP = {0, 150, 450, 900, 1425};   // wave L0: levels 1.5x slower than before ({0, 100, 300, 600, 950})
     public static int XP_WORK_TICKS = 110, XP_ACTION_PERCENT = 10;
 
     // ---- wave K2: the civilian workday, the end-of-shift unload and the miner's pace
@@ -112,6 +120,16 @@ public final class Balance {
     public static int SHIFT_END_KEEP_FOOD = 2;
     /** The miner needs this percent of the usual time per block at level 1 and reaches the usual pace at {@code MINER_FULL_PACE_LEVEL}. */
     public static int MINER_SLOW_PERCENT_AT_LEVEL1 = 200, MINER_FULL_PACE_LEVEL = 5;
+
+    // ---- wave L0: the lumberjack's chopping reach (tenths of a block, eye to the trunk base), how long he walks before chopping from where he stands,
+    // and how long a tree he could not reach is left alone
+    public static int LUMBER_CHOP_REACH_X10 = 62, LUMBER_APPROACH_TICKS = 200, LUMBER_TREE_REST_TICKS = 1200;
+
+    /**
+     * Version of the default numbers. A {@code config/hearthholm.json} written by an older version pins every old default and would hide
+     * the new ones, so an older file is kept as {@code hearthholm.json.v<N>.bak} and the new defaults are written (wave L0: levels 1.5x slower).
+     */
+    private static final int CONFIG_VERSION = 2;
 
     /** Length of the civilian workday in ticks. */
     public static int workdayTicks() { return 12000 * WORKDAY_DAYLIGHT_PERCENT / 100; }

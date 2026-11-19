@@ -1,5 +1,6 @@
 package io.github.operagtx.hearthholm.entity.ai.jobs;
 
+import io.github.operagtx.hearthholm.core.Balance;
 import io.github.operagtx.hearthholm.entity.SettlerEntity;
 import io.github.operagtx.hearthholm.entity.ai.Task;
 import io.github.operagtx.hearthholm.entity.ai.tasks.*;
@@ -34,6 +35,8 @@ import java.util.*;
 /** Fells whole trees inside the forest zone, clears their leaves, collects drops and replants. */
 public final class LumberjackJob extends SiteJob {
     private final Set<BlockPos> ignored = new HashSet<>();
+    /** Wave L0: trees the lumberjack could not reach (leaves or terrain in the way) and the game time until which he leaves them alone. */
+    private final Map<BlockPos, Long> resting = new HashMap<>();
     /** Wave J2: trees found in the drawn zone (base logs), rescanned every few seconds - the zone is too big to scan per task. */
     private List<BlockPos> zoneTrees = List.of();
     private long nextZoneScan;
@@ -78,7 +81,7 @@ public final class LumberjackJob extends SiteJob {
             return new Wait(200, Vec3.atCenterOf(c));
         }
         s.setStatus("chopping");
-        return new Sequence(MoveTo.block(tree, 2.6), new Chop(tree, w.flag("replant")));
+        return new Fell(tree, w.flag("replant"));
     }
 
     /** Wave K2 (reverts the J1 filter): the sweep picks up every drop again, junk included; the shift-end unload empties the pockets. */
@@ -97,9 +100,10 @@ public final class LumberjackJob extends SiteJob {
     private @Nullable BlockPos findTree(ServerLevel level, BlockPos c, int r) {
         BlockPos best = null;
         double bestDist = Double.MAX_VALUE;
+        long now = level.getGameTime();
         for (BlockPos p : BlockPos.betweenClosed(c.offset(-r, -3, -r), c.offset(r, 8, r))) {
             BlockState st = level.getBlockState(p);
-            if (!st.is(BlockTags.LOGS) || ignored.contains(p)) continue;
+            if (!st.is(BlockTags.LOGS) || ignored.contains(p) || resting(p, now)) continue;
             if (!level.getBlockState(p.below()).is(BlockTags.DIRT)) continue;
             BlockState up = level.getBlockState(p.above());
             if (!up.is(BlockTags.LOGS) && !(up.getBlock() instanceof LeavesBlock)) continue;
@@ -119,7 +123,7 @@ public final class LumberjackJob extends SiteJob {
         BlockPos best = null;
         double bestDist = Double.MAX_VALUE;
         for (BlockPos p : zoneTrees) {
-            if (ignored.contains(p) || !level.getBlockState(p).is(BlockTags.LOGS)) continue;
+            if (ignored.contains(p) || resting(p, now) || !level.getBlockState(p).is(BlockTags.LOGS)) continue;
             double d = p.distSqr(settler.blockPosition());
             if (d < bestDist) { bestDist = d; best = p; }
         }
@@ -202,6 +206,63 @@ public final class LumberjackJob extends SiteJob {
     }
 
     /** Chops at the trunk, then the whole tree comes down at once. */
+    private static final double CHOP_DY = 4.5;
+
+    /** Wave L0: the eye-to-trunk distance the lumberjack chops from (a little more than a plain arm's reach, so a tree behind leaves is still felled). */
+    private static double chopReach() { return Balance.LUMBER_CHOP_REACH_X10 / 10.0; }
+
+    private boolean resting(BlockPos p, long now) {
+        Long until = resting.get(p);
+        if (until == null) return false;
+        if (now >= until) { resting.remove(p); return false; }
+        return true;
+    }
+
+    /**
+     * Wave L0: walk to a tree and fell it. When leaves or terrain keep him from getting close he chops from where he stands as long as the trunk is within
+     * {@link #chopReach()}; after {@code LUMBER_APPROACH_TICKS} of walking he does so as soon as the trunk is in reach. A tree he cannot reach at all
+     * rests for {@code LUMBER_TREE_REST_TICKS}, so he picks another one instead of staring at it forever (the old behaviour: the same tree again and again).
+     */
+    private final class Fell implements Task {
+        private final BlockPos base;
+        private final MoveTo walk;
+        private final Chop chop;
+        private boolean chopping;
+        private int ticks;
+
+        Fell(BlockPos base, boolean replant) {
+            this.base = base.immutable();
+            this.walk = MoveTo.block(base, 2.6);
+            this.chop = new Chop(base, replant);
+        }
+
+        @Override
+        public Status tick(SettlerEntity s) {
+            if (!chopping) {
+                ticks++;
+                boolean inReach = s.canReach(base, chopReach(), CHOP_DY);
+                Status st = inReach && ticks >= Balance.LUMBER_APPROACH_TICKS ? Status.DONE : walk.tick(s);
+                if (st == Status.RUNNING) return st;
+                walk.stop(s);
+                if (st == Status.FAILED && !inReach) return giveUp(s);
+                chopping = true;
+            }
+            Status st = chop.tick(s);
+            return st == Status.FAILED ? giveUp(s) : st;
+        }
+
+        private Status giveUp(SettlerEntity s) {
+            resting.put(base, s.level().getGameTime() + Balance.LUMBER_TREE_REST_TICKS);
+            return Status.FAILED;
+        }
+
+        @Override
+        public void stop(SettlerEntity s) {
+            walk.stop(s);
+            chop.stop(s);
+        }
+    }
+
     private final class Chop implements Task {
         private final BlockPos base;
         private final boolean replant;
@@ -219,7 +280,7 @@ public final class LumberjackJob extends SiteJob {
             ServerLevel level = (ServerLevel) s.level();
             BlockState baseState = level.getBlockState(base);
             if (!baseState.is(BlockTags.LOGS)) return Status.DONE;
-            if (!s.canReach(base) && !s.hopNear(base)) return Status.FAILED;
+            if (!s.canReach(base, chopReach(), CHOP_DY) && !s.hopNear(base)) return Status.FAILED;
             if (logs == null) {
                 logs = connectedLogs(level, base);
                 if (countLeaves(level, logs) < 3) {

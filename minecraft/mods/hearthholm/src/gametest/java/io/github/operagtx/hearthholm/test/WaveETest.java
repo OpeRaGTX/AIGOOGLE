@@ -474,7 +474,10 @@ final class WaveETest {
             log("FUEL consumed: coal " + coal0 + "->" + coal1 + " itemsBurned=" + st.stats.getOrDefault(Fuel.USED, 0) + " buffer=" + st.stats.getOrDefault(Fuel.BUFFER, 0)
                     + " cookedBeef=" + cooked);
             if (cooked < 1) throw new AssertionError("cook made no steaks");
-            if (st.stats.getOrDefault(Fuel.USED, 0) < 1 || coal1 >= coal0) throw new AssertionError("no fuel was consumed");
+            // coal was the fuel: the warehouse count fell, or the buffer holds the remainder of one burnt coal (1600 minus 200 per steak). The count alone is
+            // not enough: since K2 residents hand in their pockets at the end of a shift, a miner can deliver coal to the same warehouse meanwhile (seen: 2 -> 2)
+            boolean coalBurned = coal1 < coal0 || st.stats.getOrDefault(Fuel.BUFFER, 0) == Fuel.burn(Items.COAL) - cooked * Fuel.BATCH;
+            if (st.stats.getOrDefault(Fuel.USED, 0) < 1 || !coalBurned) throw new AssertionError("no fuel was consumed");
         });
 
         // ---- 7. raid fire: roofs and walls are not targets, fire markers are saved and cleaned up after a restart

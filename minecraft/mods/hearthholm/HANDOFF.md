@@ -97,6 +97,17 @@ save it there again, chmod 600). Read only new messages:
 photos: `getFile?file_id=` → `https://api.telegram.org/file/bot<token>/<file_path>` into the scratchpad. Last read
 update_id = **331527544**. Ignore the old .mp4/.mp3 documents (another project).
 
+## L0 DONE (2026-11-19 evening): lumberjack + levels + config
+- Lumberjack: `LumberjackJob.Fell` (walk, chop from up to 6.2 blocks when the approach fails, give an unreachable tree a 1200-tick rest instead of retrying it forever); levels
+  1.5x slower (`Balance.LEVEL_XP` {0,150,450,900,1425}); `config/hearthholm.json` now carries `CONFIG_VERSION` (2): an older file is moved to `.v1.bak` and the new defaults are used.
+  `WaveL0Test` (`HH_ONLY_L0=1`) OK; docs `docs/waves/L0.md`, `docs/design/L0.md`.
+- **Real cause of the random J2 failures** ("tree not chopped", "radius behaviour no longer chops"): the test trees stood on GRASS blocks, which are not in `BlockTags.DIRT`; the
+  lumberjack only counts a log with a dirt-tag block below, so a tree became choppable only when the grass randomly turned into dirt (~1400 ticks). Fixed in the J2/L0 tests by putting
+  dirt under the trunk (worldgen does the same). Production code was fine.
+- Other test flakes fixed on the way: wave E fuel check (coal count vs concurrent deliveries), I2 loot (archer frozen), C chieftain minions (sampled), D healer hours.
+  Still flaky and unrelated: wave C `brute did not break through the palisade` (the brute wanders off 34 blocks), seen once in about eight runs.
+- NEXT: L1 combat roles, L2 zones, L3 visuals (see the owner request below).
+
 ## OWNER REQUEST 2026-11-19 evening (Telegram message 161, final edited text) - THE NEXT WORK, start after K1/K2 are packaged
 Owner: "for now these changes; after my test we go on with everything else. Write the code architecturally, so functions can later be changed or
 reworked without breakage." Verbatim (Russian):
