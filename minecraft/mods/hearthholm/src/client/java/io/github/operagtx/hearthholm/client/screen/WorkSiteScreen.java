@@ -56,6 +56,27 @@ public final class WorkSiteScreen extends HhScreen {
         return font.split(type.hint(), panelW - 16).size() * 9;
     }
 
+    /** Wave M2: how many of the chosen blueprint's materials the storage does not hold in full (server numbers {@code _h<i>}, same order as the icons). */
+    private int missingCount() {
+        Blueprint bp = BlueprintLibrary.byIndex(view.values().getOrDefault("blueprint", 0));
+        if (bp == null || lockedTier(view.values().getOrDefault("blueprint", 0)) >= 0) return 0;
+        int n = 0, i = 0;
+        for (Blueprint.Material m : bp.materialList()) if (view.values().getOrDefault("_h" + i++, 0) < m.count()) n++;
+        return n;
+    }
+
+    /** A 7x7 check mark (enough in stock) or cross (missing), drawn from rectangles so it needs no font glyph. */
+    static void mark(GuiGraphicsExtractor g, int x, int y, boolean ok) {
+        int back = 0xE0101010, c = ok ? 0xFF6FE04A : 0xFFFF5A4A;
+        g.fill(x - 1, y - 1, x + 8, y + 8, back);
+        if (ok) {
+            int[][] px = {{0, 4}, {1, 5}, {2, 6}, {3, 5}, {4, 4}, {5, 3}, {6, 2}};
+            for (int[] p : px) { g.fill(x + p[0], y + p[1] - 1, x + p[0] + 1, y + p[1] + 1, c); }
+        } else {
+            for (int k = 0; k < 7; k++) { g.fill(x + k, y + k, x + k + 1, y + k + 1, c); g.fill(x + 6 - k, y + k, x + 7 - k, y + k + 1, c); }
+        }
+    }
+
     private int optionsTop() {
         return top + 22 + hintHeight() + 36;
     }
@@ -77,6 +98,10 @@ public final class WorkSiteScreen extends HhScreen {
         if (view.total() > 0) {
             button(Component.translatable("gui.hearthholm.reset_progress"), left + 8, top + panelH - 22, 150, 16,
                     b -> send(Payloads.WorkSiteAction.RESET, 0));
+        }
+        if (type.id().equals(WorkSiteTypes.CONSTRUCTION_ID) && missingCount() > 0) {   // wave M2: the missing materials go to the workshops' orders
+            button(fitLabel(Component.translatable("gui.hearthholm.order_missing"), 164), left + 162, top + panelH - 22, 170, 16,
+                    b -> send(Payloads.WorkSiteAction.ORDER_MISSING, 0)).setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.order_missing.tip")));
         }
     }
 
@@ -122,11 +147,14 @@ public final class WorkSiteScreen extends HhScreen {
                 for (Blueprint.Material m : bp.materialList()) {
                     int ix = x + (i % 16) * 20, iy = oy + 16 + (i / 16) * 20;
                     ItemStack st = new ItemStack(m.icon(), Math.min(99, m.count()));
+                    int have = view.values().getOrDefault("_h" + i, 0);
                     g.item(st, ix, iy);
                     g.itemDecorations(font, st, ix, iy, String.valueOf(m.count()));
+                    mark(g, ix + 9, iy - 3, have >= m.count());
                     if (inside(mx, my, ix, iy, 16, 16)) {
                         Component name = m.anyKey() != null ? Component.translatable("gui.hearthholm.any." + m.anyKey()) : st.getHoverName();
-                        Component tip = Component.empty().append(name).append(" ×" + m.count());
+                        Component tip = Component.empty().append(name).append(" ×" + m.count()).append(Component.literal("  "))
+                                .append(Component.translatable("gui.hearthholm.in_stock", have, m.count()).withStyle(have >= m.count() ? net.minecraft.ChatFormatting.GREEN : net.minecraft.ChatFormatting.RED));
                         if (m.anyKey() == null && Blueprint.isWoodVariant(m.icon())) tip = tip.copy().append(Component.translatable("gui.hearthholm.or_wood").withStyle(net.minecraft.ChatFormatting.GRAY));
                         g.setTooltipForNextFrame(font, tip, mx, my);
                     }

@@ -107,6 +107,8 @@ public final class Balance {
 
     // ---- wave I1: mining (torch spacing in dug steps, vein size cap, break pace and skill bonus, work-time XP)
     public static int MINE_TORCH_EVERY_SPIRAL = 6, MINE_TORCH_EVERY_TUNNEL = 8, MINE_VEIN_CAP = 32;
+    /** Wave M2: side branches of a tunnel start every {@code MINE_BRANCH_EVERY} cells and are {@code MINE_BRANCH_LENGTH} long (was 6: he dug too little to the sides). */
+    public static int MINE_BRANCH_EVERY = 4, MINE_BRANCH_LENGTH = 12;
     /** Settlers need this percent of a player's time per block (swings, repositioning), minus a bonus per level above 1. */
     public static int BREAK_PACE_PERCENT = 150, BREAK_SKILL_PERCENT_PER_LEVEL = 4;
     /** XP curve for every profession: cumulative XP for levels 1..5. One point per XP_WORK_TICKS ticks of active work. */

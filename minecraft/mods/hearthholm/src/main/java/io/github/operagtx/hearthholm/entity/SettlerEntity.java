@@ -920,11 +920,16 @@ public class SettlerEntity extends PathfinderMob {
         swingArm(InteractionHand.MAIN_HAND);
     }
 
-    private void tickNeeds() {
-        float rate = io.github.operagtx.hearthholm.core.Balance.HUNGER_RATE_PERCENT / 100f / 1800f;   // wave M1: x2.5 (Balance.HUNGER_RATE_PERCENT)
+    /** Food points lost per tick: 1/1800 times {@code Balance.HUNGER_RATE_PERCENT} (wave M1: 250 = 2.5x), the traits' hunger factors, halved asleep. */
+    public float hungerPerTick() {
+        float rate = io.github.operagtx.hearthholm.core.Balance.HUNGER_RATE_PERCENT / 100f / 1800f;
         for (Trait t : profile.traitList()) rate *= t.hungerRate();
         if (isSleeping()) rate *= 0.5f;
-        food = Math.max(0f, food - rate);
+        return rate;
+    }
+
+    private void tickNeeds() {
+        food = Math.max(0f, food - hungerPerTick());
         if (tickCount % 600 == 0) updateMood(true);
         else if (moodDirty && tickCount % 20 == 0) updateMood(false);
         if (bubbleTicks > 0 && --bubbleTicks == 0) entityData.set(DATA_BUBBLE, Component.empty());

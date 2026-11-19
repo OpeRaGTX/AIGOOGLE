@@ -44,7 +44,8 @@ public final class MinePlanner {
     /** Rough ticks the miner needs per block (walking included), for the map's time estimate only. */
     public static final int EST_TICKS_PER_BLOCK = 16;
     private static final int[][] RING = {{0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}};
-    private static final int BRANCH_EVERY = 4, BRANCH_LENGTH = 6;
+    /** Wave M2: tunnel direction relative to the way the marker faces. FORWARD is the old behaviour (and the default). */
+    public static final int FORWARD = 0, RIGHT = 1, LEFT = 2, BACK = 3, ALL = 4;
 
     private static final Map<String, Plan> CACHE = new LinkedHashMap<>(16, 0.75f, true) {
         @Override protected boolean removeEldestEntry(Map.Entry<String, Plan> e) { return size() > 32; }
@@ -65,7 +66,7 @@ public final class MinePlanner {
         }
         if (drawn(be) && be.getLevel() instanceof ServerLevel level) return drawnPlan(be, level, depth, be.flag("after"));
         return plan(be.getBlockPos(), be.facing(), be.option("mode"), depth, be.option("length"),
-                be.flag("branches"), be.flag("torches"));
+                be.flag("branches"), be.flag("torches"), be.option("direction"));
     }
 
     /** The plan of the painted cells alone (what the map's summary counts), whatever the plan option says. */
@@ -76,7 +77,7 @@ public final class MinePlanner {
     private static synchronized Plan drawnPlan(WorkSiteBlockEntity be, ServerLevel level, int depth, boolean after) {
         WorkZone zone = be.zone();
         String key = "D/" + be.getBlockPos().asLong() + "/" + be.facing() + "/" + zone.contentHash() + "/" + be.flag("torches") + "/" + after
-                + (after ? "/" + be.option("mode") + "/" + depth + "/" + be.option("length") + "/" + be.flag("branches") : "");
+                + (after ? "/" + be.option("mode") + "/" + depth + "/" + be.option("length") + "/" + be.flag("branches") + "/" + be.option("direction") + "/" + Balance.MINE_BRANCH_LENGTH : "");
         return CACHE.computeIfAbsent(key, k -> {
             BlockPos.MutableBlockPos mp = new BlockPos.MutableBlockPos();
             DrawnPlanner.Input in = new DrawnPlanner.Input(zone.copy(), be.getBlockPos(), be.facing(), be.flag("torches"),
@@ -87,7 +88,7 @@ public final class MinePlanner {
             int top = be.getBlockPos().getY(), bottom = top;
             for (BlockPos p : dug) bottom = Math.min(bottom, p.getY());
             if (!after) return new Plan(List.copyOf(steps), dug, DRAWN, be.getBlockPos(), top, bottom);
-            Plan auto = build(be.getBlockPos(), be.facing(), be.option("mode"), depth, be.option("length"), be.flag("branches"), be.flag("torches"));
+            Plan auto = build(be.getBlockPos(), be.facing(), be.option("mode"), depth, be.option("length"), be.flag("branches"), be.flag("torches"), be.option("direction"));
             int from = steps.size();
             steps.addAll(auto.steps());
             dug.addAll(auto.dug());
@@ -95,22 +96,41 @@ public final class MinePlanner {
         });
     }
 
-    public static synchronized Plan plan(BlockPos marker, Direction facing, int mode, int depth, int length,
-                                         boolean branches, boolean torches) {
-        String key = marker.asLong() + "/" + facing + "/" + mode + "/" + depth + "/" + length + "/" + branches + "/" + torches;
-        return CACHE.computeIfAbsent(key, k -> build(marker, facing, mode, depth, length, branches, torches));
+    public static Plan plan(BlockPos marker, Direction facing, int mode, int depth, int length, boolean branches, boolean torches) {
+        return plan(marker, facing, mode, depth, length, branches, torches, FORWARD);
     }
 
-    private static Plan build(BlockPos marker, Direction f, int mode, int depth, int length, boolean branches, boolean torches) {
+    public static synchronized Plan plan(BlockPos marker, Direction facing, int mode, int depth, int length,
+                                         boolean branches, boolean torches, int dir) {
+        String key = marker.asLong() + "/" + facing + "/" + mode + "/" + depth + "/" + length + "/" + branches + "/" + torches + "/" + dir
+                + "/" + Balance.MINE_BRANCH_LENGTH + "/" + Balance.MINE_BRANCH_EVERY;
+        return CACHE.computeIfAbsent(key, k -> build(marker, facing, mode, depth, length, branches, torches, dir));
+    }
+
+    /** The tunnel directions (as world directions) a {@code direction} option value digs, in digging order; the forward one first. */
+    public static List<Direction> arms(Direction facing, int dir) {
+        Direction right = facing.getClockWise();
+        return switch (dir) {
+            case RIGHT -> List.of(right);
+            case LEFT -> List.of(right.getOpposite());
+            case BACK -> List.of(facing.getOpposite());
+            case ALL -> List.of(facing, right, right.getOpposite(), facing.getOpposite());
+            default -> List.of(facing);
+        };
+    }
+
+    private static Plan build(BlockPos marker, Direction f, int mode, int depth, int length, boolean branches, boolean torches, int dir) {
         List<Step> steps = new ArrayList<>();
         Direction right = f.getClockWise();
         int y0 = marker.getY();
         BlockPos tunnelStart;
         BlockPos shaft;
         int bottom;
+        BlockPos spiralCenter = null;   // wave M2: the pillar the spiral winds around (side tunnels start from a hub through it)
         if (mode == SPIRAL) {
             BlockPos c = marker.relative(f, 3);
             shaft = c;
+            spiralCenter = c;
             int i = 0;
             BlockPos cell;
             int lastTorch = -100;
@@ -164,8 +184,41 @@ public final class MinePlanner {
             bottom = y0;
         }
 
+        // wave M2: one arm per chosen direction. The access (spiral/ladder) above is shared by all of them and is never dug again: the forward arm
+        // leaves from the stair's exit exactly as before (plans of existing mines keep their step order); the other arms leave from the bottom of the
+        // shaft, and for a spiral through a two-cell hub behind its pillar, which is the only way out of the winding stair that touches no stair floor.
+        boolean hub = false;
+        for (Direction td : arms(f, dir)) {
+            if (td == f) { arm(steps, tunnelStart, td, length, branches, torches); continue; }
+            BlockPos start = tunnelStart;
+            if (spiralCenter != null) {
+                BlockPos c0 = spiralCenter.atY(tunnelStart.getY()), h = c0.relative(f.getOpposite());
+                if (!hub) {
+                    for (BlockPos q : new BlockPos[]{c0, h}) {
+                        dig(steps, q.above());
+                        dig(steps, q);
+                        steps.add(new Step(Kind.FLOOR, q.below(), Direction.UP));
+                    }
+                    hub = true;
+                }
+                start = h;
+            }
+            arm(steps, start, td, length, branches, torches);
+        }
+        Set<BlockPos> dug = new HashSet<>();
+        for (Step s : steps) if (s.kind == Kind.DIG) dug.add(s.pos);
+        return new Plan(List.copyOf(steps), dug, mode, shaft, y0, bottom);
+    }
+
+    /**
+     * A straight 2-wide, 2-high tunnel of {@code length} cells leaving {@code start} in direction {@code td} (the second lane is on the clockwise side),
+     * wall torches on the lane, and every {@code MINE_BRANCH_EVERY} cells a pair of side branches {@code MINE_BRANCH_LENGTH} long (wave M2: longer than
+     * the old 6). For {@code td} = the marker's facing this is exactly the pre-M2 tunnel.
+     */
+    private static void arm(List<Step> steps, BlockPos start, Direction td, int length, boolean branches, boolean torches) {
+        Direction right = td.getClockWise();
         for (int k = 1; k <= length; k++) {
-            BlockPos p = tunnelStart.relative(f, k);
+            BlockPos p = start.relative(td, k);
             for (BlockPos q : new BlockPos[]{p, p.relative(right)}) {
                 dig(steps, q.above());
                 dig(steps, q);
@@ -173,11 +226,11 @@ public final class MinePlanner {
             }
             // torch on the wall of the right-hand lane
             if (torches && k % Balance.MINE_TORCH_EVERY_TUNNEL == 2) steps.add(new Step(Kind.TORCH, p.relative(right).above(), right.getOpposite()));
-            if (branches && k % BRANCH_EVERY == 0) {
+            if (branches && k % Balance.MINE_BRANCH_EVERY == 0) {
                 for (Direction side : new Direction[]{right.getOpposite(), right}) {
-                    for (int j = (side == right ? 2 : 1); j <= BRANCH_LENGTH + (side == right ? 1 : 0); j++) {
+                    for (int j = (side == right ? 2 : 1); j <= Balance.MINE_BRANCH_LENGTH + (side == right ? 1 : 0); j++) {
                         BlockPos q0 = p.relative(side, j);
-                        for (BlockPos q : new BlockPos[]{q0, q0.relative(f)}) {
+                        for (BlockPos q : new BlockPos[]{q0, q0.relative(td)}) {
                             dig(steps, q.above());
                             dig(steps, q);
                             steps.add(new Step(Kind.FLOOR, q.below(), Direction.UP));
@@ -186,9 +239,6 @@ public final class MinePlanner {
                 }
             }
         }
-        Set<BlockPos> dug = new HashSet<>();
-        for (Step s : steps) if (s.kind == Kind.DIG) dug.add(s.pos);
-        return new Plan(List.copyOf(steps), dug, mode, shaft, y0, bottom);
     }
 
     private static void dig(List<Step> steps, BlockPos pos) {

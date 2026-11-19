@@ -143,7 +143,7 @@ public abstract class BaseJob implements Job {
      * job's food budget ({@link Job#shiftEndFood}), plus the job's own supplies ({@link Job#shiftEndKeep}, e.g. the miner's torches and ladders).
      * {@link #hasUnloadable} and {@link #unloadInto} both read this plan, so they can never disagree.
      */
-    static int[] keepPlan(SettlerEntity s, Job job) {
+    public static int[] keepPlan(SettlerEntity s, Job job) {
         int n = s.inventory().getContainerSize();
         int[] keep = new int[n];
         int food = job.shiftEndFood();
@@ -163,7 +163,7 @@ public abstract class BaseJob implements Job {
     }
 
     /** Whether any pocket holds something the shift-end unload would hand over. */
-    static boolean hasUnloadable(SettlerEntity s, Job job) {
+    public static boolean hasUnloadable(SettlerEntity s, Job job) {
         int[] keep = keepPlan(s, job);
         for (int i = 0; i < keep.length; i++) if (s.inventory().getItem(i).getCount() > keep[i]) return true;
         return false;

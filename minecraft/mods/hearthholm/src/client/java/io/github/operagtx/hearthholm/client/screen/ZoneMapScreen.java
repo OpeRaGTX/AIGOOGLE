@@ -226,7 +226,12 @@ public final class ZoneMapScreen extends HhScreen {
             int bv = opt("branches", 1);
             button(fitLabel(Component.empty().append(br.label()).append(": ").append(br.valueLabel(bv)), HW - 8), x0, y, HW, 16, bb -> sendOption("branches", br.next(bv, 1)));
             torchButton(x0 + 90, y);
-            y += 18 + 40;
+            y += 18;
+            SiteOption dir = type.option("direction");   // wave M2: which way the tunnel leaves the (shared) staircase
+            int dv = opt("direction", 0);
+            button(fitLabel(Component.empty().append(dir.label()).append(": ").append(dir.valueLabel(dv)), RW - 8), x0, y, RW, 16,
+                    bb -> sendOption("direction", dir.next(dv, 1))).setTooltip(Tooltip.create(Component.translatable("option.hearthholm.direction.tip")));
+            y += 18 + 22;
         }
         // the plan switch and what happens when the plan is done
         planY = y;

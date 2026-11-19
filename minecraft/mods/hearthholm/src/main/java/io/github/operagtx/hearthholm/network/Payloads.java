@@ -81,6 +81,8 @@ public final class Payloads {
 
     public record WorkSiteAction(BlockPos pos, String key, int value) implements CustomPacketPayload {
         public static final String RESET = "__reset";
+        /** Wave M2: the construction stake's "add the missing materials to the workshop orders" button. */
+        public static final String ORDER_MISSING = "__order_missing";
         public static final Type<WorkSiteAction> TYPE = new Type<>(Hearthholm.id("work_site_action"));
         public static final StreamCodec<RegistryFriendlyByteBuf, WorkSiteAction> CODEC = StreamCodec.composite(
                 BlockPos.STREAM_CODEC, WorkSiteAction::pos,

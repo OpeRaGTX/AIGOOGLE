@@ -127,12 +127,16 @@ public final class SettlementService {
 
     /** Wave M1: the founder and all co-owners that are currently online (the audience of village notifications). */
     public static List<ServerPlayer> onlineManagers(ServerLevel level, Settlement st) {
+        return onlineManagers(st, level.getServer().getPlayerList()::getPlayer);
+    }
+
+    /** The same with an injectable player lookup (the test has one real player; it passes fake ones through here). */
+    public static List<ServerPlayer> onlineManagers(Settlement st, java.util.function.Function<UUID, ServerPlayer> lookup) {
         List<ServerPlayer> out = new ArrayList<>(2);
-        var players = level.getServer().getPlayerList();
-        ServerPlayer founder = players.getPlayer(st.owner);
+        ServerPlayer founder = lookup.apply(st.owner);
         if (founder != null) out.add(founder);
         for (Civic.CoOwner c : st.civic.coOwners) {
-            ServerPlayer p = players.getPlayer(c.id());
+            ServerPlayer p = lookup.apply(c.id());
             if (p != null && !out.contains(p)) out.add(p);
         }
         return out;
@@ -647,6 +651,13 @@ public final class SettlementService {
             Blueprint bp = io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.byIndex(w.option("blueprint"));
             if (bp != null) total = bp.ops(w.getBlockPos(), w.facing()).size();
         }
+        if (s != null && w.type().id().equals(WorkSiteTypes.CONSTRUCTION_ID)) {   // wave M2: stock of every blueprint material (check marks on the stake screen)
+            Blueprint bp = io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.byIndex(w.option("blueprint"));
+            if (bp != null) {
+                int[] have = io.github.operagtx.hearthholm.crafting.MaterialOrders.stock(level, s, bp, w.getBlockPos());
+                for (int i = 0; i < have.length; i++) values.put("_h" + i, Math.min(have[i], 99999));
+            }
+        }
         if (s != null) {
             values.put("_tier", s.tier().index());
             for (String name : s.civic.unlocked) {
@@ -664,13 +675,57 @@ public final class SettlementService {
         Settlement s = manager(level).byId(w.settlementId());
         if (s != null && !canManage(player, s)) return;
         if (Payloads.WorkSiteAction.RESET.equals(a.key())) w.setProgress(0);
+        else if (Payloads.WorkSiteAction.ORDER_MISSING.equals(a.key())) orderMissingMaterials(player, level, s, w);
         else if ("blueprint".equals(a.key()) && s != null && w.type().id().equals(WorkSiteTypes.CONSTRUCTION_ID)
                 && !blueprintOpen(s, a.value())) {
             Blueprint bp = io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.byIndex(a.value());
             player.sendSystemMessage(Component.translatable("message.hearthholm.blueprint_locked", bp == null ? "?" : bp.label(),
                     SettlementTier.TIERS.get(io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.requiredTier(bp.id())).label()).withStyle(ChatFormatting.RED));
-        } else w.setOption(a.key(), a.value());
+        } else {
+            int before = w.option(a.key());
+            w.setOption(a.key(), a.value());
+            // wave M2: a new tunnel direction restarts the plan from the top; the finished staircase is recognised as dug and skipped, never dug again
+            if ("direction".equals(a.key()) && w.type().id().equals(WorkSiteTypes.MINE_ID) && w.option("direction") != before) w.setProgress(0);
+        }
         ServerPlayNetworking.send(player, new Payloads.OpenWorkSite(siteView(level, w, s)));
+    }
+
+    /** Wave M2: the stake's "add the missing to the orders" button; tells the player what was ordered and what no workshop can make. */
+    private static void orderMissingMaterials(ServerPlayer player, ServerLevel level, @Nullable Settlement s, WorkSiteBlockEntity w) {
+        Blueprint bp = io.github.operagtx.hearthholm.blueprint.BlueprintLibrary.byIndex(w.option("blueprint"));
+        if (s == null || bp == null || !w.type().id().equals(WorkSiteTypes.CONSTRUCTION_ID)) return;
+        var r = io.github.operagtx.hearthholm.crafting.MaterialOrders.orderMissing(level, s, bp, w.getBlockPos());
+        if (r.ordered().isEmpty() && r.unchanged().isEmpty() && r.refused().isEmpty()) {
+            player.sendSystemMessage(Component.translatable("message.hearthholm.order_missing_none").withStyle(ChatFormatting.GREEN));
+            return;
+        }
+        if (!r.ordered().isEmpty()) {
+            Component names = itemNames(r.ordered());
+            player.sendSystemMessage(Component.translatable("message.hearthholm.order_missing_done", r.ordered().size(), names).withStyle(ChatFormatting.GREEN));
+            manager(level).setDirty();
+        }
+        if (!r.unchanged().isEmpty())
+            player.sendSystemMessage(Component.translatable("message.hearthholm.order_missing_already", itemNames(r.unchanged())).withStyle(ChatFormatting.GRAY));
+        if (!r.refused().isEmpty()) {
+            net.minecraft.network.chat.MutableComponent list = Component.empty();
+            int n = 0;
+            for (var f : r.refused()) {
+                if (n++ >= 6) { list.append(Component.literal(", ...")); break; }
+                list.append(n == 1 ? Component.empty() : Component.literal("; ")).append(new ItemStack(f.item()).getHoverName())
+                        .append(Component.literal(" (")).append(Component.translatable("message.hearthholm.order_blocker." + f.why().name().toLowerCase(java.util.Locale.ROOT))).append(Component.literal(")"));
+            }
+            player.sendSystemMessage(Component.translatable("message.hearthholm.order_missing_refused", list).withStyle(ChatFormatting.YELLOW));
+        }
+    }
+
+    private static Component itemNames(List<Item> items) {
+        net.minecraft.network.chat.MutableComponent out = Component.empty();
+        int n = 0;
+        for (Item it : items) {
+            if (n++ >= 8) { out.append(Component.literal(", ...")); break; }
+            out.append(n == 1 ? Component.empty() : Component.literal(", ")).append(new ItemStack(it).getHoverName());
+        }
+        return out;
     }
 
     /** Whether the settlement may build blueprint {@code index} (tier reached, or bought from a trader). */
@@ -821,12 +876,12 @@ public final class SettlementService {
                 if (!rest.isEmpty()) e.store(rest);
             }
         }
-        if (e.getOffhandItem().isEmpty()) e.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
         Identifier old = e.professionId();
-        e.setXp(Professions.KNIGHT_ID, Math.max(e.xp(Professions.KNIGHT_ID), e.xp(old)));
-        e.setProfession(Professions.KNIGHT);
+        e.setXp(pr.to(), Math.max(e.xp(pr.to()), e.xp(old)));
+        e.setProfession(Professions.get(pr.to()));
         e.setHealth(e.getMaxHealth());
         e.addThought("knighted", io.github.operagtx.hearthholm.core.Balance.MOOD_KNIGHTED, 48000);
+            if (e.getOffhandItem().isEmpty()) e.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
         e.say("knighted");
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.TOTEM_OF_UNDYING, e.getX(), e.getY() + 1.2, e.getZ(), 30, 0.4, 0.6, 0.4, 0.3);
         level.playSound(null, e.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.8f, 0.8f);
