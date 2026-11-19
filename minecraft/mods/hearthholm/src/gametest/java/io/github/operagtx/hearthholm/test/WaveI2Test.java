@@ -124,6 +124,15 @@ final class WaveI2Test {
 
     private static double flatDist(Vec3 a, Vec3 b) { return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.z - b.z) * (a.z - b.z)); }
 
+    /** Emeralds in the chests next to the patrol post (the guard's first drop-off). */
+    private static int postChestEmeralds(MinecraftServer s) {
+        int n = 0;
+        for (BlockPos p : BlockPos.betweenClosed(POST.offset(-3, -3, -3), POST.offset(3, 3, 3))) {
+            if (s.overworld().getBlockEntity(p) instanceof net.minecraft.world.Container c) for (int i = 0; i < c.getContainerSize(); i++) if (c.getItem(i).is(Items.EMERALD)) n += c.getItem(i).getCount();
+        }
+        return n;
+    }
+
     static void run(ClientGameTestContext ctx, TestSingleplayerContext sp) {
         sp.getServer().runCommand("gamemode creative @a");
         sp.getServer().runCommand("time set 10000");
@@ -332,7 +341,7 @@ final class WaveI2Test {
                 var near = Loot.nearest(g, Vec3.atBottomCenterOf(POST), 12);
                 log("I2 diag loot guard=" + g.blockPosition().toShortString() + " act=" + g.brain().currentActivity() + " status=" + g.status().getString() + " free=" + g.freeSlots()
                         + " nearest=" + (near == null ? "none" : near.blockPosition().toShortString()) + " posts=" + town(s).sitesOf(WorkSiteTypes.PATROL_ID).size());
-                if (HearthholmClientTest.stock(s, Items.EMERALD) > emeralds0.get()) delivered.set(true);
+                if (HearthholmClientTest.stock(s, Items.EMERALD) > emeralds0.get() || postChestEmeralds(s) > 0) delivered.set(true);   // drop-offs: the post chest first, then the warehouse
             });
         }
         sp.getServer().runOnServer(s -> {
