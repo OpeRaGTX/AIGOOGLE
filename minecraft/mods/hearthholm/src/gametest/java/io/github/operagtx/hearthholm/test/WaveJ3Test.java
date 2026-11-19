@@ -148,7 +148,7 @@ final class WaveJ3Test {
         in.holdMouse(com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
         ctx.waitTicks(3);
         for (int i = 0; i < 5; i++) { in.moveCursor(ppc * sc * 1.2, ppc * sc * 0.8); ctx.waitTicks(2); }
-        in.releaseMouse(0);
+        in.releaseMouse(com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
         ctx.waitTicks(12);
         AtomicInteger afterRect = new AtomicInteger();
         sp.getServer().runOnServer(s -> afterRect.set(((WorkSiteBlockEntity) s.overworld().getBlockEntity(site)).zone() == null ? 0 : ((WorkSiteBlockEntity) s.overworld().getBlockEntity(site)).zone().cellCount()));
@@ -159,7 +159,7 @@ final class WaveJ3Test {
         in.holdMouse(com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
         ctx.waitTicks(3);
         for (int i = 0; i < 8; i++) { in.moveCursor(ppc * sc * 1.5, ppc * sc * 0.5); ctx.waitTicks(2); }
-        in.releaseMouse(0);
+        in.releaseMouse(com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
         ctx.waitTicks(12);
         AtomicInteger afterBrush = new AtomicInteger();
         sp.getServer().runOnServer(s -> afterBrush.set(((WorkSiteBlockEntity) s.overworld().getBlockEntity(site)).zone() == null ? 0 : ((WorkSiteBlockEntity) s.overworld().getBlockEntity(site)).zone().cellCount()));
