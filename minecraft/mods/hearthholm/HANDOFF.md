@@ -83,6 +83,8 @@ No PR unless asked. Stop hook demands commit+push before ending a turn.
 
 - **J2 Map zones + chopping block**: generic `zone/WorkZone` + `ZoneMapService` (snapshot, throttle, validated diffs) + client `ZoneMapWidget/Screen`; the lumberjack's block is a chopping block with an axe (same block id), its job works only inside the drawn zone (empty zone = old radius), plants saplings in the zone (`plant` option); settler screen bottom row sized to labels. Test `WaveJ2Test` (`HH_ONLY_J2=1`). Next: **J3** the miner reuses it (`WorkZone.register(MINE_ID, Spec(100, 2, true))`, layer mode snapshots, `ZoneMapScreen` layer row).
 
+- **J3 Miner's stone + 3D dig plan**: `zone/MinerModule`, `WorkZone` heights 1-4 + `Spec.MINER` (50x50 cells of 2), `entity/ai/jobs/DrawnPlanner` (access stair 1:1, flood by layer, islands, open-to-sky = no stair), `zone/MineGuard` (protected places), options `plan`/`after`, map screen `ZoneMapScreen.initMiner` (slider, height, ghosts, ore, red cells, summary), block `mine_marker` = boulder with pickaxe (`tools/gen_j3_tex.py`). Zone edits: reach 16, rejection told to the owner (`message.zone_rejected`). Test `WaveJ3Test` (`HH_ONLY_J3=1`) incl. REAL simulated mouse painting on both maps. I2/D tests made robust (loot race, chase speed by game time, barracks wait). DESIGN section 16.
+
 ## Remaining gaps / ideas
 - Balance is theory + headless test only: tune after real play (now via `config/hearthholm.json`).
 - End dimension untested for the party; raid casualties non-deterministic.
