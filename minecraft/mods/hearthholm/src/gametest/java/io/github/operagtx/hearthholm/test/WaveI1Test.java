@@ -351,7 +351,7 @@ final class WaveI1Test {
                     if (placed > placedStart.get() + 1) lastPlace.set(now);
                     lastPlaced.set(placed);
                 }
-                if (!(l.getBlockEntity(STAKE_I) instanceof WorkSiteBlockEntity)) builderDone.set(true);
+                if (!(l.getBlockEntity(STAKE_I) instanceof WorkSiteBlockEntity sw) || !sw.flag("build")) builderDone.set(true);   // K1: the stake stays, building switches off
                 SettlerEntity miner = null;
                 for (SettlerEntity e : settlers(s)) if (e.professionId().equals(Professions.MINER.id())) miner = e;
                 if (miner != null) {

@@ -202,6 +202,7 @@ final class WaveH3Test {
                     if (lastProgress.get() == lastLogged.get() && w.workerId() != null && l.getEntity(w.workerId()) instanceof SettlerEntity b && lastProgress.get() >= 0)
                         log("H3 builder status " + b.status().getString() + " inv=" + (18 - b.freeSlots()) + " progress=" + w.progress() + " pos=" + b.blockPosition().toShortString());
                     lastLogged.set(lastProgress.get());
+                    if (!w.flag("build")) finished.set(true);   // K1: the kept stake switches building off when the house is done
                 }
                 else finished.set(true);   // finishConstruction takes the stake away
             });
