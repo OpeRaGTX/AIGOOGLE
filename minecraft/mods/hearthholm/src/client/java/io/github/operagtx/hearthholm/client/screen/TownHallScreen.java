@@ -150,7 +150,7 @@ public final class TownHallScreen extends HhScreen {
         y = top + 142;
         if (owners.online().isEmpty()) text(g, Component.translatable("gui.hearthholm.owners.no_online"), x, y + 2, DIM);
         for (int i = 0; i < owners.online().size() && i < 3; i++, y += 16) text(g, owners.online().get(i).name(), x + 4, y + 2, TEXT);
-        g.textWithWordWrap(font, Component.translatable("gui.hearthholm.owners.tip"), x, top + panelH - 28, panelW - 20, DIM);
+        g.textWithWordWrap(font, Component.translatable("gui.hearthholm.owners.tip"), x, top + panelH - 40, panelW - 20, DIM);
     }
 
     @Override
