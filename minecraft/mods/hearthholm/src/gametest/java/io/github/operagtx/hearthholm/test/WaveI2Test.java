@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.github.operagtx.hearthholm.test.HearthholmClientTest.*;
@@ -214,7 +215,8 @@ final class WaveI2Test {
             g.setTarget(z);
         });
         ctx.waitTicks(30);
-        sp.getServer().runOnServer(s -> p0.set(get(s, GUARD).position()));
+        AtomicLong chaseT0 = new AtomicLong();
+        sp.getServer().runOnServer(s -> { p0.set(get(s, GUARD).position()); chaseT0.set(s.overworld().getGameTime()); });
         for (int i = 0; i < 2; i++) {
             ctx.waitTicks(20);
             sp.getServer().runOnServer(s -> {
@@ -225,7 +227,7 @@ final class WaveI2Test {
         }
         sp.getServer().runOnServer(s -> {
             SettlerEntity g = get(s, GUARD);
-            double bps = flatDist(p0.get(), g.position()) / 2.0;
+            double bps = flatDist(p0.get(), g.position()) / Math.max(0.5, (s.overworld().getGameTime() - chaseT0.get()) / 20.0);   // game time, not wall ticks: robust under load
             log("I2 guard speed chasing = " + String.format("%.2f", bps) + " b/s (player sprint 5.6) target=" + (g.getTarget() != null));
             check(bps > 4.9 && bps < 6.3, "chasing speed " + bps);
             g.setTarget(null);
@@ -309,7 +311,7 @@ final class WaveI2Test {
             emeralds0.set(HearthholmClientTest.stock(s, Items.EMERALD));
             SettlerEntity ar = get(s, ARCHER);   // the archer patrols the same post and loots as well
             for (int i = 0; i < 15; i++) g.inventory().setItem(i, new ItemStack(Items.DIRT));
-            for (int i = 0; i < 18; i++) ar.inventory().setItem(i, new ItemStack(Items.DIRT));   // the archer cannot take the loot: the guard carries it home (no race)   // pockets nearly full
+            ar.setProfession(Professions.UNEMPLOYED);   // the archer sits this out (restored below): the guard carries the loot home, no race   // pockets nearly full
             BlockPos at = POST.offset(2, 0, -1).atY(l.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, POST.getX() + 2, POST.getZ() - 1));
             var z = zombie(l, at);
             ItemEntity drop = new ItemEntity(l, at.getX() + 0.5, at.getY() + 0.2, at.getZ() + 0.5, new ItemStack(Items.EMERALD, 3));
@@ -346,6 +348,7 @@ final class WaveI2Test {
             });
         }
         sp.getServer().runOnServer(s -> {
+            get(s, ARCHER).setProfession(Professions.ARCHER);
             log("I2 loot picked up=" + picked.get() + " delivered to the warehouse=" + delivered.get() + " (emeralds " + emeralds0.get() + " -> " + HearthholmClientTest.stock(s, Items.EMERALD) + ")");
             check(picked.get() || delivered.get(), "guard did not pick up the loot");
             check(delivered.get(), "loot was not delivered to the warehouse");
