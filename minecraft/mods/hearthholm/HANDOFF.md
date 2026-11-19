@@ -1,7 +1,7 @@
 # HANDOFF — read this first after /clear
 
 Orchestrator notes for continuing **Hearthholm** (Fabric, MC 26.3). Owner writes Russian → answer in Russian,
-briefly. Owner wants full autonomy: **no questions**, be creative, focus on city-building (Stonehearth / Craft the World
+briefly. Owner wants autonomy: ask only truly key questions (the owner allows them), be creative, focus on city-building (Stonehearth / Craft the World
 mechanics, no copied names/art). The orchestrator does **not** write code: it plans a wave, delegates it to ONE
 background Sonnet agent (`Agent`, model sonnet, `run_in_background`), verifies, then starts the next wave.
 
@@ -84,6 +84,49 @@ No PR unless asked. Stop hook demands commit+push before ending a turn.
 - **J2 Map zones + chopping block**: generic `zone/WorkZone` + `ZoneMapService` (snapshot, throttle, validated diffs) + client `ZoneMapWidget/Screen`; the lumberjack's block is a chopping block with an axe (same block id), its job works only inside the drawn zone (empty zone = old radius), plants saplings in the zone (`plant` option); settler screen bottom row sized to labels. Test `WaveJ2Test` (`HH_ONLY_J2=1`). Next: **J3** the miner reuses it (`WorkZone.register(MINE_ID, Spec(100, 2, true))`, layer mode snapshots, `ZoneMapScreen` layer row).
 
 - **J3 Miner's stone + 3D dig plan**: `zone/MinerModule`, `WorkZone` heights 1-4 + `Spec.MINER` (50x50 cells of 2), `entity/ai/jobs/DrawnPlanner` (access stair 1:1, flood by layer, islands, open-to-sky = no stair), `zone/MineGuard` (protected places), options `plan`/`after`, map screen `ZoneMapScreen.initMiner` (slider, height, ghosts, ore, red cells, summary), block `mine_marker` = boulder with pickaxe (`tools/gen_j3_tex.py`). Zone edits: reach 16, rejection told to the owner (`message.zone_rejected`). Test `WaveJ3Test` (`HH_ONLY_J3=1`) incl. REAL simulated mouse painting on both maps. I2/D tests made robust (loot race, chase speed by game time, barracks wait). DESIGN section 16.
+
+## Owner feedback channel (Telegram bot)
+The owner playtests in real survival and sends fixes + screenshots to a Telegram bot made for us. The token is NOT in
+the repo (public). It is in `~/.config/hearthholm/telegram_bot_token` (lost on container restart → ask the owner once and
+save it there again, chmod 600). Read only new messages:
+`curl -s "https://api.telegram.org/bot$(cat ~/.config/hearthholm/telegram_bot_token)/getUpdates?offset=<last_update_id+1>"`;
+photos: `getFile?file_id=` → `https://api.telegram.org/file/bot<token>/<file_path>` into the scratchpad. Last read
+update_id = **331527542**. Ignore the old .mp4/.mp3 documents (another project).
+
+## Next: waves K1 and K2 (owner decisions are final, start without questions)
+**Retest note:** owner reported "drawing on the zone map does nothing" (J2 build); J3 could not reproduce it with real
+simulated mouse input, raised edit reach to 16 and now shows the rejection reason in chat. Ask the owner to retest J3.
+
+**K1 — builder, recipes, co-owners**
+1. Builder (owner photo: glass panes and chests stand unconnected):
+   - after placing, update neighbour shapes: panes, fences, walls, iron bars, chests (double chests), stairs;
+   - attachables (torches, lanterns, ladders, buttons, wall signs, trapdoors, doors) are placed only after their support
+     block, never into air; facing is kept;
+   - missing material: skip that block, keep building the rest, return to skipped blocks when materials arrive;
+   - when the build is finished the stake is NOT dropped: it stays (option) or the builder carries it to the warehouse chest.
+2. Recipes:
+   - unlock ALL mod recipes in the recipe book on login;
+   - add a Founder's Chronicle chapter with recipe pictures;
+   - signpost and miner stone recipes must not collide with vanilla. The test checks every mod recipe against vanilla
+     recipes for collisions.
+3. Town hall "Add owner":
+   - list of online players with "Add", co-owner list with "Remove";
+   - co-owners manage everything; only the founder removes co-owners or breaks the town hall;
+   - Codec default is an empty list.
+
+**K2 — daily routine, miner pace**
+1. The workday starts when undead begin to burn (sunrise, MC time ~0 = 06:00) and lasts 0.75 of daylight
+   (~06:00–15:00). Then leisure (walk, talk, tavern) until dark; sleep at night. Guards keep their shifts.
+2. At the end of the shift settlers deposit EVERYTHING except the held tool/weapon, armor and a couple of food items:
+   to the chest near their work site, else the warehouse. Lumberjack: revert the J1 sweep filter (pick up all junk again).
+3. Miner 2x slower than now; reaches the current (I1) speed only at level 5.
+
+## Orchestration notes
+- One background Sonnet agent at a time (they share files). Test rules are in AGENTS_BRIEF "Test runs": develop on
+  `HH_ONLY_<wave>=1`, one full run at the end (~15–18 min).
+- After a rate limit (429) or a container restart: commit+push the agent's leftover changes, then SendMessage the same
+  agent to continue (it keeps its context). The stop hook demands pushing WIP whenever the tree is dirty or ahead.
+- Verify each wave yourself: `git log`, `HHTEST DONE`, 1–3 new screenshots; then send the zip to the owner (SendUserFile).
 
 ## Remaining gaps / ideas
 - Balance is theory + headless test only: tune after real play (now via `config/hearthholm.json`).
