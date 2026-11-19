@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:barrel",
+    "minecraft:bowl"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:tavern_keg"
+  }
+}

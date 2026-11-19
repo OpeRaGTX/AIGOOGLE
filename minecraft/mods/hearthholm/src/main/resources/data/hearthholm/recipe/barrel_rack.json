@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "#minecraft:planks",
+    "B": "minecraft:barrel"
+  },
+  "pattern": [
+    "PBP",
+    "PPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:barrel_rack"
+  }
+}

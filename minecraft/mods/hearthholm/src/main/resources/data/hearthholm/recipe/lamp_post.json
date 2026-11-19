@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "L": "minecraft:lantern",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "L",
+    "I",
+    "I"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:lamp_post"
+  }
+}

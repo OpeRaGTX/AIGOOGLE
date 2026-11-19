@@ -1,0 +1,116 @@
+{
+  "workshop.saw": {
+    "sounds": [
+      "hearthholm:workshop/saw1",
+      "hearthholm:workshop/saw2"
+    ],
+    "subtitle": "subtitles.hearthholm.workshop.saw"
+  },
+  "workshop.chisel": {
+    "sounds": [
+      "hearthholm:workshop/chisel1",
+      "hearthholm:workshop/chisel2"
+    ],
+    "subtitle": "subtitles.hearthholm.workshop.chisel"
+  },
+  "workshop.hammer": {
+    "sounds": [
+      "hearthholm:workshop/hammer1",
+      "hearthholm:workshop/hammer2"
+    ],
+    "subtitle": "subtitles.hearthholm.workshop.hammer"
+  },
+  "workshop.sizzle": {
+    "sounds": [
+      "hearthholm:workshop/sizzle1",
+      "hearthholm:workshop/sizzle2"
+    ],
+    "subtitle": "subtitles.hearthholm.workshop.sizzle"
+  },
+  "social.bell": {
+    "sounds": [
+      "hearthholm:social/bell1"
+    ],
+    "subtitle": "subtitles.hearthholm.social.bell"
+  },
+  "social.murmur": {
+    "sounds": [
+      "hearthholm:social/murmur1",
+      "hearthholm:social/murmur2",
+      "hearthholm:social/murmur3",
+      "hearthholm:social/murmur4"
+    ],
+    "subtitle": "subtitles.hearthholm.social.murmur"
+  },
+  "social.festival": {
+    "sounds": [
+      {
+        "name": "hearthholm:social/festival",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.hearthholm.social.festival"
+  },
+  "threat.raid_horn": {
+    "sounds": [
+      "hearthholm:threat/raid_horn"
+    ],
+    "subtitle": "subtitles.hearthholm.threat.raid_horn"
+  },
+  "threat.alarm_bell": {
+    "sounds": [
+      "hearthholm:threat/alarm_bell"
+    ],
+    "subtitle": "subtitles.hearthholm.threat.alarm_bell"
+  },
+  "threat.rift_hum": {
+    "sounds": [
+      "hearthholm:threat/rift_hum"
+    ],
+    "subtitle": "subtitles.hearthholm.threat.rift_hum"
+  },
+  "threat.boss_roar": {
+    "sounds": [
+      "hearthholm:threat/boss_roar"
+    ],
+    "subtitle": "subtitles.hearthholm.threat.boss_roar"
+  },
+  "party.horn": {
+    "sounds": [
+      "hearthholm:party/horn"
+    ],
+    "subtitle": "subtitles.hearthholm.party.horn"
+  },
+  "workshop.chop": {
+    "sounds": [
+      "hearthholm:workshop/chop1",
+      "hearthholm:workshop/chop2"
+    ],
+    "subtitle": "subtitles.hearthholm.workshop.chop"
+  },
+  "workshop.pick": {
+    "sounds": [
+      "hearthholm:workshop/pick1",
+      "hearthholm:workshop/pick2"
+    ],
+    "subtitle": "subtitles.hearthholm.workshop.pick"
+  },
+  "social.level_up": {
+    "sounds": [
+      "hearthholm:social/level_up"
+    ],
+    "subtitle": "subtitles.hearthholm.social.level_up"
+  },
+  "town.caravan_horn": {
+    "sounds": [
+      "hearthholm:town/caravan_horn"
+    ],
+    "subtitle": "subtitles.hearthholm.town.caravan_horn"
+  },
+  "town.quest_done": {
+    "sounds": [
+      "hearthholm:town/quest_done"
+    ],
+    "subtitle": "subtitles.hearthholm.town.quest_done"
+  }
+}

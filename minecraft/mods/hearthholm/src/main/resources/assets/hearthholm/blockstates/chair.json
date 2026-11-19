@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/chair"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/chair",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/chair",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/chair",
+      "y": 270
+    }
+  }
+}

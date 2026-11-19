@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/cook_stove"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/cook_stove",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/cook_stove",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/cook_stove",
+      "y": 270
+    }
+  }
+}

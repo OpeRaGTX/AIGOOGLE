@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:porkchop",
+    "minecraft:beef",
+    "minecraft:string"
+  ],
+  "result": {
+    "count": 3,
+    "id": "hearthholm:sausage"
+  }
+}

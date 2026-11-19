@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "hearthholm-test",
+  "version": "0.0.0",
+  "name": "Hearthholm client game test",
+  "environment": "*",
+  "entrypoints": { "fabric-client-gametest": ["io.github.operagtx.hearthholm.test.HearthholmClientTest"] },
+  "depends": { "hearthholm": "*" }
+}

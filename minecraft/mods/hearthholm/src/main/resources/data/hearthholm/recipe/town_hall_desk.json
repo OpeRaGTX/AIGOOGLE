@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "#minecraft:planks",
+    "R": "minecraft:paper",
+    "L": "#minecraft:logs",
+    "C": "minecraft:crafting_table"
+  },
+  "pattern": [
+    "PRP",
+    "LCL",
+    "L L"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:town_hall_desk"
+  }
+}

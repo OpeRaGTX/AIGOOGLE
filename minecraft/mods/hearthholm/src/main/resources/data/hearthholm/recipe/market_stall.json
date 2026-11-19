@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "W": "#minecraft:wool",
+    "P": "#minecraft:planks"
+  },
+  "pattern": [
+    "WWW",
+    "P P"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:market_stall"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/weapon_rack"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/weapon_rack",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/weapon_rack",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/weapon_rack",
+      "y": 270
+    }
+  }
+}

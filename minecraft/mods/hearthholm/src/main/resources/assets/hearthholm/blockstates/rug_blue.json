@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/rug_blue"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/rug_blue",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/rug_blue",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/rug_blue",
+      "y": 270
+    }
+  }
+}

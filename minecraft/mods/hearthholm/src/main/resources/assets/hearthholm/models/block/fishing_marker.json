@@ -1,0 +1,7 @@
+{
+  "parent": "hearthholm:block/marker_template",
+  "textures": {
+    "post": "hearthholm:block/marker_post",
+    "sign": "hearthholm:block/fishing_sign"
+  }
+}

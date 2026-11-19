@@ -1,0 +1,94 @@
+{
+  "variants": {
+    "count=1,facing=north,on_table=false": {
+      "model": "hearthholm:block/bottles_1"
+    },
+    "count=1,facing=north,on_table=true": {
+      "model": "hearthholm:block/bottles_1_t"
+    },
+    "count=1,facing=east,on_table=false": {
+      "model": "hearthholm:block/bottles_1",
+      "y": 90
+    },
+    "count=1,facing=east,on_table=true": {
+      "model": "hearthholm:block/bottles_1_t",
+      "y": 90
+    },
+    "count=1,facing=south,on_table=false": {
+      "model": "hearthholm:block/bottles_1",
+      "y": 180
+    },
+    "count=1,facing=south,on_table=true": {
+      "model": "hearthholm:block/bottles_1_t",
+      "y": 180
+    },
+    "count=1,facing=west,on_table=false": {
+      "model": "hearthholm:block/bottles_1",
+      "y": 270
+    },
+    "count=1,facing=west,on_table=true": {
+      "model": "hearthholm:block/bottles_1_t",
+      "y": 270
+    },
+    "count=2,facing=north,on_table=false": {
+      "model": "hearthholm:block/bottles_2"
+    },
+    "count=2,facing=north,on_table=true": {
+      "model": "hearthholm:block/bottles_2_t"
+    },
+    "count=2,facing=east,on_table=false": {
+      "model": "hearthholm:block/bottles_2",
+      "y": 90
+    },
+    "count=2,facing=east,on_table=true": {
+      "model": "hearthholm:block/bottles_2_t",
+      "y": 90
+    },
+    "count=2,facing=south,on_table=false": {
+      "model": "hearthholm:block/bottles_2",
+      "y": 180
+    },
+    "count=2,facing=south,on_table=true": {
+      "model": "hearthholm:block/bottles_2_t",
+      "y": 180
+    },
+    "count=2,facing=west,on_table=false": {
+      "model": "hearthholm:block/bottles_2",
+      "y": 270
+    },
+    "count=2,facing=west,on_table=true": {
+      "model": "hearthholm:block/bottles_2_t",
+      "y": 270
+    },
+    "count=3,facing=north,on_table=false": {
+      "model": "hearthholm:block/bottles_3"
+    },
+    "count=3,facing=north,on_table=true": {
+      "model": "hearthholm:block/bottles_3_t"
+    },
+    "count=3,facing=east,on_table=false": {
+      "model": "hearthholm:block/bottles_3",
+      "y": 90
+    },
+    "count=3,facing=east,on_table=true": {
+      "model": "hearthholm:block/bottles_3_t",
+      "y": 90
+    },
+    "count=3,facing=south,on_table=false": {
+      "model": "hearthholm:block/bottles_3",
+      "y": 180
+    },
+    "count=3,facing=south,on_table=true": {
+      "model": "hearthholm:block/bottles_3_t",
+      "y": 180
+    },
+    "count=3,facing=west,on_table=false": {
+      "model": "hearthholm:block/bottles_3",
+      "y": 270
+    },
+    "count=3,facing=west,on_table=true": {
+      "model": "hearthholm:block/bottles_3_t",
+      "y": 270
+    }
+  }
+}

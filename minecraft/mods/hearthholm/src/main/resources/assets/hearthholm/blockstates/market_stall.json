@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/market_stall"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/market_stall",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/market_stall",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/market_stall",
+      "y": 270
+    }
+  }
+}

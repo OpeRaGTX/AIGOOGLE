@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/order_board"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/order_board",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/order_board",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/order_board",
+      "y": 270
+    }
+  }
+}

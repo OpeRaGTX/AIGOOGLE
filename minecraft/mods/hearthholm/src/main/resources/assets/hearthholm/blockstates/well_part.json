@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "facing=north,part=ring_edge": {
+      "model": "hearthholm:block/well_ring_edge"
+    },
+    "facing=east,part=ring_edge": {
+      "model": "hearthholm:block/well_ring_edge",
+      "y": 90
+    },
+    "facing=south,part=ring_edge": {
+      "model": "hearthholm:block/well_ring_edge",
+      "y": 180
+    },
+    "facing=west,part=ring_edge": {
+      "model": "hearthholm:block/well_ring_edge",
+      "y": 270
+    },
+    "facing=north,part=ring_corner": {
+      "model": "hearthholm:block/well_ring_corner"
+    },
+    "facing=east,part=ring_corner": {
+      "model": "hearthholm:block/well_ring_corner",
+      "y": 90
+    },
+    "facing=south,part=ring_corner": {
+      "model": "hearthholm:block/well_ring_corner",
+      "y": 180
+    },
+    "facing=west,part=ring_corner": {
+      "model": "hearthholm:block/well_ring_corner",
+      "y": 270
+    },
+    "facing=north,part=post": {
+      "model": "hearthholm:block/well_post"
+    },
+    "facing=east,part=post": {
+      "model": "hearthholm:block/well_post",
+      "y": 90
+    },
+    "facing=south,part=post": {
+      "model": "hearthholm:block/well_post",
+      "y": 180
+    },
+    "facing=west,part=post": {
+      "model": "hearthholm:block/well_post",
+      "y": 270
+    },
+    "facing=north,part=rope": {
+      "model": "hearthholm:block/well_rope"
+    },
+    "facing=east,part=rope": {
+      "model": "hearthholm:block/well_rope",
+      "y": 90
+    },
+    "facing=south,part=rope": {
+      "model": "hearthholm:block/well_rope",
+      "y": 180
+    },
+    "facing=west,part=rope": {
+      "model": "hearthholm:block/well_rope",
+      "y": 270
+    },
+    "facing=north,part=roof_corner": {
+      "model": "hearthholm:block/well_roof_corner"
+    },
+    "facing=east,part=roof_corner": {
+      "model": "hearthholm:block/well_roof_corner",
+      "y": 90
+    },
+    "facing=south,part=roof_corner": {
+      "model": "hearthholm:block/well_roof_corner",
+      "y": 180
+    },
+    "facing=west,part=roof_corner": {
+      "model": "hearthholm:block/well_roof_corner",
+      "y": 270
+    },
+    "facing=north,part=roof_edge": {
+      "model": "hearthholm:block/well_roof_edge"
+    },
+    "facing=east,part=roof_edge": {
+      "model": "hearthholm:block/well_roof_edge",
+      "y": 90
+    },
+    "facing=south,part=roof_edge": {
+      "model": "hearthholm:block/well_roof_edge",
+      "y": 180
+    },
+    "facing=west,part=roof_edge": {
+      "model": "hearthholm:block/well_roof_edge",
+      "y": 270
+    },
+    "facing=north,part=roof_post": {
+      "model": "hearthholm:block/well_roof_post"
+    },
+    "facing=east,part=roof_post": {
+      "model": "hearthholm:block/well_roof_post",
+      "y": 90
+    },
+    "facing=south,part=roof_post": {
+      "model": "hearthholm:block/well_roof_post",
+      "y": 180
+    },
+    "facing=west,part=roof_post": {
+      "model": "hearthholm:block/well_roof_post",
+      "y": 270
+    },
+    "facing=north,part=roof_center": {
+      "model": "hearthholm:block/well_roof_center"
+    },
+    "facing=east,part=roof_center": {
+      "model": "hearthholm:block/well_roof_center",
+      "y": 90
+    },
+    "facing=south,part=roof_center": {
+      "model": "hearthholm:block/well_roof_center",
+      "y": 180
+    },
+    "facing=west,part=roof_center": {
+      "model": "hearthholm:block/well_roof_center",
+      "y": 270
+    }
+  }
+}

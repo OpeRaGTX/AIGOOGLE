@@ -1,0 +1,323 @@
+{
+  "parent": "block/block",
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.625,
+        0.625,
+        0.625
+      ]
+    },
+    "ground": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        3,
+        0
+      ],
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        2.5,
+        0
+      ],
+      "scale": [
+        0.375,
+        0.375,
+        0.375
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
+    }
+  },
+  "textures": {
+    "particle": "hearthholm:block/well_stone",
+    "stone": "hearthholm:block/well_stone",
+    "water": "hearthholm:block/well_water",
+    "roof": "hearthholm:block/well_roof",
+    "post": "hearthholm:block/well_post",
+    "rope": "hearthholm:block/rope",
+    "bucket": "hearthholm:block/bucket",
+    "axle": "hearthholm:block/well_axle"
+  },
+  "elements": [
+    {
+      "from": [
+        7.5,
+        3,
+        7.5
+      ],
+      "to": [
+        8.5,
+        16,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#rope",
+          "uv": [
+            7.5,
+            0,
+            8.5,
+            13
+          ]
+        },
+        "south": {
+          "texture": "#rope",
+          "uv": [
+            7.5,
+            0,
+            8.5,
+            13
+          ]
+        },
+        "east": {
+          "texture": "#rope",
+          "uv": [
+            7.5,
+            0,
+            8.5,
+            13
+          ]
+        },
+        "west": {
+          "texture": "#rope",
+          "uv": [
+            7.5,
+            0,
+            8.5,
+            13
+          ]
+        },
+        "up": {
+          "texture": "#rope",
+          "uv": [
+            7.5,
+            7.5,
+            8.5,
+            8.5
+          ]
+        },
+        "down": {
+          "texture": "#rope",
+          "uv": [
+            7.5,
+            7.5,
+            8.5,
+            8.5
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        -3,
+        5
+      ],
+      "to": [
+        11,
+        3,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bucket",
+          "uv": [
+            5,
+            13,
+            11,
+            19
+          ]
+        },
+        "south": {
+          "texture": "#bucket",
+          "uv": [
+            5,
+            13,
+            11,
+            19
+          ]
+        },
+        "east": {
+          "texture": "#bucket",
+          "uv": [
+            5,
+            13,
+            11,
+            19
+          ]
+        },
+        "west": {
+          "texture": "#bucket",
+          "uv": [
+            5,
+            13,
+            11,
+            19
+          ]
+        },
+        "up": {
+          "texture": "#bucket",
+          "uv": [
+            5,
+            5,
+            11,
+            11
+          ]
+        },
+        "down": {
+          "texture": "#bucket",
+          "uv": [
+            5,
+            5,
+            11,
+            11
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        5.5,
+        3,
+        7.5
+      ],
+      "to": [
+        10.5,
+        3.8,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#post",
+          "uv": [
+            5.5,
+            12.2,
+            10.5,
+            13
+          ]
+        },
+        "south": {
+          "texture": "#post",
+          "uv": [
+            5.5,
+            12.2,
+            10.5,
+            13
+          ]
+        },
+        "east": {
+          "texture": "#post",
+          "uv": [
+            7.5,
+            12.2,
+            8.5,
+            13
+          ]
+        },
+        "west": {
+          "texture": "#post",
+          "uv": [
+            7.5,
+            12.2,
+            8.5,
+            13
+          ]
+        },
+        "up": {
+          "texture": "#post",
+          "uv": [
+            5.5,
+            7.5,
+            10.5,
+            8.5
+          ]
+        },
+        "down": {
+          "texture": "#post",
+          "uv": [
+            5.5,
+            7.5,
+            10.5,
+            8.5
+          ]
+        }
+      }
+    }
+  ]
+}

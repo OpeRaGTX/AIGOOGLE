@@ -1,0 +1,66 @@
+{
+ "palette": {
+  "L": "minecraft:gravel",
+  "P": "minecraft:cobblestone",
+  "R": "hearthholm:lamp_post[facing=north]",
+  "c": "minecraft:oak_fence",
+  "D": "hearthholm:flower_box[facing=north]",
+  "d": "hearthholm:counter[facing=north]",
+  "G": "hearthholm:market_stall[facing=north]",
+  "T": "hearthholm:crate",
+  "C": "hearthholm:barrel_rack[facing=north]",
+  "K": "minecraft:oak_log[axis=y]",
+  "b": "minecraft:spruce_planks",
+  "B": "hearthholm:mug[facing=north,count=2,on_table=true]",
+  "l": "hearthholm:plate_bread[facing=north,count=1,on_table=true]",
+  "p": "hearthholm:bottles[facing=north,count=2,on_table=true]",
+  "M": "hearthholm:candlestick[facing=north,count=1,on_table=true]",
+  "f": "hearthholm:wall_shelf[facing=north]",
+  "h": "hearthholm:hanging_herbs[facing=north]",
+  "t": "minecraft:white_wool",
+  "F": "minecraft:red_wool",
+  "g": "minecraft:lantern[hanging=true]"
+ },
+ "layers": [
+  [
+   "LLLLLLL",
+   "LLLLLLL",
+   "LLLLLLL",
+   "LPPPPPL",
+   "LLLLLLL",
+   "LLLLLLL"
+  ],
+  [
+   "R.....R",
+   "cD...Dc",
+   ".......",
+   ".ddGdd.",
+   ".TT..C.",
+   "KbbbbbK"
+  ],
+  [
+   ".......",
+   "c.....c",
+   ".......",
+   ".Bl.pM.",
+   "..fhf..",
+   "KbbbbbK"
+  ],
+  [
+   ".......",
+   "ctFtFtc",
+   "...g...",
+   ".......",
+   ".......",
+   "KbbbbbK"
+  ],
+  [
+   ".......",
+   "FtFtFtF",
+   "FtFtFtF",
+   "FtFtFtF",
+   "FtFtFtF",
+   "FtFtFtF"
+  ]
+ ]
+}

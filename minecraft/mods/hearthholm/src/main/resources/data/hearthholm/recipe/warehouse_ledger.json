@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:chest",
+    "minecraft:paper",
+    "minecraft:stick"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:warehouse_ledger"
+  }
+}

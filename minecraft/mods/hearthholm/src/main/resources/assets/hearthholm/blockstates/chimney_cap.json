@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/chimney_cap"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/chimney_cap",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/chimney_cap",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/chimney_cap",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "minecraft:cooked_chicken",
+    "C": "minecraft:clay_ball"
+  },
+  "pattern": [
+    "B",
+    "C"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:plate_roast"
+  }
+}

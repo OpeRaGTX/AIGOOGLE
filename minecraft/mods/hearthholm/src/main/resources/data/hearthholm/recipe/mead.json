@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:honey_bottle",
+    "minecraft:wheat"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:mead"
+  }
+}

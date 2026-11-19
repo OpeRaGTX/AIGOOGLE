@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/construction_stake"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/construction_stake",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/construction_stake",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/construction_stake",
+      "y": 270
+    }
+  }
+}

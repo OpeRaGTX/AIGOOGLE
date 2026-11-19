@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:furnace",
+    "minecraft:bowl",
+    "minecraft:cobblestone"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:cook_stove"
+  }
+}

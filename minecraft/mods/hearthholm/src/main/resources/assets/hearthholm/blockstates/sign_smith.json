@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/sign_smith"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/sign_smith",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/sign_smith",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/sign_smith",
+      "y": 270
+    }
+  }
+}

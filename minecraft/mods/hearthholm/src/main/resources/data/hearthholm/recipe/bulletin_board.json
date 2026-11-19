@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#minecraft:planks",
+    "minecraft:paper",
+    "minecraft:paper",
+    "minecraft:stick"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:bulletin_board"
+  }
+}

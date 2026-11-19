@@ -1,0 +1,690 @@
+{
+  "parent": "block/block",
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        -1.5,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ground": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        3,
+        0
+      ],
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        2.5,
+        0
+      ],
+      "scale": [
+        0.55,
+        0.55,
+        0.55
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ]
+    }
+  },
+  "textures": {
+    "particle": "hearthholm:block/hanging_lantern",
+    "hanging_lantern": "hearthholm:block/hanging_lantern",
+    "chain": "hearthholm:block/chain"
+  },
+  "elements": [
+    {
+      "from": [
+        5,
+        1,
+        5
+      ],
+      "to": [
+        11,
+        2,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            8,
+            8,
+            10
+          ]
+        },
+        "south": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            8,
+            8,
+            10
+          ]
+        },
+        "east": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            8,
+            8,
+            10
+          ]
+        },
+        "west": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            8,
+            8,
+            10
+          ]
+        },
+        "up": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            8,
+            8,
+            10
+          ]
+        },
+        "down": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            8,
+            8,
+            10
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        2,
+        5
+      ],
+      "to": [
+        6,
+        9,
+        6
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "south": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "east": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "west": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "up": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "down": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        2,
+        10
+      ],
+      "to": [
+        6,
+        9,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "south": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "east": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "west": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "up": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "down": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        10,
+        2,
+        5
+      ],
+      "to": [
+        11,
+        9,
+        6
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "south": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "east": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "west": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "up": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "down": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        10,
+        2,
+        10
+      ],
+      "to": [
+        11,
+        9,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "south": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "east": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "west": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "up": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        },
+        "down": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            10,
+            2,
+            14
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        5.5,
+        2,
+        5.5
+      ],
+      "to": [
+        10.5,
+        9,
+        10.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            1,
+            0,
+            7,
+            8
+          ]
+        },
+        "south": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            1,
+            0,
+            7,
+            8
+          ]
+        },
+        "east": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            1,
+            0,
+            7,
+            8
+          ]
+        },
+        "west": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            1,
+            0,
+            7,
+            8
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        9,
+        5
+      ],
+      "to": [
+        11,
+        10,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            8,
+            8,
+            10
+          ]
+        },
+        "south": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            8,
+            8,
+            10
+          ]
+        },
+        "east": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            8,
+            8,
+            10
+          ]
+        },
+        "west": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            8,
+            8,
+            10
+          ]
+        },
+        "up": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            8,
+            8,
+            10
+          ]
+        },
+        "down": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            0,
+            8,
+            8,
+            10
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        10,
+        6.5
+      ],
+      "to": [
+        9.5,
+        11.5,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            8,
+            8,
+            16,
+            10
+          ]
+        },
+        "south": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            8,
+            8,
+            16,
+            10
+          ]
+        },
+        "east": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            8,
+            8,
+            16,
+            10
+          ]
+        },
+        "west": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            8,
+            8,
+            16,
+            10
+          ]
+        },
+        "up": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            8,
+            8,
+            16,
+            10
+          ]
+        },
+        "down": {
+          "texture": "#hanging_lantern",
+          "uv": [
+            8,
+            8,
+            16,
+            10
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        7.5,
+        11.5,
+        7.5
+      ],
+      "to": [
+        8.5,
+        16,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#chain",
+          "uv": [
+            0,
+            0,
+            1,
+            5
+          ]
+        },
+        "south": {
+          "texture": "#chain",
+          "uv": [
+            0,
+            0,
+            1,
+            5
+          ]
+        },
+        "east": {
+          "texture": "#chain",
+          "uv": [
+            0,
+            0,
+            1,
+            5
+          ]
+        },
+        "west": {
+          "texture": "#chain",
+          "uv": [
+            0,
+            0,
+            1,
+            5
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+ "palette": {
+  "L": "minecraft:cobblestone",
+  "P": "hearthholm:lamp_post[facing=north]",
+  "R": "minecraft:oak_fence",
+  "c": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
+  "D": "minecraft:ladder[facing=north]",
+  "d": "minecraft:oak_log[axis=y]",
+  "G": "minecraft:lantern[hanging=false]",
+  "T": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
+  "C": "minecraft:wall_torch[facing=east]",
+  "K": "minecraft:stone_bricks",
+  "b": "minecraft:glass_pane",
+  "B": "minecraft:oak_planks",
+  "l": "hearthholm:alarm_bell[facing=north]",
+  "p": "minecraft:spruce_stairs[facing=south,half=bottom,shape=outer_left]",
+  "M": "minecraft:spruce_stairs[facing=south,half=bottom,shape=straight]",
+  "f": "minecraft:spruce_stairs[facing=south,half=bottom,shape=outer_right]",
+  "h": "minecraft:spruce_stairs[facing=east,half=bottom,shape=straight]",
+  "t": "minecraft:spruce_planks",
+  "F": "minecraft:spruce_stairs[facing=west,half=bottom,shape=straight]",
+  "g": "minecraft:spruce_stairs[facing=north,half=bottom,shape=outer_right]",
+  "S": "minecraft:spruce_stairs[facing=north,half=bottom,shape=straight]",
+  "s": "minecraft:spruce_stairs[facing=north,half=bottom,shape=outer_left]",
+  "W": "minecraft:spruce_slab[type=bottom]"
+ },
+ "layers": [
+  [
+   "LLLLLLL",
+   "LLLLLLL",
+   "LLLLLLL",
+   "LLLLLLL",
+   "LLLLLLL",
+   "LLLLLLL",
+   "LLLLLLL"
+  ],
+  [
+   "P.R.R..",
+   ".LLcLL.",
+   ".L...L.",
+   ".L...L.",
+   ".L.D.L.",
+   ".dLLLd.",
+   "......."
+  ],
+  [
+   "..G.G..",
+   ".dLTLd.",
+   ".L...L.",
+   ".LC..L.",
+   ".L.D.L.",
+   ".dLLLd.",
+   "......."
+  ],
+  [
+   ".......",
+   ".dKKKd.",
+   ".K...K.",
+   ".b...b.",
+   ".K.D.K.",
+   ".dKKKd.",
+   "......."
+  ],
+  [
+   ".......",
+   ".dKKKd.",
+   ".K...K.",
+   ".K...K.",
+   ".K.D.K.",
+   ".dKKKd.",
+   "......."
+  ],
+  [
+   "BBBBBBB",
+   "BBBBBBB",
+   "BBBBBBB",
+   "BBBBBBB",
+   "BBBDBBB",
+   "BBBBBBB",
+   "BBBBBBB"
+  ],
+  [
+   "dRRRRRd",
+   "R.....R",
+   "R.....R",
+   "R..l..R",
+   "R..D..R",
+   "R.....R",
+   "dRRRRRd"
+  ],
+  [
+   "d.....d",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   "d.....d"
+  ],
+  [
+   "d.....d",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   "d.....d"
+  ],
+  [
+   "pMMMMMf",
+   "htttttF",
+   "htttttF",
+   "htttttF",
+   "htttttF",
+   "htttttF",
+   "gSSSSSs"
+  ],
+  [
+   ".......",
+   ".pMMMf.",
+   ".htttF.",
+   ".htttF.",
+   ".htttF.",
+   ".gSSSs.",
+   "......."
+  ],
+  [
+   ".......",
+   ".......",
+   "..pMf..",
+   "..htF..",
+   "..gSs..",
+   ".......",
+   "......."
+  ],
+  [
+   ".......",
+   ".......",
+   ".......",
+   "...W...",
+   ".......",
+   ".......",
+   "......."
+  ],
+  [
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   "......."
+  ]
+ ]
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "W": "#minecraft:wool",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "WW",
+    "WW",
+    " S"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:settlement_banner"
+  }
+}

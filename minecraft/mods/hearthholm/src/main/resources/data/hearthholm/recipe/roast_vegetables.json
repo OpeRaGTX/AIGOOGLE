@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:baked_potato",
+    "minecraft:carrot",
+    "minecraft:beetroot"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:roast_vegetables"
+  }
+}

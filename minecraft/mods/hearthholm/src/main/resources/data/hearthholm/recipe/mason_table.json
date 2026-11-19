@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:crafting_table",
+    "minecraft:cobblestone",
+    "minecraft:cobblestone",
+    "minecraft:stone"
+  ],
+  "result": {
+    "count": 1,
+    "id": "hearthholm:mason_table"
+  }
+}

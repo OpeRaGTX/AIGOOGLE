@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hearthholm:block/tavern_keg"
+    },
+    "facing=east": {
+      "model": "hearthholm:block/tavern_keg",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hearthholm:block/tavern_keg",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hearthholm:block/tavern_keg",
+      "y": 270
+    }
+  }
+}

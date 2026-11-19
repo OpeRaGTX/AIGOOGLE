@@ -1,0 +1,125 @@
+{
+ "palette": {
+  "L": "minecraft:oak_planks",
+  "P": "minecraft:cobblestone",
+  "R": "minecraft:spruce_planks",
+  "c": "hearthholm:lamp_post[facing=north]",
+  "D": "minecraft:barrel[facing=up]",
+  "d": "minecraft:oak_fence",
+  "G": "hearthholm:crate",
+  "T": "minecraft:spruce_log[axis=y]",
+  "C": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
+  "K": "hearthholm:stool[facing=south]",
+  "b": "hearthholm:flower_box[facing=west]",
+  "B": "minecraft:blue_bed[facing=south,part=foot]",
+  "l": "hearthholm:rug_blue[facing=north]",
+  "p": "hearthholm:barrel_rack[facing=west]",
+  "M": "minecraft:blue_bed[facing=south,part=head]",
+  "f": "hearthholm:flower_box[facing=south]",
+  "h": "minecraft:lantern[hanging=false]",
+  "t": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
+  "F": "minecraft:oak_trapdoor[facing=west,half=bottom,open=true]",
+  "g": "minecraft:glass_pane",
+  "S": "hearthholm:plate_fish[facing=north,count=1,on_table=true]",
+  "s": "hearthholm:wall_shelf[facing=north]",
+  "W": "minecraft:oak_trapdoor[facing=south,half=bottom,open=true]",
+  "w": "minecraft:oak_stairs[facing=south,half=bottom,shape=straight]",
+  "X": "minecraft:spruce_log[axis=x]",
+  "x": "minecraft:spruce_log[axis=z]",
+  "Y": "minecraft:lantern[hanging=true]",
+  "y": "minecraft:oak_stairs[facing=north,half=bottom,shape=straight]",
+  "Z": "minecraft:oak_slab[type=bottom]"
+ },
+ "layers": [
+  [
+   "~~LLL~~",
+   "~PPPPP~",
+   "~PRRRP~",
+   "~PRRRP~",
+   "~PRRRP~",
+   "~PPPPP~",
+   "~~~~~~~"
+  ],
+  [
+   "cDd.dG.",
+   ".TPCPT.",
+   ".PK..Pd",
+   "bPBlGPp",
+   ".PM.DPd",
+   ".TPPPT.",
+   "...f..."
+  ],
+  [
+   "..h.h..",
+   ".TRtRT.",
+   "FR...Rd",
+   ".g..Sg.",
+   "FR.s.Rd",
+   ".TRgRT.",
+   "..W.W.."
+  ],
+  [
+   "wwwwwww",
+   ".TXXXT.",
+   ".x...xd",
+   ".x.Y.xd",
+   ".x...xd",
+   ".TXXXT.",
+   "yyyyyyy"
+  ],
+  [
+   ".......",
+   "wwwwwww",
+   ".RRRRR.",
+   ".RRRRR.",
+   ".RRRRR.",
+   "yyyyyyy",
+   "......."
+  ],
+  [
+   ".......",
+   ".......",
+   "wwwwwww",
+   "LLLLLLL",
+   "yyyyyyy",
+   ".......",
+   "......."
+  ],
+  [
+   ".......",
+   ".......",
+   ".......",
+   "ZZZZZZZ",
+   ".......",
+   ".......",
+   "......."
+  ],
+  [
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   "......."
+  ],
+  [
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   "......."
+  ],
+  [
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   ".......",
+   "......."
+  ]
+ ]
+}

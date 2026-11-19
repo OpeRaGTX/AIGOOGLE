@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "#minecraft:planks",
+    "N": "minecraft:iron_nugget",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "PPP",
+    " N ",
+    " S "
+  ],
+  "result": {
+    "count": 2,
+    "id": "hearthholm:signpost"
+  }
+}

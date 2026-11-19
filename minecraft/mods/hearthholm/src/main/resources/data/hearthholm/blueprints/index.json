@@ -1,0 +1,20 @@
+{
+ "blueprints": [
+  "small_house",
+  "family_house",
+  "warehouse",
+  "town_hall",
+  "workshop",
+  "watchtower",
+  "palisade_segment",
+  "barracks",
+  "tavern",
+  "market_stall",
+  "farmhouse",
+  "wall_section",
+  "cottage",
+  "townhouse",
+  "fisher_hut",
+  "l_house"
+ ]
+}

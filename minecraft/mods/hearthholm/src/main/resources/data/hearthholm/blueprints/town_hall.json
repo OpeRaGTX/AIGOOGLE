@@ -1,0 +1,78 @@
+{
+ "palette": {
+  "c": "minecraft:cobblestone",
+  "L": "minecraft:oak_log[axis=y]",
+  "P": "minecraft:oak_planks",
+  "R": "minecraft:dark_oak_planks",
+  "D": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
+  "d": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
+  "G": "minecraft:glass_pane",
+  "T": "minecraft:wall_torch[facing=south]",
+  "t": "minecraft:crafting_table",
+  "f": "minecraft:red_bed[facing=south,part=foot]",
+  "h": "minecraft:red_bed[facing=south,part=head]",
+  "s": "minecraft:stone_bricks",
+  "S": "minecraft:stone_bricks",
+  "B": "minecraft:bookshelf",
+  "r": "minecraft:red_carpet",
+  "X": "hearthholm:town_hall_desk[facing=south]",
+  "N": "minecraft:wall_torch[facing=north]"
+ },
+ "layers": [
+  [
+   "sssssssss",
+   "sssssssss",
+   "sssssssss",
+   "sssssssss",
+   "sssssssss",
+   "sssssssss",
+   "sssssssss",
+   "sssssssss",
+   "sssssssss"
+  ],
+  [
+   "LSSSDSSSL",
+   "S.......S",
+   "S.......S",
+   "S.......S",
+   "S...X...S",
+   "S..rrr..S",
+   "S.......S",
+   "SBB...BBS",
+   "LSSSSSSSL"
+  ],
+  [
+   "LPPPdPPPL",
+   "P.......P",
+   "G.......G",
+   "P.......P",
+   "G.......G",
+   "P.......P",
+   "G.......G",
+   "PBB...BBP",
+   "LPPGGGPPL"
+  ],
+  [
+   "LPPPPPPPL",
+   "P...T...P",
+   "P.......P",
+   "P.......P",
+   "P.......P",
+   "P.......P",
+   "P.......P",
+   "P...N...P",
+   "LPPPPPPPL"
+  ],
+  [
+   "RRRRRRRRR",
+   "RRRRRRRRR",
+   "RRRRRRRRR",
+   "RRRRRRRRR",
+   "RRRRRRRRR",
+   "RRRRRRRRR",
+   "RRRRRRRRR",
+   "RRRRRRRRR",
+   "RRRRRRRRR"
+  ]
+ ]
+}
