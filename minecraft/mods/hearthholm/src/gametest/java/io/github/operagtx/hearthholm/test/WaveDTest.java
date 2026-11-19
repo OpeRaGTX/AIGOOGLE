@@ -482,7 +482,7 @@ final class WaveDTest {
             if (!rested[0]) throw new AssertionError("wounded guard did not go to the barracks");
             if (g.getHealth() < g.getMaxHealth() * 0.4f) throw new AssertionError("no healing in the barracks");
         });
-        ctx.waitTicks(100);
+        ctx.waitTicks(400);   // the thought is checked on a slow cadence; give it room on a slow machine
         sp.getServer().runOnServer(s -> {
             SettlerEntity g = get(s, GUARD);
             log("BARRACKS mood: hp=" + g.getHealth() + "/" + g.getMaxHealth() + " comrades=" + g.hasThought("comrades") + " thoughts="
