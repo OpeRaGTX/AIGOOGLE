@@ -100,6 +100,7 @@ update_id = **331527542**. Ignore the old .mp4/.mp3 documents (another project).
 simulated mouse input, raised edit reach to 16 and now shows the rejection reason in chat. Ask the owner to retest J3.
 
 **K1 — builder, recipes, co-owners**
+0. Zone map brush bug (owner retest, Windows): MC 26.3 SDL uses `InputConstants.MOUSE_BUTTON_LEFT=1, RIGHT=3`; `ZoneMapWidget`/`ZoneMapScreen` and J2/J3 tests used 0/1 → left click panned. Fix = constants everywhere (sent to the K1 agent).
 1. Builder (owner photo: glass panes and chests stand unconnected):
    - after placing, update neighbour shapes: panes, fences, walls, iron bars, chests (double chests), stairs;
    - attachables (torches, lanterns, ladders, buttons, wall signs, trapdoors, doors) are placed only after their support
