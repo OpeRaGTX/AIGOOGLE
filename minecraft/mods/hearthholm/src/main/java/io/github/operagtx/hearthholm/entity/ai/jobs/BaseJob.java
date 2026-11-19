@@ -1,6 +1,9 @@
 package io.github.operagtx.hearthholm.entity.ai.jobs;
 
+import io.github.operagtx.hearthholm.core.Balance;
+import io.github.operagtx.hearthholm.core.Professions;
 import io.github.operagtx.hearthholm.entity.SettlerEntity;
+import io.github.operagtx.hearthholm.menu.SettlerMenu;
 import io.github.operagtx.hearthholm.entity.ai.Job;
 import io.github.operagtx.hearthholm.entity.ai.Task;
 import io.github.operagtx.hearthholm.entity.ai.tasks.ContainerTrip;
@@ -11,7 +14,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -111,6 +116,57 @@ public abstract class BaseJob implements Job {
             }
             s.inventory().setChanged();
         });
+    }
+
+    // ---- wave K2: end of shift ------------------------------------------------------------
+
+    @Override
+    public @Nullable Task endOfShift(SettlerEntity s) {
+        if (!hasUnloadable(s)) return null;
+        BlockPos target = findSpace(dropOffs());   // the chest by the work site first, then the warehouse
+        if (target == null) {
+            s.setStatus("storage_full");
+            return null;
+        }
+        s.setStatus("depositing");
+        return new ContainerTrip(target, BaseJob::unloadInto);
+    }
+
+    /** What a settler keeps for the night: tools of the profession, weapons, armour, the shield and (archers) arrows. */
+    static boolean keptGear(SettlerEntity s, ItemStack st) {
+        return s.profession().isTool(st) || SettlerMenu.isToolOrWeapon(st) || SettlerMenu.armorSlot(st) != null || st.is(Items.SHIELD)
+                || (s.professionId().equals(Professions.ARCHER.id()) && st.is(ItemTags.ARROWS));
+    }
+
+    /** Whether any pocket holds something the shift-end unload would hand over. */
+    static boolean hasUnloadable(SettlerEntity s) {
+        int food = Balance.SHIFT_END_KEEP_FOOD;
+        for (ItemStack st : s.inventory().getItems()) {
+            if (st.isEmpty() || keptGear(s, st)) continue;
+            if (!Storage.isFood(st)) return true;
+            if (st.getCount() > food) return true;
+            food -= st.getCount();
+        }
+        return false;
+    }
+
+    /** Moves everything except {@link #keptGear} and {@code SHIFT_END_KEEP_FOOD} food items into {@code c}; what does not fit stays in the pockets. */
+    static void unloadInto(SettlerEntity s, Container c) {
+        int food = Balance.SHIFT_END_KEEP_FOOD;
+        for (int i = 0; i < s.inventory().getContainerSize(); i++) {
+            ItemStack st = s.inventory().getItem(i);
+            if (st.isEmpty() || keptGear(s, st)) continue;
+            if (Storage.isFood(st)) {
+                int keep = Math.min(food, st.getCount());
+                food -= keep;
+                if (keep == st.getCount()) continue;
+                ItemStack rest = Storage.insert(c, st.copyWithCount(st.getCount() - keep));
+                st.setCount(keep + rest.getCount());
+                continue;
+            }
+            s.inventory().setItem(i, Storage.insert(c, st));
+        }
+        s.inventory().setChanged();
     }
 
     /** Wave I1: jobs that cannot work without their tool (miner, lumberjack) return true and name it via {@link #toolKey()}. */

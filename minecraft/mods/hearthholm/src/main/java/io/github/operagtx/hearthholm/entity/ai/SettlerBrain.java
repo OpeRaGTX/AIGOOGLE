@@ -25,6 +25,7 @@ public final class SettlerBrain {
                 new ArriveActivity(settler),
                 new PartyActivity(settler),
                 new AlarmActivity(settler),
+                new ShiftEndActivity(settler),
                 new SleepActivity(settler),
                 new EatActivity(settler),
                 new MedicActivity(settler),

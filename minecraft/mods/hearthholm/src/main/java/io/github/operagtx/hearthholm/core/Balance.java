@@ -105,6 +105,20 @@ public final class Balance {
     public static int[] LEVEL_XP = {0, 100, 300, 600, 950};
     public static int XP_WORK_TICKS = 110, XP_ACTION_PERCENT = 10;
 
+    // ---- wave K2: the civilian workday, the end-of-shift unload and the miner's pace
+    /** The workday starts at sunrise (tick 0 = 06:00, when undead begin to burn) and lasts this percent of the 12000 daylight ticks (75 = until ~15:00). */
+    public static int WORKDAY_START_TICK = 0, WORKDAY_DAYLIGHT_PERCENT = 75;
+    /** At the end of the shift a settler keeps this many food items (plus tools, weapons and armour) and deposits everything else. */
+    public static int SHIFT_END_KEEP_FOOD = 2;
+    /** The miner needs this percent of the usual time per block at level 1 and reaches the usual pace at {@code MINER_FULL_PACE_LEVEL}. */
+    public static int MINER_SLOW_PERCENT_AT_LEVEL1 = 200, MINER_FULL_PACE_LEVEL = 5;
+
+    /** Length of the civilian workday in ticks. */
+    public static int workdayTicks() { return 12000 * WORKDAY_DAYLIGHT_PERCENT / 100; }
+
+    /** Whether the time of day {@code t} (0..23999) falls into the civilian workday. */
+    public static boolean inWorkday(long t) { return Math.floorMod(t - WORKDAY_START_TICK, 24000L) < workdayTicks(); }
+
     // ---- wave I2: combat settlers move like a player (blocks/second x10), damage comes from the held weapon
     /** Walking and chasing speed in blocks/second x10 (player: walk 4.3, sprint 5.6). A mob's drive is both its speed and its forward input, so blocks/second = {@code COMBAT_BPS_PER_ATTR_SQ} x attribute squared (measured: 44, e.g. 0.1 gives 0.44 b/s). */
     public static int COMBAT_WALK_BPS_X10 = 43, COMBAT_SPRINT_BPS_X10 = 56, COMBAT_BPS_PER_ATTR_SQ = 44;

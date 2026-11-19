@@ -21,6 +21,7 @@ public final class WorkActivity implements Activity {
     @Override
     public boolean tick() {
         if (!s.isWorkTime()) return false;
+        s.markWorked();
         if (task == null) {
             if (cooldown > 0) { cooldown--; return true; }
             task = s.brain().job().next(s);

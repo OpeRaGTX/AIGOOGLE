@@ -20,6 +20,12 @@ public interface Job {
     /** Combat jobs: whether this target is inside the area this settler protects. */
     default boolean defends(SettlerEntity settler, net.minecraft.world.entity.LivingEntity target) { return false; }
 
+    /**
+     * Wave K2: the shift is over. A trip that unloads the pockets (everything except tools, weapons, armour and a couple of food items) into
+     * the chest near the work site, else the warehouse; null when there is nothing to unload or nowhere to put it.
+     */
+    default @Nullable Task endOfShift(SettlerEntity settler) { return null; }
+
     /** Settler changes profession or leaves: release claims. */
     default void release(SettlerEntity settler) {}
 }

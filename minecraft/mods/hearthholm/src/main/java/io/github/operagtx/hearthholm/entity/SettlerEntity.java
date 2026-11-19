@@ -745,7 +745,20 @@ public class SettlerEntity extends PathfinderMob {
         for (Trait t : profile.traitList()) skill *= t.workSpeed();
         if (food <= 0) skill *= 0.6f;
         float ticks = vanilla * io.github.operagtx.hearthholm.core.Balance.BREAK_PACE_PERCENT / 100f / Math.max(0.3f, skill);
+        ticks *= minerSlowdown();
         return Mth.clamp(Mth.ceil(ticks), 4, 1200);
+    }
+
+    /**
+     * Wave K2: a miner digs {@code MINER_SLOW_PERCENT_AT_LEVEL1} percent of the usual time at level 1 (twice as slow), the factor falls in even steps
+     * and is 1 (the old pace) from {@code MINER_FULL_PACE_LEVEL}. Other professions (the builder clearing a plot) are not affected.
+     */
+    public float minerSlowdown() {
+        if (!professionId().equals(Professions.MINER.id())) return 1f;
+        int full = Math.max(2, io.github.operagtx.hearthholm.core.Balance.MINER_FULL_PACE_LEVEL);
+        float slow = io.github.operagtx.hearthholm.core.Balance.MINER_SLOW_PERCENT_AT_LEVEL1 / 100f;
+        int lvl = Mth.clamp(level(professionId()), 1, full);
+        return slow - (slow - 1f) * (lvl - 1) / (full - 1);
     }
 
     // ---- inventory ------------------------------------------------------------------------
@@ -859,9 +872,23 @@ public class SettlerEntity extends PathfinderMob {
         return switch (effectiveShift()) {
             case SHIFT_NIGHT -> t >= 11800 || t < 3000;
             case SHIFT_DAY -> t < 11800 || t >= 23400;
-            default -> profession().nightShift() || t < 11800 || t >= 23400;
+            default -> profession().nightShift() || io.github.operagtx.hearthholm.core.Balance.inWorkday(t);   // K2: sunrise until ~15:00, then leisure
         };
     }
+
+    // ---- wave K2: end-of-shift unload bookkeeping (not saved: after a reload the next workday starts the cycle again) ----------
+
+    private long lastWorkTick = -1, lastUnloadTick = -1;
+
+    /** Called by the work activity every tick it works. */
+    public void markWorked() { lastWorkTick = level().getGameTime(); }
+
+    /** Worked since the last unload, the shift is over and the settler is not asleep: time to hand the pockets over. */
+    public boolean shiftUnloadDue() {
+        return lastWorkTick > lastUnloadTick && !isWorkTime() && !isSleeping() && profession() != Professions.UNEMPLOYED;
+    }
+
+    public void markUnloaded() { lastUnloadTick = level().getGameTime(); }
 
     public boolean isWorkTime() {
         return workAt(dayTime());

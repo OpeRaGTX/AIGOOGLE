@@ -419,10 +419,11 @@ final class WaveJ1Test {
         sp.getServer().runOnServer(s -> {
             boolean ok = LumberjackJob.wanted(new ItemStack(Items.OAK_LOG)) && LumberjackJob.wanted(new ItemStack(Items.OAK_SAPLING)) && LumberjackJob.wanted(new ItemStack(Items.STICK))
                     && LumberjackJob.wanted(new ItemStack(Items.APPLE)) && LumberjackJob.wanted(new ItemStack(Items.OAK_PLANKS));
-            boolean no = LumberjackJob.wanted(new ItemStack(Items.DIAMOND)) || LumberjackJob.wanted(new ItemStack(Items.COBBLESTONE)) || LumberjackJob.wanted(new ItemStack(Items.ROTTEN_FLESH))
-                    || LumberjackJob.wanted(ItemStack.EMPTY);
-            log("J1 lumberjack sweep: takes wood/sapling/stick/apple=" + ok + " ignores diamond/cobble/flesh=" + !no);
-            check(ok && !no, "lumberjack sweep filter wrong");
+            // wave K2 reverted the J1 filter: the sweep takes every drop again (the shift-end unload empties the pockets); only an empty stack is ignored
+            boolean everything = LumberjackJob.wanted(new ItemStack(Items.DIAMOND)) && LumberjackJob.wanted(new ItemStack(Items.COBBLESTONE)) && LumberjackJob.wanted(new ItemStack(Items.ROTTEN_FLESH))
+                    && !LumberjackJob.wanted(ItemStack.EMPTY);
+            log("J1 lumberjack sweep: takes wood/sapling/stick/apple=" + ok + " and (K2) diamond/cobble/flesh=" + everything);
+            check(ok && everything, "lumberjack sweep filter wrong");
             int n = 0, withSite = 0;
             for (Profession p : Professions.REGISTRY.values()) {
                 ProfessionModule m = ProfessionModules.REGISTRY.get(p.id()).orElse(null);

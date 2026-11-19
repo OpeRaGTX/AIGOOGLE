@@ -81,9 +81,9 @@ public final class LumberjackJob extends SiteJob {
         return new Sequence(MoveTo.block(tree, 2.6), new Chop(tree, w.flag("replant")));
     }
 
-    /** Wave J1: the zone sweep only takes what a forest gives: wood, saplings, sticks and apples. */
+    /** Wave K2 (reverts the J1 filter): the sweep picks up every drop again, junk included; the shift-end unload empties the pockets. */
     public static boolean wanted(ItemStack st) {
-        return !st.isEmpty() && (st.is(ItemTags.LOGS) || st.is(ItemTags.PLANKS) || st.is(ItemTags.SAPLINGS) || st.is(net.minecraft.world.item.Items.STICK) || st.is(net.minecraft.world.item.Items.APPLE));
+        return !st.isEmpty();
     }
 
     static void pickUpAround(SettlerEntity s) {
