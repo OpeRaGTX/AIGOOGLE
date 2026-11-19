@@ -48,6 +48,12 @@ final class WaveDTest {
         return (SettlerEntity) s.overworld().getEntity(id);
     }
 
+    /** Health for a log line; a defender who died in the raid is "DEAD" (the check below then reports it) instead of a NullPointerException. */
+    private static String hp(MinecraftServer s, UUID id) {
+        SettlerEntity e = get(s, id);
+        return e == null ? "DEAD" : String.format("%.0f", e.getHealth());
+    }
+
     private static SettlerEntity byProf(MinecraftServer s, Profession p) {
         for (SettlerEntity e : settlers(s)) if (e.professionId().equals(p.id())) return e;
         return null;
@@ -525,8 +531,8 @@ final class WaveDTest {
                 Settlement st = town(s);
                 ServerLevel l = s.overworld();
                 log("small raid: alive=" + io.github.operagtx.hearthholm.threat.Threats.alive(l, st) + " killed=" + st.raid.killed + " deaths=" + st.raid.deaths
-                        + " phase=" + st.raid.phase + " defenders hp: knight=" + String.format("%.0f", get(s, WARRIOR).getHealth()) + " guard=" + String.format("%.0f", get(s, GUARD).getHealth())
-                        + " archer=" + String.format("%.0f", get(s, ARCHER).getHealth()) + " target-switches=" + st.stats.getOrDefault("arrows_used", 0));
+                        + " phase=" + st.raid.phase + " defenders hp: knight=" + hp(s, WARRIOR) + " guard=" + hp(s, GUARD)
+                        + " archer=" + hp(s, ARCHER) + " target-switches=" + st.stats.getOrDefault("arrows_used", 0));
                 for (var id : st.raid.raiders) if (l.getEntity(id) instanceof io.github.operagtx.hearthholm.entity.ashborn.AshbornEntity r)
                     log("   " + r.getType().toShortString() + " pos=" + r.blockPosition().toShortString() + " target=" + (r.getTarget() == null ? "-" : r.getTarget().getType().toShortString())
                             + " hp=" + String.format("%.0f", r.getHealth()));
