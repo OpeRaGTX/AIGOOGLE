@@ -86,6 +86,17 @@ final class WaveK2Test {
             OTHER = all.stream().filter(e -> e != lj).findFirst().orElseThrow().getUUID();
             log("K2 workday: start " + Balance.WORKDAY_START_TICK + " length " + Balance.workdayTicks() + " (" + Balance.WORKDAY_DAYLIGHT_PERCENT + "% of daylight)");
         });
+        // wave M-night fix: after earlier waves (K1 turns every settler into something else) the lumberjack holds no claim on the forest marker, so the unload below
+        // would go to the warehouse. Give him a fresh job and a workday to claim the base forest marker before the checks (a no-op when he already holds it).
+        sp.getServer().runOnServer(s -> {
+            SettlerEntity lj = (SettlerEntity) s.overworld().getEntity(LUMBER);
+            lj.setProfession(Professions.UNEMPLOYED);
+            lj.setProfession(Professions.LUMBERJACK);
+            lj.markArrived();
+            lj.teleportTo(FOREST.getX() + 2.5, FOREST.getY(), FOREST.getZ() + 0.5);
+        });
+        setTime(sp, 5000);
+        ctx.waitTicks(260);
         int[] workAt = {0, 100, 4500, 8999};
         int[] restAt = {9000, 10000, 11500, 12000, 23500, 23999};   // leisure: no work, not asleep (the late-evening limit is the night owl's 14500, so no 12600+)
         int[] sleepAt = {15000, 20000, 23000};

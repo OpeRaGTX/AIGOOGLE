@@ -67,6 +67,7 @@ final class WaveL1Test {
         e.teleportTo(x, y, z);
         e.refreshCombatStats();
         e.setHealth(e.getMaxHealth());
+        e.setFood(1000f);   // a settler that has been alive through earlier waves is hungry (food runs out 2.5x faster since M1) and would walk off to eat
     }
 
     private static Husk husk(ServerLevel l, double x, double y, double z) {
@@ -362,7 +363,9 @@ final class WaveL1Test {
             ServerLevel l = s.overworld();
             SettlerEntity w = get(l, B);
             Horse horse = (Horse) l.getEntity(ids[0]);
-            log("L1 cavalry: mounted=" + mounted + " status='" + w.status().getString() + "' horse saddled=" + Cavalry.saddled(horse) + " tamed=" + horse.isTamed() + " passengers=" + horse.getPassengers().size());
+            log("L1 cavalry: mounted=" + mounted + " status='" + w.status().getString() + "' horse saddled=" + Cavalry.saddled(horse) + " tamed=" + horse.isTamed() + " passengers=" + horse.getPassengers().size()
+                    + " | activity=" + w.brain().currentActivity() + " food=" + w.food() + " work=" + w.isWorkTime() + " asleep=" + w.isSleeping() + " saddleInPockets=" + w.has(Items.SADDLE)
+                    + " at " + w.blockPosition().toShortString() + " horse at " + horse.blockPosition().toShortString());
             check(mounted && Cavalry.saddled(horse), "the cavalryman did not saddle and mount the horse");
             // a still husk 24 blocks away on the platform
             Husk h = husk(l, horse.getX() + 24, Q.getY(), horse.getZ());

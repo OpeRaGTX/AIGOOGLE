@@ -137,7 +137,13 @@ final class WaveL2Test {
             farmer.setProfession(Professions.FARMER);
             fisher.setProfession(Professions.FISHER);
             warrior.setProfession(Professions.WARRIOR);
-            for (SettlerEntity e : List.of(farmer, fisher, warrior)) { e.markArrived(); e.inventory().clearContent(); e.getNavigation().stop(); }
+            for (SettlerEntity e : List.of(farmer, fisher, warrior)) { e.markArrived(); e.inventory().clearContent(); e.getNavigation().stop(); e.setFood(1000f); }   // fed: no walk to eat
+            // a fully equipped warrior makes no trip to the warehouse for armour or a shield (earlier waves leave such items there)
+            warrior.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+            warrior.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
+            warrior.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
+            warrior.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
+            warrior.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
             farmer.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_HOE));
             farmer.inventory().addItem(new ItemStack(Items.WHEAT_SEEDS, 64));
             farmer.teleportTo(FARM.getX() + 0.5, FARM.getY(), FARM.getZ() + 2.5);
