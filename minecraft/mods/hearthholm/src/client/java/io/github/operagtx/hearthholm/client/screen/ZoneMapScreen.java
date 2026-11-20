@@ -145,6 +145,10 @@ public final class ZoneMapScreen extends HhScreen {
             } else if (o.kind() == SiteOption.Kind.RANGE) {
                 button(Component.literal("<"), x0, y, 16, 16, bb -> sendOption(o.key(), o.next(value, -1)));
                 button(Component.literal(">"), x0 + RW - 16, y, 16, 16, bb -> sendOption(o.key(), o.next(value, 1)));
+            } else {   // wave L2: choices (the farmer's crop, the warrior's stance and shift) cycle on a click, like toggles
+                Component label = Component.empty().append(o.label()).append(": ").append(o.valueLabel(value));
+                Button b = button(fitLabel(label, 168), x0, y, RW, 16, bb -> sendOption(o.key(), o.next(value, 1)));
+                if (language("option.hearthholm." + o.key() + ".tip")) b.setTooltip(Tooltip.create(Component.translatable("option.hearthholm." + o.key() + ".tip")));
             }
             y += 18;
         }

@@ -1265,6 +1265,8 @@ def main():
     gen_j2_tex.run(sys.modules[__name__])   # wave J2: chopping block
     import gen_j3_tex
     gen_j3_tex.run(sys.modules[__name__])   # wave J3: miner's stone with a pickaxe
+    import gen_l2_tex
+    gen_l2_tex.run(sys.modules[__name__])   # wave L2: fertilizer heap, fish bucket pieces
     print("textures written to", os.path.normpath(OUT))
 
 if __name__ == "__main__":

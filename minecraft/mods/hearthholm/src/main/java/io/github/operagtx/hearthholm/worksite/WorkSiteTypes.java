@@ -28,6 +28,12 @@ public final class WorkSiteTypes {
         return REGISTRY.get(id).orElseThrow(() -> new IllegalStateException("Unknown work site " + id));
     }
 
+    /** Wave L2: the outline of a drawn zone (y from {@code down} below to {@code up} above the block), else the old box. */
+    private static AABB zoneOr(WorkSiteBlockEntity be, int down, int up, AABB fallback) {
+        AABB zb = be.hasZone() ? be.zone().bounds(be.getBlockPos().getY() - down, be.getBlockPos().getY() + up) : null;
+        return zb != null ? zb : fallback;
+    }
+
     private static AABB around(BlockPos p, int r, int down, int up) {
         return new AABB(p.getX() - r, p.getY() - down, p.getZ() - r, p.getX() + r + 1, p.getY() + up, p.getZ() + r + 1);
     }
@@ -62,9 +68,11 @@ public final class WorkSiteTypes {
         REGISTRY.register(FARM_ID, new WorkSiteType(FARM_ID, Hearthholm.id("farmer"), List.of(
                 SiteOption.range("radius", 2, 8, 1, 4),
                 SiteOption.choice("crop", 0, "auto", "wheat", "carrot", "potato", "beetroot"),
-                SiteOption.toggle("till", true)), 0xD8C25A, be -> around(be.getBlockPos(), be.option("radius"), 1, 2)));
+                SiteOption.toggle("till", true)), 0xD8C25A, be -> zoneOr(be, 1, 3, around(be.getBlockPos(), be.option("radius"), 1, 2))));
+        io.github.operagtx.hearthholm.zone.WorkZone.register(FARM_ID, io.github.operagtx.hearthholm.zone.WorkZone.Spec.FARMER);   // wave L2: 30 x 30
         REGISTRY.register(FISHING_ID, new WorkSiteType(FISHING_ID, Hearthholm.id("fisher"), List.of(
-                SiteOption.toggle("keep_junk", false)), 0x4FA3C7, be -> around(be.getBlockPos(), 4, 2, 2)));
+                SiteOption.toggle("keep_junk", false)), 0x4FA3C7, be -> zoneOr(be, 3, 2, around(be.getBlockPos(), 4, 2, 2))));
+        io.github.operagtx.hearthholm.zone.WorkZone.register(FISHING_ID, io.github.operagtx.hearthholm.zone.WorkZone.Spec.FISHER);   // wave L2: 10 x 10
         REGISTRY.register(PATROL_ID, new WorkSiteType(PATROL_ID, Hearthholm.id("guard"), List.of(
                 SiteOption.range("wait", 5, 60, 5, 15),
                 SiteOption.range("radius", 4, 24, 2, 8),
@@ -72,6 +80,7 @@ public final class WorkSiteTypes {
         REGISTRY.register(TERRITORY_ID, new WorkSiteType(TERRITORY_ID, Hearthholm.id("warrior"), List.of(
                 SiteOption.range("radius", 8, 48, 4, 16),
                 SiteOption.choice("stance", 0, "patrol", "follow", "hold"),
-                SiteOption.choice("shift", 0, "always", "day", "night")), 0xC9483C, be -> around(be.getBlockPos(), be.option("radius"), 0, 3)));
+                SiteOption.choice("shift", 0, "always", "day", "night")), 0xC9483C, be -> zoneOr(be, 1, 4, around(be.getBlockPos(), be.option("radius"), 0, 3))));
+        io.github.operagtx.hearthholm.zone.WorkZone.register(TERRITORY_ID, io.github.operagtx.hearthholm.zone.WorkZone.Spec.WARRIOR);   // wave L2: 50 x 50
     }
 }

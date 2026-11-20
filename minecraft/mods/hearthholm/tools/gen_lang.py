@@ -484,6 +484,9 @@ T = {
  "thought.hearthholm.comrades": ("Comrades", "Боевые товарищи"),
  "thought.hearthholm.patched_up": ("Patched up", "Подлечили"),
  "thought.hearthholm.knighted": ("Knighted!", "Посвящён в рыцари!"),
+ "block.hearthholm.farm_marker": ("Fertilizer Barrel", "Бочка с удобрениями"),
+ "block.hearthholm.fishing_marker": ("Fish Bucket", "Ведро с рыбой"),
+ "block.hearthholm.territory_banner": ("Warrior's Stone", "Камень воина"),
  "status.hearthholm.fetching_saddle": ("Fetching a saddle", "Несёт седло"),
  "status.hearthholm.mounting": ("Mounting up", "Садится на коня"),
  "gui.hearthholm.promote": ("Promote", "Повысить"),
@@ -773,7 +776,7 @@ T.update({
  "gui.hearthholm.zone.zoom.tip": ("Zoom (also the mouse wheel). Pan the map by dragging with the right mouse button.", "Масштаб (и колёсико мыши). Карту двигают правой кнопкой мыши."),
  "gui.hearthholm.zone.legend.zone": ("Work zone", "Зона работы"),
  "gui.hearthholm.zone.legend.tree": ("Tree", "Дерево"),
- "gui.hearthholm.zone.legend.site": ("Work site", "Колода"),
+ "gui.hearthholm.zone.legend.site": ("Work site", "Метка"),   # wave L2: the legend is shared by every zone profession
  "gui.hearthholm.zone.legend.chest": ("Chest", "Сундук"),
  "gui.hearthholm.zone.legend.warehouse": ("Warehouse", "Склад"),
  "gui.hearthholm.zone.cursor": ("X %s Z %s  cell %s,%s", "X %s Z %s  клетка %s,%s"),

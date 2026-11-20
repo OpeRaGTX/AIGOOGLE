@@ -9,6 +9,7 @@ import io.github.operagtx.hearthholm.settlement.SettlementService;
 import io.github.operagtx.hearthholm.settlement.Storage;
 import io.github.operagtx.hearthholm.worksite.WorkSiteBlockEntity;
 import io.github.operagtx.hearthholm.worksite.WorkSiteTypes;
+import io.github.operagtx.hearthholm.zone.WorkZone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -65,7 +66,9 @@ public final class FarmerJob extends SiteJob {
         BlockPos bestPos = null;
         Action best = null;
         double bestDist = Double.MAX_VALUE;
-        for (BlockPos ground : BlockPos.betweenClosed(center.offset(-r, -1, -r), center.offset(r, -1, r))) {
+        // wave L2: with a drawn zone (30 x 30) the candidates are the soil of its columns (rescanned every 100 ticks); without one, the old radius box
+        Iterable<BlockPos> candidates = w.hasZone() ? zoneGrounds(level, center, w.zone()) : BlockPos.betweenClosed(center.offset(-r, -1, -r), center.offset(r, -1, r));
+        for (BlockPos ground : candidates) {
             if (ground.getX() == center.getX() && ground.getZ() == center.getZ()) continue;
             Action a = actionFor(level, ground, seed != null, w.flag("till") && hoe);
             if (a == null) continue;
@@ -79,6 +82,36 @@ public final class FarmerJob extends SiteJob {
         }
         s.setStatus("farming");
         return new Work(bestPos, best, seed);
+    }
+
+    private List<BlockPos> grounds = List.of();
+    private long nextGroundScan;
+    private int groundZoneHash;
+
+    /**
+     * Wave L2: the soil of every drawn column: farmland, dirt, grass or path at the marker's level (one below, two below or level with it), found at most every
+     * 100 ticks (the zone has up to 900 columns). Crops stand on the farmland, so their ground is the same block.
+     */
+    private List<BlockPos> zoneGrounds(ServerLevel level, BlockPos center, WorkZone zone) {
+        long now = level.getGameTime();
+        if (now < nextGroundScan && zone.contentHash() == groundZoneHash) return grounds;
+        nextGroundScan = now + 100;
+        groundZoneHash = zone.contentHash();
+        List<BlockPos> out = new java.util.ArrayList<>();
+        BlockPos.MutableBlockPos mp = new BlockPos.MutableBlockPos();
+        zone.forEachCell(WorkZone.SURFACE, (ix, iz) -> {
+            for (int ox = 0; ox < zone.cell(); ox++) for (int oz = 0; oz < zone.cell(); oz++) {
+                int x = zone.blockX(ix) + ox, z = zone.blockZ(iz) + oz;
+                if (!level.hasChunkAt(mp.set(x, center.getY(), z))) continue;
+                for (int dy : new int[]{-1, -2, 0}) {
+                    BlockPos g = new BlockPos(x, center.getY() + dy, z);
+                    BlockState st = level.getBlockState(g);
+                    if (st.getBlock() instanceof FarmlandBlock || st.is(Blocks.DIRT) || st.is(Blocks.GRASS_BLOCK) || st.is(Blocks.DIRT_PATH)) { out.add(g); break; }
+                }
+            }
+        });
+        grounds = out;
+        return grounds;
     }
 
     private @Nullable Item chooseSeed(WorkSiteBlockEntity w) {

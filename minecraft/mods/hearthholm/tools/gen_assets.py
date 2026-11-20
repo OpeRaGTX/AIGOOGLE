@@ -716,6 +716,56 @@ w(f"assets/{NS}/models/block/mine_marker.json", {"parent": "block/block", "displ
         _rot3({"from": [12.5, 18.5, 7.5], "to": [14.5, 22, 8.5], "faces": {d: face("#iron", [0, 4, 2, 8]) for d in ("north", "south", "east", "west", "up", "down")}}),
     ]})
 
+# ---- wave L2: the farmer's work site is a barrel of fertilizer with a scoop in it, the fisher's a bucket with a fish, the warrior's a stone with an iron sword stuck in it
+#      (same block ids as the old markers; the old blockstates and item parents keep working)
+def _box(fr, to, tex, uv_top=None):
+    f = {d: face(tex, side_uv(fr, to, d)) for d in ("north", "south", "east", "west", "down")}
+    f["up"] = face(uv_top or tex, [fr[0], fr[2], to[0], to[2]])
+    return {"from": fr, "to": to, "faces": f}
+
+w(f"assets/{NS}/models/block/farm_marker.json", {"parent": "block/block", "display": DISPLAY,
+    "textures": {"particle": "minecraft:block/barrel_side", "side": "minecraft:block/barrel_side", "top": "minecraft:block/barrel_top_open",
+                 "bottom": "minecraft:block/barrel_bottom", "fert": f"{NS}:block/fert_heap", "wood": "minecraft:block/oak_planks"},
+    "elements": [
+        {"from": [2, 0, 2], "to": [14, 13, 14], "faces": {d: face("#side", [2, 3, 14, 16]) for d in ("north", "south", "east", "west")}
+            | {"up": face("#top", [2, 2, 14, 14]), "down": face("#bottom", [2, 2, 14, 14])}},
+        _box([3, 12.2, 3], [13, 14.5, 13], "#fert"),
+        _box([4.5, 14.5, 5], [9.5, 15.5, 9], "#fert"),
+        {"from": [10.2, 11, 7.4], "to": [11.4, 21, 8.6], "rotation": {"origin": [10.8, 12, 8], "axis": "z", "angle": 22.5},
+            "faces": {d: face("#wood", [0, 0, 1, 10]) for d in ("north", "south", "east", "west")} | {"up": face("#wood", [0, 0, 1, 1])}},
+        {"from": [8.2, 10, 6.4], "to": [12.8, 12, 9.6], "rotation": {"origin": [10.8, 12, 8], "axis": "z", "angle": 22.5},
+            "faces": {d: face("#wood", [0, 0, 4, 2]) for d in ("north", "south", "east", "west", "up", "down")}},
+    ]})
+
+w(f"assets/{NS}/models/block/fishing_marker.json", {"parent": "block/block", "display": DISPLAY,
+    "textures": {"particle": f"{NS}:block/bucket_metal", "metal": f"{NS}:block/bucket_metal", "water": f"{NS}:block/bucket_water", "fish": f"{NS}:block/fish_body"},
+    "elements": [
+        _box([4.5, 0, 4.5], [11.5, 5, 11.5], "#metal"),
+        _box([4, 5, 4], [12, 11, 12], "#metal"),
+        {"from": [4.3, 10.6, 4.3], "to": [11.7, 10.7, 11.7], "faces": {"up": face("#water", [0, 0, 16, 16]), "down": face("#water", [0, 0, 16, 16])}},
+        _box([3.2, 10, 7.5], [4.2, 14, 8.5], "#metal"),
+        _box([11.8, 10, 7.5], [12.8, 14, 8.5], "#metal"),
+        _box([3.2, 14, 7.5], [12.8, 15, 8.5], "#metal"),
+        {"from": [1.5, 8.5, 8], "to": [14.5, 21.5, 8], "rotation": {"origin": [8, 11, 8], "axis": "z", "angle": 22.5},
+            "faces": {"north": face("#fish", [0, 0, 16, 16]), "south": face("#fish", [16, 0, 0, 16])}},
+    ]})
+
+_tilt_w = {"origin": [8, 8, 8], "axis": "z", "angle": 8}
+def _rot_w(el): el["rotation"] = _tilt_w; return el
+w(f"assets/{NS}/models/block/territory_banner.json", {"parent": "block/block", "display": DISPLAY,
+    "textures": {"particle": f"{NS}:block/mine_rock", "rock": f"{NS}:block/mine_rock", "top": f"{NS}:block/mine_rock_top",
+                 "wood": f"{NS}:block/mine_pick_wood", "iron": f"{NS}:block/mine_pick_iron"},
+    "elements": [
+        _rock([1, 0, 1], [15, 4, 15]),
+        _rock([2, 4, 2], [14, 7, 14]),
+        _rock([4, 7, 4], [12, 9, 12]),
+        _rock([12, 0, 10], [16, 3, 14]),
+        _rot_w({"from": [7.25, 5, 7.4], "to": [8.75, 21, 8.6], "faces": {d: face("#iron", [0, 0, 1.5, 16]) for d in ("north", "south", "east", "west")} | {"up": face("#iron", [0, 0, 1, 1])}}),
+        _rot_w({"from": [4.8, 21, 7.1], "to": [11.2, 22.6, 8.9], "faces": {d: face("#iron", [0, 4, 6, 6]) for d in ("north", "south", "east", "west", "up", "down")}}),
+        _rot_w({"from": [7.4, 22.6, 7.4], "to": [8.6, 26.4, 8.6], "faces": {d: face("#wood", [0, 0, 1, 4]) for d in ("north", "south", "east", "west")} | {"up": face("#wood", [0, 0, 1, 1])}}),
+        _rot_w({"from": [6.9, 26.4, 6.9], "to": [9.1, 27.8, 9.1], "faces": {d: face("#iron", [0, 0, 2, 1]) for d in ("north", "south", "east", "west", "up", "down")}}),
+    ]})
+
 # ---- wave K1: picture list of all crafting recipes for the Founder's Chronicle (client asset; the server data stays the source)
 _book = []
 _rdir = os.path.join(R, "data", NS, "recipe")

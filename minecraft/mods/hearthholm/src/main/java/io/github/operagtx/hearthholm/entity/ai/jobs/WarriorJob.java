@@ -29,6 +29,10 @@ public class WarriorJob extends SiteJob {
     public boolean defends(SettlerEntity s, LivingEntity target) {
         WorkSiteBlockEntity w = site();
         if (w != null) {
+            if (w.hasZone() && w.option("stance") != FOLLOW) {   // wave L2: a drawn zone (50 x 50): inside it, with a margin of 4 blocks
+                var zb = w.zone().bounds(w.getBlockPos().getY() - 24, w.getBlockPos().getY() + 24);
+                if (zb != null) return zb.inflate(4, 0, 4).contains(target.position());
+            }
             int r = w.option("radius") + 4;
             if (w.option("stance") == FOLLOW) {
                 ServerPlayer owner = owner(s);
@@ -70,6 +74,10 @@ public class WarriorJob extends SiteJob {
         int r = w != null ? w.option("radius") : Math.max(10, st.radius());   // wave L1: without a marker he patrols the whole settlement, with one the marked territory
         s.setStatus(w != null ? "guarding_territory" : "patrolling_hall");
         Vec3 t = center.add(s.getRandom().nextInt(2 * r + 1) - r, 0, s.getRandom().nextInt(2 * r + 1) - r);
+        if (w != null && w.hasZone()) {   // wave L2: the patrol goes to random cells of the drawn zone
+            var col = w.zone().randomColumn(io.github.operagtx.hearthholm.zone.WorkZone.SURFACE, s.getRandom(), w.getBlockPos().getY());
+            if (col != null) t = Vec3.atBottomCenterOf(col);
+        }
         return new Sequence(new MoveTo(t, 2.5, 0.6).noHop(), new Wait(40 + s.getRandom().nextInt(80)));
     }
 }

@@ -30,6 +30,8 @@ public final class WorkZone {
         public static final Spec LUMBERJACK = new Spec(DEFAULT_SIZE, 1, false);
         /** Wave J3: the miner draws 50 x 50 cells of 2 x 2 blocks (100 x 100 blocks), one layer per Y level. */
         public static final Spec MINER = new Spec(50, 2, true);
+        /** Wave L2: the farmer's field is 30 x 30 blocks, the fisher's water 10 x 10, the warrior's patrol 50 x 50 (cells of one block). */
+        public static final Spec FARMER = new Spec(30, 1, false), FISHER = new Spec(10, 1, false), WARRIOR = new Spec(50, 1, false);
     }
 
     /** Zone grids by work-site type id; the profession module registers its own. */

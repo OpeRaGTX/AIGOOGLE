@@ -8,6 +8,7 @@ import io.github.operagtx.hearthholm.settlement.Settlement;
 import io.github.operagtx.hearthholm.settlement.SettlementService;
 import io.github.operagtx.hearthholm.worksite.WorkSiteBlockEntity;
 import io.github.operagtx.hearthholm.worksite.WorkSiteTypes;
+import io.github.operagtx.hearthholm.zone.WorkZone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -55,7 +56,7 @@ public final class FisherJob extends SiteJob {
             return new Wait(300);
         }
         ServerLevel level = (ServerLevel) s.level();
-        BlockPos water = findWater(level, w.getBlockPos());
+        BlockPos water = w.hasZone() ? findZoneWater(level, w.getBlockPos(), w.zone(), s) : findWater(level, w.getBlockPos());
         if (water == null) {
             s.setStatus("no_water");
             return new Wait(300);
@@ -63,6 +64,28 @@ public final class FisherJob extends SiteJob {
         BlockPos stand = findStand(level, water, w.getBlockPos());
         s.setStatus("fishing");
         return new Fish(stand, water, w.flag("keep_junk"));
+    }
+
+    /**
+     * Wave L2: the water source nearest to the fisher inside the drawn 10 x 10 zone (a source block with air above it, at most 4 below to 2 above the marker);
+     * the zone is small, so it is scanned column by column every time.
+     */
+    public static @Nullable BlockPos findZoneWater(ServerLevel level, BlockPos marker, WorkZone zone, SettlerEntity s) {
+        BlockPos[] best = {null};
+        double[] bestDist = {Double.MAX_VALUE};
+        BlockPos.MutableBlockPos mp = new BlockPos.MutableBlockPos();
+        zone.forEachCell(WorkZone.SURFACE, (ix, iz) -> {
+            int x = zone.blockX(ix), z = zone.blockZ(iz);
+            if (!level.hasChunkAt(mp.set(x, marker.getY(), z))) return;
+            for (int dy = 2; dy >= -4; dy--) {
+                BlockPos p = new BlockPos(x, marker.getY() + dy, z);
+                if (!level.getFluidState(p).is(FluidTags.WATER) || !level.getFluidState(p).isSource() || !level.getBlockState(p.above()).isAir()) continue;
+                double d = p.distSqr(s.blockPosition());
+                if (d < bestDist[0]) { bestDist[0] = d; best[0] = p; }
+                break;
+            }
+        });
+        return best[0];
     }
 
     private static @Nullable BlockPos findWater(ServerLevel level, BlockPos c) {
