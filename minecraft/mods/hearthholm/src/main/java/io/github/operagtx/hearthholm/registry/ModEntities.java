@@ -33,7 +33,8 @@ public final class ModEntities {
 
     public static void init() {
         SETTLER = reg("settler", EntityType.Builder.<SettlerEntity>of(SettlerEntity::new, MobCategory.MISC)
-                .sized(0.6f, 1.8f).eyeHeight(1.62f).clientTrackingRange(10));
+                .sized(0.6f, 1.8f).eyeHeight(1.62f).clientTrackingRange(10)
+                .ridingOffset(-0.7f));   // wave L1 fix: a rider sits ON the saddle (vanilla zombies and villagers use the same -0.7); without it the cavalryman floated above the horse
         FabricDefaultAttributeRegistry.register(SETTLER, SettlerEntity.createAttributes());
         // wave C: the Ashborn and the rift wisp
         ASH_RAIDER = reg("ash_raider", EntityType.Builder.<AshRaiderEntity>of(AshRaiderEntity::new, MobCategory.MONSTER)

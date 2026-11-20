@@ -367,6 +367,9 @@ final class WaveL1Test {
                     + " | activity=" + w.brain().currentActivity() + " food=" + w.food() + " work=" + w.isWorkTime() + " asleep=" + w.isSleeping() + " saddleInPockets=" + w.has(Items.SADDLE)
                     + " at " + w.blockPosition().toShortString() + " horse at " + horse.blockPosition().toShortString());
             check(mounted && Cavalry.saddled(horse), "the cavalryman did not saddle and mount the horse");
+            double sit = w.getY() - horse.getY();
+            log("L1 cavalry: the rider's feet are " + String.format("%.2f", sit) + " blocks above the horse's feet");
+            check(sit > 0.0 && sit < 1.0, "the rider floats above the saddle (feet " + sit + " above the horse's feet; a seated rider is about 0.4)");
             // a still husk 24 blocks away on the platform
             Husk h = husk(l, horse.getX() + 24, Q.getY(), horse.getZ());
             h.setHealth(h.getMaxHealth());
