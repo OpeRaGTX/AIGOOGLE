@@ -89,6 +89,21 @@ No PR unless asked. Stop hook demands commit+push before ending a turn.
 
 - **K2 Workday, shift-end unload, miner pace**: civilians work from sunrise (tick 0 = 06:00) for 75% of daylight (0..9000, ~15:00), then leisure (idle/chat/tavern), sleep at night; the military (guard, archer, warrior, knight) keep their old hours and explicit shifts (`Balance.inWorkday`, `SettlerEntity.workAt`). `ShiftEndActivity` + `Job.endOfShift`/`BaseJob.unloadInto`: once per workday everything except tool/weapon, armour, shield (archer: arrows) and 2 food items goes to the chest by the work site, else the warehouse. Lumberjack sweeps every drop again (J1 filter reverted, `LumberjackJob.wanted`). Miner: `breakTicks` x2.0 at level 1 falling to x1.0 at level 5 (`SettlerEntity.minerSlowdown`, only the miner; this slows the digging time only, not walking/placing). Config keys in `config/hearthholm.json`: `WORKDAY_START_TICK`, `WORKDAY_DAYLIGHT_PERCENT`, `SHIFT_END_KEEP_FOOD`, `MINER_SLOW_PERCENT_AT_LEVEL1`, `MINER_FULL_PACE_LEVEL`. Test `WaveK2Test` (`HH_ONLY_K2=1`). Docs `docs/waves/K2.md`, `docs/design/K2.md`.
 
+- **M1 bugs and small things** (`docs/waves/M1.md`): blueprint names + `util/Labels` fallback (never a raw key), `Workshop.smelts()` (furnace hint only where it matters), owners/co-owners are never fought by settlers
+  (`SettlerEntity.isProtectedOwner`), `SettlementService.notify` reaches online co-owners, hunger x2.5 (`HUNGER_RATE_PERCENT`), shift-end `BaseJob.keepPlan` + `Job.shiftEndKeep/shiftEndFood` (miner keeps torches, ladders, filler, 8 food),
+  builder picks pickaxe/shovel per block (`ToolKit`). Test `WaveM1Test` (`HH_ONLY_M1=1`).
+- **M2 stake and miner** (`docs/waves/M2.md`): check marks per material + "Order missing" button (`crafting/MaterialOrders`, idempotent), miner `direction` option (forward/right/left/back/all) over the SHARED staircase
+  (`MinePlanner.arms`, spiral hub behind the pillar), branches 12 long (`MINE_BRANCH_LENGTH`). Test `WaveM2Test` (`HH_ONLY_M2=1`).
+- **L1 combat roles** (`docs/waves/L1.md`, package `combat/`): `CombatRoles` (hp 100/90/81, speed 80/100/100), `Distress`, `Shields`, `Strafe` (edge-safe), `Promotions` (25 marks: guard to knight, archer to crossbowman, warrior to cavalryman),
+  `Cavalry` + `CavalryChargeGoal` + `CavalrymanJob` (settler steers the horse by handing out the HORSE's navigation, see docs/design/L1.md). Test `WaveL1Test` (`HH_ONLY_L1=1`).
+- **L2 zones** (`docs/waves/L2.md`): farmer 30x30 / fisher 10x10 / warrior 50x50 on the J2/J3 framework (`zone/ZoneModules`, `WorkZone.Spec.FARMER/FISHER/WARRIOR`), new markers (fertilizer barrel, fish bucket, sword in stone, generated in `tools/gen_assets.py` + `gen_l2_tex.py`).
+  Test `WaveL2Test` (`HH_ONLY_L2=1`). Markers must stand inside the settlement radius (village 72) to register as sites.
+- **L3 visuals** (`docs/waves/L3.md`): own particles (`registry/ModParticles`, `client/particle/HearthParticles`, `tools/gen_l3_tex.py`) and the 30% ghost blueprint (`client/GhostPreview`, called from `ZonePreview`). Test `WaveL3Test` (`HH_ONLY_L3=1`).
+- Test dispatch: `HH_ONLY_<W>=1` for the legacy waves D..J3 means "this wave and the later legacy ones"; the **standalone** waves K1, K2, L0, M1, M2, L1, L2, L3 run only alone (or several at once: `HH_ONLY_L1=1 HH_ONLY_L2=1`) or in the full run;
+  waves M1 and later collect their failures (`WAVE <x> FAILED`) so the others still run. New wave = flag + `standalone` entry + one line in `HearthholmClientTest`.
+- Tools: `minecraft/tools/tg-report.sh <text> [--zip f] [photos...]` sends the Telegram report (token/chat in `~/.config/hearthholm/`), `minecraft/tools/package-offline.sh <mod dir>` repacks the zip with a fresh jar when Modrinth is unreachable.
+  Screenshots of the night run are in `docs/screenshots/hh_m1_*, hh_m2_*, hh_l1_*, hh_l2_*, hh_l3_*`.
+
 ## Owner feedback channel (Telegram bot)
 The owner playtests in real survival and sends fixes + screenshots to a Telegram bot made for us. The token is NOT in
 the repo (public). It is in `~/.config/hearthholm/telegram_bot_token` (lost on container restart → ask the owner once and
@@ -106,9 +121,10 @@ update_id = **331527548**. Ignore the old .mp4/.mp3 documents (another project).
   dirt under the trunk (worldgen does the same). Production code was fine.
 - Other test flakes fixed on the way: wave E fuel check (coal count vs concurrent deliveries), I2 loot (archer frozen), C chieftain minions (sampled), D healer hours.
   Still flaky and unrelated: wave C `brute did not break through the palisade` (the brute wanders off 34 blocks), seen once in about eight runs.
-- NEXT: L1 combat roles, L2 zones, L3 visuals (see the owner request below).
+- (L1, L2 and L3 were done in the night run of 2026-11-19 to 20.)
 
-## NIGHT PLAN 2026-11-19 -> 20 (owner asleep: work through it without questions, report to Telegram after every wave)
+## NIGHT PLAN 2026-11-19 -> 20: DONE (M1, M2, L1, L2, L3 implemented, each tested alone with its screenshots; see the Status lines above; the report of each wave went to Telegram)
+(original plan text below, kept as the reference of the owner decisions; owner asleep: work through it without questions, report to Telegram after every wave)
 Owner decisions (answered 2026-11-19 late): **order = bugs and small things first**; miner directions = **one choice on the stone** (forward / right / left / back / all);
 food kept at the end of a shift = **miner 8, everybody else 2**; torches, ladders, pickaxes and tools are never handed in by miner and builder; reporting = **Telegram report + zip after every wave**.
 

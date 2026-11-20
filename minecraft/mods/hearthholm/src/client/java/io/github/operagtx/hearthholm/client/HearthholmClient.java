@@ -45,6 +45,7 @@ public final class HearthholmClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenOrders.TYPE,
                 (p, ctx) -> ctx.client().execute(() -> OrdersScreen.show(p.view())));
         io.github.operagtx.hearthholm.item.ChronicleItem.OPENER = io.github.operagtx.hearthholm.client.screen.ChronicleScreen::open;
+        io.github.operagtx.hearthholm.client.particle.HearthParticles.register();   // wave L3
         ClientTickEvents.END_CLIENT_TICK.register(ZonePreview::tick);
     }
 }
