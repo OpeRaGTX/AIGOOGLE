@@ -38,10 +38,11 @@ public enum Workshop {
                     Items.COBBLESTONE_STAIRS, Items.COBBLESTONE_SLAB, Items.COBBLESTONE_WALL, Items.STONE_STAIRS,
                     Items.STONE_SLAB, Items.FURNACE, Items.TERRACOTTA, Items.DYED_TERRACOTTA.white(), Items.GLASS_PANE, deco(ModBlocks.WELL), deco(ModBlocks.SIGNS.get(1)),
                     deco(ModBlocks.BOTTLES), deco(ModBlocks.CANDLES), deco(ModBlocks.CHIMNEY_CAP))),
+    // wave L1: the smithy also makes shields and crossbows for the fighters (Items.SHIELD, Items.CROSSBOW in its list)
     SMITHY("smithy", 32, "smith", false, List.of(RecipeType.CRAFTING, RecipeType.BLASTING, RecipeType.SMELTING),
             () -> List.of(Items.IRON_INGOT, Items.IRON_PICKAXE, Items.IRON_AXE, Items.IRON_SHOVEL, Items.IRON_HOE, Items.IRON_SWORD,
                     Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS, Items.SHEARS,
-                    Items.BUCKET, Items.LANTERN, Items.IRON_BARS, Items.SHIELD, Items.CROSSBOW,   // wave L1: shields and crossbows for the fighters deco(ModBlocks.LAMP_POST), deco(ModBlocks.SIGNS.get(2)),
+                    Items.BUCKET, Items.LANTERN, Items.IRON_BARS, Items.SHIELD, Items.CROSSBOW, deco(ModBlocks.LAMP_POST), deco(ModBlocks.SIGNS.get(2)),
                     deco(ModBlocks.CANDLESTICK), deco(ModBlocks.HANGING_LANTERN))),
     KITCHEN("kitchen", 64, "cook", true, List.of(RecipeType.CRAFTING, RecipeType.SMOKING, RecipeType.SMELTING, RecipeType.CAMPFIRE_COOKING),
             () -> {
