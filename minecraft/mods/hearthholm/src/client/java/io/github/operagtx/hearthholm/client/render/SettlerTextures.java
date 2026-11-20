@@ -42,6 +42,15 @@ public final class SettlerTextures {
         return id;
     }
 
+    /** Wave L1: the promotions without art of their own wear the outfit of the rank they come from (until they get one). */
+    private static String skinOf(Identifier profession) {
+        return switch (profession.getPath()) {
+            case "crossbowman" -> "archer";
+            case "cavalryman" -> "warrior";
+            default -> profession.getPath();
+        };
+    }
+
     /** Drop cached skins (resource reload). */
     public static void clear() {
         for (Identifier id : CACHE.values()) Minecraft.getInstance().getTextureManager().release(id);
@@ -76,7 +85,7 @@ public final class SettlerTextures {
         }
         else if (a.hairStyle() > 0) layer(out, "hair/m" + a.hairStyle(), hair);
         if (a.headwear() > 0) layer(out, "head/h" + a.headwear(), SHIRT[(a.shirt() + 3) % SHIRT.length]);
-        layer(out, "profession/" + profession.getPath() + "_" + arms, -1);
+        layer(out, "profession/" + skinOf(profession) + "_" + arms, -1);
         return out;
     }
 

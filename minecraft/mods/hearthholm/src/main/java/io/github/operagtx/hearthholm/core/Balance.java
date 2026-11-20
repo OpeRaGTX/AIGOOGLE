@@ -159,6 +159,21 @@ public final class Balance {
     // ---- wave I2: archers (draw time, arrow stocks, bonus per level in percent of a point of arrow base damage)
     public static int ARCHER_DRAW_TICKS = 20, ARCHER_DMG_PER_LEVEL_PCT = 5, ARROWS_LOW = 12, ARROWS_FETCH = 48;
 
+    // ---- wave L1: combat roles (percent). Health relative to the guard, speed relative to the I2 walking/chasing speed, how far a call for help is heard
+    public static int ROLE_HP_GUARD = 100, ROLE_HP_WARRIOR = 90, ROLE_HP_ARCHER = 81;
+    public static int ROLE_SPEED_GUARD = 80, ROLE_SPEED_WARRIOR = 100, ROLE_SPEED_ARCHER = 100;
+    public static int DISTRESS_RADIUS_GUARD = 64, DISTRESS_RADIUS_OTHER = 20;
+    /** A shield in the off hand turns a blow from the front into this percent of its damage; each block wears the shield by the damage taken. */
+    public static int SHIELD_BLOCK_PERCENT = 35;
+    /** Promotion price in hearth marks (guard to knight, archer to crossbowman, warrior to cavalryman) and the level it needs. */
+    public static int PROMOTE_MARKS = 25, PROMOTE_LEVEL = 5;
+    /** The crossbowman reloads for this many ticks and his bolt hits for this much more than a bow arrow (base damage points). */
+    public static int CROSSBOW_DRAW_TICKS = 30, CROSSBOW_EXTRA_DAMAGE_X10 = 20;
+
+    // ---- wave L1: the cavalryman's charge (speed factor x10 on the horse's own speed, spear reach from the horse's centre x10, blocks to ride past before turning,
+    // ticks the pass may last, pause between rams, extra damage per ram x10)
+    public static int CAVALRY_CHARGE_SPEED_X10 = 15, CAVALRY_REACH_X10 = 28, CAVALRY_TURN_DISTANCE = 9, CAVALRY_PASS_TICKS = 80, CAVALRY_BLOW_PAUSE_TICKS = 20, CAVALRY_CHARGE_BONUS_X10 = 30;
+
     // ---- wave I2: loot carried home (extra search radius around the post, ticks a drop stays claimable)
     public static int LOOT_EXTRA_RADIUS = 4, LOOT_CLAIM_TICKS = 6000;
 }

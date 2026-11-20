@@ -638,8 +638,8 @@ public final class SettlementService {
         if (s != null && (w.type().id().equals(WorkSiteTypes.PATROL_ID) || w.type().id().equals(WorkSiteTypes.TERRITORY_ID))) {
             int on = 0, off = 0;
             for (ResidentRecord r : s.residents) {
-                if (!r.profession.equals(w.type().profession()) && !(w.type().id().equals(WorkSiteTypes.PATROL_ID) && r.profession.equals(Professions.ARCHER.id()))
-                        && !(w.type().id().equals(WorkSiteTypes.TERRITORY_ID) && r.profession.equals(Professions.KNIGHT_ID))) continue;
+                if (!r.profession.equals(w.type().profession()) && !(w.type().id().equals(WorkSiteTypes.PATROL_ID) && Professions.isShooter(r.profession))
+                        && !(w.type().id().equals(WorkSiteTypes.TERRITORY_ID) && (r.profession.equals(Professions.KNIGHT_ID) || r.profession.equals(Professions.CAVALRYMAN_ID)))) continue;
                 if (level.getEntity(r.uuid) instanceof SettlerEntity g) { if (g.isOnDuty()) on++; else off++; }
             }
             worker = Component.translatable("gui.hearthholm.duty_count", on, off);
@@ -846,57 +846,61 @@ public final class SettlementService {
         openSettler(player, e);
     }
 
-    public static final int PROMOTE_LEVEL = 5, PROMOTE_MARKS = 10;
     private static final Item[] KNIGHT_ARMOR = {Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS};
 
-    /** Guards and warriors of level 5 can be promoted to knights. */
+    /** Wave L1: whether a promotion exists for this settler's rank (see {@code combat/Promotions}) and he has the level for it. */
     public static boolean canPromote(SettlerEntity e) {
-        Identifier p = e.professionId();
-        return (p.equals(Professions.GUARD.id()) || p.equals(Professions.WARRIOR.id())) && e.level(p) >= PROMOTE_LEVEL;
+        return io.github.operagtx.hearthholm.combat.Promotions.of(e.professionId()) != null && e.level(e.professionId()) >= io.github.operagtx.hearthholm.core.Balance.PROMOTE_LEVEL;
     }
 
-    /** Promotion costs hearth marks and a set of iron armour from the warehouse; the knight wears the armour and a shield. */
+    /**
+     * Promotion costs hearth marks from the warehouse (Balance.PROMOTE_MARKS, 25); a knight also needs and wears a set of iron armour and gets a shield.
+     * Which rank comes next is decided by {@code combat/Promotions}.
+     */
     public static boolean promote(ServerPlayer player, SettlerEntity e, Settlement s) {
-        if (!canPromote(e)) { say(player, "promote_not_ready", e.getName(), PROMOTE_LEVEL); return false; }
+        var pr = io.github.operagtx.hearthholm.combat.Promotions.of(e.professionId());
+        int need = io.github.operagtx.hearthholm.core.Balance.PROMOTE_MARKS;
+        if (pr == null || !canPromote(e)) { say(player, "promote_not_ready", e.getName(), io.github.operagtx.hearthholm.core.Balance.PROMOTE_LEVEL); return false; }
         ServerLevel level = player.level();
         List<Container> storage = Storage.resolve(level, s.storagePositions());
         int marks = Storage.count(storage, x -> x.is(io.github.operagtx.hearthholm.registry.ModItems.HEARTH_MARK));
-        if (marks < PROMOTE_MARKS) { say(player, "promote_need_marks", PROMOTE_MARKS, marks); return false; }
-        for (Item a : KNIGHT_ARMOR)
-            if (Storage.count(storage, x -> x.is(a)) == 0) { say(player, "promote_need_armor", new ItemStack(a).getHoverName()); return false; }
-        Storage.take(storage, x -> x.is(io.github.operagtx.hearthholm.registry.ModItems.HEARTH_MARK), PROMOTE_MARKS);
-        EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-        for (int i = 0; i < 4; i++) {
-            Item a = KNIGHT_ARMOR[i];
-            ItemStack piece = Storage.take(storage, x -> x.is(a), 1);
-            ItemStack old = e.getItemBySlot(slots[i]);
-            e.setItemSlot(slots[i], piece);
-            if (!old.isEmpty()) {
-                ItemStack rest = Storage.insert(storage, old);
-                if (!rest.isEmpty()) e.store(rest);
+        if (marks < need) { say(player, "promote_need_marks", need, marks); return false; }
+        if (pr.needsArmor()) {
+            for (Item a : KNIGHT_ARMOR)
+                if (Storage.count(storage, x -> x.is(a)) == 0) { say(player, "promote_need_armor", new ItemStack(a).getHoverName()); return false; }
+        }
+        Storage.take(storage, x -> x.is(io.github.operagtx.hearthholm.registry.ModItems.HEARTH_MARK), need);
+        if (pr.needsArmor()) {
+            EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+            for (int i = 0; i < 4; i++) {
+                Item a = KNIGHT_ARMOR[i];
+                ItemStack piece = Storage.take(storage, x -> x.is(a), 1);
+                ItemStack old = e.getItemBySlot(slots[i]);
+                e.setItemSlot(slots[i], piece);
+                if (!old.isEmpty()) {
+                    ItemStack rest = Storage.insert(storage, old);
+                    if (!rest.isEmpty()) e.store(rest);
+                }
             }
+            if (e.getOffhandItem().isEmpty()) e.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
         }
         Identifier old = e.professionId();
         e.setXp(pr.to(), Math.max(e.xp(pr.to()), e.xp(old)));
         e.setProfession(Professions.get(pr.to()));
         e.setHealth(e.getMaxHealth());
         e.addThought("knighted", io.github.operagtx.hearthholm.core.Balance.MOOD_KNIGHTED, 48000);
-            if (e.getOffhandItem().isEmpty()) e.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
-        e.say("knighted");
+        if (pr.needsArmor()) e.say("knighted");
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.TOTEM_OF_UNDYING, e.getX(), e.getY() + 1.2, e.getZ(), 30, 0.4, 0.6, 0.4, 0.3);
         level.playSound(null, e.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.8f, 0.8f);
         s.stats.merge("promotions", 1, Integer::sum);
         s.addRenown(10);
-        say(player, "promoted", e.getName());
+        player.sendSystemMessage(Component.translatable("message.hearthholm.promoted." + pr.key(), e.getName()).withStyle(ChatFormatting.GREEN));
         manager(level).setDirty();
         return true;
     }
 
     /** A settler was attacked: nearby combatants take on the attacker. */
     public static void callGuards(SettlerEntity victim, LivingEntity attacker) {
-        for (SettlerEntity g : victim.level().getEntitiesOfClass(SettlerEntity.class, victim.getBoundingBox().inflate(32),
-                x -> x.isCombatant() && x.getTarget() == null && !x.isSleeping())) {
-            g.setTarget(attacker);
-        }
+        io.github.operagtx.hearthholm.combat.Distress.raise(victim, attacker);   // wave L1: who answers, and from how far, is decided per role
     }
 }

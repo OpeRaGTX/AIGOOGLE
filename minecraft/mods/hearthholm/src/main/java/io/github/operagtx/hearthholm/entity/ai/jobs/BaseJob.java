@@ -135,7 +135,7 @@ public abstract class BaseJob implements Job {
     /** What a settler always keeps for the night: tools of the profession, weapons, armour, the shield and (archers) arrows. */
     static boolean keptGear(SettlerEntity s, ItemStack st) {
         return s.profession().isTool(st) || SettlerMenu.isToolOrWeapon(st) || SettlerMenu.armorSlot(st) != null || st.is(Items.SHIELD)
-                || (s.professionId().equals(Professions.ARCHER.id()) && st.is(ItemTags.ARROWS));
+                || (Professions.isShooter(s.professionId()) && st.is(ItemTags.ARROWS));
     }
 
     /**

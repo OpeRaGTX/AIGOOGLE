@@ -39,6 +39,8 @@
  "work_unemployed": 4,
  "work_archer": 5,
  "work_healer": 5,
+ "work_crossbowman": 3,
+ "work_cavalryman": 3,
  "work_knight": 5,
  "trait_grumpy": 4,
  "trait_cheerful": 4,

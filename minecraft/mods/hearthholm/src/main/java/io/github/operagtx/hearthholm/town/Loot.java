@@ -42,7 +42,7 @@ public final class Loot {
         AABB box = new AABB(centre, centre).inflate(radius, 4, radius);
         List<Entity> found = new java.util.ArrayList<>(s.level().getEntitiesOfClass(ItemEntity.class, box,
                 e -> e.isAlive() && e.entityTags().contains(TAG) && !e.getItem().isEmpty()));
-        if (s.professionId().equals(io.github.operagtx.hearthholm.core.Professions.ARCHER.id())) {
+        if (io.github.operagtx.hearthholm.core.Professions.isShooter(s.professionId())) {
             found.addAll(s.level().getEntitiesOfClass(AbstractArrow.class, box, a -> a.isAlive() && a.getOwner() == s
                     && a.tickCount > 40 && a.getDeltaMovement().lengthSqr() < 1.0E-4));
         }

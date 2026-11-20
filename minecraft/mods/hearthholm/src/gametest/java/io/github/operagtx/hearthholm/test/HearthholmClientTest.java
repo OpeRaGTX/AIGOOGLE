@@ -197,9 +197,23 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             if (onlyK1 || !anyOnly) WaveK1Test.run(ctx, sp);
             if (onlyK2 || !anyOnly) WaveK2Test.run(ctx, sp);
             if (onlyL0 || !anyOnly) WaveL0Test.run(ctx, sp);
-            if (onlyM1 || !anyOnly) WaveM1Test.run(ctx, sp);
-            if (onlyM2 || !anyOnly) WaveM2Test.run(ctx, sp);
+            // waves M1 and later: a failing wave is recorded and the next ones still run (the report then names every failed wave); K1..L0 above fail fast as before
+            List<String> failedWaves = new java.util.ArrayList<>();
+            if (onlyM1 || !anyOnly) standalone(failedWaves, "M1", () -> WaveM1Test.run(ctx, sp));
+            if (onlyM2 || !anyOnly) standalone(failedWaves, "M2", () -> WaveM2Test.run(ctx, sp));
+            if (onlyL1 || !anyOnly) standalone(failedWaves, "L1", () -> WaveL1Test.run(ctx, sp));
             log("DONE");
+            if (!failedWaves.isEmpty()) throw new AssertionError("failed waves: " + failedWaves);
+        }
+    }
+
+    /** Runs one standalone wave; an assertion failure (the wave has already logged its RESULT line) is collected instead of stopping the whole test. */
+    private static void standalone(List<String> failed, String name, Runnable wave) {
+        try {
+            wave.run();
+        } catch (AssertionError | RuntimeException e) {
+            log("WAVE " + name + " FAILED: " + e);
+            failed.add(name);
         }
     }
 

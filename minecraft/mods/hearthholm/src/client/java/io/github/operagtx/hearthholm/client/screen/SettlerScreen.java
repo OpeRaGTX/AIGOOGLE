@@ -75,7 +75,7 @@ public final class SettlerScreen extends HhScreen {
         // wave J2: the bottom row sizes its buttons to their labels (RU "Повысить до рыцаря" used to be cut); Dismiss keeps the right corner
         int by = top + panelH - 22, bx = left + 8, limit = left + panelW - 110 - 4;
         Component refresh = Component.translatable("gui.hearthholm.refresh"), invL = Component.translatable("gui.hearthholm.inventory"),
-                promoteL = Component.translatable("gui.hearthholm.promote");
+                promoteL = Component.translatable("gui.hearthholm.promote." + promoKey());
         int w1 = Math.max(56, font.width(refresh) + 12), w2 = Math.max(64, font.width(invL) + 12);
         int w3 = view.promotable() ? Math.min(limit - (bx + w1 + 4 + w2 + 4), font.width(promoteL) + 12) : 0;
         button(fitLabel(refresh, w1 - 8), bx, by, w1, 16, b -> send(Payloads.SettlerAction.REFRESH, ""));
@@ -85,8 +85,14 @@ public final class SettlerScreen extends HhScreen {
         bx += w2 + 4;
         if (view.promotable()) {
             Button promote = button(fitLabel(promoteL, w3 - 8), bx, by, w3, 16, b -> send(Payloads.SettlerAction.PROMOTE, ""));
-            promote.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.promote_tip")));
+            promote.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.hearthholm.promote_tip." + promoKey())));
         }
+    }
+
+    /** Wave L1: which rank the Promote button leads to (texts {@code gui.hearthholm.promote.<key>}). */
+    private String promoKey() {
+        var p = io.github.operagtx.hearthholm.combat.Promotions.of(view.profession());
+        return p == null ? "knight" : p.key();
     }
 
     @Override

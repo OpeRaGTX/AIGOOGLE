@@ -9,6 +9,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.equipment.Equippable;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +37,17 @@ final class CombatGear {
                 return new ContainerTrip(chest, CombatGear::equipAll);
             }
         }
+        // wave L1: guards, warriors and their promotions carry a shield in the off hand when the storage has one
+        if (meleeRole(s) && s.getOffhandItem().isEmpty()) {
+            BlockPos chest = job.findWith(job.storage(), st -> st.is(Items.SHIELD));
+            if (chest != null) {
+                s.setStatus("fetching_armor");
+                return new ContainerTrip(chest, (who, c) -> {
+                    ItemStack shield = Storage.take(List.of(c), st -> st.is(Items.SHIELD), 1);
+                    if (!shield.isEmpty()) who.setItemSlot(EquipmentSlot.OFFHAND, shield);
+                });
+            }
+        }
         return null;
     }
 
@@ -43,6 +55,12 @@ final class CombatGear {
     static boolean keep(SettlerEntity s, ItemStack st) {
         return st.is(net.minecraft.world.item.Items.ARROW) || s.profession().isTool(st) || st.has(DataComponents.EQUIPPABLE)
                 || st.has(DataComponents.FOOD) || st.is(io.github.operagtx.hearthholm.registry.ModItems.HEALING_SALVE);
+    }
+
+    /** The roles that fight in melee and so use a shield (archers and crossbowmen need a free hand for the string). */
+    private static boolean meleeRole(SettlerEntity s) {
+        String p = s.professionId().getPath();
+        return p.equals("guard") || p.equals("warrior") || p.equals("knight") || p.equals("cavalryman");
     }
 
     private static boolean fits(ItemStack st, EquipmentSlot slot) {

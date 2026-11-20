@@ -17,7 +17,7 @@ import java.util.List;
  * restocks from a chest next to the post or the warehouse. Without arrows (and none to fetch) it shows "Needs arrows" and
  * fights in melee.
  */
-public final class ArcherJob extends GuardJob {
+public class ArcherJob extends GuardJob {
     private long nextArrowTrip, nextArrowSay;
 
     public ArcherJob(SettlerEntity settler) {

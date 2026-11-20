@@ -191,6 +191,8 @@ W = {
  "unemployed": [("I could use some work.", "Мне бы работу."), ("Idle hands...", "Руки без дела..."), ("Give me a job, boss!", "Дай мне работу, хозяин!"), ("What should I do today?", "Чем бы сегодня заняться?")],
  "archer": [("Wind is calm. Perfect shot.", "Ветра нет. Идеальный выстрел."), ("An arrow for every foe.", "Каждому врагу по стреле."), ("Steady hands, steady aim.", "Твёрдая рука, верный глаз."), ("I count my arrows twice.", "Свои стрелы считаю дважды."), ("Nothing slips past my sight.", "Ничто не проскользнёт мимо взгляда.")],
  "healer": [("Chamomile and a little patience.", "Ромашка и немного терпения."), ("Show me where it hurts.", "Покажи, где болит."), ("A salve a day keeps the grave away.", "Мазь на ночь - смерть прочь."), ("These herbs smell wonderful.", "Как чудесно пахнут травы."), ("Drink water, rest well.", "Пейте воду, хорошо отдыхайте.")],
+ "crossbowman": [("Slow to load, sure to land.", "Заряжаю долго, бью наверняка."), ("A bolt finds its mark.", "Болт найдёт цель."), ("Cranked and ready.", "Взведён и готов.")],
+ "cavalryman": [("To the saddle!", "По сёдлам!"), ("Hold the line, I charge!", "Держите строй, я иду в атаку!"), ("My horse and my spear.", "Мой конь и моё копьё.")],
  "knight": [("Honour before glory.", "Честь прежде славы."), ("My shield guards this town.", "Мой щит хранит этот город."), ("No raider passes while I stand.", "Пока я стою, налётчик не пройдёт."), ("Steel and duty.", "Сталь и долг."), ("I swore an oath at the hearth.", "Я дал клятву у очага.")],
 }
 

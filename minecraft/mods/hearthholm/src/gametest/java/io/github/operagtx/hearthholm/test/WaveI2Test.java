@@ -50,6 +50,8 @@ import static io.github.operagtx.hearthholm.test.HearthholmClientTest.*;
  * missing), loot pickup, shifts and the alarm. Run alone (plus the base) with HH_ONLY_I2=1.
  */
 final class WaveI2Test {
+    /** Wave L1: the guard is 20% slower than the I2 reference speed (a player's walk and sprint). */
+    private static final double ROLE = io.github.operagtx.hearthholm.core.Balance.ROLE_SPEED_GUARD / 100.0;
     private static final List<String> FAILS = new ArrayList<>();
     private static UUID GUARD, ARCHER;
     private static BlockPos POST;
@@ -206,7 +208,7 @@ final class WaveI2Test {
             double bps = flatDist(p0.get(), g.position()) / 3.0;
             walkTenths.set((int) Math.round(bps * 10));
             log("I2 guard speed walking = " + String.format("%.2f", bps) + " b/s (player walk 4.3)");
-            check(bps > 3.7 && bps < 4.9, "walking speed " + bps);
+            check(bps > 3.7 * ROLE && bps < 4.9 * ROLE, "walking speed " + bps + " (guard role " + ROLE + ")");
             g.removeTestGoal(walk.get());
             g.getNavigation().stop();
             g.teleportTo(O.getX() - 8.5, platformY, O.getZ() + 40.5);
@@ -215,7 +217,7 @@ final class WaveI2Test {
             g.setTarget(z);
         });
         java.util.concurrent.atomic.AtomicReference<Double> chaseBps = new java.util.concurrent.atomic.AtomicReference<>(0.0);
-        for (int attempt = 0; attempt < 2 && !(chaseBps.get() > 4.9 && chaseBps.get() < 6.3); attempt++) {   // K1: one retry, the first path request is sometimes dropped under load
+        for (int attempt = 0; attempt < 2 && !(chaseBps.get() > 4.9 * ROLE && chaseBps.get() < 6.3 * ROLE); attempt++) {   // K1: one retry, the first path request is sometimes dropped under load
             if (attempt > 0) sp.getServer().runOnServer(s -> {
                 SettlerEntity g = get(s, GUARD);
                 g.getNavigation().stop();
@@ -242,7 +244,7 @@ final class WaveI2Test {
         }
         sp.getServer().runOnServer(s -> {
             SettlerEntity g = get(s, GUARD);
-            check(chaseBps.get() > 4.9 && chaseBps.get() < 6.3, "chasing speed " + chaseBps.get());
+            check(chaseBps.get() > 4.9 * ROLE && chaseBps.get() < 6.3 * ROLE, "chasing speed " + chaseBps.get() + " (guard role " + ROLE + ")");
             g.setTarget(null);
             s.overworld().getEntity(foe.get()).discard();
             g.getNavigation().stop();

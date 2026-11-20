@@ -130,6 +130,7 @@ public class SettlerEntity extends PathfinderMob {
         goalSelector.addGoal(1, new SettlerRetreatGoal(this));
         goalSelector.addGoal(2, new SettlerFleeGoal(this));
         goalSelector.addGoal(2, new SettlerRangedGoal(this));
+        goalSelector.addGoal(2, new io.github.operagtx.hearthholm.combat.CavalryChargeGoal(this));   // wave L1
         goalSelector.addGoal(2, new SettlerMeleeGoal(this));
         goalSelector.addGoal(5, new SettlerBrainGoal(this));
         goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6f));
@@ -320,14 +321,20 @@ public class SettlerEntity extends PathfinderMob {
 
     public boolean isKnight() { return professionId().equals(Professions.KNIGHT_ID); }
 
+    /** Wave L1: an archer holding a bow, or a crossbowman holding a crossbow. */
+    public boolean shootsWithHeld() {
+        Identifier p = professionId();
+        return (p.equals(Professions.ARCHER.id()) && getMainHandItem().is(Items.BOW)) || (p.equals(Professions.CROSSBOWMAN_ID) && getMainHandItem().is(Items.CROSSBOW));
+    }
+
     /** A settler fighting with a bow and with arrows left shoots instead of swinging. */
     public boolean isRanged() {
-        return professionId().equals(Professions.ARCHER.id()) && getMainHandItem().is(Items.BOW) && has(Items.ARROW);
+        return shootsWithHeld() && has(Items.ARROW);
     }
 
     /** An archer with a bow in hand and no arrows left. */
     public boolean needsArrows() {
-        return professionId().equals(Professions.ARCHER.id()) && getMainHandItem().is(Items.BOW) && !has(Items.ARROW);
+        return shootsWithHeld() && !has(Items.ARROW);
     }
 
     /**
@@ -447,6 +454,7 @@ public class SettlerEntity extends PathfinderMob {
      */
     public void refreshCombatStats() {
         int lvl = level(professionId());
+        var role = io.github.operagtx.hearthholm.combat.CombatRoles.of(professionId());
         float hp = 20 + profile.stat(io.github.operagtx.hearthholm.core.Stat.ENDURANCE) / 2f;
         for (Trait t : profile.traitList()) hp += t.maxHealthBonus();
         double atk = 1 + profile.stat(io.github.operagtx.hearthholm.core.Stat.STRENGTH) * 0.25;
@@ -459,6 +467,7 @@ public class SettlerEntity extends PathfinderMob {
             armor = 2 + 0.5 * (lvl - 1);
             toughness = 2;
             if (isKnight()) { hp += 24; atk += io.github.operagtx.hearthholm.core.Balance.KNIGHT_DMG_BONUS_PCT / 100.0; armor += 3; toughness += 2; }
+            hp = hp * role.hpPercent() / 100f;   // wave L1: guard 100%, warrior 90%, archer 81% of the guard's health
         }
         var maxHp = Objects.requireNonNull(getAttribute(Attributes.MAX_HEALTH));
         float old = getMaxHealth();
@@ -469,7 +478,8 @@ public class SettlerEntity extends PathfinderMob {
         Objects.requireNonNull(getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(atk);
         // wave I2: movement attribute = chasing speed of a sprinting player; walking is derived in setSpeed
         Objects.requireNonNull(getAttribute(Attributes.MOVEMENT_SPEED)).setBaseValue(isCombatant()
-                ? Math.sqrt(io.github.operagtx.hearthholm.core.Balance.COMBAT_SPRINT_BPS_X10 / 10.0 / io.github.operagtx.hearthholm.core.Balance.COMBAT_BPS_PER_ATTR_SQ) : 0.5);
+                ? Math.sqrt(io.github.operagtx.hearthholm.core.Balance.COMBAT_SPRINT_BPS_X10 * role.speedPercent() / 100.0 / 10.0 / io.github.operagtx.hearthholm.core.Balance.COMBAT_BPS_PER_ATTR_SQ) : 0.5);   // wave L1: guard 80%, warrior and archer 100%
+        Objects.requireNonNull(getAttribute(Attributes.FOLLOW_RANGE)).setBaseValue(Math.max(32, role.distressRadius() + 8));   // wave L1: a guard can path to a call for help across the settlement
         Objects.requireNonNull(getAttribute(Attributes.ARMOR)).setBaseValue(armor);
         Objects.requireNonNull(getAttribute(Attributes.ARMOR_TOUGHNESS)).setBaseValue(toughness);
     }
@@ -560,6 +570,10 @@ public class SettlerEntity extends PathfinderMob {
     /** Once a second: slow natural healing (fast in a barracks), salves, the knight's taunt, "comrades" mood. */
     private void tickMilitary(ServerLevel sl) {
         long now = sl.getGameTime();
+        // wave L1: a cavalryman gets off his horse when the shift is over, when he retreats, sleeps, or is no cavalryman any more
+        if (isPassenger() && io.github.operagtx.hearthholm.combat.Cavalry.mountOf(this) != null
+                && (isRetreating() || isSleeping() || !professionId().equals(Professions.CAVALRYMAN_ID) || (!isWorkTime() && getTarget() == null)))
+            io.github.operagtx.hearthholm.combat.Cavalry.dismount(this);
         boolean barracks = isCombatant() && inBarracks();
         if (getHealth() < getMaxHealth() && food > 4 && now - lastHurt > 100) heal(barracks ? 1.25f : 0.25f);
         if (barracks && !isSleeping()) {
@@ -593,6 +607,16 @@ public class SettlerEntity extends PathfinderMob {
             }
         }
     }
+
+    /** Wave L1: while a cavalryman rides his horse, every walking task steers the HORSE (see {@code combat/Cavalry}). */
+    @Override
+    public net.minecraft.world.entity.ai.navigation.PathNavigation getNavigation() {
+        var horse = io.github.operagtx.hearthholm.combat.Cavalry.mountOf(this);
+        return horse != null ? horse.getNavigation() : super.getNavigation();
+    }
+
+    /** Wave L1: sits on a horse as a cavalryman. */
+    public boolean isCavalryMounted() { return io.github.operagtx.hearthholm.combat.Cavalry.mountOf(this) != null; }
 
     /** Combatants only fight inside the settlement or close to themselves. */
     public boolean canDefend(LivingEntity target) {
@@ -1053,15 +1077,7 @@ public class SettlerEntity extends PathfinderMob {
     @Override
     public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
         if (source.getEntity() instanceof SettlerEntity) return false;   // no friendly fire (arrows, stray blows): it would start a brawl
-        if (isKnight() && !source.is(DamageTypeTags.BYPASSES_SHIELD) && source.getSourcePosition() != null) {
-            Vec3 look = getViewVector(1f).multiply(1, 0, 1).normalize();
-            Vec3 to = source.getSourcePosition().subtract(position()).multiply(1, 0, 1).normalize();
-            if (to.dot(look) > 0.2) {
-                amount *= 0.35f;
-                level.playSound(null, blockPosition(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.NEUTRAL, 0.8f, 1f);
-                level.sendParticles(ParticleTypes.CRIT, getX() + to.x * 0.6, getY() + 1.2, getZ() + to.z * 0.6, 4, 0.15, 0.2, 0.15, 0.1);
-            }
-        }
+        amount = io.github.operagtx.hearthholm.combat.Shields.reduce(this, level, source, amount);   // wave L1: any fighter with a shield in the off hand
         boolean hurt = super.hurtServer(level, source, amount);
         if (hurt && isProtectedOwner(source.getEntity())) {   // wave M1: an owner's stray blow hurts but never starts a fight
             setLastHurtByMob(null);

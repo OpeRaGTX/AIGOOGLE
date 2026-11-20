@@ -31,7 +31,12 @@ public final class Professions {
     public static Profession HEALER;
     public static Profession KNIGHT;
     public static Profession INNKEEPER;
-    public static final Identifier KNIGHT_ID = Hearthholm.id("knight");
+    /** Wave L1: the archer's and the warrior's promotions (see {@code combat/Promotions}). */
+    public static Profession CROSSBOWMAN, CAVALRYMAN;
+    public static final Identifier KNIGHT_ID = Hearthholm.id("knight"), CROSSBOWMAN_ID = Hearthholm.id("crossbowman"), CAVALRYMAN_ID = Hearthholm.id("cavalryman");
+
+    /** Wave L1: archers and crossbowmen shoot (they need arrows, strafe and keep their distance). */
+    public static boolean isShooter(Identifier id) { return id.equals(ARCHER.id()) || id.equals(CROSSBOWMAN_ID); }
 
     private Professions() {}
 
@@ -120,5 +125,15 @@ public final class Professions {
                 .tool(s -> s.is(ItemTags.SWORDS) || s.is(ItemTags.AXES)).site(WorkSiteTypes.TERRITORY_ID)
                 .combat().promotionOnly().color(0xD8B04A).icon(() -> new ItemStack(Items.IRON_CHESTPLATE))
                 .job(KnightJob::new).build());
+        CROSSBOWMAN = reg(Profession.builder(CROSSBOWMAN_ID)
+                .weight(Stat.PERCEPTION, 3).weight(Stat.DEXTERITY, 3).weight(Stat.ENDURANCE, 1)
+                .tool(s -> s.is(Items.CROSSBOW)).site(WorkSiteTypes.PATROL_ID)
+                .combat().nightShift().promotionOnly().color(0x3F8F7A).icon(() -> new ItemStack(Items.CROSSBOW))
+                .job(CrossbowmanJob::new).build());
+        CAVALRYMAN = reg(Profession.builder(CAVALRYMAN_ID)
+                .weight(Stat.STRENGTH, 3).weight(Stat.ENDURANCE, 2).weight(Stat.DEXTERITY, 1)
+                .tool(s -> s.is(ItemTags.SWORDS) || s.is(ItemTags.AXES) || s.is(ItemTags.SPEARS)).site(WorkSiteTypes.TERRITORY_ID)
+                .combat().promotionOnly().color(0xB8742A).icon(() -> new ItemStack(Items.SADDLE))
+                .job(CavalrymanJob::new).build());
     }
 }

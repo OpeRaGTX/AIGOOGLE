@@ -377,22 +377,23 @@ final class WaveDTest {
         });
 
         sp.getServer().runCommand("time set 10000");
-        // ---- 5. promotion: a level 5 warrior becomes a knight through the settler screen
+        // ---- 5. promotion: a level 5 guard becomes a knight through the settler screen (wave L1: the knight is the guard's rank, costs 25 marks)
         sp.getServer().runOnServer(s -> {
             ServerLevel l = s.overworld();
             SettlerEntity w = get(s, WARRIOR);
-            w.setXp(Professions.WARRIOR.id(), io.github.operagtx.hearthholm.core.Balance.LEVEL_XP[4]);
+            w.setProfession(Professions.GUARD);
+            w.setXp(Professions.GUARD.id(), io.github.operagtx.hearthholm.core.Balance.LEVEL_XP[4]);
             w.teleportTo(O.getX() + 6.5, O.getY(), O.getZ() + 11.5);
             w.setHealth(w.getMaxHealth());
-            stockUp(s, new ItemStack(ModItems.HEARTH_MARK, 20), new ItemStack(Items.IRON_HELMET), new ItemStack(Items.IRON_CHESTPLATE),
+            stockUp(s, new ItemStack(ModItems.HEARTH_MARK, 30), new ItemStack(Items.IRON_HELMET), new ItemStack(Items.IRON_CHESTPLATE),
                     new ItemStack(Items.IRON_LEGGINGS), new ItemStack(Items.IRON_BOOTS));
-            log("KNIGHT before: level=" + w.level(Professions.WARRIOR.id()) + " hp=" + w.getMaxHealth() + " armor=" + w.getArmorValue() + " marks=" + stock(s, ModItems.HEARTH_MARK));
+            log("KNIGHT before: level=" + w.level(Professions.GUARD.id()) + " hp=" + w.getMaxHealth() + " armor=" + w.getArmorValue() + " marks=" + stock(s, ModItems.HEARTH_MARK));
             SettlementService.openSettler(player(s), w);
         });
         ctx.waitForScreen(SettlerScreen.class);
         ctx.waitTicks(5);
         ctx.takeScreenshot("hh_42_settler_promote");
-        ctx.clickScreenButton("gui.hearthholm.promote");
+        ctx.clickScreenButton("gui.hearthholm.promote.knight");
         ctx.waitTicks(10);
         ctx.setScreen(() -> null);
         sp.getServer().runOnServer(s -> {

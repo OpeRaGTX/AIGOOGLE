@@ -67,7 +67,7 @@ public class WarriorJob extends SiteJob {
             s.setStatus("holding");
             return new Sequence(MoveTo.block(w.getBlockPos(), 1.8), new Wait(100));
         }
-        int r = w != null ? w.option("radius") : 10;
+        int r = w != null ? w.option("radius") : Math.max(10, st.radius());   // wave L1: without a marker he patrols the whole settlement, with one the marked territory
         s.setStatus(w != null ? "guarding_territory" : "patrolling_hall");
         Vec3 t = center.add(s.getRandom().nextInt(2 * r + 1) - r, 0, s.getRandom().nextInt(2 * r + 1) - r);
         return new Sequence(new MoveTo(t, 2.5, 0.6).noHop(), new Wait(40 + s.getRandom().nextInt(80)));
