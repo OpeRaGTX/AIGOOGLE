@@ -23,6 +23,25 @@ public final class Fx {
 
     private Fx() {}
 
+    // ---- wave L3: the mod's own particles (registry/ModParticles); call sites say WHAT happened, the look is decided here
+    /** Golden sparks rising from a point: celebrations, promotions, finished buildings. */
+    public static void sparks(ServerLevel l, double x, double y, double z, int n, double spread) {
+        hit("sparks");
+        l.sendParticles(io.github.operagtx.hearthholm.registry.ModParticles.HEARTH_SPARK, x, y, z, n, spread, spread * 0.8, spread, 0.03);
+    }
+
+    /** Glowing embers and ash: raiders, fire, the rift. */
+    public static void embers(ServerLevel l, double x, double y, double z, int n, double spread) {
+        hit("embers");
+        l.sendParticles(io.github.operagtx.hearthholm.registry.ModParticles.ASH_EMBER, x, y, z, n, spread, spread * 1.2, spread, 0.02);
+    }
+
+    /** A pale puff: a block placed, a wall raised. */
+    public static void buildDust(ServerLevel l, BlockPos pos) {
+        hit("buildDust");
+        l.sendParticles(io.github.operagtx.hearthholm.registry.ModParticles.BUILD_DUST, pos.getX() + 0.5, pos.getY() + 0.7, pos.getZ() + 0.5, 3, 0.3, 0.25, 0.3, 0.01);
+    }
+
     private static void play(ServerLevel l, BlockPos p, SoundEvent s, SoundSource src, float vol, float pitch) {
         sounds++;
         l.playSound(null, p, s, src, vol, pitch);
@@ -61,14 +80,14 @@ public final class Fx {
         hit("levelUp");
         play(l, pos, ModSounds.LEVEL_UP, SoundSource.NEUTRAL, big ? 1.4f : 0.7f, 1f);
         l.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 2, pos.getZ() + 0.5, big ? 30 : 12, 0.5, 0.5, 0.5, 0.1);
-        l.sendParticles(ParticleTypes.FIREWORK, pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, big ? 24 : 8, 0.4, 0.6, 0.4, 0.08);
+        sparks(l, pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, big ? 24 : 8, 0.5);
     }
 
     /** Notes and confetti over the festival square. */
     public static void festival(ServerLevel l, BlockPos sq, int notes) {
         hit("festival");
         l.sendParticles(ParticleTypes.NOTE, sq.getX() + 0.5, sq.getY() + 2, sq.getZ() + 0.5, notes, 3, 1, 3, 1);
-        l.sendParticles(ParticleTypes.FIREWORK, sq.getX() + 0.5, sq.getY() + 3, sq.getZ() + 0.5, notes * 2, 3, 1.5, 3, 0.1);
+        sparks(l, sq.getX() + 0.5, sq.getY() + 3, sq.getZ() + 0.5, notes * 2, 3);
     }
 
     /** The caravan comes into view: a horn call and a cloud of dust. */

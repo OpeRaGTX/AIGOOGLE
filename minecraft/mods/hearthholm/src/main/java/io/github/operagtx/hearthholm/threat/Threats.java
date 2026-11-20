@@ -306,6 +306,7 @@ public final class Threats {
         s.raid.raiders.add(e.getUUID());
         if (!(e instanceof AshChieftainEntity)) s.raid.spawned++;
         level.sendParticles(ParticleTypes.LARGE_SMOKE, e.getX(), e.getY() + 1, e.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
+        io.github.operagtx.hearthholm.town.Fx.embers(level, e.getX(), e.getY() + 1, e.getZ(), 10, 0.4);   // wave L3
         return e;
     }
 
@@ -338,6 +339,7 @@ public final class Threats {
             for (UUID id : List.copyOf(r.raiders)) {
                 if (level.getEntity(id) instanceof AshbornEntity a) {
                     level.sendParticles(ParticleTypes.LARGE_SMOKE, a.getX(), a.getY() + 1, a.getZ(), 10, 0.3, 0.6, 0.3, 0.02);
+                    io.github.operagtx.hearthholm.town.Fx.embers(level, a.getX(), a.getY() + 1, a.getZ(), 8, 0.4);   // wave L3
                     a.discard();
                 }
             }

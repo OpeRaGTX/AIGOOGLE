@@ -16,6 +16,9 @@ import net.minecraft.world.phys.AABB;
 public final class ZonePreview {
     private ZonePreview() {}
 
+    /** How many ghost blocks the last preview round showed (read by the test). */
+    public static int lastGhosts;
+
     public static void tick(Minecraft mc) {
         ClientLevel level = mc.level;
         LocalPlayer player = mc.player;
@@ -35,6 +38,7 @@ public final class ZonePreview {
                         continue;
                     }
                     if (box != null) outline(level, box, w.type().color());
+                    if (GhostPreview.applies(player, w)) lastGhosts = GhostPreview.show(level, player, w);   // wave L3: translucent blueprint
                 }
             }
     }

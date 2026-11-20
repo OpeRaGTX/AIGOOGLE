@@ -69,6 +69,7 @@ public final class PlaceBlock implements Task {
         }
         reshapeAround(level, pos);
         level.playSound(null, pos, state.getSoundType().getPlaceSound(), SoundSource.BLOCKS, 0.8f, 1f);
+        io.github.operagtx.hearthholm.town.Fx.buildDust(level, pos);   // wave L3
         s.swingArm(InteractionHand.MAIN_HAND);
         if (after != null) after.accept(s);
         return Status.DONE;

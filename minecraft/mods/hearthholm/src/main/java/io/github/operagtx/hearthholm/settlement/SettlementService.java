@@ -757,6 +757,7 @@ public final class SettlementService {
         }
         level.playSound(null, pos, SoundEvents.PLAYER_LEVELUP, SoundSource.BLOCKS, 0.8f, 0.9f);
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, 25, 2, 1, 2, 0.1);
+        io.github.operagtx.hearthholm.town.Fx.sparks(level, pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, 30, 2);   // wave L3
         if (s != null) {
             s.addRenown(20);
             notify(level, s, Component.translatable("message.hearthholm.construction_done", builder.getName(), bp.label()).withStyle(ChatFormatting.GREEN));
@@ -891,6 +892,7 @@ public final class SettlementService {
         e.addThought("knighted", io.github.operagtx.hearthholm.core.Balance.MOOD_KNIGHTED, 48000);
         if (pr.needsArmor()) e.say("knighted");
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.TOTEM_OF_UNDYING, e.getX(), e.getY() + 1.2, e.getZ(), 30, 0.4, 0.6, 0.4, 0.3);
+        io.github.operagtx.hearthholm.town.Fx.sparks(level, e.getX(), e.getY() + 1.4, e.getZ(), 24, 0.5);   // wave L3
         level.playSound(null, e.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.8f, 0.8f);
         s.stats.merge("promotions", 1, Integer::sum);
         s.addRenown(10);

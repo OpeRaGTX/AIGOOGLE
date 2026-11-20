@@ -203,6 +203,7 @@ public final class HearthholmClientTest implements FabricClientGameTest {
             if (onlyM2 || !anyOnly) standalone(failedWaves, "M2", () -> WaveM2Test.run(ctx, sp));
             if (onlyL1 || !anyOnly) standalone(failedWaves, "L1", () -> WaveL1Test.run(ctx, sp));
             if (onlyL2 || !anyOnly) standalone(failedWaves, "L2", () -> WaveL2Test.run(ctx, sp));
+            if (onlyL3 || !anyOnly) standalone(failedWaves, "L3", () -> WaveL3Test.run(ctx, sp));
             log("DONE");
             if (!failedWaves.isEmpty()) throw new AssertionError("failed waves: " + failedWaves);
         }

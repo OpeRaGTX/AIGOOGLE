@@ -37,6 +37,7 @@ public final class Hearthholm implements ModInitializer {
         io.github.operagtx.hearthholm.zone.ZoneModules.register();        // wave L2: map zones for the farmer, the fisher and the warrior
         io.github.operagtx.hearthholm.api.ProfessionModules.bootstrap();   // wave J1: modules for the professions above
         ModSounds.init();
+        io.github.operagtx.hearthholm.registry.ModParticles.init();   // wave L3: the mod's own particle types
         ModBlocks.init();
         ModBlockEntities.init();
         ModMenus.init();
